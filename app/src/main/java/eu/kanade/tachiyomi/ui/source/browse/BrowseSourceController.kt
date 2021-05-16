@@ -371,7 +371,7 @@ open class BrowseSourceController(bundle: Bundle) :
         showProgressBar()
         adapter?.clear()
 
-        presenter.restartPager(newQuery)
+        presenter.restartPager(newQuery, presenter.sourceFilters)
     }
 
     /**
