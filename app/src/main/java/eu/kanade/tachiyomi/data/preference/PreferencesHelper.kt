@@ -12,9 +12,9 @@ import com.tfcporciuncula.flow.FlowSharedPreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
+import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
-import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
 import eu.kanade.tachiyomi.util.system.Themes
 import kotlinx.coroutines.CoroutineScope
@@ -173,7 +173,7 @@ class PreferencesHelper(val context: Context) {
 
     fun webtoonNavInverted() = flowPrefs.getEnum(Keys.webtoonNavInverted, ViewerNavigation.TappingInvertMode.NONE)
 
-    fun pageLayout() = flowPrefs.getInt(Keys.pageLayout, PageLayout.AUTOMATIC)
+    fun pageLayout() = flowPrefs.getInt(Keys.pageLayout, PageLayout.AUTOMATIC.value)
 
     fun invertDoublePages() = flowPrefs.getBoolean(Keys.invertDoublePages, false)
 
