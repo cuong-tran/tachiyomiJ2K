@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.isInNightMode
+import eu.kanade.tachiyomi.util.system.isTablet
 import kotlinx.coroutines.flow.launchIn
 import java.util.Locale
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
@@ -74,6 +75,13 @@ class SettingsGeneralController : SettingsController() {
             titleRes = R.string.hide_bottom_nav
             summaryRes = R.string.hides_on_scroll
             defaultValue = true
+        }
+
+        switchPreference {
+            key = Keys.showSideNavOnBottom
+            titleRes = R.string.move_side_nav_to_bottom
+            defaultValue = false
+            isVisible = activity?.isTablet() == true
         }
 
         switchPreference {

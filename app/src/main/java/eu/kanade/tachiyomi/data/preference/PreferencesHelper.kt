@@ -394,6 +394,8 @@ class PreferencesHelper(val context: Context) {
 
     fun hideBottomNavOnScroll() = flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, true)
 
+    fun showSideNavOnBottom() = flowPrefs.getBoolean(Keys.showSideNavOnBottom, false)
+
     fun showNsfwSource() = flowPrefs.getBoolean(Keys.showNsfwSource, true)
     fun showNsfwExtension() = flowPrefs.getBoolean(Keys.showNsfwExtension, true)
     fun labelNsfwExtension() = prefs.getBoolean(Keys.labelNsfwExtension, true)
