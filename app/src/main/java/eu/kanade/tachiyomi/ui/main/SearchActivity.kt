@@ -51,8 +51,8 @@ class SearchActivity : MainActivity() {
         }
     }
 
-    override fun setFloatingToolbar(show: Boolean, solidBG: Boolean) {
-        super.setFloatingToolbar(show, solidBG)
+    override fun setFloatingToolbar(show: Boolean, solidBG: Boolean, changeBG: Boolean) {
+        super.setFloatingToolbar(show, solidBG, changeBG)
         currentToolbar?.setNavigationOnClickListener { popToRoot() }
     }
 
@@ -73,8 +73,8 @@ class SearchActivity : MainActivity() {
         binding.toolbar.navigationIcon = drawerArrow
         drawerArrow?.progress = 1f
 
-        binding.bottomNav.isVisible = false
-        binding.bottomView.isVisible = false
+        nav.isVisible = false
+        binding.bottomView?.isVisible = false
     }
 
     override fun handleIntentAction(intent: Intent): Boolean {

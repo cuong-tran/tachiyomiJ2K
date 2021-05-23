@@ -91,10 +91,10 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         binding.pager.adapter = TabbedSheetAdapter()
         binding.tabs.setupWithViewPager(binding.pager)
         this.controller = controller
-        binding.pager.doOnApplyWindowInsets { _, _, _ ->
+        binding.pager.doOnApplyWindowInsets { _, insets, _ ->
             val bottomBar = controller.activityBinding?.bottomNav
-            extensionFrameLayout?.binding?.recycler?.updatePaddingRelative(bottom = bottomBar?.height ?: 0)
-            migrationFrameLayout?.binding?.recycler?.updatePaddingRelative(bottom = bottomBar?.height ?: 0)
+            extensionFrameLayout?.binding?.recycler?.updatePaddingRelative(bottom = bottomBar?.height ?: insets.systemWindowInsetBottom)
+            migrationFrameLayout?.binding?.recycler?.updatePaddingRelative(bottom = bottomBar?.height ?: insets.systemWindowInsetBottom)
         }
         binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -336,9 +336,15 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
          * @return a new view.
          */
         override fun createView(container: ViewGroup): View {
-            val binding = RecyclerWithScrollerBinding.inflate(LayoutInflater.from(container.context), container, false)
+            val binding = RecyclerWithScrollerBinding.inflate(
+                LayoutInflater.from(container.context),
+                container,
+                false
+            )
             val view: RecyclerWithScrollerView = binding.root
-            view.setUp(this@ExtensionBottomSheet, binding, this@ExtensionBottomSheet.controller.activityBinding?.bottomNav?.height ?: 0)
+            val height = this@ExtensionBottomSheet.controller.activityBinding?.bottomNav?.height
+                ?: view.rootWindowInsets?.systemWindowInsetBottom ?: 0
+            view.setUp(this@ExtensionBottomSheet, binding, height)
 
             return view
         }
