@@ -111,7 +111,7 @@ class BackupCreateService : Service() {
                 else -> LegacyBackupManager(this)
             }
 
-            val backupFileUri = backupManager.createBackup(uri, backupFlags, false)?.toUri()
+            val backupFileUri = backupManager.createBackup(uri!!, backupFlags, false)?.toUri()
             val unifile = UniFile.fromUri(this, backupFileUri)
             notifier.showBackupComplete(unifile, backupType == BackupConst.BACKUP_TYPE_LEGACY)
         } catch (e: Exception) {

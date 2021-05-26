@@ -104,7 +104,7 @@ dependencies {
     implementation("androidx.browser:browser:1.3.0")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.core:core-ktx:1.5.0-rc01")
+    implementation("androidx.core:core-ktx:1.5.0")
 
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
 
