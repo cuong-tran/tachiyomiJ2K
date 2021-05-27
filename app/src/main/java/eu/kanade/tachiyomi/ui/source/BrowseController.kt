@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.source
 
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.res.ColorStateList
@@ -48,7 +47,7 @@ import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
-import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
+import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
@@ -159,7 +158,7 @@ class BrowseController :
             updateTitleAndMenu()
         }
 
-        requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
+        requestFilePermissionsSafe(301)
         binding.bottomSheet.root.onCreate(this)
 
         binding.shadow.alpha =

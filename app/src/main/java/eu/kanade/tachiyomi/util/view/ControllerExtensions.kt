@@ -1,9 +1,13 @@
 package eu.kanade.tachiyomi.util.view
 
+import android.Manifest
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Environment
+import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +22,7 @@ import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -477,6 +482,42 @@ fun Controller.requestPermissionsSafe(permissions: Array<String>, requestCode: I
         if (ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(permission), requestCode)
         }
+    }
+}
+
+fun Controller.requestFilePermissionsSafe(requestCode: Int) {
+    val activity = activity ?: return
+    val permissions = mutableListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    permissions.forEach { permission ->
+        if (ContextCompat.checkSelfPermission(
+                activity,
+                permission
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(permission), requestCode)
+        }
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+        !Environment.isExternalStorageManager()
+    ) {
+        MaterialDialog(activity)
+            .title(R.string.all_files_permission_required)
+            .message(R.string.external_storage_permission_notice)
+            .cancelOnTouchOutside(false)
+            .positiveButton(android.R.string.ok) {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                    "package:${activity.packageName}".toUri()
+                )
+                try {
+                    activity.startActivity(intent)
+                } catch (_: Exception) {
+                    val intent2 = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                    activity.startActivity(intent2)
+                }
+            }
+            .negativeButton(android.R.string.cancel)
+            .show()
     }
 }
 
