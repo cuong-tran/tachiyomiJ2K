@@ -109,16 +109,21 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
         recycler.updatePaddingRelative(
             top = activityBinding!!.toolbar.y.toInt() + appBarHeight
         )
+        recycler.applyBottomAnimatedInsets(setPadding = true)
         recycler.doOnApplyWindowInsets { view, insets, _ ->
             val headerHeight = insets.systemWindowInsetTop + appBarHeight
             view.updatePaddingRelative(
-                top = headerHeight,
-                bottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
-                } else {
-                    insets.systemWindowInsetBottom
-                }
+                top = headerHeight
             )
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                view.updatePaddingRelative(
+                    bottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
+                    } else {
+                        insets.systemWindowInsetBottom
+                    }
+                )
+            }
         }
     } else {
         view?.applyWindowInsetsForController()

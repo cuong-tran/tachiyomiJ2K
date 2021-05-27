@@ -123,16 +123,20 @@ object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     }
 }
 
-fun View.applyBottomAnimatedInsets(bottomMargin: Int = 0) {
+fun View.applyBottomAnimatedInsets(bottomMargin: Int = 0, setPadding: Boolean = false) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
     val setInsets: ((WindowInsets) -> Unit) = { insets ->
-        updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            val bottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.ime()).bottom
-            } else {
-                insets.systemWindowInsetBottom
+        val bottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.ime()).bottom
+        } else {
+            insets.systemWindowInsetBottom
+        }
+        if (setPadding) {
+            updatePaddingRelative(bottom = bottomMargin + bottom)
+        } else {
+            updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                this.bottomMargin = bottom + bottomMargin
             }
-            this.bottomMargin = bottom + bottomMargin
         }
     }
     var handleInsets = true

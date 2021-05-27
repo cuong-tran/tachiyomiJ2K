@@ -169,6 +169,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             R.drawable.ic_close_24dp
         )
 
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+        }
         var continueSwitchingTabs = false
         nav.getItemView(R.id.nav_library)?.setOnLongClickListener {
             if (!LibraryUpdateService.isRunning()) {
