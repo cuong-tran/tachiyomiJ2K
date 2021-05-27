@@ -8,6 +8,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.util.TypedValue
@@ -20,12 +21,16 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
+import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsAnimationCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.GridLayoutManager
@@ -80,6 +85,7 @@ import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.isImeVisible
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
@@ -216,6 +222,28 @@ class LibraryController(
                 view?.context?.getString(R.string.your_library)?.lowercase(Locale.ROOT)
             }
         )
+    }
+
+    val cb = object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_STOP) {
+        override fun onStart(
+            animation: WindowInsetsAnimationCompat,
+            bounds: WindowInsetsAnimationCompat.BoundsCompat
+        ): WindowInsetsAnimationCompat.BoundsCompat {
+            updateHopperY()
+            return bounds
+        }
+
+        override fun onProgress(
+            insets: WindowInsetsCompat,
+            runningAnimations: List<WindowInsetsAnimationCompat>
+        ): WindowInsetsCompat {
+            updateHopperY(insets.toWindowInsets())
+            return insets
+        }
+
+        override fun onEnd(animation: WindowInsetsAnimationCompat) {
+            updateHopperY()
+        }
     }
 
     private var scrollListener = object : RecyclerView.OnScrollListener() {
@@ -536,6 +564,8 @@ class LibraryController(
         }
         setSwipeRefresh()
 
+        ViewCompat.setWindowInsetsAnimationCallback(view, cb)
+
         if (selectedMangas.isNotEmpty()) {
             createActionModeIfNeeded()
         }
@@ -691,15 +721,20 @@ class LibraryController(
         }
     }
 
-    fun updateHopperY() {
+    fun updateHopperY(windowInsets: WindowInsets? = null) {
         val view = view ?: return
+        val insets = windowInsets ?: view.rootWindowInsets
         val listOfYs = mutableListOf(
             binding.filterBottomSheet.filterBottomSheet.y,
             activityBinding?.bottomNav?.y ?: binding.filterBottomSheet.filterBottomSheet.y
         )
-        val insetBottom = view.rootWindowInsets?.systemWindowInsetBottom ?: 0
+        val insetBottom = insets?.systemWindowInsetBottom ?: 0
         if (!preferences.autohideHopper().get() || activityBinding?.bottomNav == null) {
             listOfYs.add(view.height - (insetBottom).toFloat())
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && insets?.isImeVisible() == true) {
+            val insetKey = insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
+            listOfYs.add(view.height - (insetKey).toFloat())
         }
         binding.categoryHopperFrame.y = -binding.categoryHopperFrame.height +
             (listOfYs.minOrNull() ?: binding.filterBottomSheet.filterBottomSheet.y) +

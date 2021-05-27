@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -35,6 +36,7 @@ import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.view.applyBottomAnimatedInsets
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
@@ -177,11 +179,14 @@ open class BrowseSourceController(bundle: Bundle) :
             recycler,
             true,
             afterInsets = { insets ->
-                binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    bottomMargin = insets.systemWindowInsetBottom + 16.dpToPx
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                    binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        bottomMargin = insets.systemWindowInsetBottom + 16.dpToPx
+                    }
                 }
             }
         )
+        binding.fab.applyBottomAnimatedInsets(16.dpToPx)
 
         recycler.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {

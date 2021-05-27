@@ -767,11 +767,15 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         setFloatingToolbar(canShowFloatingToolbar(to))
         val onRoot = router.backstackSize == 1
         if (onRoot) {
-            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !isPush) {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+            }
             binding.toolbar.navigationIcon = searchDrawable
             binding.cardToolbar.navigationIcon = searchDrawable
         } else {
-            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+            }
             binding.toolbar.navigationIcon = drawerArrow
             binding.cardToolbar.navigationIcon = drawerArrow
         }

@@ -113,7 +113,11 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
             val headerHeight = insets.systemWindowInsetTop + appBarHeight
             view.updatePaddingRelative(
                 top = headerHeight,
-                bottom = insets.systemWindowInsetBottom
+                bottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
+                } else {
+                    insets.systemWindowInsetBottom
+                }
             )
         }
     } else {
