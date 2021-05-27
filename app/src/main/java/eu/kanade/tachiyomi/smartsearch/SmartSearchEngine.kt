@@ -73,7 +73,7 @@ class SmartSearchEngine(
             }
         }
 
-        return eligibleManga.maxBy { it.dist }?.manga
+        return eligibleManga.maxByOrNull { it.dist }?.manga
     }
     private fun removeTextInBrackets(text: String, readForward: Boolean): String {
         val bracketPairs = listOf(

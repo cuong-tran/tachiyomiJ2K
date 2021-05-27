@@ -159,7 +159,7 @@ class MigrationProcessHolder(
 
         val mangaChapters = db.getChapters(manga).executeAsBlocking()
         unreadDownloadBadge.badgeView.setChapters(mangaChapters.size)
-        val latestChapter = mangaChapters.maxBy { it.chapter_number }?.chapter_number ?: -1f
+        val latestChapter = mangaChapters.maxOfOrNull { it.chapter_number } ?: -1f
 
         if (latestChapter > 0f) {
             subtitle.text = root.context.getString(
