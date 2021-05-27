@@ -87,7 +87,7 @@ object Versions {
     const val viewStatePagerAdapter = "1.1.0"
     const val viewToolTip = "1.2.2"
     const val xlog = "1.6.1"
-    const val kotlinter = "3.4.0"
+    const val kotlinter = "3.4.4"
 }
 
 object LegacyPluginClassPath {
