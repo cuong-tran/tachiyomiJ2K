@@ -252,7 +252,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.COROUTINES}")
 
     // Crash reports
-    implementation("ch.acra:acra:${Versions.ACRA}")
+    implementation("ch.acra:acra-http:5.8.1")
 
     // Text distance
     implementation("info.debatty:java-string-similarity:1.2.1")

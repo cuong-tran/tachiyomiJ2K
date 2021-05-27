@@ -16,7 +16,9 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import org.acra.ACRA
-import org.acra.annotation.ReportsCrashes
+import org.acra.config.httpSender
+import org.acra.data.StringFormat
+import org.acra.ktx.initAcra
 import org.conscrypt.Conscrypt
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
@@ -25,13 +27,13 @@ import uy.kohesive.injekt.injectLazy
 import uy.kohesive.injekt.registry.default.DefaultRegistrar
 import java.security.Security
 
-@ReportsCrashes(
-    formUri = "https://collector.tracepot.com/e90773ff",
-    reportType = org.acra.sender.HttpSender.Type.JSON,
-    httpMethod = org.acra.sender.HttpSender.Method.PUT,
-    buildConfigClass = BuildConfig::class,
-    excludeMatchingSharedPreferencesKeys = [".*username.*", ".*password.*", ".*token.*"]
-)
+// @ReportsCrashes(
+//    formUri = "https://collector.tracepot.com/e90773ff",
+//    reportType = org.acra.sender.HttpSender.Type.JSON,
+//    httpMethod = org.acra.sender.HttpSender.Method.PUT,
+//    buildConfigClass = BuildConfig::class,
+//    excludeMatchingSharedPreferencesKeys = [".*username.*", ".*password.*", ".*token.*"]
+// )
 open class App : Application(), LifecycleObserver {
 
     val preferences: PreferencesHelper by injectLazy()
@@ -79,6 +81,15 @@ open class App : Application(), LifecycleObserver {
     }
 
     protected open fun setupAcra() {
+        initAcra {
+            reportFormat = StringFormat.JSON
+            buildConfigClass = BuildConfig::class.java
+            excludeMatchingSharedPreferencesKeys = arrayOf(".*username.*", ".*password.*", ".*token.*")
+            httpSender {
+                uri = "https://collector.tracepot.com/e90773ff"
+                httpMethod = org.acra.sender.HttpSender.Method.PUT
+            }
+        }
         ACRA.init(this)
     }
 

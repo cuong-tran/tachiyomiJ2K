@@ -1,5 +1,4 @@
 object Versions {
-    const val ACRA = "4.9.2"
     const val CHUCKER = "3.2.0"
     const val COIL = "0.11.0"
     const val COROUTINES = "1.4.2"
