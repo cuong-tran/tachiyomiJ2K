@@ -642,7 +642,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     override fun onBackPressed() {
-        val sheetController = router.backstack.last().controller as? BottomSheetController
+        val sheetController = router.backstack.lastOrNull()?.controller as? BottomSheetController
         if (if (router.backstackSize == 1) !(sheetController?.handleSheetBack() ?: false)
             else !router.handleBack()
         ) {
