@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isTablet
 import kotlinx.coroutines.flow.launchIn
-import java.util.Locale
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsGeneralController : SettingsController() {
@@ -77,10 +76,16 @@ class SettingsGeneralController : SettingsController() {
             defaultValue = true
         }
 
-        switchPreference {
-            key = Keys.showSideNavOnBottom
-            titleRes = R.string.move_side_nav_to_bottom
-            defaultValue = false
+        intListPreference(activity) {
+            key = Keys.sideNavIconAlignment
+            titleRes = R.string.side_nav_icon_alignment
+            entriesRes = arrayOf(
+                R.string.top,
+                R.string.center,
+                R.string.bottom,
+            )
+            entryRange = 0..2
+            defaultValue = 0
             isVisible = activity?.isTablet() == true
         }
 
