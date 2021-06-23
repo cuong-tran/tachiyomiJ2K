@@ -302,6 +302,10 @@
     <string name="may_contain_nsfw">May contain NSFW (18+) content</string>
     <string name="app_info">App info</string>
     <string name="_must_be_enabled_first">%1$s must be enabled first</string>
+    <plurals name="_updates_pending">
+        <item quantity="one">%d update pending</item>
+        <item quantity="other">%d updates pending</item>
+    </plurals>
     <plurals name="extension_updates_available">
         <item quantity="one">Extension update available</item>
         <item quantity="other">%d extension updates available</item>

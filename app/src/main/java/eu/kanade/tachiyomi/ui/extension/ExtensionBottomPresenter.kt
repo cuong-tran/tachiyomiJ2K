@@ -152,8 +152,10 @@ class ExtensionBottomPresenter(
 
         val items = mutableListOf<ExtensionItem>()
 
-        val installedSorted = installed.filter { showNsfwExtensions || !it.isNsfw }
-            .sortedWith(compareBy({ !it.hasUpdate }, { !it.isObsolete }, { it.pkgName }))
+        val updatesSorted = installed.filter { it.hasUpdate && (showNsfwExtensions || !it.isNsfw) }.sortedBy { it.pkgName }
+        val installedSorted = installed
+            .filter { !it.hasUpdate && showNsfwExtensions || !it.isNsfw }
+            .sortedWith(compareBy({ !it.isObsolete }, { it.pkgName }))
         val untrustedSorted = untrusted.sortedBy { it.pkgName }
         val availableSorted = available
             // Filter out already installed extensions and disabled languages
@@ -165,6 +167,19 @@ class ExtensionBottomPresenter(
             }
             .sortedBy { it.pkgName }
 
+        if (updatesSorted.isNotEmpty()) {
+            val header = ExtensionGroupItem(
+                context.resources.getQuantityString(
+                    R.plurals._updates_pending,
+                    updatesSorted.size,
+                    updatesSorted.size
+                ),
+                updatesSorted.size
+            )
+            items += updatesSorted.map { extension ->
+                ExtensionItem(extension, header, currentDownloads[extension.pkgName])
+            }
+        }
         if (installedSorted.isNotEmpty() || untrustedSorted.isNotEmpty()) {
             val header = ExtensionGroupItem(context.getString(R.string.installed), installedSorted.size + untrustedSorted.size)
             items += installedSorted.map { extension ->
