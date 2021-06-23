@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.extension
 
 import android.content.Context
+import android.content.pm.PackageInstaller
 import android.graphics.drawable.Drawable
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -238,7 +239,7 @@ class ExtensionManager(
      *
      * @param extension The extension to be installed.
      */
-    fun installExtension(extension: Extension.Available): Observable<InstallStep> {
+    fun installExtension(extension: Extension.Available): Observable<Pair<InstallStep, PackageInstaller.SessionInfo?>> {
         return installer.downloadAndInstall(api.getApkUrl(extension), extension)
     }
 
@@ -249,7 +250,7 @@ class ExtensionManager(
      *
      * @param extension The extension to be updated.
      */
-    fun updateExtension(extension: Extension.Installed): Observable<InstallStep> {
+    fun updateExtension(extension: Extension.Installed): Observable<Pair<InstallStep, PackageInstaller.SessionInfo?>> {
         val availableExt = availableExtensions.find { it.pkgName == extension.pkgName }
             ?: return Observable.empty()
         return installExtension(availableExt)
@@ -261,8 +262,26 @@ class ExtensionManager(
      * @param downloadId The id of the download.
      * @param result Whether the extension was installed or not.
      */
-    fun setInstallationResult(downloadId: Long, result: Boolean) {
+    fun cancelInstallation(downloadId: Long, result: Boolean) {
         installer.setInstallationResult(downloadId, result)
+    }
+
+    /** Sets the result of the installation of an extension.
+     *
+     * @param sessionId The id of the download.
+     * @param result Whether the extension was installed or not.
+     */
+    fun cancelInstallation(sessionId: Int) {
+        installer.cancelInstallation(sessionId)
+    }
+
+    /**
+     * Sets the result of the installation of an extension.
+     *
+     * @param downloadId The id of the download.
+     */
+    fun setInstalling(downloadId: Long, sessionId: Int) {
+        installer.setInstalling(downloadId, sessionId)
     }
 
     /**
@@ -293,13 +312,16 @@ class ExtensionManager(
 
         val ctx = context
         launchNow {
-            nowTrustedExtensions.map { extension ->
-                async { ExtensionLoader.loadExtensionFromPkgName(ctx, extension.pkgName) }
-            }.map { it.await() }.forEach { result ->
-                if (result is LoadResult.Success) {
-                    registerNewExtension(result.extension)
+            nowTrustedExtensions
+                .map { extension ->
+                    async { ExtensionLoader.loadExtensionFromPkgName(ctx, extension.pkgName) }
                 }
-            }
+                .map { it.await() }
+                .forEach { result ->
+                    if (result is LoadResult.Success) {
+                        registerNewExtension(result.extension)
+                    }
+                }
         }
     }
 

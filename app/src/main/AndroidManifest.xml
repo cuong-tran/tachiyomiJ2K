@@ -175,6 +175,7 @@
 
         <activity
             android:name=".extension.util.ExtensionInstallActivity"
+            android:icon="@mipmap/ic_launcher"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
 
         <activity

@@ -19,9 +19,10 @@ class ExtensionAdapter(val listener: OnButtonClickListener) :
     /**
      * Listener for browse item clicks.
      */
-    val buttonClickListener: ExtensionAdapter.OnButtonClickListener = listener
+    val buttonClickListener: OnButtonClickListener = listener
 
     interface OnButtonClickListener {
         fun onButtonClick(position: Int)
+        fun onCancelClick(position: Int)
     }
 }

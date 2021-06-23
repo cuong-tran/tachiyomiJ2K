@@ -11,6 +11,24 @@
         android:layout_height="64dp"
         android:background="@drawable/list_item_selector">
 
+        <!--            style="@android:style/Widget.ProgressBar.Horizontal"-->
+        <ProgressBar
+            android:id="@+id/install_progress"
+            android:layout_width="0dp"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:progressBackgroundTint="?android:attr/colorBackground"
+            android:progressTint="?colorAccent"
+            android:layout_height="2dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:progress="45"
+            android:max="100"
+            />
+
         <ImageView
             android:id="@+id/source_image"
             android:layout_width="0dp"
@@ -33,7 +51,7 @@
             android:textAppearance="@style/TextAppearance.Regular.SubHeading"
             android:textSize="14sp"
             app:layout_constraintBottom_toTopOf="@id/lang"
-            app:layout_constraintEnd_toStartOf="@id/ext_button"
+            app:layout_constraintEnd_toStartOf="@id/cancel_button"
             app:layout_constraintStart_toEndOf="@id/source_image"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
@@ -78,6 +96,24 @@
             app:layout_constraintTop_toBottomOf="@+id/ext_title"
             tools:text="Warning" />
 
+        <ImageButton
+            android:id="@+id/cancel_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintWidth_max="wrap"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/next_title"
+            android:padding="12dp"
+            android:tooltipText="@string/stop"
+            app:layout_constraintEnd_toStartOf="@id/ext_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintStart_toEndOf="@id/ext_title"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="4dp"
+            app:srcCompat="@drawable/ic_close_24dp"
+            app:tint="?colorAccent" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/ext_button"
             style="@style/Theme.Widget.Button.OutlinedButtonAccent"
@@ -87,6 +123,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
+            app:layout_constraintStart_toEndOf="@id/cancel_button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
