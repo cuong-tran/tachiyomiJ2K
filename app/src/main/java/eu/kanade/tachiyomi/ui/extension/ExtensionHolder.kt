@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.extension
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import coil.clear
 import coil.load
