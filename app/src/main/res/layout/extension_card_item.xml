@@ -80,18 +80,16 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/ext_button"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            style="@style/Theme.Widget.Button.OutlinedButtonAccent"
             android:textAllCaps="false"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            android:textColor="@drawable/button_text_state"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:rippleColor="@color/fullRippleColor"
             tools:text="Details" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

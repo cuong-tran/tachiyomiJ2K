@@ -247,6 +247,14 @@
         <item name="rippleColor">@color/fullRippleColor</item>
     </style>
 
+    <style name="Theme.Widget.Button.OutlinedButtonAccent" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@android:color/transparent</item>
+        <item name="backgroundTint">@color/ext_bg_selector</item>
+        <item name="android:textColor">@color/ext_button_text_selector</item>
+        <item name="rippleColor">@color/fullRippleColor</item>
+    </style>
+
+
     <style name="Theme.Widget.Button.Borderless.Small">
         <item name="android:minHeight">48dip</item>
         <item name="android:minWidth">48dip</item>

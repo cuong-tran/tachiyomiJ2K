@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.extension
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.View
-import androidx.core.content.ContextCompat
 import coil.clear
 import coil.load
 import eu.kanade.tachiyomi.R
@@ -11,11 +10,10 @@ import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.LocaleHelper
-import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.ExtensionCardItemBinding
+import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
@@ -67,12 +65,9 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
         isClickable = true
         isActivated = false
 
-        setTextColor(ContextCompat.getColorStateList(context, R.drawable.button_text_state))
-        backgroundTintList = ContextCompat.getColorStateList(context, android.R.color.transparent)
-
-        resetStrokeColor()
         val extension = item.extension
         val installStep = item.installStep
+        strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
         if (installStep != null) {
             setText(
                 when (installStep) {
@@ -91,10 +86,6 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
             when {
                 extension.hasUpdate -> {
                     isActivated = true
-                    backgroundTintList = ColorStateList.valueOf(
-                        context.getResourceColor(R.attr.colorAccent)
-                    )
-                    strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
                     setText(R.string.update)
                 }
                 else -> {
@@ -102,8 +93,10 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
                 }
             }
         } else if (extension is Extension.Untrusted) {
+            resetStrokeColor()
             setText(R.string.trust)
         } else {
+            resetStrokeColor()
             setText(R.string.install)
         }
     }
