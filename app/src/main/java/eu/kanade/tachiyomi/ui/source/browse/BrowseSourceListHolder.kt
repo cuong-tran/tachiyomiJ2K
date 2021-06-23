@@ -1,15 +1,14 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
 import coil.clear
 import coil.request.ImageRequest
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import eu.kanade.tachiyomi.databinding.MangaListItemBinding
 
@@ -34,8 +33,7 @@ class BrowseSourceListHolder(private val view: View, adapter: FlexibleAdapter<IF
      */
     override fun onSetValues(manga: Manga) {
         binding.title.text = manga.title
-            binding.inLibraryBadge.inLibraryBadge.visibility = if (manga.favorite) View.VISIBLE else View.GONE
-
+        binding.inLibraryBadge.badge.isVisible = manga.favorite
 
         setImage(manga)
     }

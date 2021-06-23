@@ -123,7 +123,6 @@ class DownloadCache(
         lastRenew = System.currentTimeMillis()
     }
 
-
     /**
      * Renews the downloads cache.
      */
