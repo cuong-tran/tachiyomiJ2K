@@ -30,6 +30,7 @@ import uy.kohesive.injekt.api.get
 
 typealias ExtensionTuple =
     Triple<List<Extension.Installed>, List<Extension.Untrusted>, List<Extension.Available>>
+typealias ExtensionIntallInfo = Pair<InstallStep, PackageInstaller.SessionInfo?>
 
 /**
  * Presenter of [ExtensionBottomSheet].
@@ -48,7 +49,7 @@ class ExtensionBottomPresenter(
     var mangaItems = hashMapOf<Long, List<MangaItem>>()
         private set
 
-    private var currentDownloads = hashMapOf<String, InstallStep>()
+    private var currentDownloads = hashMapOf<String, ExtensionIntallInfo>()
 
     private val sourceManager: SourceManager = Injekt.get()
 
@@ -247,8 +248,8 @@ class ExtensionBottomPresenter(
         extensionManager.updateExtension(extension).subscribeToInstallUpdate(extension)
     }
 
-    private fun Observable<Pair<InstallStep, PackageInstaller.SessionInfo?>>.subscribeToInstallUpdate(extension: Extension) {
-        this.doOnNext { currentDownloads[extension.pkgName] = it.first }
+    private fun Observable<ExtensionIntallInfo>.subscribeToInstallUpdate(extension: Extension) {
+        this.doOnNext { currentDownloads[extension.pkgName] = it }
             .doOnUnsubscribe { currentDownloads.remove(extension.pkgName) }
             .map { state -> updateInstallStep(extension, state.first, state.second) }
             .subscribe { item ->

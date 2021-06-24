@@ -12,6 +12,7 @@ import androidx.core.net.toUri
 import com.jakewharton.rxrelay.PublishRelay
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
+import eu.kanade.tachiyomi.ui.extension.ExtensionIntallInfo
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -110,7 +111,7 @@ internal class ExtensionInstaller(private val context: Context) {
      *
      * @param id The id of the download to poll.
      */
-    private fun pollStatus(id: Long): Observable<Pair<InstallStep, PackageInstaller.SessionInfo?>> {
+    private fun pollStatus(id: Long): Observable<ExtensionIntallInfo> {
         val query = DownloadManager.Query().setFilterById(id)
 
         return Observable.interval(0, 1, TimeUnit.SECONDS)
@@ -132,15 +133,15 @@ internal class ExtensionInstaller(private val context: Context) {
                     DownloadManager.STATUS_RUNNING -> InstallStep.Downloading
                     else -> return@flatMap Observable.empty()
                 }
-                Observable.just(step to null as PackageInstaller.SessionInfo?)
+                Observable.just(ExtensionIntallInfo(step, null))
             }
             .doOnError {
                 Timber.e(it)
             }
     }
 
-    private fun pollInstallStatus(id: Long): Observable<Pair<InstallStep, PackageInstaller.SessionInfo?>> {
-        return Observable.interval(0, 250, TimeUnit.MILLISECONDS)
+    private fun pollInstallStatus(id: Long): Observable<ExtensionIntallInfo> {
+        return Observable.interval(0, 500, TimeUnit.MILLISECONDS)
             .flatMap {
                 val sessionId = downloadInstallerMap[id] ?: return@flatMap Observable.empty()
                 val session = context.packageManager.packageInstaller.getSessionInfo(sessionId)

@@ -1,20 +1,19 @@
 package eu.kanade.tachiyomi.extension
 
 import android.content.Context
-import android.content.pm.PackageInstaller
 import android.graphics.drawable.Drawable
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.extension.model.Extension
-import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.extension.util.ExtensionInstallReceiver
 import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.ui.extension.ExtensionIntallInfo
 import eu.kanade.tachiyomi.util.system.launchNow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -239,7 +238,7 @@ class ExtensionManager(
      *
      * @param extension The extension to be installed.
      */
-    fun installExtension(extension: Extension.Available): Observable<Pair<InstallStep, PackageInstaller.SessionInfo?>> {
+    fun installExtension(extension: Extension.Available): Observable<ExtensionIntallInfo> {
         return installer.downloadAndInstall(api.getApkUrl(extension), extension)
     }
 
@@ -250,7 +249,7 @@ class ExtensionManager(
      *
      * @param extension The extension to be updated.
      */
-    fun updateExtension(extension: Extension.Installed): Observable<Pair<InstallStep, PackageInstaller.SessionInfo?>> {
+    fun updateExtension(extension: Extension.Installed): Observable<ExtensionIntallInfo> {
         val availableExt = availableExtensions.find { it.pkgName == extension.pkgName }
             ?: return Observable.empty()
         return installExtension(availableExt)
