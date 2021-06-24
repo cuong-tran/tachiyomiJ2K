@@ -7,6 +7,7 @@ import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionParams
 import android.os.Bundle
 import com.hippo.unifile.UniFile
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.util.system.toast
 import uy.kohesive.injekt.injectLazy
@@ -67,11 +68,11 @@ class ExtensionInstallActivity : Activity() {
     }
 
     private fun packageInstallStep(intent: Intent) {
-        val extras = intent.extras
+        val extras = intent.extras ?: return
         if (PACKAGE_INSTALLED_ACTION == intent.action) {
-            val downloadId = intent.extras!!.getLong(ExtensionInstaller.EXTRA_DOWNLOAD_ID)
+            val downloadId = extras.getLong(ExtensionInstaller.EXTRA_DOWNLOAD_ID)
             val extensionManager: ExtensionManager by injectLazy()
-            when (extras!!.getInt(PackageInstaller.EXTRA_STATUS)) {
+            when (val status = extras.getInt(PackageInstaller.EXTRA_STATUS)) {
                 PackageInstaller.STATUS_PENDING_USER_ACTION -> {
                     val confirmIntent = extras[Intent.EXTRA_INTENT] as? Intent
                     startActivityForResult(confirmIntent, INSTALL_REQUEST_CODE)
@@ -83,6 +84,9 @@ class ExtensionInstallActivity : Activity() {
                 }
                 PackageInstaller.STATUS_FAILURE, PackageInstaller.STATUS_FAILURE_ABORTED, PackageInstaller.STATUS_FAILURE_BLOCKED, PackageInstaller.STATUS_FAILURE_CONFLICT, PackageInstaller.STATUS_FAILURE_INCOMPATIBLE, PackageInstaller.STATUS_FAILURE_INVALID, PackageInstaller.STATUS_FAILURE_STORAGE -> {
                     extensionManager.cancelInstallation(downloadId, false)
+                    if (status != PackageInstaller.STATUS_FAILURE_ABORTED) {
+                        toast(R.string.could_not_install_extension)
+                    }
                     finish()
                 }
                 else -> {
