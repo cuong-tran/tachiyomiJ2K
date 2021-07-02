@@ -154,7 +154,7 @@ class ExtensionBottomPresenter(
 
         val updatesSorted = installed.filter { it.hasUpdate && (showNsfwExtensions || !it.isNsfw) }.sortedBy { it.pkgName }
         val installedSorted = installed
-            .filter { !it.hasUpdate && showNsfwExtensions || !it.isNsfw }
+            .filter { !it.hasUpdate && (showNsfwExtensions || !it.isNsfw) }
             .sortedWith(compareBy({ !it.isObsolete }, { it.pkgName }))
         val untrustedSorted = untrusted.sortedBy { it.pkgName }
         val availableSorted = available
