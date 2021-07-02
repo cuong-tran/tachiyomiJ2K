@@ -131,6 +131,9 @@ object Migrations {
                         remove("show_manga_app_shortcuts")
                     }
                 }
+                if (preferences.lang().get() in listOf("en-US", "en-GB")) {
+                    preferences.lang().set("en")
+                }
             }
             return true
         }

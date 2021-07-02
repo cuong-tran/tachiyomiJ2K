@@ -159,16 +159,79 @@ class SettingsGeneralController : SettingsController() {
             listPreference(activity) {
                 key = Keys.lang
                 titleRes = R.string.language
-                entryValues = listOf(
-                    "", "ar", "bg", "bn", "ca", "cs", "de", "el", "en-US", "en-GB",
-                    "es", "fr", "hi", "hu", "in", "it", "ja", "ko", "lv", "ms", "nb-rNO", "nl", "pl", "pt",
-                    "pt-BR", "ro", "ru", "sc", "sr", "sv", "th", "tl", "tr", "uk", "vi", "zh-rCN"
+                val langs = mutableListOf<Pair<String, String>>()
+                langs += Pair(
+                    "",
+                    "${context.getString(R.string.system_default)} (${LocaleHelper.getDisplayName("")})"
                 )
-                entries = entryValues.map { value ->
-                    val locale = LocaleHelper.getLocaleFromString(value)
-                    locale?.getDisplayName(locale)?.capitalize(Locale.ROOT)
-                        ?: context.getString(R.string.system_default)
-                }
+                // Due to compatibility issues:
+                // - Hebrew: `he` is copied into `iw` at build time
+                langs += arrayOf(
+                    "am",
+                    "ar",
+                    "be",
+                    "bg",
+                    "bn",
+                    "ca",
+                    "cs",
+                    "cv",
+                    "de",
+                    "el",
+                    "eo",
+                    "es",
+                    "es-419",
+                    "en",
+                    "fa",
+                    "fi",
+                    "fil",
+                    "fr",
+                    "gl",
+                    "he",
+                    "hi",
+                    "hr",
+                    "hu",
+                    "in",
+                    "it",
+                    "ja",
+                    "jv",
+                    "ka-rGE",
+                    "kn",
+                    "ko",
+                    "lt",
+                    "lv",
+                    "mr",
+                    "ms",
+                    "my",
+                    "nb-rNO",
+                    "ne",
+                    "nl",
+                    "pl",
+                    "pt",
+                    "pt-BR",
+                    "ro",
+                    "ru",
+                    "sah",
+                    "sc",
+                    "sk",
+                    "sr",
+                    "sv",
+                    "te",
+                    "th",
+                    "tr",
+                    "uk",
+                    "ur-rPK",
+                    "vi",
+                    "uz",
+                    "zh-rCN",
+                    "zh-rTW"
+                )
+                    .map {
+                        Pair(it, LocaleHelper.getDisplayName(it))
+                    }
+                    .sortedBy { it.second }
+
+                entryValues = langs.map { it.first }
+                entries = langs.map { it.second }
                 defaultValue = ""
 
                 onChange { newValue ->
@@ -180,7 +243,6 @@ class SettingsGeneralController : SettingsController() {
                     true
                 }
             }
-
             listPreference(activity) {
                 key = Keys.dateFormat
                 titleRes = R.string.date_format
