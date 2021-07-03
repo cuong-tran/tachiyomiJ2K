@@ -79,18 +79,18 @@ class ExtensionInstallActivity : Activity() {
                     finish()
                 }
                 PackageInstaller.STATUS_SUCCESS -> {
-                    extensionManager.cancelInstallation(downloadId, true)
+                    extensionManager.setInstallationResult(downloadId, true)
                     finish()
                 }
                 PackageInstaller.STATUS_FAILURE, PackageInstaller.STATUS_FAILURE_ABORTED, PackageInstaller.STATUS_FAILURE_BLOCKED, PackageInstaller.STATUS_FAILURE_CONFLICT, PackageInstaller.STATUS_FAILURE_INCOMPATIBLE, PackageInstaller.STATUS_FAILURE_INVALID, PackageInstaller.STATUS_FAILURE_STORAGE -> {
-                    extensionManager.cancelInstallation(downloadId, false)
+                    extensionManager.setInstallationResult(downloadId, false)
                     if (status != PackageInstaller.STATUS_FAILURE_ABORTED) {
                         toast(R.string.could_not_install_extension)
                     }
                     finish()
                 }
                 else -> {
-                    extensionManager.cancelInstallation(downloadId, false)
+                    extensionManager.setInstallationResult(downloadId, false)
                     finish()
                 }
             }

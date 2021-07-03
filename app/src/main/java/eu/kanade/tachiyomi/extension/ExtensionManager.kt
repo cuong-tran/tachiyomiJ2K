@@ -261,7 +261,7 @@ class ExtensionManager(
      * @param downloadId The id of the download.
      * @param result Whether the extension was installed or not.
      */
-    fun cancelInstallation(downloadId: Long, result: Boolean) {
+    fun setInstallationResult(downloadId: Long, result: Boolean) {
         installer.setInstallationResult(downloadId, result)
     }
 
