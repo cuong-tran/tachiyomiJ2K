@@ -602,6 +602,8 @@
 
     <!-- General settings -->
     <string name="app_theme">App theme</string>
+    <string name="light_theme">Light theme</string>
+    <string name="dark_theme">Dark theme</string>
     <string name="light_blue">Light Blue</string>
     <string name="dark">Dark</string>
     <string name="amoled_black">AMOLED Black</string>
