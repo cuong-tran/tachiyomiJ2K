@@ -196,6 +196,11 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         }
     }
 
+    override fun onCancelClick(position: Int) {
+        val extension = (extAdapter?.getItem(position) as? ExtensionItem) ?: return
+        presenter.cancelExtensionInstall(extension)
+    }
+
     override fun onItemClick(view: View?, position: Int): Boolean {
         when (binding.tabs.selectedTabPosition) {
             0 -> {

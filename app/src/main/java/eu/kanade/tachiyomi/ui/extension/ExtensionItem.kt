@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.extension
 
+import android.content.pm.PackageInstaller
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -19,9 +20,19 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 data class ExtensionItem(
     val extension: Extension,
     val header: ExtensionGroupItem? = null,
-    val installStep: InstallStep? = null
+    val installStep: InstallStep? = null,
+    val session: PackageInstaller.SessionInfo? = null
 ) :
     AbstractSectionableItem<ExtensionHolder, ExtensionGroupItem>(header) {
+
+    constructor(
+        extension: Extension,
+        header: ExtensionGroupItem? = null,
+        installInfo: ExtensionIntallInfo?
+    ) : this(extension, header, installInfo?.first, installInfo?.second)
+
+    val sessionProgress: Int?
+        get() = (session?.progress?.times(100)?.toInt())
 
     /**
      * Returns the layout resource of this item.
@@ -46,7 +57,7 @@ data class ExtensionItem(
         position: Int,
         payloads: MutableList<Any?>?
     ) {
-        if (payloads == null || payloads.isEmpty()) {
+        if (payloads.isNullOrEmpty()) {
             holder.bind(this)
         } else {
             holder.bindButton(this)

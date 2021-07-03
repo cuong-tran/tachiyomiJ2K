@@ -5,12 +5,14 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Environment
 import androidx.core.net.toUri
 import com.jakewharton.rxrelay.PublishRelay
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
+import eu.kanade.tachiyomi.ui.extension.ExtensionIntallInfo
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -46,6 +48,15 @@ internal class ExtensionInstaller(private val context: Context) {
      */
     private val downloadsRelay = PublishRelay.create<Pair<Long, InstallStep>>()
 
+    /** Map of download id to installer session id */
+    val downloadInstallerMap = hashMapOf<Long, Int>()
+
+    data class DownloadSessionInfo(
+        val downloadId: Long,
+        val session: PackageInstaller.Session,
+        val sessionId: Int
+    )
+
     /**
      * Adds the given extension to the downloads queue and returns an observable containing its
      * step in the installation process.
@@ -75,13 +86,19 @@ internal class ExtensionInstaller(private val context: Context) {
         activeDownloads[pkgName] = id
 
         downloadsRelay.filter { it.first == id }
-            .map { it.second }
+            .map {
+                val sessionId = downloadInstallerMap[it.first] ?: return@map it.second to null
+                val session = context.packageManager.packageInstaller.getSessionInfo(sessionId)
+                it.second to session
+            }
             // Poll download status
             .mergeWith(pollStatus(id))
+            // Poll installation status
+            .mergeWith(pollInstallStatus(id))
             // Force an error if the download takes more than 3 minutes
-            .mergeWith(Observable.timer(3, TimeUnit.MINUTES).map { InstallStep.Error })
+            .mergeWith(Observable.timer(3, TimeUnit.MINUTES).map { InstallStep.Error to null })
             // Stop when the application is installed or errors
-            .takeUntil { it.isCompleted() }
+            .takeUntil { it.first.isCompleted() }
             // Always notify on main thread
             .observeOn(AndroidSchedulers.mainThread())
             // Always remove the download when unsubscribed
@@ -94,7 +111,7 @@ internal class ExtensionInstaller(private val context: Context) {
      *
      * @param id The id of the download to poll.
      */
-    private fun pollStatus(id: Long): Observable<InstallStep> {
+    private fun pollStatus(id: Long): Observable<ExtensionIntallInfo> {
         val query = DownloadManager.Query().setFilterById(id)
 
         return Observable.interval(0, 1, TimeUnit.SECONDS)
@@ -111,11 +128,24 @@ internal class ExtensionInstaller(private val context: Context) {
             .takeUntil { it == DownloadManager.STATUS_SUCCESSFUL || it == DownloadManager.STATUS_FAILED }
             // Map to our model
             .flatMap { status ->
-                when (status) {
-                    DownloadManager.STATUS_PENDING -> Observable.just(InstallStep.Pending)
-                    DownloadManager.STATUS_RUNNING -> Observable.just(InstallStep.Downloading)
-                    else -> Observable.empty()
+                val step = when (status) {
+                    DownloadManager.STATUS_PENDING -> InstallStep.Pending
+                    DownloadManager.STATUS_RUNNING -> InstallStep.Downloading
+                    else -> return@flatMap Observable.empty()
                 }
+                Observable.just(ExtensionIntallInfo(step, null))
+            }
+            .doOnError {
+                Timber.e(it)
+            }
+    }
+
+    private fun pollInstallStatus(id: Long): Observable<ExtensionIntallInfo> {
+        return Observable.interval(0, 500, TimeUnit.MILLISECONDS)
+            .flatMap {
+                val sessionId = downloadInstallerMap[id] ?: return@flatMap Observable.empty()
+                val session = context.packageManager.packageInstaller.getSessionInfo(sessionId)
+                Observable.just(InstallStep.Installing to session)
             }
             .doOnError {
                 Timber.e(it)
@@ -153,10 +183,27 @@ internal class ExtensionInstaller(private val context: Context) {
      * Sets the result of the installation of an extension.
      *
      * @param downloadId The id of the download.
+     */
+    fun setInstalling(downloadId: Long, sessionId: Int) {
+        downloadsRelay.call(downloadId to InstallStep.Installing)
+        downloadInstallerMap[downloadId] = sessionId
+    }
+
+    fun cancelInstallation(sessionId: Int) {
+        val downloadId = downloadInstallerMap.entries.find { it.value == sessionId }?.key ?: return
+        setInstallationResult(downloadId, false)
+        context.packageManager.packageInstaller.abandonSession(sessionId)
+    }
+
+    /**
+     * Sets the result of the installation of an extension.
+     *
+     * @param downloadId The id of the download.
      * @param result Whether the extension was installed or not.
      */
     fun setInstallationResult(downloadId: Long, result: Boolean) {
         val step = if (result) InstallStep.Installed else InstallStep.Error
+        downloadInstallerMap.remove(downloadId)
         downloadsRelay.call(downloadId to step)
     }
 
@@ -220,7 +267,7 @@ internal class ExtensionInstaller(private val context: Context) {
 
             // Set next installation step
             if (uri != null) {
-                downloadsRelay.call(id to InstallStep.Installing)
+                downloadsRelay.call(id to InstallStep.Loading)
             } else {
                 Timber.e("Couldn't locate downloaded APK")
                 downloadsRelay.call(id to InstallStep.Error)

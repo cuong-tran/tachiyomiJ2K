@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.extension
 
+import android.content.pm.PackageInstaller
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -29,6 +30,7 @@ import uy.kohesive.injekt.api.get
 
 typealias ExtensionTuple =
     Triple<List<Extension.Installed>, List<Extension.Untrusted>, List<Extension.Available>>
+typealias ExtensionIntallInfo = Pair<InstallStep, PackageInstaller.SessionInfo?>
 
 /**
  * Presenter of [ExtensionBottomSheet].
@@ -47,7 +49,7 @@ class ExtensionBottomPresenter(
     var mangaItems = hashMapOf<Long, List<MangaItem>>()
         private set
 
-    private var currentDownloads = hashMapOf<String, InstallStep>()
+    private var currentDownloads = hashMapOf<String, ExtensionIntallInfo>()
 
     private val sourceManager: SourceManager = Injekt.get()
 
@@ -211,12 +213,19 @@ class ExtensionBottomPresenter(
     fun getAutoCheckPref() = preferences.automaticExtUpdates()
 
     @Synchronized
-    private fun updateInstallStep(extension: Extension, state: InstallStep): ExtensionItem? {
+    private fun updateInstallStep(
+        extension: Extension,
+        state: InstallStep,
+        session: PackageInstaller.SessionInfo?
+    ): ExtensionItem? {
         val extensions = extensions.toMutableList()
         val position = extensions.indexOfFirst { it.extension.pkgName == extension.pkgName }
 
         return if (position != -1) {
-            val item = extensions[position].copy(installStep = state)
+            val item = extensions[position].copy(
+                installStep = state,
+                session = session
+            )
             extensions[position] = item
 
             this.extensions = extensions
@@ -224,6 +233,11 @@ class ExtensionBottomPresenter(
         } else {
             null
         }
+    }
+
+    fun cancelExtensionInstall(extItem: ExtensionItem) {
+        val sessionId = extItem.session?.sessionId ?: return
+        extensionManager.cancelInstallation(sessionId)
     }
 
     fun installExtension(extension: Extension.Available) {
@@ -234,10 +248,10 @@ class ExtensionBottomPresenter(
         extensionManager.updateExtension(extension).subscribeToInstallUpdate(extension)
     }
 
-    private fun Observable<InstallStep>.subscribeToInstallUpdate(extension: Extension) {
+    private fun Observable<ExtensionIntallInfo>.subscribeToInstallUpdate(extension: Extension) {
         this.doOnNext { currentDownloads[extension.pkgName] = it }
             .doOnUnsubscribe { currentDownloads.remove(extension.pkgName) }
-            .map { state -> updateInstallStep(extension, state) }
+            .map { state -> updateInstallStep(extension, state.first, state.second) }
             .subscribe { item ->
                 if (item != null) {
                     bottomSheet.downloadUpdate(item)

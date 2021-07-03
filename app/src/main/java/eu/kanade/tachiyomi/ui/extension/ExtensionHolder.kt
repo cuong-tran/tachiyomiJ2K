@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.extension
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.View
+import androidx.core.view.isVisible
 import coil.clear
 import coil.load
 import eu.kanade.tachiyomi.R
@@ -26,6 +27,9 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
         binding.extButton.setOnClickListener {
             adapter.buttonClickListener.onButtonClick(flexibleAdapterPosition)
         }
+        binding.cancelButton.setOnClickListener {
+            adapter.buttonClickListener.onCancelClick(flexibleAdapterPosition)
+        }
     }
 
     private val shouldLabelNsfw by lazy {
@@ -45,7 +49,10 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
             extension is Extension.Installed && extension.isUnofficial -> itemView.context.getString(R.string.unofficial)
             extension.isNsfw && shouldLabelNsfw -> itemView.context.getString(R.string.nsfw_short)
             else -> ""
-        }.toUpperCase(Locale.ROOT)
+        }.uppercase(Locale.ROOT)
+        binding.installProgress.progress = item.sessionProgress ?: 0
+        binding.installProgress.isVisible = item.sessionProgress != null
+        binding.cancelButton.isVisible = item.sessionProgress != null
 
         binding.sourceImage.clear()
 
@@ -65,6 +72,9 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
         isClickable = true
         isActivated = false
 
+        binding.installProgress.progress = item.sessionProgress ?: 0
+        binding.cancelButton.isVisible = item.sessionProgress != null
+        binding.installProgress.isVisible = item.sessionProgress != null
         val extension = item.extension
         val installStep = item.installStep
         strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
@@ -73,6 +83,7 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
                 when (installStep) {
                     InstallStep.Pending -> R.string.pending
                     InstallStep.Downloading -> R.string.downloading
+                    InstallStep.Loading -> R.string.loading
                     InstallStep.Installing -> R.string.installing
                     InstallStep.Installed -> R.string.installed
                     InstallStep.Error -> R.string.retry
