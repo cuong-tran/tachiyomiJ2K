@@ -200,26 +200,35 @@ class LibraryUpdateService(
      * @return a list of manga to update
      */
     private fun getMangaToUpdate(categoryId: Int, target: Target): List<LibraryManga> {
+        val libraryManga = db.getLibraryMangas().executeAsBlocking()
+
         var listToUpdate = if (categoryId != -1) {
             categoryIds.add(categoryId)
-            db.getLibraryMangas().executeAsBlocking().filter { it.category == categoryId }
+            libraryManga.filter { it.category == categoryId }
         } else {
             val categoriesToUpdate =
                 preferences.libraryUpdateCategories().get().map(String::toInt)
             if (categoriesToUpdate.isNotEmpty()) {
                 categoryIds.addAll(categoriesToUpdate)
-                db.getLibraryMangas().executeAsBlocking()
-                    .filter { it.category in categoriesToUpdate }.distinctBy { it.id }
+                libraryManga.filter { it.category in categoriesToUpdate }.distinctBy { it.id }
             } else {
                 categoryIds.addAll(db.getCategories().executeAsBlocking().mapNotNull { it.id } + 0)
-                db.getLibraryMangas().executeAsBlocking().distinctBy { it.id }
+                libraryManga.distinctBy { it.id }
             }
         }
         if (target == Target.CHAPTERS && preferences.updateOnlyNonCompleted()) {
             listToUpdate = listToUpdate.filter { it.status != SManga.COMPLETED }
         }
 
-        return listToUpdate
+        val categoriesToExclude =
+            preferences.libraryUpdateCategoriesExclude().get().map(String::toInt)
+        val listToExclude = if (categoriesToExclude.isNotEmpty()) {
+            libraryManga.filter { it.category in categoriesToExclude }
+        } else {
+            emptyList()
+        }
+
+        return listToUpdate.minus(listToExclude)
     }
 
     private fun launchTarget(target: Target, mangaToAdd: List<LibraryManga>, startId: Int) {
