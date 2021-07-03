@@ -56,9 +56,10 @@ class CustomMangaManager(val context: Context) {
     }
 
     fun saveMangaInfo(manga: MangaJson) {
-        if (manga.title == null && manga.author == null && manga.artist == null
-            && manga.description == null && manga.genre == null
-            && (manga.status == null || manga.status == -1)) {
+        if (manga.title == null && manga.author == null && manga.artist == null &&
+            manga.description == null && manga.genre == null &&
+            (manga.status == null || manga.status == -1)
+        ) {
             customMangaMap.remove(manga.id)
         } else {
             customMangaMap[manga.id] = MangaImpl().apply {
