@@ -438,6 +438,14 @@ class LibraryController(
         filterTooltip?.show()
     }
 
+    private fun openRandomManga() {
+        val items = adapter.currentItems.filter { (it is LibraryItem && !it.manga.isBlank() && !it.manga.isHidden() && (!it.manga.initialized || it.manga.unread > 0)) }
+        if (items.isNotEmpty()) {
+            val item = items.random() as LibraryItem
+            openManga(item.manga)
+        }
+    }
+
     private fun showGroupOptions() {
         val groupItems = mutableListOf(BY_DEFAULT, BY_TAG, BY_SOURCE, BY_STATUS)
         if (presenter.isLoggedIntoTracking) {
@@ -673,6 +681,7 @@ class LibraryController(
 
         binding.roundedCategoryHopper.categoryButton.setOnLongClickListener {
             when (preferences.hopperLongPressAction().get()) {
+                4 -> openRandomManga()
                 3 -> showGroupOptions()
                 2 -> showDisplayOptions()
                 1 -> if (canCollapseOrExpandCategory() != null) presenter.toggleAllCategoryVisibility()
