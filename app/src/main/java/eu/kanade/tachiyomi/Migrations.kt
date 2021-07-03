@@ -134,6 +134,12 @@ object Migrations {
                 if (preferences.lang().get() in listOf("en-US", "en-GB")) {
                     preferences.lang().set("en")
                 }
+                // Handle removed every 1 or 2 hour library updates
+                val updateInterval = preferences.libraryUpdateInterval().get()
+                if (updateInterval == 1 || updateInterval == 2) {
+                    preferences.libraryUpdateInterval().set(3)
+                    LibraryUpdateJob.setupTask(3)
+                }
             }
             return true
         }

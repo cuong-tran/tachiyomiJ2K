@@ -103,15 +103,14 @@ class SettingsLibraryController : SettingsController() {
                 titleRes = R.string.library_update_frequency
                 entriesRes = arrayOf(
                     R.string.manual,
-                    R.string.hourly,
-                    R.string.every_2_hours,
                     R.string.every_3_hours,
                     R.string.every_6_hours,
                     R.string.every_12_hours,
                     R.string.daily,
-                    R.string.every_2_days
+                    R.string.every_2_days,
+                    R.string.weekly
                 )
-                entryValues = listOf(0, 1, 2, 3, 6, 12, 24, 48)
+                entryValues = listOf(0, 3, 6, 12, 24, 48, 168)
                 defaultValue = 24
 
                 onChange { newValue ->
