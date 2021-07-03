@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.graphics.Color
 import android.util.TypedValue
@@ -58,6 +59,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         }
     }
 
+    @SuppressLint("SetTextI18n")
     fun bind(item: LibraryHeaderItem) {
         val index = adapter.headerItems.indexOf(item)
         val previousIsCollapsed =
@@ -79,8 +81,11 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         }
         val category = item.category
 
-        if (category.isAlone && !category.isDynamic) binding.categoryTitle.text = ""
-        else binding.categoryTitle.text = category.name
+        binding.categoryTitle.text =
+            if (category.isAlone && !category.isDynamic) { "" } else { category.name } +
+            if (adapter.showNumber && !category.isHidden) {
+                " (${adapter.itemsPerCategory[item.catId]})"
+            } else { "" }
         if (category.sourceId != null) {
             val icon = adapter.sourceManager.get(category.sourceId!!)?.icon()
             icon?.setBounds(0, 0, 32.dpToPx, 32.dpToPx)
