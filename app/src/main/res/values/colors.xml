@@ -92,4 +92,12 @@
     <color name="colorAccentLimeText">#2C2D32</color>
     <color name="dialogLime">#282A2E</color>
     <color name="colorOnLime">#2C2D32</color>
+
+    <!-- Strawberry Daiquiri Theme -->
+    <color name="colorAccentStrawberry">#ED4A65</color>
+    <color name="colorAccentStrawberryText">#b62e45</color>
+
+    <!-- Yotsuba Theme -->
+    <color name="colorAccentYotsuba">#FC8C5C</color>
+    <color name="colorAccentYotsubaText">#d35b27</color>
 </resources>

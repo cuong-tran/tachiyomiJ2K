@@ -33,6 +33,11 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         AppCompatDelegate.MODE_NIGHT_YES,
         R.string.amoled_black
     ),
+    STRAWBERRY_DAIQUIRI(
+        R.style.Theme_Tachiyomi_StrawberryDaiquiri,
+        AppCompatDelegate.MODE_NIGHT_NO,
+        R.string.strawberry_daiquiri
+    ),
     BLACK_N_RED(
         R.style.Theme_Tachiyomi_BlackAndRed,
         AppCompatDelegate.MODE_NIGHT_YES,
@@ -42,6 +47,11 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         R.style.Theme_Tachiyomi_HotPink,
         AppCompatDelegate.MODE_NIGHT_YES,
         R.string.hot_pink
+    ),
+    YOTSUBA(
+        R.style.Theme_Tachiyomi_Yotsuba,
+        AppCompatDelegate.MODE_NIGHT_NO,
+        R.string.yotsuba
     ),
     LIGHT_BLUE(
         R.style.Theme_Tachiyomi_AllBlue,
@@ -140,6 +150,8 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     val lightAccent: Int = Color.parseColor(
         when (styleRes) {
             R.style.Theme_Tachiyomi_MidnightDusk -> "#c43c97"
+            R.style.Theme_Tachiyomi_StrawberryDaiquiri -> "#ED4A65"
+            R.style.Theme_Tachiyomi_Yotsuba -> "#FC8C5C"
             else -> "#2979FF"
         }
     )
