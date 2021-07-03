@@ -9,7 +9,7 @@
     <!--==============-->
     <!-- Amoled Theme -->
     <!--==============-->
-    <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi">
+    <style name="Theme.Tachiyomi.Amoled">
         <item name="colorSecondary">@color/colorAmoledPrimary</item>
         <item name="colorPrimaryVariant">@color/colorAmoledPrimary</item>
         <item name="colorOnPrimary">@color/colorAmoledPrimary</item>
@@ -33,7 +33,7 @@
         <item name="colorAccentText">@color/colorAccentPink</item>
     </style>
 
-    <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi">
+    <style name="Theme.Tachiyomi.FlatLime">
         <item name="colorPrimary">@color/primaryLime</item>
         <item name="colorPrimaryDark">@color/backgroundLime</item>
         <item name="colorAccent">@color/colorAccentLime</item>
