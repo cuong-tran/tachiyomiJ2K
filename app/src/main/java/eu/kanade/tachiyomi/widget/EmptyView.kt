@@ -10,7 +10,6 @@ import androidx.core.view.isVisible
 import com.google.android.material.button.MaterialButton
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.CommonViewEmptyBinding
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 
 class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -40,7 +39,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      * @param textResource text of information view
      */
     fun show(@DrawableRes drawable: Int, message: String, actions: List<Action>? = null) {
-        binding.imageView.setVectorCompat(drawable, context.getResourceColor(android.R.attr.textColorHint))
+        binding.imageView.setVectorCompat(drawable, android.R.attr.textColorHint)
         binding.textLabel.text = message
 
         binding.actionsContainer.removeAllViews()
