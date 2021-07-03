@@ -121,6 +121,17 @@ object Migrations {
                     UpdaterJob.setupTask()
                 }
             }
+            if (oldVersion < 75) {
+                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+                val wasShortcutsDisabled = !prefs.getBoolean("show_manga_app_shortcuts", true)
+                if (wasShortcutsDisabled) {
+                    prefs.edit {
+                        putBoolean(PreferenceKeys.showSourcesInShortcuts, false)
+                        putBoolean(PreferenceKeys.showSeriesInShortcuts, false)
+                        remove("show_manga_app_shortcuts")
+                    }
+                }
+            }
             return true
         }
         return false
