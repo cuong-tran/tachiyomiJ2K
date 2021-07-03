@@ -92,7 +92,6 @@
         <item name="colorAccent">@color/colorAccentYotsuba</item>
         <item name="colorAccentText">@color/colorAccentYotsubaText</item>
     </style>
-    <style name="Theme.Tachiyomi.Monet"/>
 
     <!--===============-->
     <!-- Launch Screen -->
