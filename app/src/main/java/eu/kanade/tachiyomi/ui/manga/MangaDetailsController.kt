@@ -1239,7 +1239,12 @@ class MangaDetailsController :
                 updateHeader()
                 showAddedSnack()
             },
-            onMangaMoved = { updateHeader() },
+            onMangaMoved = {
+                updateHeader()
+                if (presenter.preferences.autoAddTrack()) {
+                    presenter.fetchChapters(andTracking = true)
+                }
+            },
             onMangaDeleted = { presenter.confirmDeletion() }
         )
         if (snack?.duration == Snackbar.LENGTH_INDEFINITE) {

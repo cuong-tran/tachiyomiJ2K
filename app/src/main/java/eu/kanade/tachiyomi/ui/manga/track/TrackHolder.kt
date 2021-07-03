@@ -68,8 +68,15 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
             val status = item.service.getStatus(track.status)
             if (status.isEmpty()) binding.trackStatus.setText(R.string.unknown_status)
             else binding.trackStatus.text = item.service.getStatus(track.status)
-            binding.trackScore.text = if (track.score == 0f) "-" else item.service.displayScore(track)
-            binding.trackScore.setCompoundDrawablesWithIntrinsicBounds(0, 0, starIcon(track), 0)
+            val supportsScoring = item.service.getScoreList().isNotEmpty()
+            if (supportsScoring) {
+                binding.trackScore.text =
+                    if (track.score == 0f) "-" else item.service.displayScore(track)
+                binding.trackScore.setCompoundDrawablesWithIntrinsicBounds(0, 0, starIcon(track), 0)
+            }
+            binding.scoreContainer.isVisible = supportsScoring
+            binding.vertDivider2.isVisible = supportsScoring
+
             binding.dateGroup.isVisible = item.service.supportsReadingDates
             if (item.service.supportsReadingDates) {
                 binding.trackStartDate.text =

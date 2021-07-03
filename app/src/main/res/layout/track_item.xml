@@ -180,6 +180,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <View
+                android:id="@+id/vert_divider_2"
                 android:layout_width="1dp"
                 android:layout_height="0dp"
                 android:layout_marginTop="10dp"
@@ -199,7 +200,7 @@
                 android:background="@color/strong_divider"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/score_container" />
+                app:layout_constraintTop_toBottomOf="@+id/track_chapters" />
 
             <TextView
                 android:id="@+id/track_start_date"

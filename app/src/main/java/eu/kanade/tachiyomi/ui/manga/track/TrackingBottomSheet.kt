@@ -11,16 +11,22 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.data.track.UnattendedTrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.databinding.TrackingBottomSheetBinding
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.checkHeightThen
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import timber.log.Timber
+import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class TrackingBottomSheet(private val controller: MangaDetailsController) :
     E2EBottomSheetDialog<TrackingBottomSheetBinding>(controller.activity!!),
@@ -35,6 +41,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     val presenter = controller.presenter
 
+    private val sourceManager: SourceManager by injectLazy()
     private var adapter: TrackAdapter? = null
 
     override fun createBinding(inflater: LayoutInflater) =
@@ -140,10 +147,31 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
             return
         }
 
-        TrackSearchDialog(this, item.service, item.track != null).showDialog(
-            controller.router,
-            TAG_SEARCH_CONTROLLER
-        )
+        if (item.service is UnattendedTrackService) {
+            if (item.track != null) {
+                controller.presenter.removeTracker(item, false)
+                return
+            }
+
+            if (!item.service.accept(controller.presenter.source)) {
+                controller.view?.context?.toast(R.string.source_unsupported)
+                return
+            }
+
+            launchIO {
+                try {
+                    item.service.match(controller.presenter.manga)?.let { track ->
+                        controller.presenter.registerTracking(track, item.service)
+                    }
+                        ?: withUIContext { controller.view?.context?.toast(R.string.no_match_found) }
+                } catch (e: Exception) {
+                    withUIContext { controller.view?.context?.toast(R.string.no_match_found) }
+                }
+            }
+        } else {
+            TrackSearchDialog(this, item.service, item.track != null)
+                .showDialog(controller.router, TAG_SEARCH_CONTROLLER)
+        }
     }
 
     override fun onStatusClick(position: Int) {

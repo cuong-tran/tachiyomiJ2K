@@ -10,9 +10,19 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.data.track.UnattendedTrackService
 import eu.kanade.tachiyomi.source.LocalSource
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
+import eu.kanade.tachiyomi.util.chapter.syncChaptersWithTrackServiceTwoWay
+import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.snack
+import timber.log.Timber
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.util.Date
 
 fun Manga.isLocal() = source == LocalSource.ID
@@ -95,6 +105,9 @@ fun Manga.addOrRemoveToFavorites(
             defaultCategory != null -> {
                 favorite = true
                 date_added = Date().time
+                if (preferences.autoAddTrack()) {
+                    autoAddTrack(db, onMangaMoved)
+                }
                 db.insertManga(this).executeAsBlocking()
                 val mc = MangaCategory.create(this, defaultCategory)
                 db.setMangaCategories(listOf(mc), listOf(this))
@@ -108,6 +121,9 @@ fun Manga.addOrRemoveToFavorites(
             defaultCategoryId == 0 || categories.isEmpty() -> { // 'Default' or no category
                 favorite = true
                 date_added = Date().time
+                if (preferences.autoAddTrack()) {
+                    autoAddTrack(db, onMangaMoved)
+                }
                 db.insertManga(this).executeAsBlocking()
                 db.setMangaCategories(emptyList(), listOf(this))
                 onMangaMoved()
@@ -133,6 +149,9 @@ fun Manga.addOrRemoveToFavorites(
                     true
                 ) {
                     onMangaAdded()
+                    if (preferences.autoAddTrack()) {
+                        autoAddTrack(db, onMangaMoved)
+                    }
                 }.show()
             }
         }
@@ -162,4 +181,30 @@ fun Manga.addOrRemoveToFavorites(
         }
     }
     return null
+}
+
+fun Manga.autoAddTrack(db: DatabaseHelper, onMangaMoved: () -> Unit) {
+    val loggedServices = Injekt.get<TrackManager>().services.filter { it.isLogged }
+    val source = Injekt.get<SourceManager>().getOrStub(this.source)
+    loggedServices
+        .filterIsInstance<UnattendedTrackService>()
+        .filter { it.accept(source) }
+        .forEach { service ->
+            launchIO {
+                try {
+                    service.match(this@autoAddTrack)?.let { track ->
+                        track.manga_id = this@autoAddTrack.id!!
+                        (service as TrackService).bind(track)
+                        db.insertTrack(track).executeAsBlocking()
+
+                        syncChaptersWithTrackServiceTwoWay(db, db.getChapters(this@autoAddTrack).executeAsBlocking(), track, service as TrackService)
+                        withUIContext {
+                            onMangaMoved()
+                        }
+                    }
+                } catch (e: Exception) {
+                    Timber.w(e, "Could not match manga: ${this@autoAddTrack.title} with service $service")
+                }
+            }
+        }
 }

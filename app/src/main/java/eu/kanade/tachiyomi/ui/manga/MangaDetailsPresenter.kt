@@ -30,6 +30,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.data.track.UnattendedTrackService
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SManga
@@ -42,6 +43,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.chapter.syncChaptersWithTrackServiceTwoWay
 import eu.kanade.tachiyomi.util.lang.trimOrNull
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -799,6 +801,9 @@ class MangaDetailsPresenter(
                         }
                         if (trackItem != null) {
                             db.insertTrack(trackItem).executeAsBlocking()
+                            if (item.service is UnattendedTrackService) {
+                                syncChaptersWithTrackServiceTwoWay(db, chapters, trackItem, item.service)
+                            }
                             trackItem
                         } else item.track
                     }
@@ -847,7 +852,13 @@ class MangaDetailsPresenter(
                     null
                 }
                 withContext(Dispatchers.IO) {
-                    if (binding != null) db.insertTrack(binding).executeAsBlocking()
+                    if (binding != null) {
+                        db.insertTrack(binding).executeAsBlocking()
+                    }
+
+                    if (service is UnattendedTrackService) {
+                        syncChaptersWithTrackServiceTwoWay(db, chapters, item, service)
+                    }
                 }
                 fetchTracks()
             }
