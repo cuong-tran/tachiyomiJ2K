@@ -11,7 +11,6 @@
         android:layout_height="64dp"
         android:background="@drawable/list_item_selector">
 
-        <!--            style="@android:style/Widget.ProgressBar.Horizontal"-->
         <ProgressBar
             android:id="@+id/install_progress"
             android:layout_width="0dp"
