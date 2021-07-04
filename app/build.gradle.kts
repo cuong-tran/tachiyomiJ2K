@@ -95,22 +95,22 @@ dependencies {
     implementation("tachiyomi.sourceapi:source-api:1.1")
 
     // Android X libraries
-    implementation("androidx.appcompat:appcompat:1.3.0-rc01")
+    implementation("androidx.appcompat:appcompat:1.3.0")
     implementation("androidx.cardview:cardview:1.0.0")
-    implementation("com.google.android.material:material:1.4.0-beta01")
-    implementation("androidx.recyclerview:recyclerview:1.2.0")
+    implementation("com.google.android.material:material:1.4.0")
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.preference:preference:1.1.1")
     implementation("androidx.annotation:annotation:1.2.0")
     implementation("androidx.browser:browser:1.3.0")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.core:core-ktx:1.5.0")
+    implementation("androidx.core:core-ktx:1.6.0")
 
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
 
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("com.google.firebase:firebase-core:18.0.3")
+    implementation("com.google.firebase:firebase-core:19.0.0")
 
     val lifecycleVersion = "2.2.0"
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
@@ -159,9 +159,10 @@ dependencies {
     implementation(kotlin("reflect", version = Versions.kotlin))
 
     // JSON
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinSerialization}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${Versions.kotlinSerialization}")
-    implementation("com.google.code.gson:gson:2.8.6")
+    val kotlinSerialization =  "1.2.1"
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinSerialization}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${kotlinSerialization}")
+    implementation("com.google.code.gson:gson:2.8.7")
     implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
 
     // JavaScript engine
@@ -229,7 +230,7 @@ dependencies {
     // Conductor
     val conductorVersion = "3.0.0"
     implementation("com.bluelinelabs:conductor:$conductorVersion")
-    implementation("com.github.jays2kings:conductor-support-preference:3.0.0")
+    implementation("com.github.tachiyomiorg:conductor-support-preference:$conductorVersion")
 
     // RxBindings
     implementation("com.jakewharton.rxbinding:rxbinding-kotlin:${Versions.RX_BINDING}")
@@ -238,8 +239,8 @@ dependencies {
     implementation("com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin:${Versions.RX_BINDING}")
 
     // Tests
-    testImplementation("junit:junit:4.13")
-    testImplementation("org.assertj:assertj-core:3.12.2")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.assertj:assertj-core:3.16.1")
     testImplementation("org.mockito:mockito-core:1.10.19")
 
     testImplementation("org.robolectric:robolectric:${Versions.ROBO_ELECTRIC}")
@@ -260,7 +261,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-oss-licenses:${Versions.OSS_LICENSE}")
 
     // TLS 1.3 support for Android < 10
-    implementation("org.conscrypt:conscrypt-android:2.4.0")
+    implementation("org.conscrypt:conscrypt-android:2.5.2")
 }
 
 

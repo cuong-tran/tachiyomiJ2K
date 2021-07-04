@@ -18,7 +18,6 @@ object Versions {
     const val androidCardView = "1.0.0"
     const val androidConstraintLayout = "1.1.3"
     const val androidCoreKtx = "1.3.1"
-    const val androidGradlePlugin = "4.2.1"
     const val androidLifecycle = "2.2.0"
     const val androidMaterial = "1.1.0"
     const val androidMultiDex = "2.0.1"
@@ -50,8 +49,6 @@ object Versions {
     const val jsoup = "1.13.1"
     const val junit = "4.13"
     const val kotlin = "1.5.10"
-    const val kotlinCoroutines = "1.3.9"
-    const val kotlinSerialization = "1.1.0"
     const val kotson = "2.5.0"
     const val ktlint = "9.4.0"
     const val loadingButton = "2.2.0"
@@ -92,7 +89,6 @@ object Versions {
 
 object LegacyPluginClassPath {
     const val aboutLibraries = "com.google.android.gms:oss-licenses-plugin:${Versions.aboutLibraries}"
-    const val androidGradlePlugin = "com.android.tools.build:gradle:${Versions.androidGradlePlugin}"
     const val googleServices = "com.google.gms:google-services:${Versions.googleServices}"
     const val kotlinPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}"
     const val kotlinSerializations = "org.jetbrains.kotlin:kotlin-serialization:${Versions.kotlin}"
