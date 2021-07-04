@@ -30,7 +30,7 @@ class SettingsBrowseController : SettingsController() {
 
                 onChange {
                     it as Boolean
-                    ExtensionUpdateJob.setupTask(it)
+                    ExtensionUpdateJob.setupTask(context, it)
                     true
                 }
             }

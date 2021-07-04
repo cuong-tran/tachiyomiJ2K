@@ -48,9 +48,9 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
                     .addTag(TAG)
                     .build()
 
-                WorkManager.getInstance().enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+                WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
             } else {
-                WorkManager.getInstance().cancelAllWorkByTag(TAG)
+                WorkManager.getInstance(context).cancelAllWorkByTag(TAG)
             }
         }
     }

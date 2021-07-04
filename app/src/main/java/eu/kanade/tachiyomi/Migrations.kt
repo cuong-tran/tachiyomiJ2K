@@ -34,19 +34,19 @@ object Migrations {
 
             if (oldVersion == 0) {
                 if (BuildConfig.INCLUDE_UPDATER) {
-                    UpdaterJob.setupTask()
+                    UpdaterJob.setupTask(context)
                 }
-                ExtensionUpdateJob.setupTask()
-                LibraryUpdateJob.setupTask()
+                ExtensionUpdateJob.setupTask(context)
+                LibraryUpdateJob.setupTask(context)
                 return BuildConfig.DEBUG
             }
 
             if (oldVersion < 14) {
                 // Restore jobs after upgrading to evernote's job scheduler.
                 if (BuildConfig.INCLUDE_UPDATER) {
-                    UpdaterJob.setupTask()
+                    UpdaterJob.setupTask(context)
                 }
-                LibraryUpdateJob.setupTask()
+                LibraryUpdateJob.setupTask(context)
             }
             if (oldVersion < 15) {
                 // Delete internal chapter cache dir.
@@ -81,11 +81,11 @@ object Migrations {
                 LibraryPresenter.updateDB()
                 // Restore jobs after migrating from Evernote's job scheduler to WorkManager.
                 if (BuildConfig.INCLUDE_UPDATER) {
-                    UpdaterJob.setupTask()
+                    UpdaterJob.setupTask(context)
                 }
-                LibraryUpdateJob.setupTask()
+                LibraryUpdateJob.setupTask(context)
                 BackupCreatorJob.setupTask(context)
-                ExtensionUpdateJob.setupTask()
+                ExtensionUpdateJob.setupTask(context)
             }
             if (oldVersion < 66) {
                 LibraryPresenter.updateCustoms()
@@ -118,7 +118,7 @@ object Migrations {
             if (oldVersion < 74) {
                 // Turn on auto updates for all users
                 if (BuildConfig.INCLUDE_UPDATER) {
-                    UpdaterJob.setupTask()
+                    UpdaterJob.setupTask(context)
                 }
             }
             if (oldVersion < 75) {
@@ -138,7 +138,7 @@ object Migrations {
                 val updateInterval = preferences.libraryUpdateInterval().get()
                 if (updateInterval == 1 || updateInterval == 2) {
                     preferences.libraryUpdateInterval().set(3)
-                    LibraryUpdateJob.setupTask(3)
+                    LibraryUpdateJob.setupTask(context, 3)
                 }
             }
             return true

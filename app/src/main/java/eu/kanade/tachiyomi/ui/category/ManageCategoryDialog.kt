@@ -106,7 +106,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             updatePref(preferences.libraryUpdateCategories(), binding.includeGlobal) == false
         ) {
             preferences.libraryUpdateInterval().set(0)
-            LibraryUpdateJob.setupTask(0)
+            LibraryUpdateJob.setupTask(preferences.context, 0)
         }
         updateLibrary?.invoke(category.id)
         return true

@@ -75,7 +75,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
     companion object {
         private const val TAG = "ExtensionUpdate"
 
-        fun setupTask(forceAutoUpdateJob: Boolean? = null) {
+        fun setupTask(context: Context, forceAutoUpdateJob: Boolean? = null) {
             val preferences = Injekt.get<PreferencesHelper>()
             val autoUpdateJob = forceAutoUpdateJob ?: preferences.automaticExtUpdates().getOrDefault()
             if (autoUpdateJob) {
@@ -93,9 +93,9 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                     .setConstraints(constraints)
                     .build()
 
-                WorkManager.getInstance().enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+                WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
             } else {
-                WorkManager.getInstance().cancelAllWorkByTag(TAG)
+                WorkManager.getInstance(context).cancelAllWorkByTag(TAG)
             }
         }
     }
