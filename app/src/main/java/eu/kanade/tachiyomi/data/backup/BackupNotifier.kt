@@ -84,9 +84,9 @@ class BackupNotifier(private val context: Context) {
         val builder = with(progressNotificationBuilder) {
             setContentTitle(context.getString(R.string.restoring_backup))
 
-            // if (!preferences.hideNotificationContent()) {
-            setContentText(content)
-            // }
+            if (!preferences.hideNotificationContent()) {
+                setContentText(content)
+            }
 
             setProgress(maxAmount, progress, false)
             setOnlyAlertOnce(true)

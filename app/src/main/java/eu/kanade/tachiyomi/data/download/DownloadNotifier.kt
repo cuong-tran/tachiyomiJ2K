@@ -11,8 +11,10 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notificationManager
+import uy.kohesive.injekt.injectLazy
 import java.util.regex.Pattern
 
 /**
@@ -21,6 +23,9 @@ import java.util.regex.Pattern
  * @param context context of application
  */
 internal class DownloadNotifier(private val context: Context) {
+
+    private val preferences: PreferencesHelper by injectLazy()
+
     /**
      * Notification builder.
      */
@@ -54,15 +59,6 @@ internal class DownloadNotifier(private val context: Context) {
     }
 
     /**
-     * Clear old actions if they exist.
-     */
-    private fun clearActions() = with(notification) {
-        if (!mActions.isEmpty()) {
-            mActions.clear()
-        }
-    }
-
-    /**
      * Dismiss the downloader's notification. Downloader error notifications use a different id, so
      * those can only be dismissed by the user.
      */
@@ -89,7 +85,7 @@ internal class DownloadNotifier(private val context: Context) {
                 )
             }
 
-            if (download != null) {
+            if (download != null && !preferences.hideNotificationContent()) {
                 val title = download.manga.title.chop(15)
                 val quotedTitle = Pattern.quote(title)
                 val chapter = download.chapter.name.replaceFirst(
@@ -141,17 +137,22 @@ internal class DownloadNotifier(private val context: Context) {
                 )
             }
 
-            val title = download.manga.title.chop(15)
-            val quotedTitle = Pattern.quote(title)
-            val chapter = download.chapter.name.replaceFirst(
-                "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE),
-                ""
-            )
-            setContentTitle("$title - $chapter".chop(30))
-            setContentText(
+            val downloadingProgressText =
                 context.getString(R.string.downloading_progress)
                     .format(download.downloadedImages, download.pages!!.size)
-            )
+
+            if (preferences.hideNotificationContent()) {
+                setContentTitle(downloadingProgressText)
+            } else {
+                val title = download.manga.title.chop(15)
+                val quotedTitle = Pattern.quote(title)
+                val chapter = download.chapter.name.replaceFirst(
+                    "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE),
+                    ""
+                )
+                setContentTitle("$title - $chapter".chop(30))
+                setContentText(downloadingProgressText)
+            }
             setStyle(null)
             setProgress(download.pages!!.size, download.downloadedImages, false)
         }
