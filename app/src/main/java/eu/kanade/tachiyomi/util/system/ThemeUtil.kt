@@ -26,7 +26,6 @@ object ThemeUtil {
         )
         preferences.darkTheme().set(
             when (theme) {
-                3 -> Themes.AMOLED
                 4 -> Themes.DARK_BLUE
                 else -> Themes.DARK
             }
@@ -60,6 +59,13 @@ fun Activity.setThemeAndNight(preferences: PreferencesHelper) {
     AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())
     val theme = getPrefTheme(preferences)
     setTheme(theme.styleRes)
+
+    if (theme.isDarkTheme && preferences.themeDarkAmoled().get()) {
+        setTheme(R.style.ThemeOverlay_Tachiyomi_Amoled)
+        if (ThemeUtil.isColoredTheme(theme)) {
+            setTheme(R.style.ThemeOverlay_Tachiyomi_AllBlue)
+        }
+    }
 }
 
 fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {
