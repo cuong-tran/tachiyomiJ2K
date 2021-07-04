@@ -217,8 +217,6 @@ object PreferenceKeys {
     const val showSourcesInShortcuts = "show_sources_shortcuts"
     const val openChapterInShortcuts = "open_chapter_shortcuts"
 
-    const val createLegacyBackup = "create_legacy_backup"
-
     const val dohProvider = "doh_provider"
 
     const val showNsfwSource = "show_nsfw_source"
