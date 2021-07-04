@@ -90,6 +90,8 @@ object PreferenceKeys {
 
     const val autoAddTrack = "pref_auto_add_track_key"
 
+    const val trackingsToAddOnline = "pref_tracking_for_online"
+
     const val lastUsedCatalogueSource = "last_catalogue_source"
 
     const val lastUsedCategory = "last_used_category"

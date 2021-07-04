@@ -194,6 +194,8 @@ class PreferencesHelper(val context: Context) {
 
     fun autoAddTrack() = prefs.getBoolean(Keys.autoAddTrack, true)
 
+    fun trackingsToAddOnline() = flowPrefs.getStringSet(Keys.trackingsToAddOnline, emptySet())
+
     fun lastUsedCatalogueSource() = flowPrefs.getLong(Keys.lastUsedCatalogueSource, -1)
 
     fun lastUsedCategory() = rxPrefs.getInteger(Keys.lastUsedCategory, 0)
