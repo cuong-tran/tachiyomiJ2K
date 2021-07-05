@@ -19,7 +19,7 @@ class CoilSetup(context: Context) {
             .allowHardware(false)
             .componentRegistry {
                 if (Build.VERSION.SDK_INT >= 28) {
-                    add(ImageDecoderDecoder())
+                    add(ImageDecoderDecoder(context))
                 } else {
                     add(GifDecoder())
                 }
