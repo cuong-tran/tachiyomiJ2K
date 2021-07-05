@@ -105,6 +105,7 @@
         <item name="colorAccentText">@color/colorAccentYinyangText</item>
         <item name="colorOnAccent">@color/colorOnAccentYinyang</item>
     </style>
+    <style name="Theme.Tachiyomi.Monet"/>
 
     <!--===============-->
     <!-- Launch Screen -->
