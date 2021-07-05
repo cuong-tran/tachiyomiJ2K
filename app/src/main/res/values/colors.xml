@@ -97,6 +97,6 @@
     <color name="secondaryChocolateStrawberries">#211b19</color>
 
     <!-- Yotsuba Theme -->
-    <color name="colorAccentYotsuba">#FC8C5C</color>
-    <color name="colorAccentYotsubaText">#d35b27</color>
+    <color name="colorAccentYotsuba">#dc6d3d</color>
+    <color name="colorAccentYotsubaText">#9f431c</color>
 </resources>
