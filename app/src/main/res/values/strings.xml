@@ -312,6 +312,7 @@
     <string name="app_info">App info</string>
     <string name="_must_be_enabled_first">%1$s must be enabled first</string>
     <string name="could_not_install_extension">Could not install extension</string>
+    <string name="update_all">Update all</string>
     <plurals name="_updates_pending">
         <item quantity="one">%d update pending</item>
         <item quantity="other">%d updates pending</item>

@@ -201,6 +201,20 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         presenter.cancelExtensionInstall(extension)
     }
 
+    override fun onUpdateAllClicked(position: Int) {
+        val header = (extAdapter?.getSectionHeader(position)) as? ExtensionGroupItem ?: return
+        val items = extAdapter?.getSectionItemPositions(header)
+        items?.forEach {
+            val extItem = (extAdapter?.getItem(it) as? ExtensionItem) ?: return
+            val extension = (extAdapter?.getItem(it) as? ExtensionItem)?.extension ?: return
+            if (extItem.installStep == null &&
+                extension is Extension.Installed && extension.hasUpdate
+            ) {
+                presenter.updateExtension(extension)
+            }
+        }
+    }
+
     override fun onItemClick(view: View?, position: Int): Boolean {
         when (binding.tabs.selectedTabPosition) {
             0 -> {
@@ -298,6 +312,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             extAdapter?.updateDataSet(extensions)
         }
         updateExtTitle()
+        updateExtUpdateAllButton()
     }
 
     fun canGoBack(): Boolean {
@@ -310,6 +325,20 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     fun downloadUpdate(item: ExtensionItem) {
         extAdapter?.updateItem(item, item.installStep)
+        updateExtUpdateAllButton()
+    }
+
+    fun updateExtUpdateAllButton() {
+        val updateHeader =
+            extAdapter?.headerItems?.find { it is ExtensionGroupItem && it.canUpdate != null } as? ExtensionGroupItem
+                ?: return
+        val items = extAdapter?.getSectionItemPositions(updateHeader) ?: return
+        updateHeader.canUpdate = items.any {
+            val extItem = (extAdapter?.getItem(it) as? ExtensionItem) ?: return
+            val extension = (extAdapter?.getItem(it) as? ExtensionItem)?.extension ?: return
+            extItem.installStep == null
+        }
+        extAdapter?.updateItem(updateHeader)
     }
 
     override fun trustSignature(signatureHash: String) {

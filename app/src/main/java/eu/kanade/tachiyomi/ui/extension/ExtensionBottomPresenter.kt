@@ -176,7 +176,8 @@ class ExtensionBottomPresenter(
                     updatesSorted.size,
                     updatesSorted.size
                 ),
-                updatesSorted.size
+                updatesSorted.size,
+                items.count { it.extension.pkgName in currentDownloads.keys } != updatesSorted.size
             )
             items += updatesSorted.map { extension ->
                 ExtensionItem(extension, header, currentDownloads[extension.pkgName])
