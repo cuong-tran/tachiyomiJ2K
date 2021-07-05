@@ -144,7 +144,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         when (styleRes) {
             R.style.Theme_Tachiyomi_MidnightDusk -> "#c43c97"
             R.style.Theme_Tachiyomi_StrawberryDaiquiri -> "#ED4A65"
-            R.style.Theme_Tachiyomi_Yotsuba -> "#FC8C5C"
+            R.style.Theme_Tachiyomi_Yotsuba -> "#dc6d3d"
             else -> "#2979FF"
         }
     )
