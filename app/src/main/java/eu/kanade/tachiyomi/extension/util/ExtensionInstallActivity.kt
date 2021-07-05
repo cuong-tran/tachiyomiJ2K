@@ -1,10 +1,13 @@
 package eu.kanade.tachiyomi.extension.util
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionParams
+import android.content.pm.PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import com.hippo.unifile.UniFile
@@ -20,6 +23,7 @@ import uy.kohesive.injekt.injectLazy
  */
 class ExtensionInstallActivity : Activity() {
 
+    @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
@@ -37,8 +41,9 @@ class ExtensionInstallActivity : Activity() {
             )
             // TODO: Add once compiling via SDK 31
 //            if (Build.VERSION.SDK_INT >= 31) {
-//                params.setRequireUserAction(USER_ACTION_NOT_REQUIRED)
-//            }
+            if (Build.VERSION.PREVIEW_SDK_INT + Build.VERSION.SDK_INT >= 31) {
+                params.setRequireUserAction(USER_ACTION_NOT_REQUIRED)
+            }
             val sessionId = packageInstaller.createSession(params)
             val session = packageInstaller.openSession(sessionId)
             session.openWrite("package", 0, -1).use { packageInSession ->
