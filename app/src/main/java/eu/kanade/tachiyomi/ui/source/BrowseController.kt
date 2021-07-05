@@ -362,6 +362,9 @@ class BrowseController :
         binding.bottomSheet.root.presenter.refreshExtensions()
         binding.bottomSheet.root.presenter.refreshMigrations()
         setBottomPadding()
+        if (showingExtensions) {
+            activity.invalidateOptionsMenu()
+        }
     }
 
     override fun onItemClick(view: View, position: Int): Boolean {
