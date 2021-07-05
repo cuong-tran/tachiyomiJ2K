@@ -4,6 +4,9 @@ import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.os.Build
 import android.view.MotionEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -28,7 +31,7 @@ import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 
-@SuppressLint("ClickableViewAccessibility")
+@SuppressLint("ClickableViewAccessibility", "NewApi")
 class MangaHeaderHolder(
     view: View,
     private val adapter: MangaDetailsAdapter,
@@ -123,6 +126,15 @@ class MangaHeaderHolder(
                     R.string.author
                 )
                 true
+            }
+            if (Build.VERSION.PREVIEW_SDK_INT + Build.VERSION.SDK_INT >= 31) {
+                backdrop.setRenderEffect(
+                    RenderEffect.createBlurEffect(
+                        10f,
+                        10f,
+                        Shader.TileMode.MIRROR
+                    )
+                )
             }
             mangaCover.setOnClickListener { adapter.delegate.zoomImageFromThumb(coverCard) }
             trackButton.setOnClickListener { adapter.delegate.showTrackingSheet() }
