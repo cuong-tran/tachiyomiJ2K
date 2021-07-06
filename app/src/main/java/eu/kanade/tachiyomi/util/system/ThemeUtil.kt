@@ -1,11 +1,13 @@
 package eu.kanade.tachiyomi.util.system
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.Color
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.coroutineScope
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import uy.kohesive.injekt.injectLazy
 
 object ThemeUtil {
 
@@ -36,8 +38,9 @@ object ThemeUtil {
         return theme.styleRes == R.style.Theme_Tachiyomi_AllBlue
     }
 
-    fun isPitchBlack(context: Context, theme: Themes): Boolean {
-        return context.isInNightMode() && theme.darkBackground == Color.BLACK
+    fun isPitchBlack(context: Context): Boolean {
+        val preferences: PreferencesHelper by injectLazy()
+        return context.isInNightMode() && preferences.themeDarkAmoled().get()
     }
 
     fun hasDarkActionBarInLight(context: Context, theme: Themes): Boolean {
@@ -52,11 +55,10 @@ object ThemeUtil {
     }
 }
 
-fun Activity.setThemeAndNight(preferences: PreferencesHelper) {
+fun AppCompatActivity.setThemeAndNight(preferences: PreferencesHelper) {
     if (preferences.nightMode().isNotSet()) {
         ThemeUtil.convertTheme(preferences, preferences.oldTheme())
     }
-    AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())
     val theme = getPrefTheme(preferences)
     setTheme(theme.styleRes)
 
@@ -65,6 +67,9 @@ fun Activity.setThemeAndNight(preferences: PreferencesHelper) {
         if (ThemeUtil.isColoredTheme(theme)) {
             setTheme(R.style.ThemeOverlay_Tachiyomi_AllBlue)
         }
+    }
+    lifecycle.coroutineScope.launchWhenCreated {
+        AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())
     }
 }
 
