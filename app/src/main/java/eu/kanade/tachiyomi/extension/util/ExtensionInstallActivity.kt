@@ -40,13 +40,7 @@ class ExtensionInstallActivity : Activity() {
             val sessionId = packageInstaller.createSession(params)
             val session = packageInstaller.openSession(sessionId)
             session.openWrite("package", 0, -1).use { packageInSession ->
-                data.use { `is` ->
-                    val buffer = ByteArray(16384)
-                    var n: Int
-                    while (`is`.read(buffer).also { n = it } >= 0) {
-                        packageInSession.write(buffer, 0, n)
-                    }
-                }
+                data.copyTo(packageInSession)
             }
 
             val newIntent = Intent(this, ExtensionInstallActivity::class.java)
@@ -59,6 +53,7 @@ class ExtensionInstallActivity : Activity() {
             session.commit(statusReceiver)
             val extensionManager: ExtensionManager by injectLazy()
             extensionManager.setInstalling(downloadId, sessionId)
+            data.close()
         } catch (error: Exception) {
             // Either install package can't be found (probably bots) or there's a security exception
             // with the download manager. Nothing we can workaround.
