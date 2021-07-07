@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.base.activity
 
+import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
@@ -17,9 +18,8 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     lateinit var binding: VB
     val isBindingInitialized get() = this::binding.isInitialized
 
-    init {
-        @Suppress("LeakingThis")
-        LocaleHelper.updateConfiguration(this)
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.createLocaleWrapper(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

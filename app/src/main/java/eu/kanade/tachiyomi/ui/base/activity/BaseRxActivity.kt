@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.base.activity
 
+import android.content.Context
 import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
@@ -11,9 +12,8 @@ abstract class BaseRxActivity<P : BasePresenter<*>> : NucleusAppCompatActivity<P
 
     val scope = lifecycleScope
 
-    init {
-        @Suppress("LeakingThis")
-        LocaleHelper.updateConfiguration(this)
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.createLocaleWrapper(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi
 
 import android.app.Application
 import android.content.Context
-import android.content.res.Configuration
 import android.os.Build
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -14,7 +13,6 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.util.system.LocaleHelper
 import org.acra.ACRA
 import org.acra.config.httpSender
 import org.acra.data.StringFormat
@@ -54,7 +52,6 @@ open class App : Application(), LifecycleObserver {
         setupAcra()
         setupNotificationChannels()
 
-        LocaleHelper.updateConfiguration(this, resources.configuration)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
         // Reset Incognito Mode on relaunch
@@ -73,11 +70,6 @@ open class App : Application(), LifecycleObserver {
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
         MultiDex.install(this)
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        LocaleHelper.updateConfiguration(this, newConfig, true)
     }
 
     protected open fun setupAcra() {
