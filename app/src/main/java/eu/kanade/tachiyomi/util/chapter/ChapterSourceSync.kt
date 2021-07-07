@@ -67,7 +67,9 @@ fun syncChaptersWithSource(
             ChapterRecognition.parseChapterNumber(sourceChapter, manga)
 
             if (shouldUpdateDbChapter(dbChapter, sourceChapter)) {
-                if (dbChapter.name != sourceChapter.name && downloadManager.isChapterDownloaded(dbChapter, manga)) {
+                if (dbChapter.name != sourceChapter.name &&
+                    downloadManager.isChapterDownloaded(dbChapter, manga)
+                ) {
                     downloadManager.renameChapter(source, manga, dbChapter, sourceChapter)
                 }
                 dbChapter.scanlator = sourceChapter.scanlator
@@ -150,7 +152,8 @@ fun syncChaptersWithSource(
         db.fixChaptersSourceOrder(sourceChapters).executeAsBlocking()
 
         // Set this manga as updated since chapters were changed
-        val newestChapterDate = db.getChapters(manga).executeAsBlocking().maxOfOrNull { it.date_upload } ?: 0L
+        val newestChapterDate = db.getChapters(manga).executeAsBlocking()
+            .maxOfOrNull { it.date_upload } ?: 0L
         if (newestChapterDate == 0L) {
             if (toAdd.isNotEmpty()) {
                 manga.last_update = Date().time
