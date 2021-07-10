@@ -64,8 +64,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         R.string.dark_blue
     );
 
-    val isDarkTheme: Boolean
-        get() = nightMode == AppCompatDelegate.MODE_NIGHT_YES
+    val isDarkTheme = nightMode == AppCompatDelegate.MODE_NIGHT_YES
 
     fun getColors(mode: Int = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM): Colors {
         return when (nightMode) {
