@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.extension
 
 import android.content.pm.PackageInstaller
+import android.widget.Toast
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -18,7 +19,9 @@ import eu.kanade.tachiyomi.ui.migration.MangaItem
 import eu.kanade.tachiyomi.ui.migration.SelectionHeader
 import eu.kanade.tachiyomi.ui.migration.SourceItem
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import eu.kanade.tachiyomi.util.system.MiuiUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -241,11 +244,23 @@ class ExtensionBottomPresenter(
     }
 
     fun installExtension(extension: Extension.Available) {
-        extensionManager.installExtension(extension).subscribeToInstallUpdate(extension)
+        if (isNotMIUIOptimized()) {
+            extensionManager.installExtension(extension).subscribeToInstallUpdate(extension)
+        }
     }
 
     fun updateExtension(extension: Extension.Installed) {
-        extensionManager.updateExtension(extension).subscribeToInstallUpdate(extension)
+        if (isNotMIUIOptimized()) {
+            extensionManager.updateExtension(extension).subscribeToInstallUpdate(extension)
+        }
+    }
+
+    fun isNotMIUIOptimized(): Boolean {
+        if (MiuiUtil.isMiui() && !MiuiUtil.isMiuiOptimizationDisabled()) {
+            preferences.context.toast(R.string.extensions_miui_warning, Toast.LENGTH_LONG)
+            return false
+        }
+        return true
     }
 
     private fun Observable<ExtensionIntallInfo>.subscribeToInstallUpdate(extension: Extension) {
