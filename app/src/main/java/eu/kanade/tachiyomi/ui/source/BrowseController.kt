@@ -160,7 +160,7 @@ class BrowseController :
             updateTitleAndMenu()
         }
 
-        requestFilePermissionsSafe(301)
+        requestFilePermissionsSafe(301, preferences)
         binding.bottomSheet.root.onCreate(this)
 
         binding.shadow.alpha =
