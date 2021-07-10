@@ -60,7 +60,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.LibraryControllerBinding
 import eu.kanade.tachiyomi.source.LocalSource
-import eu.kanade.tachiyomi.ui.base.MaterialFastScroll
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.category.CategoryController
@@ -249,7 +248,6 @@ class LibraryController(
     private var scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
-            if (recyclerView.tag == MaterialFastScroll.noUpdate) return
             val recyclerCover = binding.recyclerCover
             if (!recyclerCover.isClickable && isAnimatingHopper != true) {
                 if (preferences.autohideHopper().get()) {
