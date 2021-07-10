@@ -11,10 +11,10 @@ class ChapterFilter(val preferences: PreferencesHelper = Injekt.get(), val downl
 
     // filters chapters based on the manga values
     fun <T : Chapter> filterChapters(chapters: List<T>, manga: Manga): List<T> {
-        val readEnabled = manga.readFilter == Manga.SHOW_READ
-        val unreadEnabled = manga.readFilter == Manga.SHOW_UNREAD
-        val downloadEnabled = manga.downloadedFilter == Manga.SHOW_DOWNLOADED
-        val bookmarkEnabled = manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED
+        val readEnabled = manga.readFilter == Manga.CHAPTER_SHOW_READ
+        val unreadEnabled = manga.readFilter == Manga.CHAPTER_SHOW_UNREAD
+        val downloadEnabled = manga.downloadedFilter == Manga.CHAPTER_SHOW_DOWNLOADED
+        val bookmarkEnabled = manga.bookmarkedFilter == Manga.CHAPTER_SHOW_BOOKMARKED
 
         // if none of the filters are enabled skip the filtering of them
         return if (readEnabled || unreadEnabled || downloadEnabled || bookmarkEnabled) {

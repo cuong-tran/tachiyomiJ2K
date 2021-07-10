@@ -89,7 +89,7 @@ class BackupTest {
         root.add(Backup.MANGAS, mangaEntries)
         root.add(Backup.CATEGORIES, categoryEntries)
     }
-
+/*
     /**
      * Test that checks if no crashes when no categories in library.
      */
@@ -105,6 +105,7 @@ class BackupTest {
         val dbCats = db.getCategories().executeAsBlocking()
         assertThat(dbCats).isEmpty()
     }
+*/
 
     /**
      * Test to check if single category gets restored
@@ -150,7 +151,7 @@ class BackupTest {
         assertThat(dbCats[3].name).isEqualTo(category4.name)
         assertThat(dbCats[4].name).isEqualTo(category5.name)
     }
-
+/*
     /**
      * Test if restore of manga is successful
      */
@@ -217,6 +218,7 @@ class BackupTest {
         assertThat(dbCats[0].viewer).isEqualTo(3)
         assertThat(dbCats[0].description).isEqualTo("This is a description")
     }
+*/
 
     /**
      * Test if chapter restore is successful

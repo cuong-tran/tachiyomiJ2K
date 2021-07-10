@@ -30,6 +30,8 @@ import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
+import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
+import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -117,8 +119,8 @@ class ReaderPresenter(
             chapterFilter.filterChaptersForReader(dbChapters, manga, selectedChapter)
 
         when (manga.sorting) {
-            Manga.SORTING_SOURCE -> ChapterLoadBySource().get(chaptersForReader)
-            Manga.SORTING_NUMBER -> ChapterLoadByNumber().get(chaptersForReader, selectedChapter)
+            Manga.CHAPTER_SORTING_SOURCE -> ChapterLoadBySource().get(chaptersForReader)
+            Manga.CHAPTER_SORTING_NUMBER -> ChapterLoadByNumber().get(chaptersForReader, selectedChapter)
             else -> error("Unknown sorting method")
         }.map(::ReaderChapter)
     }
@@ -215,7 +217,7 @@ class ReaderPresenter(
                 chapterFilter.filterChaptersForReader(dbChapters, manga, getCurrentChapter()?.chapter)
                     .sortedBy {
                         when (manga.sorting) {
-                            Manga.SORTING_NUMBER -> it.chapter_number
+                            Manga.CHAPTER_SORTING_NUMBER -> it.chapter_number
                             else -> it.source_order.toFloat()
                         }
                     }.map {
@@ -233,21 +235,6 @@ class ReaderPresenter(
         }
 
         return chapterItems
-    }
-
-    /**
-     * Removes all filters and requests an UI update.
-     */
-    fun setFilters(read: Boolean, unread: Boolean, downloaded: Boolean, bookmarked: Boolean) {
-        val manga = manga ?: return
-        manga.readFilter = when {
-            read -> Manga.SHOW_READ
-            unread -> Manga.SHOW_UNREAD
-            else -> Manga.SHOW_ALL
-        }
-        manga.downloadedFilter = if (downloaded) Manga.SHOW_DOWNLOADED else Manga.SHOW_ALL
-        manga.bookmarkedFilter = if (bookmarked) Manga.SHOW_BOOKMARKED else Manga.SHOW_ALL
-        db.updateFlags(manga).executeAsBlocking()
     }
 
     /**
@@ -594,29 +581,32 @@ class ReaderPresenter(
     /**
      * Returns the viewer position used by this manga or the default one.
      */
-    fun getMangaViewer(): Int {
-        val default = preferences.defaultViewer()
+    fun getMangaReadingMode(): Int {
+        val default = preferences.defaultReadingMode()
         val manga = manga ?: return default
         val readerType = manga.defaultReaderType()
-        if (manga.viewer == -1 ||
+        if (manga.viewer_flags == -1 ||
             // Force webtoon mode
-            (manga.isLongStrip() && readerType != manga.viewer)
+            (manga.isLongStrip() && readerType != manga.readingModeType)
         ) {
             val cantSwitchToLTR =
-                (readerType == ReaderActivity.LEFT_TO_RIGHT && default != ReaderActivity.RIGHT_TO_LEFT)
-            manga.viewer = if (cantSwitchToLTR) 0 else readerType
-            db.updateMangaViewer(manga).asRxObservable().subscribe()
+                (
+                    readerType == ReadingModeType.LEFT_TO_RIGHT.flagValue &&
+                        default != ReadingModeType.RIGHT_TO_LEFT.flagValue
+                    )
+            manga.readingModeType = if (cantSwitchToLTR) 0 else readerType
+            db.updateViewerFlags(manga).asRxObservable().subscribe()
         }
-        return if (manga.viewer == 0) default else manga.viewer
+        return if (manga.readingModeType == 0) default else manga.readingModeType
     }
 
     /**
      * Updates the viewer position for the open manga.
      */
-    fun setMangaViewer(viewer: Int) {
+    fun setMangaReadingMode(readingModeType: Int) {
         val manga = manga ?: return
-        manga.viewer = viewer
-        db.updateMangaViewer(manga).executeAsBlocking()
+        manga.readingModeType = readingModeType
+        db.updateViewerFlags(manga).executeAsBlocking()
 
         Observable.timer(250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
             .subscribeFirst({ view, _ ->
@@ -629,6 +619,36 @@ class ReaderPresenter(
                     // Emit manga and chapters to the new viewer
                     view.setManga(manga)
                     view.setChapters(currChapters)
+                }
+            })
+    }
+
+    /**
+     * Returns the orientation type used by this manga or the default one.
+     */
+    fun getMangaOrientationType(): Int {
+        val default = preferences.defaultOrientationType().get()
+        return when (manga?.orientationType) {
+            OrientationType.DEFAULT.flagValue -> default
+            else -> manga?.orientationType ?: default
+        }
+    }
+
+    /**
+     * Updates the orientation type for the open manga.
+     */
+    fun setMangaOrientationType(rotationType: Int) {
+        val manga = manga ?: return
+        manga.orientationType = rotationType
+        db.updateViewerFlags(manga).executeAsBlocking()
+
+        Timber.i("Manga orientation is ${manga.orientationType}")
+
+        Observable.timer(250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+            .subscribeFirst({ view, _ ->
+                val currChapters = viewerChaptersRelay.value
+                if (currChapters != null) {
+                    view.setOrientation(getMangaOrientationType())
                 }
             })
     }

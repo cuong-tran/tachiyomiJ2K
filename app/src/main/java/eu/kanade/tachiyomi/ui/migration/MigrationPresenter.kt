@@ -19,6 +19,7 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Date
 
 class MigrationPresenter(
     private val sourceManager: SourceManager = Injekt.get(),
@@ -142,6 +143,19 @@ class MigrationPresenter(
             }
             manga.favorite = true
             db.updateMangaFavorite(manga).executeAsBlocking()
+
+            manga.chapter_flags = prevManga.chapter_flags
+            db.updateChapterFlags(manga).executeAsBlocking()
+            manga.viewer_flags = prevManga.viewer_flags
+            db.updateViewerFlags(manga).executeAsBlocking()
+
+            // Update date added
+            if (replace) {
+                manga.date_added = prevManga.date_added
+                prevManga.date_added = 0
+            } else {
+                manga.date_added = Date().time
+            }
 
             // SearchPresenter#networkToLocalManga may have updated the manga title, so ensure db gets updated title
             db.updateMangaTitle(manga).executeAsBlocking()

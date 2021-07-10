@@ -4,7 +4,8 @@ import android.content.Context
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
+import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import tachiyomi.source.model.MangaInfo
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -22,7 +23,7 @@ interface Manga : SManga {
 
     var date_added: Long
 
-    var viewer: Int
+    var viewer_flags: Int
 
     var chapter_flags: Int
 
@@ -32,26 +33,30 @@ interface Manga : SManga {
     fun isHidden() = status == -1
 
     fun setChapterOrder(order: Int) {
-        setFlags(order, SORT_MASK)
-        setFlags(SORT_LOCAL, SORT_SELF_MASK)
+        setChapterFlags(order, CHAPTER_SORT_MASK)
+        setChapterFlags(CHAPTER_SORT_LOCAL, CHAPTER_SORT_SELF_MASK)
     }
 
-    fun setSortToGlobal() = setFlags(SORT_GLOBAL, SORT_SELF_MASK)
+    fun setSortToGlobal() = setChapterFlags(CHAPTER_SORT_GLOBAL, CHAPTER_SORT_SELF_MASK)
 
-    private fun setFlags(flag: Int, mask: Int) {
+    private fun setChapterFlags(flag: Int, mask: Int) {
         chapter_flags = chapter_flags and mask.inv() or (flag and mask)
     }
 
-    fun sortDescending(): Boolean = chapter_flags and SORT_MASK == SORT_DESC
+    private fun setViewerFlags(flag: Int, mask: Int) {
+        viewer_flags = viewer_flags and mask.inv() or (flag and mask)
+    }
 
-    fun usesLocalSort(): Boolean = chapter_flags and SORT_SELF_MASK == SORT_LOCAL
+    fun sortDescending(): Boolean = chapter_flags and CHAPTER_SORT_MASK == CHAPTER_SORT_DESC
+
+    fun usesLocalSort(): Boolean = chapter_flags and CHAPTER_SORT_SELF_MASK == CHAPTER_SORT_LOCAL
 
     fun sortDescending(defaultDesc: Boolean): Boolean {
-        return if (chapter_flags and SORT_SELF_MASK == SORT_GLOBAL) defaultDesc
+        return if (chapter_flags and CHAPTER_SORT_SELF_MASK == CHAPTER_SORT_GLOBAL) defaultDesc
         else sortDescending()
     }
 
-    fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and DISPLAY_MASK == DISPLAY_NUMBER
+    fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and CHAPTER_DISPLAY_MASK == CHAPTER_DISPLAY_NUMBER
 
     fun seriesType(context: Context, sourceManager: SourceManager? = null): String {
         return context.getString(
@@ -125,7 +130,7 @@ interface Manga : SManga {
                     currentTags.none { tag -> isComicTag(tag) }
                 )
         ) {
-            ReaderActivity.WEBTOON
+            ReadingModeType.WEBTOON.flagValue
         } else if (currentTags.any
             { tag ->
                 tag == "chinese" || tag == "manhua" ||
@@ -136,7 +141,7 @@ interface Manga : SManga {
                 ) ||
             (sourceName.contains("manhua", true) && currentTags.none { tag -> isMangaTag(tag) })
         ) {
-            ReaderActivity.LEFT_TO_RIGHT
+            ReadingModeType.LEFT_TO_RIGHT.flagValue
         } else 0
     }
 
@@ -194,57 +199,65 @@ interface Manga : SManga {
 
     // Used to display the chapter's title one way or another
     var displayMode: Int
-        get() = chapter_flags and DISPLAY_MASK
-        set(mode) = setFlags(mode, DISPLAY_MASK)
+        get() = chapter_flags and CHAPTER_DISPLAY_MASK
+        set(mode) = setChapterFlags(mode, CHAPTER_DISPLAY_MASK)
 
     var readFilter: Int
-        get() = chapter_flags and READ_MASK
-        set(filter) = setFlags(filter, READ_MASK)
+        get() = chapter_flags and CHAPTER_READ_MASK
+        set(filter) = setChapterFlags(filter, CHAPTER_READ_MASK)
 
     var downloadedFilter: Int
-        get() = chapter_flags and DOWNLOADED_MASK
-        set(filter) = setFlags(filter, DOWNLOADED_MASK)
+        get() = chapter_flags and CHAPTER_DOWNLOADED_MASK
+        set(filter) = setChapterFlags(filter, CHAPTER_DOWNLOADED_MASK)
 
     var bookmarkedFilter: Int
-        get() = chapter_flags and BOOKMARKED_MASK
-        set(filter) = setFlags(filter, BOOKMARKED_MASK)
+        get() = chapter_flags and CHAPTER_BOOKMARKED_MASK
+        set(filter) = setChapterFlags(filter, CHAPTER_BOOKMARKED_MASK)
 
     var sorting: Int
-        get() = chapter_flags and SORTING_MASK
-        set(sort) = setFlags(sort, SORTING_MASK)
+        get() = chapter_flags and CHAPTER_SORTING_MASK
+        set(sort) = setChapterFlags(sort, CHAPTER_SORTING_MASK)
+
+    var readingModeType: Int
+        get() = viewer_flags and ReadingModeType.MASK
+        set(readingMode) = setViewerFlags(readingMode, ReadingModeType.MASK)
+
+    var orientationType: Int
+        get() = viewer_flags and OrientationType.MASK
+        set(rotationType) = setViewerFlags(rotationType, OrientationType.MASK)
 
     companion object {
 
-        const val SORT_DESC = 0x00000000
-        const val SORT_ASC = 0x00000001
-        const val SORT_MASK = 0x00000001
+        const val CHAPTER_SORT_DESC = 0x00000000
+        const val CHAPTER_SORT_ASC = 0x00000001
+        const val CHAPTER_SORT_MASK = 0x00000001
 
-        const val SORT_GLOBAL = 0x00000000
-        const val SORT_LOCAL = 0x00001000
-        const val SORT_SELF_MASK = 0x00001000
+        const val CHAPTER_SORT_GLOBAL = 0x00000000
+        const val CHAPTER_SORT_LOCAL = 0x00001000
+        const val CHAPTER_SORT_SELF_MASK = 0x00001000
 
         // Generic filter that does not filter anything
         const val SHOW_ALL = 0x00000000
 
-        const val SHOW_UNREAD = 0x00000002
-        const val SHOW_READ = 0x00000004
-        const val READ_MASK = 0x00000006
+        const val CHAPTER_SHOW_UNREAD = 0x00000002
+        const val CHAPTER_SHOW_READ = 0x00000004
+        const val CHAPTER_READ_MASK = 0x00000006
 
-        const val SHOW_DOWNLOADED = 0x00000008
-        const val SHOW_NOT_DOWNLOADED = 0x00000010
-        const val DOWNLOADED_MASK = 0x00000018
+        const val CHAPTER_SHOW_DOWNLOADED = 0x00000008
+        const val CHAPTER_SHOW_NOT_DOWNLOADED = 0x00000010
+        const val CHAPTER_DOWNLOADED_MASK = 0x00000018
 
-        const val SHOW_BOOKMARKED = 0x00000020
-        const val SHOW_NOT_BOOKMARKED = 0x00000040
-        const val BOOKMARKED_MASK = 0x00000060
+        const val CHAPTER_SHOW_BOOKMARKED = 0x00000020
+        const val CHAPTER_SHOW_NOT_BOOKMARKED = 0x00000040
+        const val CHAPTER_BOOKMARKED_MASK = 0x00000060
 
-        const val SORTING_SOURCE = 0x00000000
-        const val SORTING_NUMBER = 0x00000100
-        const val SORTING_MASK = 0x00000100
+        const val CHAPTER_SORTING_SOURCE = 0x00000000
+        const val CHAPTER_SORTING_NUMBER = 0x00000100
+        const val CHAPTER_SORTING_MASK = 0x00000100
 
-        const val DISPLAY_NAME = 0x00000000
-        const val DISPLAY_NUMBER = 0x00100000
-        const val DISPLAY_MASK = 0x00100000
+        const val CHAPTER_DISPLAY_NAME = 0x00000000
+        const val CHAPTER_DISPLAY_NUMBER = 0x00100000
+        const val CHAPTER_DISPLAY_MASK = 0x00100000
 
         const val TYPE_MANGA = 1
         const val TYPE_MANHWA = 2
