@@ -67,10 +67,14 @@ fun AppCompatActivity.setThemeAndNight(preferences: PreferencesHelper) {
         if (ThemeUtil.isColoredTheme(theme)) {
             setTheme(R.style.ThemeOverlay_Tachiyomi_AllBlue)
         }
+        if (!isInNightMode()) {
+            lifecycle.coroutineScope.launchWhenCreated {
+                AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())
+            }
+            return
+        }
     }
-    lifecycle.coroutineScope.launchWhenCreated {
-        AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())
-    }
+    AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())
 }
 
 fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {
