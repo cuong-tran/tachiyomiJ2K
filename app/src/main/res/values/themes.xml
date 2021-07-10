@@ -99,6 +99,13 @@
         <item name="colorAccent">@color/colorAccentYotsuba</item>
         <item name="colorAccentText">@color/colorAccentYotsubaText</item>
     </style>
+    <!--== Yin Yang theme ==-->
+    <style name="Theme.Tachiyomi.YinYang">
+        <!-- Theme colors -->
+        <item name="colorAccent">@color/colorAccentYinyang</item>
+        <item name="colorAccentText">@color/colorAccentYinyangText</item>
+        <item name="colorOnAccent">@color/colorOnAccentYinyang</item>
+    </style>
 
     <!--===============-->
     <!-- Launch Screen -->

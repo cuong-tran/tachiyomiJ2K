@@ -187,7 +187,7 @@
             <ImageView
                 android:id="@+id/checkbox"
                 android:background="@drawable/oval"
-                android:backgroundTint="@android:color/white"
+                android:backgroundTint="?colorOnAccent"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:contentDescription="@string/select_all"

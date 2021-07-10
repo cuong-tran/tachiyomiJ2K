@@ -99,4 +99,9 @@
     <!-- Yotsuba Theme -->
     <color name="colorAccentYotsuba">#dc6d3d</color>
     <color name="colorAccentYotsubaText">#9f431c</color>
+
+    <!-- Yin Yang Theme -->
+    <color name="colorAccentYinyang">#000000</color>
+    <color name="colorAccentYinyangText">#777777</color>
+    <color name="colorOnAccentYinyang">@color/md_white_1000</color>
 </resources>

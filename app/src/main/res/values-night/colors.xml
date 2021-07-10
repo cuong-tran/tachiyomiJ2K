@@ -33,4 +33,8 @@
     <color name="textPrimaryDuskDawn">@color/md_white_1000</color>
     <color name="appBarTextDuskDawn">@color/md_white_1000</color>
 
+    <!-- Yin Yang Theme -->
+    <color name="colorAccentYinyang">#FFFFFF</color>
+    <color name="colorAccentYinyangText">#999999</color>
+    <color name="colorOnAccentYinyang">@color/md_black_1000</color>
 </resources>
