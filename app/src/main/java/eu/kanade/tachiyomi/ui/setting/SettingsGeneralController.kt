@@ -8,11 +8,11 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.isInNightMode
-import eu.kanade.tachiyomi.util.system.isTablet
 import kotlinx.coroutines.flow.launchIn
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
@@ -88,7 +88,7 @@ class SettingsGeneralController : SettingsController() {
             )
             entryRange = 0..2
             defaultValue = 0
-            isVisible = activity?.isTablet() == true
+            isVisible = (activity as? MainActivity)?.binding?.sideNav != null
         }
 
         preferenceCategory {

@@ -5,6 +5,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Environment
 import android.provider.Settings
@@ -39,7 +40,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.toast
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.abs
 import kotlin.random.Random
@@ -186,8 +186,8 @@ fun Controller.scrollViewWith(
     val tabBarHeight = 48.dpToPx
     activityBinding?.appBar?.y = 0f
     activityBinding?.tabsFrameLayout?.elevation = 0f
-    val isTabletWithTabs = recycler.context.isTablet() && includeTabView
-    activityBinding?.tabShadow?.isVisible = isTabletWithTabs
+    val isSideNavWithTabs = activityBinding?.sideNav != null && includeTabView && recycler.context.isTablet()
+    activityBinding?.tabShadow?.isVisible = isSideNavWithTabs
     val attrsArray = intArrayOf(R.attr.actionBarSize)
     val array = recycler.context.obtainStyledAttributes(attrsArray)
     var appBarHeight = (
@@ -243,13 +243,13 @@ fun Controller.scrollViewWith(
             liftOnScroll.invoke(el)
         } else {
             elevationAnim?.cancel()
-            if (isTabletWithTabs && el) {
+            if (isSideNavWithTabs && el) {
                 activityBinding?.tabShadow?.isVisible = true
             }
             val floatingBar =
                 (this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView
             if (floatingBar) {
-                if (isTabletWithTabs) {
+                if (isSideNavWithTabs) {
                     activityBinding?.tabShadow?.alpha = 0f
                 } else {
                     activityBinding?.appBar?.elevation = 0f
@@ -257,7 +257,7 @@ fun Controller.scrollViewWith(
                 return@f
             }
             elevationAnim = ValueAnimator.ofFloat(
-                if (isTabletWithTabs) {
+                if (isSideNavWithTabs) {
                     (activityBinding?.tabShadow?.alpha ?: 0f) * 100
                 } else {
                     activityBinding?.appBar?.elevation ?: 0f
@@ -265,7 +265,7 @@ fun Controller.scrollViewWith(
                 if (el) 15f else 0f
             )
             elevationAnim?.addUpdateListener { valueAnimator ->
-                if (isTabletWithTabs) {
+                if (isSideNavWithTabs) {
                     activityBinding?.tabShadow?.alpha = valueAnimator.animatedValue as Float / 100
                 } else {
                     activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
@@ -287,7 +287,7 @@ fun Controller.scrollViewWith(
                 super.onChangeStart(controller, changeHandler, changeType)
                 isInView = changeType.isEnter
                 if (changeType.isEnter) {
-                    activityBinding?.tabShadow?.isVisible = isTabletWithTabs
+                    activityBinding?.tabShadow?.isVisible = isSideNavWithTabs
                     elevateFunc(elevate)
                     if (fakeToolbarView?.parent != null) {
                         val parent = fakeToolbarView?.parent as? ViewGroup ?: return
@@ -353,7 +353,7 @@ fun Controller.scrollViewWith(
     recycler.post {
         elevateFunc(recycler.canScrollVertically(-1))
     }
-    val isTablet = recycler.context.isTablet()
+    val isTablet = recycler.context.isTablet() && recycler.context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
     recycler.addOnScrollListener(
         object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
