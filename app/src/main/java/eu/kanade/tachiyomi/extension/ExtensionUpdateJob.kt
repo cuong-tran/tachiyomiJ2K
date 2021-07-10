@@ -51,8 +51,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                     setContentTitle(
                         context.resources.getQuantityString(
                             R.plurals.extension_updates_available,
-                            names
-                                .size,
+                            names.size,
                             names.size
                         )
                     )
