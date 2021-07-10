@@ -9,8 +9,7 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
@@ -19,20 +18,32 @@ import uy.kohesive.injekt.injectLazy
 
 internal class ExtensionGithubApi {
 
-    private val network: NetworkHelper by injectLazy()
+    private val networkService: NetworkHelper by injectLazy()
+
+    private var requiresFallbackSource = false
 
     suspend fun findExtensions(): List<Extension.Available> {
-        return withContext(Dispatchers.IO) {
-            network.client
-                .newCall(GET("${REPO_URL_PREFIX}index.min.json"))
-                .await()
+        return withIOContext {
+            val response = try {
+                networkService.client
+                    .newCall(GET("${REPO_URL_PREFIX}index.min.json"))
+                    .await()
+            } catch (e: Throwable) {
+                requiresFallbackSource = true
+
+                networkService.client
+                    .newCall(GET("${FALLBACK_REPO_URL_PREFIX}index.min.json"))
+                    .await()
+            }
+
+            response
                 .parseAs<JsonArray>()
                 .let { parseResponse(it) }
         }
     }
 
     suspend fun checkForUpdates(context: Context): List<Extension.Available> {
-        return withContext(Dispatchers.IO) {
+        return withIOContext {
             val extensions = findExtensions()
 
             val installedExtensions = ExtensionLoader.loadExtensions(context)
@@ -40,8 +51,7 @@ internal class ExtensionGithubApi {
                 .map { it.extension }
 
             val extensionsWithUpdate = mutableListOf<Extension.Available>()
-            val mutInstalledExtensions = installedExtensions.toMutableList()
-            for (installedExt in mutInstalledExtensions) {
+            for (installedExt in installedExtensions) {
                 val pkgName = installedExt.pkgName
                 val availableExt = extensions.find { it.pkgName == pkgName } ?: continue
 
@@ -55,7 +65,7 @@ internal class ExtensionGithubApi {
         }
     }
 
-    private fun parseResponse(json: kotlinx.serialization.json.JsonArray): List<Extension.Available> {
+    private fun parseResponse(json: JsonArray): List<Extension.Available> {
         return json
             .filter { element ->
                 val versionName = element.jsonObject["version"]!!.jsonPrimitive.content
@@ -70,18 +80,23 @@ internal class ExtensionGithubApi {
                 val versionCode = element.jsonObject["code"]!!.jsonPrimitive.int
                 val lang = element.jsonObject["lang"]!!.jsonPrimitive.content
                 val nsfw = element.jsonObject["nsfw"]!!.jsonPrimitive.int == 1
-                val icon = "${REPO_URL_PREFIX}icon/${apkName.replace(".apk", ".png")}"
+                val icon = "${getUrlPrefix()}icon/${apkName.replace(".apk", ".png")}"
 
                 Extension.Available(name, pkgName, versionName, versionCode, lang, nsfw, apkName, icon)
             }
     }
 
     fun getApkUrl(extension: ExtensionManager.ExtensionInfo): String {
-        return "${REPO_URL_PREFIX}apk/${extension.apkName}"
+        return "${getUrlPrefix()}apk/${extension.apkName}"
     }
 
-    companion object {
-        private const val BASE_URL = "https://raw.githubusercontent.com/"
-        const val REPO_URL_PREFIX = "${BASE_URL}tachiyomiorg/tachiyomi-extensions/repo/"
+    private fun getUrlPrefix(): String {
+        return when (requiresFallbackSource) {
+            true -> FALLBACK_REPO_URL_PREFIX
+            false -> REPO_URL_PREFIX
+        }
     }
 }
+
+private const val REPO_URL_PREFIX = "https://raw.githubusercontent.com/tachiyomiorg/tachiyomi-extensions/repo/"
+private const val FALLBACK_REPO_URL_PREFIX = "https://cdn.jsdelivr.net/gh/tachiyomiorg/tachiyomi-extensions@repo/"
