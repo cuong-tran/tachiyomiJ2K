@@ -94,6 +94,8 @@ class BrowseController :
     var showingExtensions = false
 
     var snackbar: Snackbar? = null
+    val shadowAlpha = 0.15f
+    val shadow2Alpha = 0.05f
 
     /**
      * Called when controller is initialized.
@@ -154,7 +156,7 @@ class BrowseController :
                 bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
             )
             val isCollapsed = binding.bottomSheet.root.sheetBehavior.isCollapsed()
-            binding.shadow.alpha = if (isCollapsed) 0.5f else 0f
+            binding.shadow.alpha = if (isCollapsed) shadowAlpha else 0f
             updateTitleAndMenu()
         }
 
@@ -162,14 +164,14 @@ class BrowseController :
         binding.bottomSheet.root.onCreate(this)
 
         binding.shadow.alpha =
-            if (binding.bottomSheet.root.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
+            if (binding.bottomSheet.root.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) shadowAlpha else 0f
 
         binding.bottomSheet.root.sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior
             .BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, progress: Float) {
-                    binding.shadow2.alpha = (1 - max(0f, progress)) * 0.25f
-                    binding.shadow.alpha = (1 - abs(progress)) * 0.5f
+                    binding.shadow2.alpha = (1 - max(0f, progress)) * shadow2Alpha
+                    binding.shadow.alpha = (1 - abs(progress)) * shadowAlpha
                     activityBinding?.appBar?.y = max(activityBinding!!.appBar.y, -headerHeight * (1 - progress))
                     val oldShow = showingExtensions
                     showingExtensions = progress > 0.92f
@@ -203,7 +205,7 @@ class BrowseController :
 
                     if (state == BottomSheetBehavior.STATE_EXPANDED || state == BottomSheetBehavior.STATE_COLLAPSED) {
                         binding.shadow.alpha =
-                            if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
+                            if (state == BottomSheetBehavior.STATE_COLLAPSED) shadowAlpha else 0f
                     }
 
                     retainViewMode = if (state == BottomSheetBehavior.STATE_EXPANDED) {
