@@ -302,6 +302,11 @@ class BrowseController :
         binding.bottomSheet.root.sheetBehavior?.expand()
     }
 
+    override fun hideSheet() {
+        if (!isBindingInitialized) return
+        binding.bottomSheet.root.sheetBehavior?.collapse()
+    }
+
     override fun toggleSheet() {
         if (!binding.bottomSheet.root.sheetBehavior.isCollapsed()) {
             binding.bottomSheet.root.sheetBehavior?.collapse()
