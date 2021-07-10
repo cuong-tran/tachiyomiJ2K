@@ -406,7 +406,7 @@ class PreferencesHelper(val context: Context) {
 
     fun hideBottomNavOnScroll() = flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, true)
 
-    fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 0)
+    fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 1)
 
     fun showNsfwSource() = flowPrefs.getBoolean(Keys.showNsfwSource, true)
     fun showNsfwExtension() = flowPrefs.getBoolean(Keys.showNsfwExtension, true)
