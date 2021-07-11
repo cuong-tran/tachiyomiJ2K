@@ -14,15 +14,19 @@ class ChapterFilter(val preferences: PreferencesHelper = Injekt.get(), val downl
         val readEnabled = manga.readFilter == Manga.CHAPTER_SHOW_READ
         val unreadEnabled = manga.readFilter == Manga.CHAPTER_SHOW_UNREAD
         val downloadEnabled = manga.downloadedFilter == Manga.CHAPTER_SHOW_DOWNLOADED
+        val notDownloadEnabled = manga.downloadedFilter == Manga.CHAPTER_SHOW_NOT_DOWNLOADED
         val bookmarkEnabled = manga.bookmarkedFilter == Manga.CHAPTER_SHOW_BOOKMARKED
+        val notBookmarkEnabled = manga.bookmarkedFilter == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
 
         // if none of the filters are enabled skip the filtering of them
-        return if (readEnabled || unreadEnabled || downloadEnabled || bookmarkEnabled) {
+        return if (readEnabled || unreadEnabled || downloadEnabled || notDownloadEnabled || bookmarkEnabled || notBookmarkEnabled) {
             chapters.filter {
                 if (readEnabled && it.read.not() ||
                     (unreadEnabled && it.read) ||
                     (bookmarkEnabled && it.bookmark.not()) ||
-                    (downloadEnabled && downloadManager.isChapterDownloaded(it, manga).not())
+                    (notBookmarkEnabled && it.bookmark) ||
+                    (downloadEnabled && downloadManager.isChapterDownloaded(it, manga).not()) ||
+                    (notDownloadEnabled && downloadManager.isChapterDownloaded(it, manga))
                 ) {
                     return@filter false
                 }
