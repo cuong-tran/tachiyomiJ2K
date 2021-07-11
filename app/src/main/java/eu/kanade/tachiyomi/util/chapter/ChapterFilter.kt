@@ -38,7 +38,7 @@ class ChapterFilter(val preferences: PreferencesHelper = Injekt.get(), val downl
     }
 
     // filter chapters for the reader
-    fun filterChaptersForReader(chapters: List<Chapter>, manga: Manga, selectedChapter: Chapter? = null): List<Chapter> {
+    fun <T : Chapter> filterChaptersForReader(chapters: List<T>, manga: Manga, selectedChapter: T? = null): List<T> {
         // if neither preference is enabled don't even filter
         if (!preferences.skipRead() && !preferences.skipFiltered()) {
             return chapters
