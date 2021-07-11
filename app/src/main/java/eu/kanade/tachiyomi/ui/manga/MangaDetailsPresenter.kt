@@ -27,7 +27,6 @@ import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.UnattendedTrackService
@@ -86,7 +85,7 @@ class MangaDetailsPresenter(
     private val customMangaManager: CustomMangaManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
-    private val chapterSort by lazy { ChapterSort(manga, chapterFilter, preferences) }
+    private val chapterSort = ChapterSort(manga, chapterFilter, preferences)
 
     var isLockedFromSearch = false
     var hasRequested = false
@@ -214,9 +213,9 @@ class MangaDetailsPresenter(
     /**
      * Whether the sorting method is descending or ascending.
      */
-    fun sortDescending() = manga.sortDescending(globalSort())
+    fun sortDescending() = manga.sortDescending(preferences)
 
-    fun sortingOrder() = manga.chapterOrder(globalSorting())
+    fun sortingOrder() = manga.chapterOrder(preferences)
 
     /**
      * Applies the view filters to the list of chapters obtained from the database.
@@ -504,12 +503,11 @@ class MangaDetailsPresenter(
         asyncUpdateMangaAndChapters()
     }
 
-    private fun globalSort(): Boolean = preferences.chaptersDescAsDefault().getOrDefault()
-
-    private fun globalSorting(): Int = preferences.sortChapterOrder().get()
-
     fun mangaSortMatchesDefault(): Boolean {
-        return (manga.sortDescending() == globalSort() && manga.sorting == globalSorting()) || !manga.usesLocalSort()
+        return (
+            manga.sortDescending == preferences.chaptersDescAsDefault().get() &&
+                manga.sorting == preferences.sortChapterOrder().get()
+            ) || !manga.usesLocalSort
     }
 
     fun mangaFilterMatchesDefault(): Boolean {
@@ -517,8 +515,8 @@ class MangaDetailsPresenter(
             manga.readFilter == preferences.filterChapterByRead().get() &&
                 manga.downloadedFilter == preferences.filterChapterByDownloaded().get() &&
                 manga.bookmarkedFilter == preferences.filterChapterByBookmarked().get() &&
-                manga.hideChapterTitles() == preferences.hideChapterTitlesByDefault().get()
-            ) || !manga.usesLocalFilter()
+                manga.hideChapterTitles == preferences.hideChapterTitlesByDefault().get()
+            ) || !manga.usesLocalFilter
     }
 
     fun resetSortingToDefault() {
@@ -601,7 +599,7 @@ class MangaDetailsPresenter(
                 else -> Manga.SHOW_ALL
             }
         )
-        preferences.hideChapterTitlesByDefault().set(manga.hideChapterTitles())
+        preferences.hideChapterTitlesByDefault().set(manga.hideChapterTitles)
         manga.setFilterToGlobal()
         asyncUpdateMangaAndChapters()
     }
