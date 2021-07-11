@@ -24,7 +24,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
     override fun createBinding(inflater: LayoutInflater) = ChapterSortBottomSheetBinding.inflate(inflater)
     init {
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        sheetBehavior.peekHeight = 415.dpToPx + height
+        sheetBehavior.peekHeight = 460.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
@@ -64,18 +64,12 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
             // making the view gone somehow breaks the layout so lets make it invisible
             binding.pill.isInvisible = isScrollable
         }
-
-        setOnDismissListener {
-            presenter.setFilters(
-                binding.chapterFilterLayout.showUnread.state,
-                binding.chapterFilterLayout.showDownload.state,
-                binding.chapterFilterLayout.showBookmark.state
-            )
-        }
     }
 
     private fun initGeneralPreferences() {
-        binding.chapterFilterLayout.root.setCheckboxes(presenter.manga)
+        binding.chapterFilterLayout.root.setCheckboxes(presenter.manga, presenter.preferences)
+        checkIfFilterMatchesDefault(binding.chapterFilterLayout.root)
+        binding.chapterFilterLayout.root.setOnCheckedChangeListener(::setFilters)
 
         binding.byChapterNumber.state = SortTextView.State.NONE
         binding.byUploadDate.state = SortTextView.State.NONE
@@ -98,7 +92,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
         binding.byUploadDate.setOnSortChangeListener(::sortChanged)
         binding.bySource.setOnSortChangeListener(::sortChanged)
 
-        binding.hideTitles.isChecked = presenter.manga.displayMode != Manga.CHAPTER_DISPLAY_NAME
+        binding.hideTitles.isChecked = presenter.manga.hideChapterTitle(presenter.preferences)
 
         binding.setAsDefaultSort.setOnClickListener {
             presenter.setGlobalChapterSort(
@@ -133,7 +127,42 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
 
         binding.hideTitles.setOnCheckedChangeListener { _, isChecked ->
             presenter.hideTitle(isChecked)
+            checkIfFilterMatchesDefault(binding.chapterFilterLayout.root)
         }
+
+        binding.chapterFilterLayout.setAsDefaultFilter.setOnClickListener {
+            presenter.setGlobalChapterFilters(
+                binding.chapterFilterLayout.showUnread.state,
+                binding.chapterFilterLayout.showDownload.state,
+                binding.chapterFilterLayout.showBookmark.state
+            )
+            binding.chapterFilterLayout.setAsDefaultFilter.isInvisible = true
+            binding.chapterFilterLayout.resetAsDefaultFilter.isInvisible = true
+        }
+
+        binding.chapterFilterLayout.resetAsDefaultFilter.setOnClickListener {
+            presenter.resetFilterToDefault()
+
+            binding.chapterFilterLayout.root.setCheckboxes(presenter.manga, presenter.preferences)
+            binding.hideTitles.isChecked = presenter.manga.hideChapterTitle(presenter.preferences)
+            binding.chapterFilterLayout.setAsDefaultFilter.isInvisible = true
+            binding.chapterFilterLayout.resetAsDefaultFilter.isInvisible = true
+        }
+    }
+
+    private fun setFilters(filterLayout: ChapterFilterLayout) {
+        presenter.setFilters(
+            binding.chapterFilterLayout.showUnread.state,
+            binding.chapterFilterLayout.showDownload.state,
+            binding.chapterFilterLayout.showBookmark.state
+        )
+        checkIfFilterMatchesDefault(filterLayout)
+    }
+
+    private fun checkIfFilterMatchesDefault(filterLayout: ChapterFilterLayout) {
+        val matches = presenter.mangaFilterMatchesDefault()
+        filterLayout.binding.setAsDefaultFilter.isInvisible = matches
+        filterLayout.binding.resetAsDefaultFilter.isInvisible = matches
     }
 
     private fun checkIfSortMatchesDefault() {

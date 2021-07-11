@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
@@ -40,6 +41,9 @@ interface Manga : SManga {
 
     fun setSortToGlobal() = setChapterFlags(CHAPTER_SORT_FILTER_GLOBAL, CHAPTER_SORT_LOCAL_MASK)
 
+    fun setFilterToGlobal() = setChapterFlags(CHAPTER_SORT_FILTER_GLOBAL, CHAPTER_FILTER_LOCAL_MASK)
+    fun setFilterToLocal() = setChapterFlags(CHAPTER_FILTER_LOCAL, CHAPTER_FILTER_LOCAL_MASK)
+
     private fun setChapterFlags(flag: Int, mask: Int) {
         chapter_flags = chapter_flags and mask.inv() or (flag and mask)
     }
@@ -49,8 +53,11 @@ interface Manga : SManga {
     }
 
     fun sortDescending(): Boolean = chapter_flags and CHAPTER_SORT_MASK == CHAPTER_SORT_DESC
+    fun hideChapterTitles(): Boolean = displayMode == CHAPTER_DISPLAY_NUMBER
 
     fun usesLocalSort(): Boolean = chapter_flags and CHAPTER_SORT_LOCAL_MASK == CHAPTER_SORT_LOCAL
+
+    fun usesLocalFilter(): Boolean = chapter_flags and CHAPTER_FILTER_LOCAL_MASK == CHAPTER_FILTER_LOCAL
 
     fun sortDescending(defaultDesc: Boolean): Boolean {
         return if (usesLocalSort()) sortDescending() else defaultDesc
@@ -58,6 +65,34 @@ interface Manga : SManga {
 
     fun chapterOrder(defaultOrder: Int): Int {
         return if (usesLocalSort()) sorting else defaultOrder
+    }
+
+    fun readFilter(preferences: PreferencesHelper): Int =
+        readFilter(preferences.filterChapterByRead().get())
+
+    fun readFilter(defaultFilter: Int): Int {
+        return if (usesLocalFilter()) readFilter else defaultFilter
+    }
+
+    fun downloadedFilter(preferences: PreferencesHelper): Int =
+        downloadedFilter(preferences.filterChapterByDownloaded().get())
+
+    fun downloadedFilter(defaultFilter: Int): Int {
+        return if (usesLocalFilter()) downloadedFilter else defaultFilter
+    }
+
+    fun bookmarkedFilter(preferences: PreferencesHelper): Int =
+        bookmarkedFilter(preferences.filterChapterByBookmarked().get())
+
+    fun bookmarkedFilter(defaultFilter: Int): Int {
+        return if (usesLocalFilter()) bookmarkedFilter else defaultFilter
+    }
+
+    fun hideChapterTitle(preferences: PreferencesHelper): Boolean =
+        hideChapterTitle(preferences.hideChapterTitlesByDefault().get())
+
+    fun hideChapterTitle(default: Boolean): Boolean {
+        return if (usesLocalFilter()) hideChapterTitles() else default
     }
 
     fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and CHAPTER_DISPLAY_MASK == CHAPTER_DISPLAY_NUMBER
@@ -242,6 +277,8 @@ interface Manga : SManga {
         const val CHAPTER_SORT_FILTER_GLOBAL = 0x00000000
         const val CHAPTER_SORT_LOCAL = 0x00001000
         const val CHAPTER_SORT_LOCAL_MASK = 0x00001000
+        const val CHAPTER_FILTER_LOCAL = 0x00002000
+        const val CHAPTER_FILTER_LOCAL_MASK = 0x00002000
 
         const val CHAPTER_SHOW_UNREAD = 0x00000002
         const val CHAPTER_SHOW_READ = 0x00000004

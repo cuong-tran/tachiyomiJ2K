@@ -58,6 +58,8 @@
                     android:padding="4dp"
                     android:layout_marginEnd="6dp"
                     android:layout_gravity="center_vertical"
+                    app:layout_constraintStart_toEndOf="@id/set_as_default_sort"
+                    app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintBaseline_toBaselineOf="@id/sort_title"
                     app:layout_constraintEnd_toEndOf="parent"
                     android:text="@string/reset" />
@@ -86,18 +88,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <com.google.android.material.textview.MaterialTextView
-                style="@style/TextAppearance.MaterialComponents.Headline6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="12dp"
-                android:text="@string/more" />
-
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/hide_titles"
                 android:layout_width="match_parent"
+                android:layout_marginTop="6dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
