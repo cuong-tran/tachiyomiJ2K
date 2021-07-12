@@ -39,6 +39,7 @@ import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.source.latest.LatestUpdatesController
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.spToPx
@@ -144,6 +145,9 @@ class BrowseController :
                     top = headerHeight,
                     bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
                 )
+                if (activityBinding?.bottomNav == null) {
+                    setBottomPadding()
+                }
             },
             onBottomNavUpdate = {
                 setBottomPadding()
@@ -162,6 +166,8 @@ class BrowseController :
 
         requestFilePermissionsSafe(301, preferences)
         binding.bottomSheet.root.onCreate(this)
+
+        binding.bottomSheet.root.sheetBehavior?.isGestureInsetBottomIgnored = true
 
         binding.shadow.alpha =
             if (binding.bottomSheet.root.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) shadowAlpha else 0f
@@ -278,13 +284,11 @@ class BrowseController :
     }
 
     private fun setBottomPadding() {
-        val bottomBar = activityBinding?.bottomNav ?: return
-        val pad = bottomBar.translationY - bottomBar.height
+        val bottomBar = activityBinding?.bottomNav
+        val pad = bottomBar?.translationY?.minus(bottomBar.height) ?: 0f
         val padding = max(
             (-pad).toInt(),
-            if (binding.bottomSheet.root.sheetBehavior.isExpanded()) 0 else {
-                view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
-            }
+            view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
         )
         binding.shadow2.translationY = pad
         binding.bottomSheet.root.sheetBehavior?.peekHeight = 56.spToPx + padding
