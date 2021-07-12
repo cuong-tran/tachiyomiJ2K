@@ -9,7 +9,7 @@ plugins {
     kotlin(Plugins.kapt)
     id(Plugins.kotlinParcelize)
     id(Plugins.kotlinSerialization)
-    id(Plugins.aboutLibraries)
+    id("com.google.android.gms.oss-licenses-plugin")
     id(Plugins.firebaseCrashlytics)
     id(Plugins.googleServices) apply false
 }
@@ -252,8 +252,9 @@ dependencies {
 
     implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.COROUTINES}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.COROUTINES}")
+    val coroutines = "1.5.1"
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines")
 
     // Crash reports
     implementation("ch.acra:acra-http:5.8.1")

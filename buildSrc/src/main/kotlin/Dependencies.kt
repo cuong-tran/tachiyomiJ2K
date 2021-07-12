@@ -1,7 +1,6 @@
 object Versions {
     const val CHUCKER = "3.2.0"
     const val COIL = "0.11.0"
-    const val COROUTINES = "1.4.2"
     const val HYPERION = "0.9.27"
     const val NUCLEUS = "3.0.0"
     const val OSS_LICENSE = "17.0.0"
@@ -10,7 +9,6 @@ object Versions {
     const val RX_BINDING = "1.0.1"
     const val TIMBER = "4.7.1"
     const val WORKMANAGER = "2.5.0"
-    const val aboutLibraries = "0.10.3"
     const val androidAnnotations = "1.1.0"
     const val androidAppCompat = "1.1.0"
     const val androidBiometrics = "1.0.1"
@@ -48,7 +46,7 @@ object Versions {
     const val injekt = "65b0440"
     const val jsoup = "1.13.1"
     const val junit = "4.13"
-    const val kotlin = "1.5.10"
+    const val kotlin = "1.5.20"
     const val kotson = "2.5.0"
     const val ktlint = "9.4.0"
     const val loadingButton = "2.2.0"
@@ -88,7 +86,6 @@ object Versions {
 }
 
 object LegacyPluginClassPath {
-    const val aboutLibraries = "com.google.android.gms:oss-licenses-plugin:${Versions.aboutLibraries}"
     const val googleServices = "com.google.gms:google-services:${Versions.googleServices}"
     const val kotlinPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}"
     const val kotlinSerializations = "org.jetbrains.kotlin:kotlin-serialization:${Versions.kotlin}"
@@ -105,7 +102,6 @@ object AndroidVersions {
 }
 
 object Plugins {
-    const val aboutLibraries = "com.google.android.gms.oss-licenses-plugin"
     const val androidApplication = "com.android.application"
     const val firebaseCrashlytics = "com.google.firebase.crashlytics"
     const val googleServices = "com.google.gms.google-services"
