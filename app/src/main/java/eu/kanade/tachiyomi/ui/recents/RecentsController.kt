@@ -10,6 +10,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
@@ -402,6 +403,7 @@ class RecentsController(bundle: Bundle? = null) :
         binding.downloadBottomSheet.downloadFab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = max(-pad.toInt(), view?.rootWindowInsets?.systemWindowInsetBottom ?: 0) + 16.dpToPx
         }
+        setPadding(binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true)
     }
 
     fun setRefreshing(refresh: Boolean) {
@@ -429,11 +431,16 @@ class RecentsController(bundle: Bundle? = null) :
         return false
     }
 
-    fun setPadding(sheetIsHidden: Boolean) {
-        binding.recycler.updatePaddingRelative(bottom = if (sheetIsHidden) 0 else 20.dpToPx)
-        binding.recycler.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = if (sheetIsHidden) 0 else 30.dpToPx
-        }
+    fun setPadding(sheetIsHidden: Boolean, insets: WindowInsets? = null) {
+        val peekHeight = binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.peekHeight ?: 0
+        val cInsets = insets ?: view?.rootWindowInsets ?: return
+        binding.recycler.updatePaddingRelative(
+            bottom = if (sheetIsHidden) {
+                activityBinding?.bottomNav?.height ?: cInsets.systemWindowInsetBottom
+            } else {
+                peekHeight
+            }
+        )
     }
 
     override fun onActivityResumed(activity: Activity) {

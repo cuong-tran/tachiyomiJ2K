@@ -143,7 +143,7 @@ class BrowseController :
                 headerHeight = it.systemWindowInsetTop + appBarHeight
                 binding.sourceRecycler.updatePaddingRelative(
                     top = headerHeight,
-                    bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
+                    bottom = (activityBinding?.bottomNav?.height ?: it.getBottomGestureInsets()) + 58.spToPx
                 )
                 if (activityBinding?.bottomNav == null) {
                     setBottomPadding()
@@ -299,7 +299,10 @@ class BrowseController :
             bottomMargin = -pad.toInt()
         }
         binding.sourceRecycler.updatePaddingRelative(
-            bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
+            bottom = (
+                activityBinding?.bottomNav?.height
+                    ?: view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
+                ) + 58.spToPx
         )
     }
 
