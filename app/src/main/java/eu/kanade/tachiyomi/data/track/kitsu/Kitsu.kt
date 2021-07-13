@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
+import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
@@ -101,6 +102,7 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun add(track: Track): Track {
         track.score = DEFAULT_SCORE
         track.status = DEFAULT_STATUS
+        updateNewTrackInfo(track, PLAN_TO_READ)
         return api.addLibManga(track, getUserId())
     }
 
