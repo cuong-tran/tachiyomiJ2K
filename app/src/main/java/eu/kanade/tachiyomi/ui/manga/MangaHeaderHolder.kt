@@ -31,7 +31,7 @@ import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 
-@SuppressLint("ClickableViewAccessibility", "NewApi")
+@SuppressLint("ClickableViewAccessibility")
 class MangaHeaderHolder(
     view: View,
     private val adapter: MangaDetailsAdapter,
@@ -127,7 +127,7 @@ class MangaHeaderHolder(
                 )
                 true
             }
-            if (Build.VERSION.PREVIEW_SDK_INT + Build.VERSION.SDK_INT >= 31) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 backdrop.setRenderEffect(
                     RenderEffect.createBlurEffect(
                         10f,

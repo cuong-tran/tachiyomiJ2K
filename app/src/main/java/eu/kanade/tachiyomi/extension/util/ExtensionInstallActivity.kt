@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.extension.util
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
@@ -23,7 +22,6 @@ import uy.kohesive.injekt.injectLazy
  */
 class ExtensionInstallActivity : Activity() {
 
-    @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
@@ -39,9 +37,7 @@ class ExtensionInstallActivity : Activity() {
             val params = SessionParams(
                 SessionParams.MODE_FULL_INSTALL
             )
-            // TODO: Add once compiling via SDK 31
-//            if (Build.VERSION.SDK_INT >= 31) {
-            if (Build.VERSION.PREVIEW_SDK_INT + Build.VERSION.SDK_INT >= 31) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 params.setRequireUserAction(USER_ACTION_NOT_REQUIRED)
             }
             val sessionId = packageInstaller.createSession(params)
