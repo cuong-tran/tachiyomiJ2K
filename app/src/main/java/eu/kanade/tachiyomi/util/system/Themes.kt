@@ -10,27 +10,23 @@ import eu.kanade.tachiyomi.R
 import kotlin.math.roundToInt
 
 @Suppress("unused")
-enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes val nameRes: Int) {
-    PURE_WHITE(R.style.Theme_Tachiyomi, AppCompatDelegate.MODE_NIGHT_NO, R.string.white_theme),
-    DARK(R.style.Theme_Tachiyomi, AppCompatDelegate.MODE_NIGHT_YES, R.string.dark),
-    SPRING(
-        R.style.Theme_Tachiyomi_MidnightDusk,
-        AppCompatDelegate.MODE_NIGHT_NO,
-        R.string.spring_blossom
+enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes val nameRes: Int, @StringRes altNameRes: Int? = null) {
+    DEFAULT(
+        R.style.Theme_Tachiyomi,
+        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        R.string.white_theme,
+        R.string.dark
     ),
-    DUSK(
+    SPRING_AND_DUSK(
         R.style.Theme_Tachiyomi_MidnightDusk,
-        AppCompatDelegate.MODE_NIGHT_YES,
+        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        R.string.spring_blossom,
         R.string.midnight_dusk
     ),
-    STRAWBERRY_DAIQUIRI(
-        R.style.Theme_Tachiyomi_StrawberryDaiquiri,
-        AppCompatDelegate.MODE_NIGHT_NO,
-        R.string.strawberry_daiquiri
-    ),
-    CHOCOLATE_STRAWBERRIES(
-        R.style.Theme_Tachiyomi_ChocolateStrawberries,
-        AppCompatDelegate.MODE_NIGHT_YES,
+    STRAWBERRIES(
+        R.style.Theme_Tachiyomi_Strawberries,
+        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        R.string.strawberry_daiquiri,
         R.string.chocolate_strawberries
     ),
     LIME(
@@ -43,28 +39,25 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         AppCompatDelegate.MODE_NIGHT_NO,
         R.string.yotsuba
     ),
-    YANG(
+    YIN_AND_YANG(
         R.style.Theme_Tachiyomi_YinYang,
-        AppCompatDelegate.MODE_NIGHT_NO,
-        R.string.yang
-    ),
-    YIN(
-        R.style.Theme_Tachiyomi_YinYang,
-        AppCompatDelegate.MODE_NIGHT_YES,
+        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        R.string.yang,
         R.string.yin
     ),
-    LIGHT_BLUE(
+    CLASSIC_BLUE(
         R.style.Theme_Tachiyomi_AllBlue,
-        AppCompatDelegate.MODE_NIGHT_NO,
-        R.string.light_blue
-    ),
-    DARK_BLUE(
-        R.style.Theme_Tachiyomi_AllBlue,
-        AppCompatDelegate.MODE_NIGHT_YES,
+        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        R.string.light_blue,
         R.string.dark_blue
-    );
+    ),
+    ;
 
     val isDarkTheme = nightMode == AppCompatDelegate.MODE_NIGHT_YES
+    val followsSystem = nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+
+    @StringRes
+    val darkNameRes: Int = altNameRes ?: nameRes
 
     fun getColors(mode: Int = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM): Colors {
         return when (nightMode) {
@@ -140,7 +133,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     @ColorInt
     val darkBackground: Int = Color.parseColor(
         when (styleRes) {
-            R.style.Theme_Tachiyomi_ChocolateStrawberries -> "#1a1716"
+            R.style.Theme_Tachiyomi_Strawberries -> "#1a1716"
             R.style.Theme_Tachiyomi_MidnightDusk -> "#16151D"
             R.style.Theme_Tachiyomi_FlatLime -> "#202125"
             else -> "#1C1C1D"
@@ -153,7 +146,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         when (styleRes) {
             R.style.Theme_Tachiyomi_YinYang -> "#000000"
             R.style.Theme_Tachiyomi_MidnightDusk -> "#c43c97"
-            R.style.Theme_Tachiyomi_StrawberryDaiquiri -> "#ED4A65"
+            R.style.Theme_Tachiyomi_Strawberries -> "#ED4A65"
             R.style.Theme_Tachiyomi_Yotsuba -> "#dc6d3d"
             else -> "#2979FF"
         }
@@ -165,7 +158,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         when (styleRes) {
             R.style.Theme_Tachiyomi_YinYang -> "#FFFFFF"
             R.style.Theme_Tachiyomi_MidnightDusk -> "#F02475"
-            R.style.Theme_Tachiyomi_ChocolateStrawberries -> "#AA2200"
+            R.style.Theme_Tachiyomi_Strawberries -> "#AA2200"
             R.style.Theme_Tachiyomi_FlatLime -> "#4AF88A"
             else -> "#3399FF"
         }
@@ -214,7 +207,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     @ColorInt
     val darkBottomBar: Int = Color.parseColor(
         when (styleRes) {
-            R.style.Theme_Tachiyomi_ChocolateStrawberries -> "#211b19"
+            R.style.Theme_Tachiyomi_Strawberries -> "#211b19"
             R.style.Theme_Tachiyomi_AllBlue -> "#54759E"
             R.style.Theme_Tachiyomi_MidnightDusk -> "#201F27"
             R.style.Theme_Tachiyomi_FlatLime -> "#282A2E"

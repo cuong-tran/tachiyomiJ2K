@@ -78,7 +78,6 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
     <style name="ThemeOverlay.Tachiyomi.Amoled" parent=""/>
-    <style name="Theme.Tachiyomi.ChocolateStrawberries"/>
     <style name="Theme.Tachiyomi.FlatLime"/>
     <style name="Theme.Tachiyomi.MidnightDusk">
         <item name="colorPrimary">@color/primaryDuskDawn</item>
@@ -91,7 +90,7 @@
         <item name="android:colorBackground">@color/backgroundDuskDawn</item>
         <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
     </style>
-    <style name="Theme.Tachiyomi.StrawberryDaiquiri">
+    <style name="Theme.Tachiyomi.Strawberries">
         <item name="colorAccent">@color/colorAccentStrawberry</item>
         <item name="colorAccentText">@color/colorAccentStrawberryText</item>
     </style>

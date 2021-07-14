@@ -5,7 +5,10 @@ import android.content.res.Resources
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import uy.kohesive.injekt.injectLazy
 
@@ -22,16 +25,44 @@ object ThemeUtil {
         )
         preferences.lightTheme().set(
             when (theme) {
-                1 -> Themes.LIGHT_BLUE
-                else -> Themes.PURE_WHITE
+                1 -> Themes.CLASSIC_BLUE
+                else -> Themes.DEFAULT
             }
         )
         preferences.darkTheme().set(
             when (theme) {
-                4 -> Themes.DARK_BLUE
-                else -> Themes.DARK
+                4 -> Themes.CLASSIC_BLUE
+                else -> Themes.DEFAULT
             }
         )
+    }
+
+    /** Migration method */
+    fun convertNewThemes(context: Context) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val lightTheme = prefs.getString(PreferenceKeys.lightTheme, "DEFAULT")
+        val darkTheme = prefs.getString(PreferenceKeys.darkTheme, "DEFAULT")
+
+        prefs.edit {
+            putString(
+                PreferenceKeys.lightTheme,
+                when (lightTheme) {
+                    "SPRING" -> Themes.SPRING_AND_DUSK
+                    "STRAWBERRY_DAIQUIRI" -> Themes.STRAWBERRIES
+                    "LIGHT_BLUE" -> Themes.CLASSIC_BLUE
+                    else -> Themes.DEFAULT
+                }.name
+            )
+            putString(
+                PreferenceKeys.darkTheme,
+                when (darkTheme) {
+                    "DUSK" -> Themes.SPRING_AND_DUSK
+                    "CHOCOLATE_STRAWBERRIES" -> Themes.STRAWBERRIES
+                    "DARK_BLUE" -> Themes.CLASSIC_BLUE
+                    else -> Themes.DEFAULT
+                }.name
+            )
+        }
     }
 
     fun isColoredTheme(theme: Themes): Boolean {
@@ -68,7 +99,9 @@ fun AppCompatActivity.setThemeAndNight(preferences: PreferencesHelper) {
 
 fun AppCompatActivity.getThemeWithExtras(theme: Resources.Theme, preferences: PreferencesHelper): Resources.Theme {
     val prefTheme = getPrefTheme(preferences)
-    if (prefTheme.isDarkTheme && preferences.themeDarkAmoled().get()) {
+    if ((isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
+        preferences.themeDarkAmoled().get()
+    ) {
         theme.applyStyle(R.style.ThemeOverlay_Tachiyomi_Amoled, true)
         if (ThemeUtil.isColoredTheme(prefTheme)) {
             theme.applyStyle(R.style.ThemeOverlay_Tachiyomi_AllBlue, true)
@@ -86,8 +119,7 @@ fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {
             ) preferences.darkTheme() else preferences.lightTheme()
             ).get()
     } catch (e: Exception) {
-        preferences.lightTheme().set(Themes.PURE_WHITE)
-        preferences.darkTheme().set(Themes.DARK)
-        Themes.PURE_WHITE
+        ThemeUtil.convertNewThemes(preferences.context)
+        getPrefTheme(preferences)
     }
 }
