@@ -149,11 +149,6 @@
     <string name="category_is_empty">Kategorija ir tukša</string>
     <string name="create_new_category">Izveido jaunu kategoriju</string>
     <string name="_already_in_queue">%1$s jau ir rindā</string>
-    <plurals name="category_plural">
-        <item quantity="zero">Kategorija</item>
-        <item quantity="one"/>
-        <item quantity="other"/>
-    </plurals>
     <string name="chapter_not_found">Nodaļa nav atrasta</string>
     <string name="chapters_removed">Izņemtas nodaļas.</string>
     <string name="removed_bookmark">Noņemta grāmatzīme</string>

@@ -367,12 +367,6 @@
     <string name="create_new_category">Створити нову категорію</string>
     <string name="_already_in_queue">%1$s вже в черзі</string>
     <string name="adding_category_to_queue">Додано %1$s до черги оновлення</string>
-    <plurals name="category_plural">
-        <item quantity="one">Категорія</item>
-        <item quantity="few"/>
-        <item quantity="many"/>
-        <item quantity="other"/>
-    </plurals>
     <plurals name="pages_left">
         <item quantity="one">%1$d сторінка залишилась</item>
         <item quantity="few">%1$d сторінок залишилось</item>
