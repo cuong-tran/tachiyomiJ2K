@@ -17,6 +17,8 @@ import eu.kanade.tachiyomi.ui.extension.ExtensionIntallInfo
 import eu.kanade.tachiyomi.util.system.launchNow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.withContext
 import rx.Observable
 import uy.kohesive.injekt.Injekt
@@ -232,26 +234,26 @@ class ExtensionManager(
     }
 
     /**
-     * Returns an observable of the installation process for the given extension. It will complete
-     * once the extension is installed or throws an error. The process will be canceled if
-     * unsubscribed before its completion.
+     * Returns a flow of the installation process for the given extension. It will complete
+     * once the extension is installed or throws an error. The process will be canceled the scope
+     * is canceled before its completion.
      *
      * @param extension The extension to be installed.
      */
-    fun installExtension(extension: Extension.Available): Observable<ExtensionIntallInfo> {
+    fun installExtension(extension: Extension.Available): Flow<ExtensionIntallInfo> {
         return installer.downloadAndInstall(api.getApkUrl(extension), extension)
     }
 
     /**
-     * Returns an observable of the installation process for the given extension. It will complete
-     * once the extension is updated or throws an error. The process will be canceled if
-     * unsubscribed before its completion.
+     * Returns a flow of the installation process for the given extension. It will complete
+     * once the extension is updated or throws an error. The process will be canceled the scope
+     * is canceled before its completion.
      *
      * @param extension The extension to be updated.
      */
-    fun updateExtension(extension: Extension.Installed): Observable<ExtensionIntallInfo> {
+    fun updateExtension(extension: Extension.Installed): Flow<ExtensionIntallInfo> {
         val availableExt = availableExtensions.find { it.pkgName == extension.pkgName }
-            ?: return Observable.empty()
+            ?: return emptyFlow()
         return installExtension(availableExt)
     }
 

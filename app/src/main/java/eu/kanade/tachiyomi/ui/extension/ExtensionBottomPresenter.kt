@@ -19,12 +19,17 @@ import eu.kanade.tachiyomi.ui.migration.SelectionHeader
 import eu.kanade.tachiyomi.ui.migration.SourceItem
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import rx.Observable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -216,7 +221,7 @@ class ExtensionBottomPresenter(
     @Synchronized
     private fun updateInstallStep(
         extension: Extension,
-        state: InstallStep,
+        state: InstallStep?,
         session: PackageInstaller.SessionInfo?
     ): ExtensionItem? {
         val extensions = extensions.toMutableList()
@@ -243,13 +248,17 @@ class ExtensionBottomPresenter(
 
     fun installExtension(extension: Extension.Available) {
         if (isNotMIUIOptimized()) {
-            extensionManager.installExtension(extension).subscribeToInstallUpdate(extension)
+            presenterScope.launch {
+                extensionManager.installExtension(extension).collectForInstallUpdate(extension)
+            }
         }
     }
 
     fun updateExtension(extension: Extension.Installed) {
         if (isNotMIUIOptimized()) {
-            extensionManager.updateExtension(extension).subscribeToInstallUpdate(extension)
+            presenterScope.launch {
+                extensionManager.updateExtension(extension).collectForInstallUpdate(extension)
+            }
         }
     }
 
@@ -261,13 +270,20 @@ class ExtensionBottomPresenter(
         return true
     }
 
-    private fun Observable<ExtensionIntallInfo>.subscribeToInstallUpdate(extension: Extension) {
-        this.doOnNext { currentDownloads[extension.pkgName] = it }
-            .doOnUnsubscribe { currentDownloads.remove(extension.pkgName) }
-            .map { state -> updateInstallStep(extension, state.first, state.second) }
-            .subscribe { item ->
+    private suspend fun Flow<ExtensionIntallInfo>.collectForInstallUpdate(extension: Extension) {
+        this
+            .onEach { currentDownloads[extension.pkgName] = it }
+            .onCompletion {
+                currentDownloads.remove(extension.pkgName)
+                val item = updateInstallStep(extension, null, null)
                 if (item != null) {
-                    bottomSheet.downloadUpdate(item)
+                    withUIContext { bottomSheet.downloadUpdate(item) }
+                }
+            }
+            .collect { state ->
+                val item = updateInstallStep(extension, state.first, state.second)
+                if (item != null) {
+                    withUIContext { bottomSheet.downloadUpdate(item) }
                 }
             }
     }
