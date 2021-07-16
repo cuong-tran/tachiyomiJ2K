@@ -10,7 +10,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -28,7 +27,6 @@ import eu.kanade.tachiyomi.ui.setting.AboutController
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.notificationManager
-import eu.kanade.tachiyomi.util.system.toast
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -82,14 +80,6 @@ class NotificationReceiver : BroadcastReceiver() {
                     intent.getParcelableExtra(EXTRA_URI)!!,
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 )
-            // Open reader activity
-            ACTION_OPEN_CHAPTER -> {
-                openChapter(
-                    context,
-                    intent.getLongExtra(EXTRA_MANGA_ID, -1),
-                    intent.getLongExtra(EXTRA_CHAPTER_ID, -1)
-                )
-            }
             ACTION_MARK_AS_READ -> {
                 val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 if (notificationId > -1) dismissNotification(
@@ -159,29 +149,6 @@ class NotificationReceiver : BroadcastReceiver() {
         dismissNotification(context, notificationId)
         // Launch share activity
         context.startActivity(sendIntent)
-    }
-
-    /**
-     * Starts reader activity
-     *
-     * @param context context of application
-     * @param mangaId id of manga
-     * @param chapterId id of chapter
-     */
-    internal fun openChapter(context: Context, mangaId: Long, chapterId: Long) {
-        dismissNotification(context, Notifications.ID_NEW_CHAPTERS)
-        val db = DatabaseHelper(context)
-        val manga = db.getManga(mangaId).executeAsBlocking()
-        val chapter = db.getChapter(chapterId).executeAsBlocking()
-        context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
-        if (manga != null && chapter != null) {
-            val intent = ReaderActivity.newIntent(context, manga, chapter).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-            context.startActivity(intent)
-        } else {
-            context.toast(context.getString(R.string.next_chapter_not_found))
-        }
     }
 
     /**
@@ -291,9 +258,6 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Called to cancel restore
         private const val ACTION_CANCEL_RESTORE = "$ID.$NAME.CANCEL_RESTORE"
-
-        // Called to open chapter
-        private const val ACTION_OPEN_CHAPTER = "$ID.$NAME.ACTION_OPEN_CHAPTER"
 
         // Value containing file location.
         private const val EXTRA_FILE_LOCATION = "$ID.$NAME.FILE_LOCATION"
