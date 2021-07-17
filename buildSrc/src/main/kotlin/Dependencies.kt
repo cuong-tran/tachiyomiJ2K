@@ -46,7 +46,7 @@ object Versions {
     const val injekt = "65b0440"
     const val jsoup = "1.13.1"
     const val junit = "4.13"
-    const val kotlin = "1.5.20"
+    const val kotlin = "1.5.21"
     const val kotson = "2.5.0"
     const val ktlint = "9.4.0"
     const val loadingButton = "2.2.0"
