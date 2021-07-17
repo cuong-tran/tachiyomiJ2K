@@ -1,7 +1,9 @@
 package eu.kanade.tachiyomi.extension.util
 
 import android.app.Activity
+import android.app.DownloadManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionParams
@@ -56,6 +58,9 @@ class ExtensionInstallActivity : Activity() {
             session.commit(statusReceiver)
             val extensionManager: ExtensionManager by injectLazy()
             extensionManager.setInstalling(downloadId, sessionId)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                (getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).remove(downloadId)
+            }
             data.close()
         } catch (error: Exception) {
             // Either install package can't be found (probably bots) or there's a security exception

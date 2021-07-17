@@ -23,11 +23,9 @@ import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
@@ -81,7 +79,10 @@ class ExtensionBottomPresenter(
                 sourceItems = findSourcesWithManga(favs)
                 mangaItems = HashMap(
                     sourceItems.associate {
-                        it.source.id to this@ExtensionBottomPresenter.libraryToMigrationItem(favs, it.source.id)
+                        it.source.id to this@ExtensionBottomPresenter.libraryToMigrationItem(
+                            favs,
+                            it.source.id
+                        )
                     }
                 )
                 withContext(Dispatchers.Main) {
@@ -93,6 +94,27 @@ class ExtensionBottomPresenter(
                 }
             }
             listOf(migrationJob, extensionJob).awaitAll()
+        }
+        presenterScope.launch {
+            extensionManager.downloadRelay
+                .collect {
+                    val extPageName = extensionManager.getExtension(it.first)
+                    val extension = extensions.find { item ->
+                        extPageName == item.extension.pkgName
+                    } ?: return@collect
+                    when (it.second.first) {
+                        InstallStep.Installed, InstallStep.Error -> {
+                            currentDownloads.remove(extension.extension.pkgName)
+                        }
+                        else -> {
+                            currentDownloads[extension.extension.pkgName] = it.second
+                        }
+                    }
+                    val item = updateInstallStep(extension.extension, it.second.first, it.second.second)
+                    if (item != null) {
+                        withUIContext { bottomSheet.downloadUpdate(item) }
+                    }
+                }
         }
     }
 
@@ -249,15 +271,19 @@ class ExtensionBottomPresenter(
     fun installExtension(extension: Extension.Available) {
         if (isNotMIUIOptimized()) {
             presenterScope.launch {
-                extensionManager.installExtension(extension).collectForInstallUpdate(extension)
+                extensionManager.installExtension(ExtensionManager.ExtensionInfo(extension), presenterScope)
+                    .launchIn(this)
             }
         }
     }
 
     fun updateExtension(extension: Extension.Installed) {
         if (isNotMIUIOptimized()) {
+            val availableExt =
+                extensionManager.availableExtensions.find { it.pkgName == extension.pkgName } ?: return
             presenterScope.launch {
-                extensionManager.updateExtension(extension).collectForInstallUpdate(extension)
+                extensionManager.installExtension(ExtensionManager.ExtensionInfo(availableExt), presenterScope)
+                    .launchIn(this)
             }
         }
     }
@@ -268,24 +294,6 @@ class ExtensionBottomPresenter(
 //            return false
 //        }
         return true
-    }
-
-    private suspend fun Flow<ExtensionIntallInfo>.collectForInstallUpdate(extension: Extension) {
-        this
-            .onEach { currentDownloads[extension.pkgName] = it }
-            .onCompletion {
-                currentDownloads.remove(extension.pkgName)
-                val item = updateInstallStep(extension, null, null)
-                if (item != null) {
-                    withUIContext { bottomSheet.downloadUpdate(item) }
-                }
-            }
-            .collect { state ->
-                val item = updateInstallStep(extension, state.first, state.second)
-                if (item != null) {
-                    withUIContext { bottomSheet.downloadUpdate(item) }
-                }
-            }
     }
 
     fun uninstallExtension(pkgName: String) {

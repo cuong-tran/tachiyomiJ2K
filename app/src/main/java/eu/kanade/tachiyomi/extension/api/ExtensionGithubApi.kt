@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.extension.api
 
 import android.content.Context
+import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
@@ -30,7 +31,7 @@ internal class ExtensionGithubApi {
         }
     }
 
-    suspend fun checkForUpdates(context: Context): List<Extension.Installed> {
+    suspend fun checkForUpdates(context: Context): List<Extension.Available> {
         return withContext(Dispatchers.IO) {
             val extensions = findExtensions()
 
@@ -38,7 +39,7 @@ internal class ExtensionGithubApi {
                 .filterIsInstance<LoadResult.Success>()
                 .map { it.extension }
 
-            val extensionsWithUpdate = mutableListOf<Extension.Installed>()
+            val extensionsWithUpdate = mutableListOf<Extension.Available>()
             val mutInstalledExtensions = installedExtensions.toMutableList()
             for (installedExt in mutInstalledExtensions) {
                 val pkgName = installedExt.pkgName
@@ -46,7 +47,7 @@ internal class ExtensionGithubApi {
 
                 val hasUpdate = availableExt.versionCode > installedExt.versionCode
                 if (hasUpdate) {
-                    extensionsWithUpdate.add(installedExt)
+                    extensionsWithUpdate.add(availableExt)
                 }
             }
 
@@ -75,7 +76,7 @@ internal class ExtensionGithubApi {
             }
     }
 
-    fun getApkUrl(extension: Extension.Available): String {
+    fun getApkUrl(extension: ExtensionManager.ExtensionInfo): String {
         return "${REPO_URL_PREFIX}apk/${extension.apkName}"
     }
 
