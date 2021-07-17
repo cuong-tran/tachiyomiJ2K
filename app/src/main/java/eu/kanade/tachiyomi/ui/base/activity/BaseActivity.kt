@@ -20,11 +20,14 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     lateinit var binding: VB
     val isBindingInitialized get() = this::binding.isInitialized
 
+    private var updatedTheme: Resources.Theme? = null
+
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.createLocaleWrapper(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        updatedTheme = null
         setThemeAndNight(preferences)
         super.onCreate(savedInstanceState)
         SecureActivityDelegate.setSecure(this)
@@ -38,6 +41,10 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
     override fun getTheme(): Resources.Theme {
-        return getThemeWithExtras(super.getTheme(), preferences)
+        return updatedTheme ?: run {
+            val newTheme = getThemeWithExtras(super.getTheme(), preferences)
+            updatedTheme = newTheme
+            newTheme
+        }
     }
 }

@@ -7,6 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.util.system.setThemeAndNight
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.getThemeWithExtras
 import nucleus.view.NucleusAppCompatActivity
@@ -16,12 +17,15 @@ abstract class BaseRxActivity<P : BasePresenter<*>> : NucleusAppCompatActivity<P
 
     val scope = lifecycleScope
     private val preferences by injectLazy<PreferencesHelper>()
+    private var updatedTheme: Resources.Theme? = null
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.createLocaleWrapper(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        updatedTheme = null
+        setThemeAndNight(preferences)
         super.onCreate(savedInstanceState)
         SecureActivityDelegate.setSecure(this)
     }
@@ -32,6 +36,10 @@ abstract class BaseRxActivity<P : BasePresenter<*>> : NucleusAppCompatActivity<P
     }
 
     override fun getTheme(): Resources.Theme {
-        return getThemeWithExtras(super.getTheme(), preferences)
+        return updatedTheme ?: run {
+            val newTheme = getThemeWithExtras(super.getTheme(), preferences)
+            updatedTheme = newTheme
+            newTheme
+        }
     }
 }
