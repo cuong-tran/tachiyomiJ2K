@@ -12,6 +12,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import coil.request.CachePolicy
+import eu.kanade.tachiyomi.util.system.isInNightMode
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import eu.kanade.tachiyomi.R
@@ -26,6 +27,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import kotlin.math.abs
 
 @SuppressLint("ClickableViewAccessibility")
 class MangaHeaderHolder(
@@ -315,6 +317,29 @@ class MangaHeaderHolder(
     private fun setGenreTags(binding: MangaHeaderItemBinding, manga: Manga) {
         with(binding.mangaGenresTags) {
             removeAllViews()
+            val dark = context.isInNightMode()
+            val accentArray = FloatArray(3)
+            val onAccentArray = FloatArray(3)
+            ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorAccent), accentArray)
+            ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorOnAccent), onAccentArray)
+            val downloadedColor = ColorUtils.setAlphaComponent(
+                ColorUtils.HSLToColor(
+                    floatArrayOf(
+                        accentArray[0],
+                        accentArray[1],
+                        // fun math just for good contrast
+                        ((if (dark) 0.35f else 0.87f) + (abs(onAccentArray[2] - 0.5f) * .7f)) / 2f
+                    )
+                ),
+                165
+            )
+            val textColor = ColorUtils.HSLToColor(
+                floatArrayOf(
+                    accentArray[0],
+                    0.8f,
+                    if (dark) 0.925f else 0.15f
+                )
+            )
             if (manga.genre.isNullOrBlank().not()) {
                 (manga.getGenres() ?: emptyList()).map { genreText ->
                     val chip = LayoutInflater.from(binding.root.context).inflate(
@@ -324,6 +349,8 @@ class MangaHeaderHolder(
                     ) as Chip
                     val id = View.generateViewId()
                     chip.id = id
+                    chip.chipBackgroundColor = ColorStateList.valueOf(downloadedColor)
+                    chip.setTextColor(textColor)
                     chip.text = genreText
                     chip.setOnClickListener {
                         adapter.delegate.tagClicked(genreText)
