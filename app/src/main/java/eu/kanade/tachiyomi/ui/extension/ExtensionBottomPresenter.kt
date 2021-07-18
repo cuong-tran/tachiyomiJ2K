@@ -41,7 +41,7 @@ typealias ExtensionIntallInfo = Pair<InstallStep, PackageInstaller.SessionInfo?>
 class ExtensionBottomPresenter(
     private val bottomSheet: ExtensionBottomSheet,
     private val extensionManager: ExtensionManager = Injekt.get(),
-    private val preferences: PreferencesHelper = Injekt.get()
+    val preferences: PreferencesHelper = Injekt.get()
 ) : BaseCoroutinePresenter(), ExtensionsChangedListener {
 
     private var extensions = emptyList<ExtensionItem>()

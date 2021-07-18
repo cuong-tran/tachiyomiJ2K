@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -202,6 +203,21 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     }
 
     override fun onUpdateAllClicked(position: Int) {
+        if (!presenter.preferences.hasPromptedBeforeUpdateAll().get()) {
+            MaterialDialog(controller.activity!!)
+                .title(R.string.update_all)
+                .message(R.string.some_extensions_may_prompt)
+                .positiveButton(android.R.string.ok) {
+                    presenter.preferences.hasPromptedBeforeUpdateAll().set(true)
+                    updateAllExtensions(position)
+                }
+                .show()
+        } else {
+            updateAllExtensions(position)
+        }
+    }
+
+    fun updateAllExtensions(position: Int) {
         val header = (extAdapter?.getSectionHeader(position)) as? ExtensionGroupItem ?: return
         val items = extAdapter?.getSectionItemPositions(header)
         items?.forEach {

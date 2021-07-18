@@ -313,6 +313,7 @@
     <string name="_must_be_enabled_first">%1$s must be enabled first</string>
     <string name="could_not_install_extension">Could not install extension</string>
     <string name="update_all">Update all</string>
+    <string name="some_extensions_may_prompt">Some extensions may still prompt to be installed first.</string>
     <string name="updating_extensions">Updating extensions</string>
     <plurals name="_updates_pending">
         <item quantity="one">%d update pending</item>
@@ -984,5 +985,6 @@
     <string name="use_default">Use default</string>
     <string name="view_all_errors">View all errors</string>
     <string name="view_chapters">View chapters</string>
+    <string name="warning">Warning</string>
     <string name="wifi">Wi-Fi</string>
 </resources>
