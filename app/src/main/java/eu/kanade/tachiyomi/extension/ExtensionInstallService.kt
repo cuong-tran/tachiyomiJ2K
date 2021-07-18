@@ -5,10 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.os.PowerManager
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.ExtensionManager.ExtensionInfo
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.util.system.notificationManager
+import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -41,6 +44,8 @@ class ExtensionInstallService(
 
     private val requestSemaphore = Semaphore(3)
 
+    private val preferences: PreferencesHelper = Injekt.get()
+
     /**
      * This method needs to be implemented, but it's not used/needed.
      */
@@ -58,10 +63,20 @@ class ExtensionInstallService(
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) return START_NOT_STICKY
+        if (!preferences.hasPromptedBeforeUpdateAll().get()) {
+            toast(R.string.some_extensions_may_prompt)
+            preferences.hasPromptedBeforeUpdateAll().set(true)
+        }
 
         instance = this
 
-        val list = intent.getParcelableArrayListExtra<ExtensionInfo>(KEY_EXTENSION)
+        val list = intent.getParcelableArrayListExtra<ExtensionInfo>(KEY_EXTENSION)?.filter {
+            (
+                extensionManager.installedExtensions.find { installed ->
+                    installed.pkgName == it.pkgName
+                }?.versionCode ?: 0
+                ) < it.versionCode
+        }
             ?: return START_NOT_STICKY
         var installed = 0
         job = serviceScope.launch {

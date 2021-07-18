@@ -411,11 +411,13 @@ class ExtensionManager(
         val apkName: String,
         val pkgName: String,
         val name: String,
+        val versionCode: Int,
     ) : Parcelable {
         constructor(extension: Extension.Available) : this(
             apkName = extension.apkName,
             pkgName = extension.pkgName,
-            name = extension.name
+            name = extension.name,
+            versionCode = extension.versionCode
         )
     }
 }
