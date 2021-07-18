@@ -42,6 +42,7 @@
         android:layout_height="wrap_content"
         android:hint="@string/title"
         android:layout_marginEnd="16dp"
+        android:importantForAutofill="no"
         android:layout_marginStart="16dp"
         android:inputType="text"
         android:maxLines="1"/>
@@ -52,6 +53,7 @@
         android:hint="@string/author"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
+        android:importantForAutofill="no"
         android:inputType="text"
         android:maxLines="1"/>
 
@@ -61,6 +63,7 @@
         android:layout_height="wrap_content"
         android:hint="@string/artist"
         android:layout_marginEnd="16dp"
+        android:importantForAutofill="no"
         android:layout_marginStart="16dp"
         android:inputType="text"
         android:maxLines="1"/>
@@ -71,6 +74,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+        android:importantForAutofill="no"
         android:hint="@string/description"
         android:inputType="text|textMultiLine"
         android:scrollHorizontally="false" />
@@ -107,24 +111,33 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <me.gujun.android.taggroup.TagGroup
+    <com.google.android.material.chip.ChipGroup
         android:id="@+id/manga_genres_tags"
-        style="@style/TagGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        app:atg_borderStrokeWidth="1dp"
-        app:atg_backgroundColor="@android:color/transparent"
-        app:atg_isAppendMode="true"
-        app:atg_inputHintColor="?android:attr/textColorSecondary"
-        app:atg_inputTextColor="?android:attr/textColorPrimary"
-        app:atg_checkedBackgroundColor="@color/material_red_500"
-        app:atg_checkedBorderColor="@color/material_red_500"
-        app:atg_borderColor="?attr/colorAccent"
-        app:atg_textColor="?attr/colorAccent" />
+        app:chipSpacing="-12dp"
+        android:layout_marginBottom="8dp" >
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/add_tag_chip"
+            android:layout_width="wrap_content"
+            style="@style/Theme.Widget.Chip.AddTag"
+            android:layout_height="wrap_content"
+            android:text="@string/add_tag"/>
+
+        <EditText
+            android:id="@+id/add_tag_edit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:importantForAutofill="no"
+            android:hint="@string/add_tag"
+            android:inputType="text"
+            android:maxLines="1"/>
+    </com.google.android.material.chip.ChipGroup>
 
     <Button
         android:id="@+id/reset_tags"

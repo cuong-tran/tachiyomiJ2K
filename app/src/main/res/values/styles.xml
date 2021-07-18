@@ -305,6 +305,16 @@
         <item name="chipStrokeWidth">0dp</item>
         <item name="android:checkable">false</item>
     </style>
+
+    <style name="Theme.Widget.Chip.AddTag" parent="Widget.MaterialComponents.Chip.Action">
+        <item name="chipBackgroundColor">@android:color/transparent</item>
+        <item name="chipMinHeight">28dp</item>
+        <item name="android:textColor">?colorOnSurface</item>
+        <item name="android:textAppearance">@style/Theme.TextAppearance.Chip</item>
+        <item name="chipStrokeColor">?colorOnSurface</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:checkable">false</item>
+    </style>
     
     
     <style name="Theme.TextAppearance.Chip" parent="TextAppearance.MaterialComponents.Chip">

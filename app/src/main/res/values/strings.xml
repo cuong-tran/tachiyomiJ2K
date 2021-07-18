@@ -500,8 +500,9 @@
     <string name="sort_by_chapter_number">Sort by chapter number</string>
     <string name="newest_first">Newest to oldest</string>
     <string name="oldest_first">Oldest to newest</string>
-    <string name="clear_tags">Clear Tags</string>
-    <string name="reset_tags">Reset Tags</string>
+    <string name="add_tag">Add tag</string>
+    <string name="clear_tags">Clear tags</string>
+    <string name="reset_tags">Reset tags</string>
     <string name="reset_cover">Reset cover</string>
     <string name="failed_to_update_cover">Failed to update cover</string>
     <string name="must_be_in_library_to_edit">Manga must be in your library to edit</string>
