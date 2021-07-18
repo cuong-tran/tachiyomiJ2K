@@ -189,10 +189,10 @@ internal class ExtensionInstaller(private val context: Context) {
                 delay(500)
             }
         }
-            .takeWhile {
+            .takeWhile { info ->
                 val sessionId = downloadInstallerMap[id]
                 if (sessionId != null) {
-                    context.packageManager.packageInstaller.getSessionInfo(sessionId) != null
+                    info.second != null
                 } else {
                     true
                 }
