@@ -63,10 +63,19 @@ class ExtensionInstallService(
 
         val list = intent.getParcelableArrayListExtra<ExtensionInfo>(KEY_EXTENSION)
             ?: return START_NOT_STICKY
+        var installed = 0
         job = serviceScope.launch {
             val results = list.map {
                 async {
-                    installExtension(it)
+                    requestSemaphore.withPermit {
+                        extensionManager.installExtension(it, serviceScope)
+                            .collect {
+                                if (it.first.isCompleted()) {
+                                    installed++
+                                }
+                                notifier.showProgressNotification(installed, list.size)
+                            }
+                    }
                 }
             }
             results.awaitAll()
@@ -74,15 +83,6 @@ class ExtensionInstallService(
         job?.invokeOnCompletion { stopSelf(startId) }
 
         return START_REDELIVER_INTENT
-    }
-
-    suspend fun installExtension(extension: ExtensionInfo) {
-        requestSemaphore.withPermit {
-            extensionManager.installExtension(extension, serviceScope)
-                .collect {
-                    notifier.showProgressNotification()
-                }
-        }
     }
 
     /**

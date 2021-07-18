@@ -47,6 +47,8 @@ object Notifications {
      */
     const val CHANNEL_UPDATES_TO_EXTS = "updates_ext_channel"
     const val ID_UPDATES_TO_EXTS = -401
+
+    const val CHANNEL_EXT_PROGRESS = "ext_update_progress_channel"
     const val ID_EXTENSION_PROGRESS = -402
 
     private const val GROUP_BACKUP_RESTORE = "group_backup_restore"
@@ -136,5 +138,16 @@ object Notifications {
             )
         )
         context.notificationManager.createNotificationChannels(channels)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val channel = NotificationChannel(
+                CHANNEL_EXT_PROGRESS,
+                context.getString(R.string.updating_extensions),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                setShowBadge(false)
+                setSound(null, null)
+            }
+            context.notificationManager.createNotificationChannel(channel)
+        }
     }
 }

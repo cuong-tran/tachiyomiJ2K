@@ -50,12 +50,12 @@ class ExtensionInstallNotifier(private val context: Context) {
      * @param current the current progress.
      * @param total the total progress.
      */
-    fun showProgressNotification() {
+    fun showProgressNotification(progress: Int, max: Int) {
         context.notificationManager.notify(
             Notifications.ID_EXTENSION_PROGRESS,
             progressNotificationBuilder
                 .setContentTitle(context.getString(R.string.updating_extensions))
-                .setProgress(0, 0, true)
+                .setProgress(max, progress, progress == 0)
                 .build()
         )
     }

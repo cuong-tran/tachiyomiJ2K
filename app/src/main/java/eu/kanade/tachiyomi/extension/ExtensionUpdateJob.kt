@@ -47,6 +47,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
     private fun createUpdateNotification(extensions: List<Extension.Available>) {
         val preferences: PreferencesHelper by injectLazy()
         preferences.extensionUpdatesCount().set(extensions.size)
+        // Not doing this yet since users will get prompted while device is idle
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && preferences.autoUpdateExtensions()) {
 //            val intent = ExtensionInstallService.jobIntent(context, extensions)
 //            context.startForegroundService(intent)
@@ -76,7 +77,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         val intent = ExtensionInstallService.jobIntent(context, extensions)
                         val pendingIntent =
-                            PendingIntent.getForegroundService(context, 0, intent, 0)
+                            PendingIntent.getForegroundService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
                         addAction(
                             R.drawable.ic_file_download_24dp,
                             context.getString(R.string.update_all),

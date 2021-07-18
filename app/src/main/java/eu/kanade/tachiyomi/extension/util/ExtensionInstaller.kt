@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
@@ -188,8 +189,19 @@ internal class ExtensionInstaller(private val context: Context) {
                 delay(500)
             }
         }
+            .takeWhile {
+                val sessionId = downloadInstallerMap[id]
+                if (sessionId != null) {
+                    context.packageManager.packageInstaller.getSessionInfo(sessionId) != null
+                } else {
+                    true
+                }
+            }
             .catch {
                 Timber.e(it)
+            }
+            .onCompletion {
+                emit(InstallStep.Done to null)
             }
     }
 
