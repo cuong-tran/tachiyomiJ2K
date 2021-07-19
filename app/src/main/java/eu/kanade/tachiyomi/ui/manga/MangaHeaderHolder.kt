@@ -317,16 +317,25 @@ class MangaHeaderHolder(
         with(binding.mangaGenresTags) {
             removeAllViews()
             val dark = context.isInNightMode()
+            val amoled = adapter.delegate.mangaPresenter().preferences.themeDarkAmoled().get()
+            val baseTagColor = context.getResourceColor(R.attr.background)
+            val bgArray = FloatArray(3)
             val accentArray = FloatArray(3)
-            val onAccentArray = FloatArray(3)
+
+            ColorUtils.colorToHSL(baseTagColor, bgArray)
             ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorAccent), accentArray)
-            ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorOnAccent), onAccentArray)
             val downloadedColor = ColorUtils.setAlphaComponent(
                 ColorUtils.HSLToColor(
                     floatArrayOf(
-                        accentArray[0],
-                        accentArray[1],
-                        (if (dark) 0.3f else 0.85f)
+                        bgArray[0],
+                        bgArray[1],
+                        (
+                            when {
+                                amoled && dark -> 0.1f
+                                dark -> 0.225f
+                                else -> 0.85f
+                            }
+                            )
                     )
                 ),
                 199
@@ -334,8 +343,8 @@ class MangaHeaderHolder(
             val textColor = ColorUtils.HSLToColor(
                 floatArrayOf(
                     accentArray[0],
-                    0.8f,
-                    if (dark) 0.925f else 0.15f
+                    accentArray[1],
+                    if (dark) 0.945f else 0.175f
                 )
             )
             if (manga.genre.isNullOrBlank().not()) {
