@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!--========-->
     <!--Toolbars-->
@@ -190,6 +190,9 @@
 
     <style name="OverflowDialogTheme" parent="BottomSheetDialogTheme">
         <item name="android:windowAnimationStyle">@style/Theme.Widget.Animation.DropFromAbove</item>
+        <item name="android:windowBlurBehindRadius" tools:targetApi="31">150dp</item>
+        <item name="android:windowBackgroundBlurRadius" tools:targetApi="31">150dp</item>
+        <item name="android:windowBlurBehindEnabled" tools:targetApi="31">true</item>
     </style>
 
     <style name="Theme.Widget.Animation.DropFromAbove" parent="android:Animation">

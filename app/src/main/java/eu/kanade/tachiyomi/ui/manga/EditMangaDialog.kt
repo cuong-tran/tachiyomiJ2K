@@ -35,7 +35,6 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import kotlin.math.abs
 
 class EditMangaDialog : DialogController {
 
@@ -195,26 +194,34 @@ class EditMangaDialog : DialogController {
             val addTagEditText = binding.addTagEditText
             removeAllViews()
             val dark = context.isInNightMode()
+            val amoled = infoController.presenter.preferences.themeDarkAmoled().get()
+            val baseTagColor = context.getResourceColor(R.attr.background)
+            val bgArray = FloatArray(3)
             val accentArray = FloatArray(3)
-            val onAccentArray = FloatArray(3)
+
+            ColorUtils.colorToHSL(baseTagColor, bgArray)
             ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorAccent), accentArray)
-            ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorOnAccent), onAccentArray)
             val downloadedColor = ColorUtils.setAlphaComponent(
                 ColorUtils.HSLToColor(
                     floatArrayOf(
-                        accentArray[0],
-                        accentArray[1],
-                        // fun math just for good contrast
-                        ((if (dark) 0.35f else 0.87f) + (abs(onAccentArray[2] - 0.5f) * .7f)) / 2f
+                        bgArray[0],
+                        bgArray[1],
+                        (
+                            when {
+                                amoled && dark -> 0.1f
+                                dark -> 0.225f
+                                else -> 0.85f
+                            }
+                            )
                     )
                 ),
-                165
+                199
             )
             val textColor = ColorUtils.HSLToColor(
                 floatArrayOf(
                     accentArray[0],
-                    0.8f,
-                    if (dark) 0.925f else 0.15f
+                    accentArray[1],
+                    if (dark) 0.945f else 0.175f
                 )
             )
             genres.map { genreText ->
