@@ -85,6 +85,10 @@ class SourceFilterSheet(val activity: Activity) :
             }
         })
 
+        binding.filtersRecycler.viewTreeObserver.addOnScrollChangedListener {
+            updateBottomButtons()
+        }
+
         setOnShowListener {
             updateBottomButtons()
         }
@@ -92,7 +96,7 @@ class SourceFilterSheet(val activity: Activity) :
         binding.filtersRecycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         binding.filtersRecycler.clipToPadding = false
         binding.filtersRecycler.adapter = adapter
-        binding.filtersRecycler.setHasFixedSize(true)
+        binding.filtersRecycler.setHasFixedSize(false)
 
         sheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
