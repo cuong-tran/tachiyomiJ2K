@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
+import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
@@ -29,6 +30,10 @@ object Migrations {
      */
     fun upgrade(preferences: PreferencesHelper): Boolean {
         val context = preferences.context
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        prefs.edit {
+            remove(UpdaterService.NOTIFY_ON_INSTALL_KEY)
+        }
         val oldVersion = preferences.lastVersionCode().getOrDefault()
         if (oldVersion < BuildConfig.VERSION_CODE) {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
@@ -103,7 +108,6 @@ object Migrations {
             }
             if (oldVersion < 71) {
                 // Migrate DNS over HTTPS setting
-                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                 val wasDohEnabled = prefs.getBoolean("enable_doh", false)
                 if (wasDohEnabled) {
                     prefs.edit {
@@ -114,7 +118,6 @@ object Migrations {
             }
             if (oldVersion < 73) {
                 // Reset rotation to Free after replacing Lock
-                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                 if (prefs.contains("pref_rotation_type_key")) {
                     prefs.edit {
                         putInt("pref_rotation_type_key", 1)
@@ -128,7 +131,6 @@ object Migrations {
                 }
             }
             if (oldVersion < 75) {
-                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                 val wasShortcutsDisabled = !prefs.getBoolean("show_manga_app_shortcuts", true)
                 if (wasShortcutsDisabled) {
                     prefs.edit {
@@ -149,7 +151,6 @@ object Migrations {
             }
             if (oldVersion < 77) {
                 // Migrate Rotation and Viewer values to default values for viewer_flags
-                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                 val newOrientation = when (prefs.getInt("pref_rotation_type_key", 1)) {
                     1 -> OrientationType.FREE.flagValue
                     2 -> OrientationType.PORTRAIT.flagValue
