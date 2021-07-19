@@ -167,7 +167,7 @@ internal class UpdaterNotifier(private val context: Context) {
     fun onInstallFinished() {
         with(NotificationCompat.Builder(context, Notifications.CHANNEL_UPDATED)) {
             setContentTitle(context.getString(R.string.updated_to_, BuildConfig.VERSION_NAME))
-            setSmallIcon(R.drawable.ic_tachij2k)
+            setSmallIcon(R.drawable.ic_tachij2k_notification)
             setAutoCancel(true)
             setOngoing(false)
             setProgress(0, 0, false)
