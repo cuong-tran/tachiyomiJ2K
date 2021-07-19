@@ -112,7 +112,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                         }
                     )
                 )
-                setSmallIcon(R.drawable.ic_tachi)
+                setSmallIcon(R.drawable.ic_tachij2k_notification)
                 addAction(
                     R.drawable.nnf_ic_file_folder,
                     context.getString(R.string.view_all_errors),
@@ -141,7 +141,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                     notifications.add(
                         Pair(
                             context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                                setSmallIcon(R.drawable.ic_tachi)
+                                setSmallIcon(R.drawable.ic_tachij2k_notification)
                                 try {
                                     val request = ImageRequest.Builder(context).data(manga)
                                         .parameters(
@@ -211,7 +211,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                 notify(
                     Notifications.ID_NEW_CHAPTERS,
                     context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                        setSmallIcon(R.drawable.ic_tachi)
+                        setSmallIcon(R.drawable.ic_tachij2k_notification)
                         setLargeIcon(notificationBitmap)
                         setContentTitle(context.getString(R.string.new_chapters_found))
                         color = ContextCompat.getColor(context, R.color.colorAccent)
