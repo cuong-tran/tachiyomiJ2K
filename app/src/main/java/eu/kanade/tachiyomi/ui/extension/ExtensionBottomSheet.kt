@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -201,6 +202,35 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         presenter.cancelExtensionInstall(extension)
     }
 
+    override fun onUpdateAllClicked(position: Int) {
+        if (!presenter.preferences.hasPromptedBeforeUpdateAll().get()) {
+            MaterialDialog(controller.activity!!)
+                .title(R.string.update_all)
+                .message(R.string.some_extensions_may_prompt)
+                .positiveButton(android.R.string.ok) {
+                    presenter.preferences.hasPromptedBeforeUpdateAll().set(true)
+                    updateAllExtensions(position)
+                }
+                .show()
+        } else {
+            updateAllExtensions(position)
+        }
+    }
+
+    fun updateAllExtensions(position: Int) {
+        val header = (extAdapter?.getSectionHeader(position)) as? ExtensionGroupItem ?: return
+        val items = extAdapter?.getSectionItemPositions(header)
+        items?.forEach {
+            val extItem = (extAdapter?.getItem(it) as? ExtensionItem) ?: return
+            val extension = (extAdapter?.getItem(it) as? ExtensionItem)?.extension ?: return
+            if (extItem.installStep == null &&
+                extension is Extension.Installed && extension.hasUpdate
+            ) {
+                presenter.updateExtension(extension)
+            }
+        }
+    }
+
     override fun onItemClick(view: View?, position: Int): Boolean {
         when (binding.tabs.selectedTabPosition) {
             0 -> {
@@ -298,6 +328,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             extAdapter?.updateDataSet(extensions)
         }
         updateExtTitle()
+        updateExtUpdateAllButton()
     }
 
     fun canGoBack(): Boolean {
@@ -310,6 +341,20 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     fun downloadUpdate(item: ExtensionItem) {
         extAdapter?.updateItem(item, item.installStep)
+        updateExtUpdateAllButton()
+    }
+
+    fun updateExtUpdateAllButton() {
+        val updateHeader =
+            extAdapter?.headerItems?.find { it is ExtensionGroupItem && it.canUpdate != null } as? ExtensionGroupItem
+                ?: return
+        val items = extAdapter?.getSectionItemPositions(updateHeader) ?: return
+        updateHeader.canUpdate = items.any {
+            val extItem = (extAdapter?.getItem(it) as? ExtensionItem) ?: return
+            val extension = (extAdapter?.getItem(it) as? ExtensionItem)?.extension ?: return
+            extItem.installStep == null
+        }
+        extAdapter?.updateItem(updateHeader)
     }
 
     override fun trustSignature(signatureHash: String) {

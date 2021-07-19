@@ -19,12 +19,15 @@ import eu.kanade.tachiyomi.ui.migration.SelectionHeader
 import eu.kanade.tachiyomi.ui.migration.SourceItem
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import rx.Observable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -38,7 +41,7 @@ typealias ExtensionIntallInfo = Pair<InstallStep, PackageInstaller.SessionInfo?>
 class ExtensionBottomPresenter(
     private val bottomSheet: ExtensionBottomSheet,
     private val extensionManager: ExtensionManager = Injekt.get(),
-    private val preferences: PreferencesHelper = Injekt.get()
+    val preferences: PreferencesHelper = Injekt.get()
 ) : BaseCoroutinePresenter(), ExtensionsChangedListener {
 
     private var extensions = emptyList<ExtensionItem>()
@@ -76,7 +79,10 @@ class ExtensionBottomPresenter(
                 sourceItems = findSourcesWithManga(favs)
                 mangaItems = HashMap(
                     sourceItems.associate {
-                        it.source.id to this@ExtensionBottomPresenter.libraryToMigrationItem(favs, it.source.id)
+                        it.source.id to this@ExtensionBottomPresenter.libraryToMigrationItem(
+                            favs,
+                            it.source.id
+                        )
                     }
                 )
                 withContext(Dispatchers.Main) {
@@ -88,6 +94,27 @@ class ExtensionBottomPresenter(
                 }
             }
             listOf(migrationJob, extensionJob).awaitAll()
+        }
+        presenterScope.launch {
+            extensionManager.downloadRelay
+                .collect {
+                    val extPageName = extensionManager.getExtension(it.first)
+                    val extension = extensions.find { item ->
+                        extPageName == item.extension.pkgName
+                    } ?: return@collect
+                    when (it.second.first) {
+                        InstallStep.Installed, InstallStep.Error -> {
+                            currentDownloads.remove(extension.extension.pkgName)
+                        }
+                        else -> {
+                            currentDownloads[extension.extension.pkgName] = it.second
+                        }
+                    }
+                    val item = updateInstallStep(extension.extension, it.second.first, it.second.second)
+                    if (item != null) {
+                        withUIContext { bottomSheet.downloadUpdate(item) }
+                    }
+                }
         }
     }
 
@@ -176,7 +203,8 @@ class ExtensionBottomPresenter(
                     updatesSorted.size,
                     updatesSorted.size
                 ),
-                updatesSorted.size
+                updatesSorted.size,
+                items.count { it.extension.pkgName in currentDownloads.keys } != updatesSorted.size
             )
             items += updatesSorted.map { extension ->
                 ExtensionItem(extension, header, currentDownloads[extension.pkgName])
@@ -215,7 +243,7 @@ class ExtensionBottomPresenter(
     @Synchronized
     private fun updateInstallStep(
         extension: Extension,
-        state: InstallStep,
+        state: InstallStep?,
         session: PackageInstaller.SessionInfo?
     ): ExtensionItem? {
         val extensions = extensions.toMutableList()
@@ -242,13 +270,21 @@ class ExtensionBottomPresenter(
 
     fun installExtension(extension: Extension.Available) {
         if (isNotMIUIOptimized()) {
-            extensionManager.installExtension(extension).subscribeToInstallUpdate(extension)
+            presenterScope.launch {
+                extensionManager.installExtension(ExtensionManager.ExtensionInfo(extension), presenterScope)
+                    .launchIn(this)
+            }
         }
     }
 
     fun updateExtension(extension: Extension.Installed) {
         if (isNotMIUIOptimized()) {
-            extensionManager.updateExtension(extension).subscribeToInstallUpdate(extension)
+            val availableExt =
+                extensionManager.availableExtensions.find { it.pkgName == extension.pkgName } ?: return
+            presenterScope.launch {
+                extensionManager.installExtension(ExtensionManager.ExtensionInfo(availableExt), presenterScope)
+                    .launchIn(this)
+            }
         }
     }
 
@@ -258,17 +294,6 @@ class ExtensionBottomPresenter(
 //            return false
 //        }
         return true
-    }
-
-    private fun Observable<ExtensionIntallInfo>.subscribeToInstallUpdate(extension: Extension) {
-        this.doOnNext { currentDownloads[extension.pkgName] = it }
-            .doOnUnsubscribe { currentDownloads.remove(extension.pkgName) }
-            .map { state -> updateInstallStep(extension, state.first, state.second) }
-            .subscribe { item ->
-                if (item != null) {
-                    bottomSheet.downloadUpdate(item)
-                }
-            }
     }
 
     fun uninstallExtension(pkgName: String) {

@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.DelayedTrackingUpdateJob
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.LocalSource
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -75,6 +76,9 @@ class ReaderPresenter(
      */
     var manga: Manga? = null
         private set
+
+    val source: Source?
+        get() = manga?.source?.let { sourceManager.getOrStub(it) }
 
     /**
      * The chapter id of the currently loaded chapter. Used to restore from process kill.

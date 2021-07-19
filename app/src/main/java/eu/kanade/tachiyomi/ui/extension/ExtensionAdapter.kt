@@ -24,5 +24,6 @@ class ExtensionAdapter(val listener: OnButtonClickListener) :
     interface OnButtonClickListener {
         fun onButtonClick(position: Int)
         fun onCancelClick(position: Int)
+        fun onUpdateAllClicked(position: Int)
     }
 }

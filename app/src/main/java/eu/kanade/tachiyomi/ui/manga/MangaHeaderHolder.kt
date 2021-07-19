@@ -4,6 +4,9 @@ import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.os.Build
 import android.view.MotionEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -123,6 +126,15 @@ class MangaHeaderHolder(
                     R.string.author
                 )
                 true
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                backdrop.setRenderEffect(
+                    RenderEffect.createBlurEffect(
+                        10f,
+                        10f,
+                        Shader.TileMode.MIRROR
+                    )
+                )
             }
             mangaCover.setOnClickListener { adapter.delegate.zoomImageFromThumb(coverCard) }
             trackButton.setOnClickListener { adapter.delegate.showTrackingSheet() }

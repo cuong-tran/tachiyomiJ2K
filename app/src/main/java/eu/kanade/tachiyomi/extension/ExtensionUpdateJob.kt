@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.extension
 
+import android.app.PendingIntent
 import android.content.Context
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -17,6 +19,7 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
+import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.util.system.notification
 import kotlinx.coroutines.coroutineScope
 import uy.kohesive.injekt.Injekt
@@ -35,15 +38,21 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
         }
 
         if (pendingUpdates.isNotEmpty()) {
-            createUpdateNotification(pendingUpdates.map { it.name })
+            createUpdateNotification(pendingUpdates)
         }
 
         Result.success()
     }
 
-    private fun createUpdateNotification(names: List<String>) {
+    private fun createUpdateNotification(extensions: List<Extension.Available>) {
         val preferences: PreferencesHelper by injectLazy()
-        preferences.extensionUpdatesCount().set(names.size)
+        preferences.extensionUpdatesCount().set(extensions.size)
+        // Not doing this yet since users will get prompted while device is idle
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && preferences.autoUpdateExtensions()) {
+//            val intent = ExtensionInstallService.jobIntent(context, extensions)
+//            context.startForegroundService(intent)
+//            return
+//        }
         NotificationManagerCompat.from(context).apply {
             notify(
                 Notifications.ID_UPDATES_TO_EXTS,
@@ -51,11 +60,11 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                     setContentTitle(
                         context.resources.getQuantityString(
                             R.plurals.extension_updates_available,
-                            names.size,
-                            names.size
+                            extensions.size,
+                            extensions.size
                         )
                     )
-                    val extNames = names.joinToString(", ")
+                    val extNames = extensions.joinToString(", ") { it.name }
                     setContentText(extNames)
                     setStyle(NotificationCompat.BigTextStyle().bigText(extNames))
                     setSmallIcon(R.drawable.ic_extension_update_24dp)
@@ -65,6 +74,16 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                             context
                         )
                     )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        val intent = ExtensionInstallService.jobIntent(context, extensions)
+                        val pendingIntent =
+                            PendingIntent.getForegroundService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                        addAction(
+                            R.drawable.ic_file_download_24dp,
+                            context.getString(R.string.update_all),
+                            pendingIntent
+                        )
+                    }
                     setAutoCancel(true)
                 }
             )

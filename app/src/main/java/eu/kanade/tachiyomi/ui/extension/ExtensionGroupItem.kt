@@ -13,7 +13,7 @@ import eu.kanade.tachiyomi.R
  * @param name The header name.
  * @param size The number of items in the group.
  */
-data class ExtensionGroupItem(val name: String, val size: Int) : AbstractHeaderItem<ExtensionGroupHolder>() {
+data class ExtensionGroupItem(val name: String, val size: Int, var canUpdate: Boolean? = null) : AbstractHeaderItem<ExtensionGroupHolder>() {
 
     /**
      * Returns the layout resource of this item.

@@ -20,6 +20,8 @@ object Notifications {
     const val ID_UPDATER = 1
     const val ID_DOWNLOAD_IMAGE = 2
     const val ID_INSTALL = 3
+    const val CHANNEL_UPDATED = "updated_channel"
+    const val ID_INSTALLED = -6
 
     /**
      * Notification channel and ids used by the library updater.
@@ -47,6 +49,9 @@ object Notifications {
      */
     const val CHANNEL_UPDATES_TO_EXTS = "updates_ext_channel"
     const val ID_UPDATES_TO_EXTS = -401
+
+    const val CHANNEL_EXT_PROGRESS = "ext_update_progress_channel"
+    const val ID_EXTENSION_PROGRESS = -402
 
     private const val GROUP_BACKUP_RESTORE = "group_backup_restore"
     const val CHANNEL_BACKUP_RESTORE_PROGRESS = "backup_restore_progress_channel"
@@ -135,5 +140,25 @@ object Notifications {
             )
         )
         context.notificationManager.createNotificationChannels(channels)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val newChannels = listOf(
+                NotificationChannel(
+                    CHANNEL_EXT_PROGRESS,
+                    context.getString(R.string.updating_extensions),
+                    NotificationManager.IMPORTANCE_LOW
+                ).apply {
+                    setShowBadge(false)
+                    setSound(null, null)
+                },
+                NotificationChannel(
+                    CHANNEL_UPDATED,
+                    context.getString(R.string.update_completed),
+                    NotificationManager.IMPORTANCE_DEFAULT
+                ).apply {
+                    setShowBadge(false)
+                }
+            )
+            context.notificationManager.createNotificationChannels(newChannels)
+        }
     }
 }

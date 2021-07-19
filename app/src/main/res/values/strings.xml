@@ -117,6 +117,8 @@
     <string name="no_new_updates_available">No new updates available</string>
     <string name="searching_for_updates">Searching for updates…</string>
     <string name="release_page">Release page</string>
+    <string name="could_not_install_update">Could not install update</string>
+    <string name="update_completed">Update completed</string>
 
     <!-- Main Screens -->
 
@@ -312,6 +314,9 @@
     <string name="app_info">App info</string>
     <string name="_must_be_enabled_first">%1$s must be enabled first</string>
     <string name="could_not_install_extension">Could not install extension</string>
+    <string name="update_all">Update all</string>
+    <string name="some_extensions_may_prompt">Some extensions may still prompt to be installed first.</string>
+    <string name="updating_extensions">Updating extensions</string>
     <plurals name="_updates_pending">
         <item quantity="one">%d update pending</item>
         <item quantity="other">%d updates pending</item>
@@ -625,6 +630,8 @@
     <string name="midnight_dusk">Midnight Dusk</string>
     <string name="spring_blossom">Spring Blossom</string>
     <string name="strawberry_daiquiri">Strawberry Daiquiri</string>
+    <string name="a_brighter_you">A Brighter You</string>
+    <string name="a_calmer_you">A Calmer You</string>
     <string name="yotsuba">Yotsuba</string>
     <string name="yin">Yin</string>
     <string name="yang">Yang</string>
@@ -651,6 +658,11 @@
     <string name="starting_screen">Starting screen</string>
     <string name="back_to_start">Back to start</string>
     <string name="pressing_back_to_start">Pressing back to starting screen</string>
+    <string name="auto_updates">Auto-updates</string>
+    <string name="auto_update_app">Auto-update app</string>
+    <string name="over_wifi_only">Over Wi-Fi only</string>
+    <string name="over_any_network">Over any network</string>
+    <string name="dont_auto_update">Don\'t auto-update</string>
 
     <string name="app_shortcuts">App shortcuts</string>
     <string name="show_recent_sources">Show recently used sources</string>
@@ -980,5 +992,6 @@
     <string name="use_default">Use default</string>
     <string name="view_all_errors">View all errors</string>
     <string name="view_chapters">View chapters</string>
+    <string name="warning">Warning</string>
     <string name="wifi">Wi-Fi</string>
 </resources>

@@ -68,6 +68,7 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
 
     @Suppress("ResourceType")
     fun bindButton(item: ExtensionItem) = with(binding.extButton) {
+        if (item.installStep == InstallStep.Done) return@with
         isEnabled = true
         isClickable = true
         isActivated = false
@@ -87,6 +88,7 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
                     InstallStep.Installing -> R.string.installing
                     InstallStep.Installed -> R.string.installed
                     InstallStep.Error -> R.string.retry
+                    else -> return@with
                 }
             )
             if (installStep != InstallStep.Error) {

@@ -1,10 +1,14 @@
 package eu.kanade.tachiyomi.extension.util
 
 import android.app.Activity
+import android.app.DownloadManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionParams
+import android.content.pm.PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import com.hippo.unifile.UniFile
@@ -35,10 +39,9 @@ class ExtensionInstallActivity : Activity() {
             val params = SessionParams(
                 SessionParams.MODE_FULL_INSTALL
             )
-            // TODO: Add once compiling via SDK 31
-//            if (Build.VERSION.SDK_INT >= 31) {
-//                params.setRequireUserAction(USER_ACTION_NOT_REQUIRED)
-//            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                params.setRequireUserAction(USER_ACTION_NOT_REQUIRED)
+            }
             val sessionId = packageInstaller.createSession(params)
             val session = packageInstaller.openSession(sessionId)
             session.openWrite("package", 0, -1).use { packageInSession ->
@@ -55,6 +58,9 @@ class ExtensionInstallActivity : Activity() {
             session.commit(statusReceiver)
             val extensionManager: ExtensionManager by injectLazy()
             extensionManager.setInstalling(downloadId, sessionId)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                (getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).remove(downloadId)
+            }
             data.close()
         } catch (error: Exception) {
             // Either install package can't be found (probably bots) or there's a security exception

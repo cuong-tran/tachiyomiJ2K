@@ -200,8 +200,20 @@
             android:name=".data.notification.NotificationReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name=".data.updater.UpdaterBroadcast"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".data.library.LibraryUpdateService"
+            android:exported="false" />
+
+        <service
+            android:name=".extension.ExtensionInstallService"
             android:exported="false" />
 
         <service

@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.extension
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.os.Parcelable
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -15,9 +16,12 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.extension.ExtensionIntallInfo
 import eu.kanade.tachiyomi.util.system.launchNow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 import rx.Observable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -46,6 +50,15 @@ class ExtensionManager(
      * The installer which installs, updates and uninstalls the extensions.
      */
     private val installer by lazy { ExtensionInstaller(context) }
+
+    val downloadRelay
+        get() = installer.downloadsStateFlow
+
+    fun getExtension(downloadId: Long): String? {
+        return installer.activeDownloads.entries.find { downloadId == it.value }?.key
+    }
+
+    fun getActiveInstalls(): Int = installer.activeDownloads.size
 
     /**
      * Relay used to notify the installed extensions.
@@ -232,27 +245,14 @@ class ExtensionManager(
     }
 
     /**
-     * Returns an observable of the installation process for the given extension. It will complete
-     * once the extension is installed or throws an error. The process will be canceled if
-     * unsubscribed before its completion.
+     * Returns a flow of the installation process for the given extension. It will complete
+     * once the extension is installed or throws an error. The process will be canceled the scope
+     * is canceled before its completion.
      *
      * @param extension The extension to be installed.
      */
-    fun installExtension(extension: Extension.Available): Observable<ExtensionIntallInfo> {
-        return installer.downloadAndInstall(api.getApkUrl(extension), extension)
-    }
-
-    /**
-     * Returns an observable of the installation process for the given extension. It will complete
-     * once the extension is updated or throws an error. The process will be canceled if
-     * unsubscribed before its completion.
-     *
-     * @param extension The extension to be updated.
-     */
-    fun updateExtension(extension: Extension.Installed): Observable<ExtensionIntallInfo> {
-        val availableExt = availableExtensions.find { it.pkgName == extension.pkgName }
-            ?: return Observable.empty()
-        return installExtension(availableExt)
+    suspend fun installExtension(extension: ExtensionInfo, scope: CoroutineScope): Flow<ExtensionIntallInfo> {
+        return installer.downloadAndInstall(api.getApkUrl(extension), extension, scope)
     }
 
     /**
@@ -404,6 +404,21 @@ class ExtensionManager(
             return copy(hasUpdate = true)
         }
         return this
+    }
+
+    @Parcelize
+    data class ExtensionInfo(
+        val apkName: String,
+        val pkgName: String,
+        val name: String,
+        val versionCode: Int,
+    ) : Parcelable {
+        constructor(extension: Extension.Available) : this(
+            apkName = extension.apkName,
+            pkgName = extension.pkgName,
+            name = extension.name,
+            versionCode = extension.versionCode
+        )
     }
 }
 
