@@ -81,7 +81,9 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
     <style name="ThemeOverlay.Tachiyomi.Amoled" parent=""/>
+
     <style name="Theme.Tachiyomi.FlatLime"/>
+
     <style name="Theme.Tachiyomi.MidnightDusk">
         <item name="colorPrimary">@color/primaryDuskDawn</item>
         <item name="colorAccent">@color/colorAccentDuskDawn</item>
@@ -93,14 +95,31 @@
         <item name="android:colorBackground">@color/backgroundDuskDawn</item>
         <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
     </style>
+
     <style name="Theme.Tachiyomi.Strawberries">
         <item name="colorAccent">@color/colorAccentStrawberry</item>
         <item name="colorAccentText">@color/colorAccentStrawberryText</item>
     </style>
+
+    <!--== Tako Theme ==-->
+    <style name="Theme.Tachiyomi.Tako">
+        <item name="colorAccent">@color/accentTako</item>
+        <item name="colorOnAccent">@color/colorOnAccentTako</item>
+        <item name="colorPrimaryVariant">@color/surfaceTako</item>
+        <item name="tabBarIconColor">@color/colorOnTertiaryTako</item>
+        <item name="colorControlHighlight">@color/rippleColoredTako</item>
+        <item name="colorSecondary">@color/backgroundTako</item>
+        <item name="actionBarTintColor">@color/actionTintTako</item>
+        <item name="android:colorBackground">@color/backgroundTako</item>
+        <item name="colorAccentText">@color/colorAccentTextTako</item>
+        <item name="tabBarIconInactive">@color/inactiveTabTako</item>
+    </style>
+
     <style name="Theme.Tachiyomi.Yotsuba">
         <item name="colorAccent">@color/colorAccentYotsuba</item>
         <item name="colorAccentText">@color/colorAccentYotsubaText</item>
     </style>
+
     <!--== Yin Yang theme ==-->
     <style name="Theme.Tachiyomi.YinYang">
         <!-- Theme colors -->
