@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
@@ -146,7 +147,7 @@ interface Manga : SManga {
      */
     fun defaultReaderType(): Int {
         val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
-        val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) } ?: emptyList()
+        val currentTags = genre?.split(",")?.map { it.trim().lowercase(Locale.US) } ?: emptyList()
         return if (currentTags.any
             { tag ->
                 isManhwaTag(tag) || tag.contains("webtoon")
@@ -217,6 +218,20 @@ interface Manga : SManga {
             sourceName.contains("xkcd", true) ||
             sourceName.contains("tapas", true) ||
             sourceName.contains("ComicExtra", true)
+    }
+
+    fun isOneShotOrCompleted(db: DatabaseHelper): Boolean {
+        val tags by lazy { genre?.split(",")?.map { it.trim().lowercase(Locale.US) } }
+        val chapters by lazy { db.getChapters(this).executeAsBlocking() }
+        val firstChapterName by lazy { chapters.firstOrNull()?.name?.lowercase() ?: "" }
+        return status == SManga.COMPLETED || tags?.contains("oneshot") == true ||
+            (
+                chapters.size == 1 &&
+                    (
+                        Regex("one.?shot").containsMatchIn(firstChapterName) ||
+                            firstChapterName.contains("oneshot")
+                        )
+                )
     }
 
     fun key(): String {
