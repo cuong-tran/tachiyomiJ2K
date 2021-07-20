@@ -39,6 +39,7 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithTrackServiceTwoWay
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -532,14 +533,24 @@ class LibraryUpdateService(
     private fun writeErrorFile(errors: Map<Manga, String?>): File {
         try {
             if (errors.isNotEmpty()) {
-                val destFile = File(externalCacheDir, "tachiyomi_update_errors.txt")
-
-                destFile.bufferedWriter().use { out ->
-                    errors.forEach { (manga, error) ->
-                        out.write("${manga.title}: $error\n")
+                val file = createFileInCacheDir("tachiyomi_update_errors.txt")
+                file.bufferedWriter().use { out ->
+                    // Error file format:
+                    // ! Error
+                    //   # Source
+                    //     - Manga
+                    errors.toList().groupBy({ it.second }, { it.first }).forEach { (error, mangas) ->
+                        out.write("! ${error}\n")
+                        mangas.groupBy { it.source }.forEach { (srcId, mangas) ->
+                            val source = sourceManager.getOrStub(srcId)
+                            out.write("  # $source\n")
+                            mangas.forEach {
+                                out.write("    - ${it.title}\n")
+                            }
+                        }
                     }
                 }
-                return destFile
+                return file
             }
         } catch (e: Exception) {
             // Empty
