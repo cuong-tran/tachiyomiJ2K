@@ -1,11 +1,7 @@
 package eu.kanade.tachiyomi.data.updater
 
-import android.app.ActivityManager
-import android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
-import android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
 import android.content.Context
 import android.os.Build
-import androidx.core.app.NotificationCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
@@ -13,9 +9,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.coroutineScope
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -41,17 +35,6 @@ class AutoUpdaterJob(private val context: Context, workerParams: WorkerParameter
         } catch (e: Exception) {
             Result.failure()
         }
-    }
-
-    fun foregrounded(): Boolean {
-        val appProcessInfo = ActivityManager.RunningAppProcessInfo()
-        ActivityManager.getMyMemoryState(appProcessInfo)
-        return appProcessInfo.importance == IMPORTANCE_FOREGROUND || appProcessInfo.importance == IMPORTANCE_VISIBLE
-    }
-
-    fun NotificationCompat.Builder.update(block: NotificationCompat.Builder.() -> Unit) {
-        block()
-        context.notificationManager.notify(Notifications.ID_UPDATER, build())
     }
 
     companion object {
