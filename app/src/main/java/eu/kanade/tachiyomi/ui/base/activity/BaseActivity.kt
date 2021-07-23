@@ -41,10 +41,8 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
     override fun getTheme(): Resources.Theme {
-        return updatedTheme ?: run {
-            val newTheme = getThemeWithExtras(super.getTheme(), preferences)
-            updatedTheme = newTheme
-            newTheme
-        }
+        val newTheme = getThemeWithExtras(super.getTheme(), preferences, updatedTheme)
+        updatedTheme = newTheme
+        return newTheme
     }
 }
