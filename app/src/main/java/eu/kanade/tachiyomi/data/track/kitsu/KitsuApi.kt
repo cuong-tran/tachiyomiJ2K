@@ -120,8 +120,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
                             track.finished_reading_date = finishedDate
                         }
                     }
-                    track.apply {
-                    }
+                    track
                 }
         }
     }
