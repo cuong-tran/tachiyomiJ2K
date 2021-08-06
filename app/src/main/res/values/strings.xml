@@ -658,7 +658,6 @@
     <string name="white_theme">Pure White</string>
     <string name="locale">Locale</string>
     <string name="last_used_library_recents">Last used (Library or Recents)</string>
-    <string name="language">Language</string>
     <string name="system_default">System default</string>
     <string name="date_format">Date format</string>
     <string name="check_for_updates">Check for updates</string>
@@ -971,6 +970,7 @@
     <string name="name">Name</string>
     <string name="recently_updated">Recently updated</string>
     <string name="recently_installed">Recently installed</string>
+    <string name="language">Language</string>
     <string name="never">Never</string>
     <string name="newest">Newest</string>
     <string name="next">Next</string>
