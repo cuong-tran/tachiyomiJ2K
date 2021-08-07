@@ -88,11 +88,15 @@ internal object ExtensionLoader {
     }
 
     fun isExtensionInstalledByApp(context: Context, pkgName: String): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            context.packageManager.getInstallSourceInfo(pkgName).installingPackageName
-        } else {
-            context.packageManager.getInstallerPackageName(pkgName)
-        } == BuildConfig.APPLICATION_ID
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                context.packageManager.getInstallSourceInfo(pkgName).installingPackageName
+            } else {
+                context.packageManager.getInstallerPackageName(pkgName)
+            } == BuildConfig.APPLICATION_ID
+        } catch (e: java.lang.Exception) {
+            false
+        }
     }
 
     /**
