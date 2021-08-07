@@ -26,6 +26,8 @@
         <item name="android:colorBackground">@color/backgroundLime</item>
         <item name="colorSurface">@color/colorAccentLimeText</item>
         <item name="colorOnAccent">@color/colorOnLime</item>
+        <item name="colorDownloadBadge">@color/download_badge_light</item>
+        <item name="colorOnDownloadBadge">@color/md_white_1000</item>
     </style>
 
 
