@@ -23,7 +23,7 @@ subprojects {
 buildscript {
     dependencies {
         classpath(LegacyPluginClassPath.fireBaseCrashlytics)
-        classpath("com.android.tools.build:gradle:4.2.2")
+        classpath("com.android.tools.build:gradle:7.0.0")
         classpath(LegacyPluginClassPath.googleServices)
         classpath(LegacyPluginClassPath.kotlinPlugin)
         classpath("com.google.android.gms:oss-licenses-plugin:0.10.4")
