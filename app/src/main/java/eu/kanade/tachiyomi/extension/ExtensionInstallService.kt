@@ -109,7 +109,7 @@ class ExtensionInstallService(
         }
 
         job?.invokeOnCompletion {
-            if (showUpdatedNotification) {
+            if (showUpdatedNotification && installedExtensions.size > 0) {
                 notifier.showUpdatedNotification(installedExtensions, preferences.hideNotificationContent())
             }
             if (reRunUpdateCheck || installedExtensions.size != list.size) {

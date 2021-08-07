@@ -61,22 +61,24 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                 val extensionManager = Injekt.get<ExtensionManager>()
                 val extensionsInstalledByApp =
                     extensions.filter { extensionManager.isInstalledByApp(it) }
-                val intent =
-                    ExtensionInstallService.jobIntent(
-                        context,
-                        extensionsInstalledByApp,
-                        // Re reun this job if not all the extensions can be auto updated
-                        if (extensionsInstalledByApp.size == extensions.size) {
-                            1
-                        } else {
-                            2
-                        }
-                    )
-                context.startForegroundService(intent)
-                if (extensionsInstalledByApp.size == extensions.size) {
-                    return
-                } else {
-                    extensions.removeAll(extensionsInstalledByApp)
+                if (extensionsInstalledByApp.isNotEmpty()) {
+                    val intent =
+                        ExtensionInstallService.jobIntent(
+                            context,
+                            extensionsInstalledByApp,
+                            // Re run this job if not all the extensions can be auto updated
+                            if (extensionsInstalledByApp.size == extensions.size) {
+                                1
+                            } else {
+                                2
+                            }
+                        )
+                    context.startForegroundService(intent)
+                    if (extensionsInstalledByApp.size == extensions.size) {
+                        return
+                    } else {
+                        extensions.removeAll(extensionsInstalledByApp)
+                    }
                 }
             } else {
                 runJobAgain(context, NetworkType.UNMETERED)
