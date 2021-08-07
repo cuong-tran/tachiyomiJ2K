@@ -175,6 +175,11 @@
         </activity>
 
         <activity
+            android:name=".extension.util.ExtensionInstallActivity"
+            android:icon="@mipmap/ic_launcher"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+
+        <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
             android:theme="@style/Theme.OSS" />
         <activity

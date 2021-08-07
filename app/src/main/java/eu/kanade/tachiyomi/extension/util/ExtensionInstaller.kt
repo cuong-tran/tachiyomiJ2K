@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import androidx.core.net.toUri
 import eu.kanade.tachiyomi.extension.ExtensionManager
@@ -211,12 +212,24 @@ internal class ExtensionInstaller(private val context: Context) {
      * @param uri The uri of the extension to install.
      */
     fun installApk(downloadId: Long, uri: Uri) {
-        val intent = Intent(context, ExtensionInstallBroadcast::class.java)
-            .setDataAndType(uri, APK_MIME)
-            .putExtra(EXTRA_DOWNLOAD_ID, downloadId)
-            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
-        context.sendBroadcast(intent)
+        val pkgName = activeDownloads.entries.find { it.value == downloadId }?.key
+        val useActivity =
+            pkgName?.let { !ExtensionLoader.isExtensionInstalledByApp(context, pkgName) } ?: true ||
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+        val intent =
+            if (useActivity) {
+                Intent(context, ExtensionInstallActivity::class.java)
+            } else {
+                Intent(context, ExtensionInstallBroadcast::class.java)
+            }
+                .setDataAndType(uri, APK_MIME)
+                .putExtra(EXTRA_DOWNLOAD_ID, downloadId)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        if (useActivity) {
+            context.startActivity(intent)
+        } else {
+            context.sendBroadcast(intent)
+        }
     }
 
     /**
