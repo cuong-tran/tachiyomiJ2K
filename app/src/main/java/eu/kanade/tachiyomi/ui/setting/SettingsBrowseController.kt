@@ -1,8 +1,14 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Build
+import android.provider.Settings
 import androidx.preference.PreferenceScreen
+import androidx.preference.SwitchPreferenceCompat
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -19,6 +25,7 @@ import uy.kohesive.injekt.injectLazy
 class SettingsBrowseController : SettingsController() {
 
     val sourceManager: SourceManager by injectLazy()
+    var updatedExtNotifPref: SwitchPreferenceCompat? = null
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.sources
@@ -49,6 +56,23 @@ class SettingsBrowseController : SettingsController() {
                     defaultValue = AutoUpdaterJob.ONLY_ON_UNMETERED
                 }
                 infoPreference(R.string.some_extensions_may_not_update)
+                switchPreference {
+                    key = "notify_ext_updated"
+                    isPersistent = false
+                    titleRes = R.string.notify_extension_updated
+                    isChecked = Notifications.isNotificationChannelEnabled(context, Notifications.CHANNEL_EXT_UPDATED)
+                    updatedExtNotifPref = this
+                    onChange {
+                        false
+                    }
+                    onClick {
+                        val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+                            putExtra(Settings.EXTRA_APP_PACKAGE, BuildConfig.APPLICATION_ID)
+                            putExtra(Settings.EXTRA_CHANNEL_ID, Notifications.CHANNEL_EXT_UPDATED)
+                        }
+                        startActivity(intent)
+                    }
+                }
             }
         }
 
@@ -152,5 +176,10 @@ class SettingsBrowseController : SettingsController() {
 
             infoPreference(R.string.does_not_prevent_unofficial_nsfw)
         }
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        updatedExtNotifPref?.isChecked = Notifications.isNotificationChannelEnabled(activity, Notifications.CHANNEL_EXT_UPDATED)
     }
 }
