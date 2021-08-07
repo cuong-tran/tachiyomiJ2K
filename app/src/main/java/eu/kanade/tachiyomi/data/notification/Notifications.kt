@@ -47,11 +47,14 @@ object Notifications {
     /**
      * Notification channel and ids used by the library updater.
      */
+    private const val GROUP_EXTENSION_UPDATES = "group_extension_updates"
     const val CHANNEL_UPDATES_TO_EXTS = "updates_ext_channel"
     const val ID_UPDATES_TO_EXTS = -401
 
     const val CHANNEL_EXT_PROGRESS = "ext_update_progress_channel"
     const val ID_EXTENSION_PROGRESS = -402
+    const val CHANNEL_EXT_UPDATED = "ext_updated_channel"
+    const val ID_UPDATED_EXTS = -403
 
     private const val GROUP_BACKUP_RESTORE = "group_backup_restore"
     const val CHANNEL_BACKUP_RESTORE_PROGRESS = "backup_restore_progress_channel"
@@ -84,6 +87,7 @@ object Notifications {
 
         listOf(
             NotificationChannelGroup(GROUP_BACKUP_RESTORE, context.getString(R.string.backup_and_restore)),
+            NotificationChannelGroup(GROUP_EXTENSION_UPDATES, context.getString(R.string.extension_updates)),
         ).forEach(context.notificationManager::createNotificationChannelGroup)
 
         val channels = listOf(
@@ -108,9 +112,11 @@ object Notifications {
             },
             NotificationChannel(
                 CHANNEL_UPDATES_TO_EXTS,
-                context.getString(R.string.extension_updates),
+                context.getString(R.string.extension_updates_pending),
                 NotificationManager.IMPORTANCE_DEFAULT
-            ),
+            ).apply {
+                group = GROUP_EXTENSION_UPDATES
+            },
             NotificationChannel(
                 CHANNEL_NEW_CHAPTERS,
                 context.getString(R.string.new_chapters),
@@ -147,8 +153,16 @@ object Notifications {
                     context.getString(R.string.updating_extensions),
                     NotificationManager.IMPORTANCE_LOW
                 ).apply {
+                    group = GROUP_EXTENSION_UPDATES
                     setShowBadge(false)
                     setSound(null, null)
+                },
+                NotificationChannel(
+                    CHANNEL_EXT_UPDATED,
+                    context.getString(R.string.extensions_updated),
+                    NotificationManager.IMPORTANCE_DEFAULT
+                ).apply {
+                    group = GROUP_EXTENSION_UPDATES
                 },
                 NotificationChannel(
                     CHANNEL_UPDATED,

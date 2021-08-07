@@ -431,6 +431,8 @@ class PreferencesHelper(val context: Context) {
 
     fun shouldAutoUpdate() = prefs.getInt(Keys.shouldAutoUpdate, AutoUpdaterJob.ONLY_ON_UNMETERED)
 
+    fun autoUpdateExtensions() = prefs.getInt(Keys.autoUpdateExtensions, AutoUpdaterJob.ONLY_ON_UNMETERED)
+
     fun filterChapterByRead() = flowPrefs.getInt(Keys.defaultChapterFilterByRead, Manga.SHOW_ALL)
 
     fun filterChapterByDownloaded() = flowPrefs.getInt(Keys.defaultChapterFilterByDownloaded, Manga.SHOW_ALL)

@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.os.Build
 import dalvik.system.PathClassLoader
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.annotations.Nsfw
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -83,6 +85,14 @@ internal object ExtensionLoader {
             return LoadResult.Error("Tried to load a package that wasn't a extension")
         }
         return loadExtension(context, pkgName, pkgInfo)
+    }
+
+    fun isExtensionInstalledByApp(context: Context, pkgName: String): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            context.packageManager.getInstallSourceInfo(pkgName).installingPackageName
+        } else {
+            context.packageManager.getInstallerPackageName(pkgName)
+        } == BuildConfig.APPLICATION_ID
     }
 
     /**

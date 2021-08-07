@@ -292,6 +292,7 @@
     <!-- Extensions -->
     <string name="extensions">Extensions</string>
     <string name="extension_updates">Extension Updates</string>
+    <string name="extension_updates_pending">Extension Updates pending</string>
     <string name="extension_info">Extension info</string>
     <string name="filter_languages">Filter Languages</string>
     <string name="obsolete">Obsolete</string>
@@ -320,6 +321,11 @@
     <plurals name="_updates_pending">
         <item quantity="one">%d update pending</item>
         <item quantity="other">%d updates pending</item>
+    </plurals>
+    <string name="extensions_updated">Extensions updated</string>
+    <plurals name="extensions_updated_plural">
+        <item quantity="one">Extension updated</item>
+        <item quantity="other">%d extensions updated</item>
     </plurals>
     <plurals name="extension_updates_available">
         <item quantity="one">Extension update available</item>
@@ -770,6 +776,8 @@
     <!-- Browse Settings -->
     <string name="pref_global_search">Global search</string>
     <string name="check_for_extension_updates">Check for extension updates</string>
+    <string name="auto_update_extensions">Auto-update extensions</string>
+    <string name="some_extensions_may_not_update">Some extensions may not be auto-updated if they were installed outside this app</string>
     <string name="only_search_pinned_when">Only search pinned sources</string>
     <string name="match_pinned_sources">Match pinned sources</string>
     <string name="match_enabled_sources">Match enabled sources</string>

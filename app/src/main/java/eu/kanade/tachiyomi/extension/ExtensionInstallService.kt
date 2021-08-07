@@ -5,9 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.os.PowerManager
+import androidx.work.NetworkType
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.ExtensionManager.ExtensionInfo
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.util.system.notificationManager
@@ -26,6 +28,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.ArrayList
 import java.util.concurrent.TimeUnit
+import kotlin.math.max
 
 class ExtensionInstallService(
     val extensionManager: ExtensionManager = Injekt.get(),
@@ -63,7 +66,11 @@ class ExtensionInstallService(
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) return START_NOT_STICKY
-        if (!preferences.hasPromptedBeforeUpdateAll().get()) {
+        val showUpdated = intent.getIntExtra(KEY_SHOW_UPDATED, 0)
+        val showUpdatedNotification = showUpdated > 0
+        val reRunUpdateCheck = showUpdated > 1
+
+        if (!showUpdatedNotification && !preferences.hasPromptedBeforeUpdateAll().get()) {
             toast(R.string.some_extensions_may_prompt)
             preferences.hasPromptedBeforeUpdateAll().set(true)
         }
@@ -79,14 +86,19 @@ class ExtensionInstallService(
         }
             ?: return START_NOT_STICKY
         var installed = 0
+        val installedExtensions = mutableListOf<ExtensionInfo>()
         job = serviceScope.launch {
-            val results = list.map {
+            val results = list.map { extension ->
                 async {
                     requestSemaphore.withPermit {
-                        extensionManager.installExtension(it, serviceScope)
+                        extensionManager.installExtension(extension, serviceScope)
                             .collect {
                                 if (it.first.isCompleted()) {
+                                    installedExtensions.add(extension)
                                     installed++
+                                    val prefCount =
+                                        preferences.extensionUpdatesCount().getOrDefault()
+                                    preferences.extensionUpdatesCount().set(max(prefCount - 1, 0))
                                 }
                                 notifier.showProgressNotification(installed, list.size)
                             }
@@ -95,9 +107,18 @@ class ExtensionInstallService(
             }
             results.awaitAll()
         }
-        job?.invokeOnCompletion { stopSelf(startId) }
 
-        return START_REDELIVER_INTENT
+        job?.invokeOnCompletion {
+            if (showUpdatedNotification) {
+                notifier.showUpdatedNotification(installedExtensions, preferences.hideNotificationContent())
+            }
+            if (reRunUpdateCheck || installedExtensions.size != list.size) {
+                ExtensionUpdateJob.runJobAgain(this, NetworkType.CONNECTED)
+            }
+            stopSelf(startId)
+        }
+
+        return START_NOT_STICKY
     }
 
     /**
@@ -149,11 +170,13 @@ class ExtensionInstallService(
          * Key that defines what should be updated.
          */
         private const val KEY_EXTENSION = "extension"
+        private const val KEY_SHOW_UPDATED = "show_updated"
 
-        fun jobIntent(context: Context, extensions: List<Extension.Available>): Intent {
+        fun jobIntent(context: Context, extensions: List<Extension.Available>, showUpdatedExtension: Int = 0): Intent {
             return Intent(context, ExtensionInstallService::class.java).apply {
                 val info = extensions.map(::ExtensionInfo)
                 putParcelableArrayListExtra(KEY_EXTENSION, ArrayList(info))
+                putExtra(KEY_SHOW_UPDATED, showUpdatedExtension)
             }
         }
     }

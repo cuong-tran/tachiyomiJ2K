@@ -29,7 +29,7 @@ class ExtensionInstallNotifier(private val context: Context) {
      * Cached progress notification to avoid creating a lot.
      */
     val progressNotificationBuilder by lazy {
-        context.notificationBuilder(Notifications.CHANNEL_UPDATES_TO_EXTS) {
+        context.notificationBuilder(Notifications.CHANNEL_EXT_PROGRESS) {
             setContentTitle(context.getString(R.string.app_name))
             setSmallIcon(android.R.drawable.stat_sys_download)
             setLargeIcon(notificationBitmap)
@@ -54,8 +54,34 @@ class ExtensionInstallNotifier(private val context: Context) {
         context.notificationManager.notify(
             Notifications.ID_EXTENSION_PROGRESS,
             progressNotificationBuilder
+                .setChannelId(Notifications.CHANNEL_EXT_PROGRESS)
                 .setContentTitle(context.getString(R.string.updating_extensions))
                 .setProgress(max, progress, progress == 0)
+                .build()
+        )
+    }
+
+    fun showUpdatedNotification(extensions: List<ExtensionManager.ExtensionInfo>, hideContent: Boolean) {
+        context.notificationManager.notify(
+            Notifications.ID_UPDATED_EXTS,
+            progressNotificationBuilder
+                .setChannelId(Notifications.CHANNEL_EXT_UPDATED)
+                .setContentTitle(
+                    context.resources.getQuantityString(
+                        R.plurals.extensions_updated_plural,
+                        extensions.size,
+                        extensions.size
+                    )
+                )
+                .setSmallIcon(R.drawable.ic_extension_updated_24dp)
+                .setOngoing(false)
+                .setContentIntent(NotificationReceiver.openExtensionsPendingActivity(context))
+                .clearActions()
+                .setProgress(0, 0, false).apply {
+                    if (!hideContent) {
+                        setContentText(extensions.joinToString(", ") { it.name })
+                    }
+                }
                 .build()
         )
     }

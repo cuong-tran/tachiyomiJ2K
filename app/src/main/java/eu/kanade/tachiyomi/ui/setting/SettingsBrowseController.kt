@@ -1,10 +1,12 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.os.Build
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -33,6 +35,20 @@ class SettingsBrowseController : SettingsController() {
                     ExtensionUpdateJob.setupTask(context, it)
                     true
                 }
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                intListPreference(activity) {
+                    key = PreferenceKeys.autoUpdateExtensions
+                    titleRes = R.string.auto_update_extensions
+                    entryRange = 0..2
+                    entriesRes = arrayOf(
+                        R.string.over_any_network,
+                        R.string.over_wifi_only,
+                        R.string.dont_auto_update
+                    )
+                    defaultValue = AutoUpdaterJob.ONLY_ON_UNMETERED
+                }
+                infoPreference(R.string.some_extensions_may_not_update)
             }
         }
 

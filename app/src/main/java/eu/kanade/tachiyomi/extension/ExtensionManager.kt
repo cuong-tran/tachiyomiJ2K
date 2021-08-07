@@ -182,6 +182,10 @@ class ExtensionManager(
         return untrustedExtensionsRelay.asObservable()
     }
 
+    fun isInstalledByApp(extension: Extension.Available): Boolean {
+        return ExtensionLoader.isExtensionInstalledByApp(context, extension.pkgName)
+    }
+
     /**
      * Finds the available extensions in the [api] and updates [availableExtensions].
      */

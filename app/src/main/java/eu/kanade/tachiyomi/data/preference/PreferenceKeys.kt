@@ -231,6 +231,8 @@ object PreferenceKeys {
 
     const val shouldAutoUpdate = "should_auto_update"
 
+    const val autoUpdateExtensions = "auto_update_extensions"
+
     const val defaultChapterFilterByRead = "default_chapter_filter_by_read"
 
     const val defaultChapterFilterByDownloaded = "default_chapter_filter_by_downloaded"

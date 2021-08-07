@@ -9,7 +9,9 @@ import androidx.core.content.ContextCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -18,8 +20,10 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.extension.model.Extension
+import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.notification
 import kotlinx.coroutines.coroutineScope
 import uy.kohesive.injekt.Injekt
@@ -44,15 +48,40 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
         Result.success()
     }
 
-    private fun createUpdateNotification(extensions: List<Extension.Available>) {
+    private fun createUpdateNotification(extensionsList: List<Extension.Available>) {
+        val extensions = extensionsList.toMutableList()
         val preferences: PreferencesHelper by injectLazy()
         preferences.extensionUpdatesCount().set(extensions.size)
-        // Not doing this yet since users will get prompted while device is idle
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && preferences.autoUpdateExtensions()) {
-//            val intent = ExtensionInstallService.jobIntent(context, extensions)
-//            context.startForegroundService(intent)
-//            return
-//        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && preferences.autoUpdateExtensions() != AutoUpdaterJob.NEVER) {
+            val cm = context.connectivityManager
+            if (
+                preferences.autoUpdateExtensions() == AutoUpdaterJob.ALWAYS ||
+                !cm.isActiveNetworkMetered
+            ) {
+                val extensionManager = Injekt.get<ExtensionManager>()
+                val extensionsInstalledByApp =
+                    extensions.filter { extensionManager.isInstalledByApp(it) }
+                val intent =
+                    ExtensionInstallService.jobIntent(
+                        context,
+                        extensionsInstalledByApp,
+                        // Re reun this job if not all the extensions can be auto updated
+                        if (extensionsInstalledByApp.size == extensions.size) {
+                            1
+                        } else {
+                            2
+                        }
+                    )
+                context.startForegroundService(intent)
+                if (extensionsInstalledByApp.size == extensions.size) {
+                    return
+                } else {
+                    extensions.removeAll(extensionsInstalledByApp)
+                }
+            } else {
+                runJobAgain(context, NetworkType.UNMETERED)
+            }
+        }
         NotificationManagerCompat.from(context).apply {
             notify(
                 Notifications.ID_UPDATES_TO_EXTS,
@@ -74,7 +103,9 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                             context
                         )
                     )
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                        extensions.size == extensionsList.size
+                    ) {
                         val intent = ExtensionInstallService.jobIntent(context, extensions)
                         val pendingIntent =
                             PendingIntent.getForegroundService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
@@ -92,6 +123,20 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
 
     companion object {
         private const val TAG = "ExtensionUpdate"
+        private const val AUTO_TAG = "AutoExtensionUpdate"
+
+        fun runJobAgain(context: Context, networkType: NetworkType) {
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(networkType)
+                .build()
+            val request = OneTimeWorkRequestBuilder<ExtensionUpdateJob>()
+                .setConstraints(constraints)
+                .addTag(AUTO_TAG)
+                .build()
+
+            WorkManager.getInstance(context)
+                .enqueueUniqueWork(AUTO_TAG, ExistingWorkPolicy.REPLACE, request)
+        }
 
         fun setupTask(context: Context, forceAutoUpdateJob: Boolean? = null) {
             val preferences = Injekt.get<PreferencesHelper>()
