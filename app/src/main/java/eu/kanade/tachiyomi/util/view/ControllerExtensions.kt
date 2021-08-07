@@ -187,7 +187,6 @@ fun Controller.scrollViewWith(
     activityBinding?.appBar?.y = 0f
     activityBinding?.tabsFrameLayout?.elevation = 0f
     val isSideNavWithTabs = activityBinding?.sideNav != null && includeTabView && recycler.context.isTablet()
-    activityBinding?.tabShadow?.isVisible = isSideNavWithTabs
     val attrsArray = intArrayOf(R.attr.actionBarSize)
     val array = recycler.context.obtainStyledAttributes(attrsArray)
     var appBarHeight = (
@@ -243,33 +242,18 @@ fun Controller.scrollViewWith(
             liftOnScroll.invoke(el)
         } else {
             elevationAnim?.cancel()
-            if (isSideNavWithTabs && el) {
-                activityBinding?.tabShadow?.isVisible = true
-            }
             val floatingBar =
                 (this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView
             if (floatingBar) {
-                if (isSideNavWithTabs) {
-                    activityBinding?.tabShadow?.alpha = 0f
-                } else {
-                    activityBinding?.appBar?.elevation = 0f
-                }
+                activityBinding?.appBar?.elevation = 0f
                 return@f
             }
             elevationAnim = ValueAnimator.ofFloat(
-                if (isSideNavWithTabs) {
-                    (activityBinding?.tabShadow?.alpha ?: 0f) * 100
-                } else {
-                    activityBinding?.appBar?.elevation ?: 0f
-                },
+                activityBinding?.appBar?.elevation ?: 0f,
                 if (el) 15f else 0f
             )
             elevationAnim?.addUpdateListener { valueAnimator ->
-                if (isSideNavWithTabs) {
-                    activityBinding?.tabShadow?.alpha = valueAnimator.animatedValue as Float / 100
-                } else {
-                    activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
-                }
+                activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
             }
             elevationAnim?.start()
         }
@@ -287,7 +271,6 @@ fun Controller.scrollViewWith(
                 super.onChangeStart(controller, changeHandler, changeType)
                 isInView = changeType.isEnter
                 if (changeType.isEnter) {
-                    activityBinding?.tabShadow?.isVisible = isSideNavWithTabs
                     elevateFunc(elevate)
                     if (fakeToolbarView?.parent != null) {
                         val parent = fakeToolbarView?.parent as? ViewGroup ?: return
@@ -309,7 +292,6 @@ fun Controller.scrollViewWith(
                         }
                     }
                 } else {
-                    activityBinding?.tabShadow?.isVisible = false
                     if (!customPadding && lastY == 0f && (
                         (
                             this@scrollViewWith !is FloatingSearchInterface && router.backstack.lastOrNull()
