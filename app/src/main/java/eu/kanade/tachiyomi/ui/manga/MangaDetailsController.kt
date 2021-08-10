@@ -355,23 +355,26 @@ class MangaDetailsController :
         val request = ImageRequest.Builder(view.context).data(presenter.manga).allowHardware(false).memoryCacheKey(presenter.manga.key())
             .target(
                 onSuccess = { drawable ->
-                    val bitmap = (drawable as BitmapDrawable).bitmap
+                    val bitmap = (drawable as? BitmapDrawable)?.bitmap
                     // Generate the Palette on a background thread.
-                    Palette.from(bitmap).generate {
-                        if (it == null) return@generate
-                        val colorBack = view.context.getResourceColor(
-                            android.R.attr.colorBackground
-                        )
-                        // this makes the color more consistent regardless of theme
-                        val backDropColor =
-                            ColorUtils.blendARGB(it.getVibrantColor(colorBack), colorBack, .35f)
+                    if (bitmap != null) {
+                        Palette.from(bitmap).generate {
+                            if (it == null) return@generate
+                            val colorBack = view.context.getResourceColor(
+                                android.R.attr.colorBackground
+                            )
+                            // this makes the color more consistent regardless of theme
+                            val backDropColor =
+                                ColorUtils.blendARGB(it.getVibrantColor(colorBack), colorBack, .35f)
 
-                        coverColor = backDropColor
-                        getHeader()?.setBackDrop(backDropColor)
-                        if (toolbarIsColored) {
-                            val translucentColor = ColorUtils.setAlphaComponent(backDropColor, 175)
-                            activityBinding?.toolbar?.setBackgroundColor(translucentColor)
-                            activity?.window?.statusBarColor = translucentColor
+                            coverColor = backDropColor
+                            getHeader()?.setBackDrop(backDropColor)
+                            if (toolbarIsColored) {
+                                val translucentColor =
+                                    ColorUtils.setAlphaComponent(backDropColor, 175)
+                                activityBinding?.toolbar?.setBackgroundColor(translucentColor)
+                                activity?.window?.statusBarColor = translucentColor
+                            }
                         }
                     }
                     binding.mangaCoverFull.setImageDrawable(drawable)
@@ -1379,11 +1382,12 @@ class MangaDetailsController :
 
     override fun zoomImageFromThumb(thumbView: View) {
         if (fullCoverActive) return
+        val drawable = binding.mangaCoverFull.drawable ?: return
         fullCoverActive = true
-        val expandedImageView = binding.mangaCoverFull
+        drawable.alpha = 255
         val fullCoverDialog = FullCoverDialog(
             this,
-            expandedImageView.drawable,
+            drawable,
             thumbView
         )
         fullCoverDialog.setOnDismissListener {
@@ -1393,7 +1397,6 @@ class MangaDetailsController :
             fullCoverActive = false
         }
         fullCoverDialog.show()
-        return
     }
 
     companion object {
