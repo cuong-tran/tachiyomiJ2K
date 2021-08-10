@@ -8,6 +8,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
+import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
@@ -52,7 +53,10 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
         val extensions = extensionsList.toMutableList()
         val preferences: PreferencesHelper by injectLazy()
         preferences.extensionUpdatesCount().set(extensions.size)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && preferences.autoUpdateExtensions() != AutoUpdaterJob.NEVER) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            inputData.getBoolean(RUN_AUTO, true) &&
+            preferences.autoUpdateExtensions() != AutoUpdaterJob.NEVER
+        ) {
             val cm = context.connectivityManager
             if (
                 preferences.autoUpdateExtensions() == AutoUpdaterJob.ALWAYS ||
@@ -126,14 +130,20 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
     companion object {
         private const val TAG = "ExtensionUpdate"
         private const val AUTO_TAG = "AutoExtensionUpdate"
+        private const val RUN_AUTO = "run_auto"
 
-        fun runJobAgain(context: Context, networkType: NetworkType) {
+        fun runJobAgain(context: Context, networkType: NetworkType, runAutoInstaller: Boolean = true) {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(networkType)
                 .build()
+
+            val data = Data.Builder()
+            data.putBoolean(RUN_AUTO, runAutoInstaller)
+
             val request = OneTimeWorkRequestBuilder<ExtensionUpdateJob>()
                 .setConstraints(constraints)
                 .addTag(AUTO_TAG)
+                .setInputData(data.build())
                 .build()
 
             WorkManager.getInstance(context)
