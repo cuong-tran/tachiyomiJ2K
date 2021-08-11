@@ -813,7 +813,7 @@ class MangaDetailsPresenter(
     }
 
     private fun saveCover(directory: File): File {
-        val cover = coverCache.getCoverFile(manga)
+        val cover = coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(manga)
         val type = ImageUtil.findImageType(cover.inputStream())
             ?: throw Exception("Not an image")
 
