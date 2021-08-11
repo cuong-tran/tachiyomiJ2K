@@ -71,8 +71,10 @@ import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.source.BrowseController
+import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
@@ -1137,10 +1139,29 @@ class MangaDetailsController :
     }
 
     override fun tagClicked(text: String) {
-        val firstController = router.backstack.first()?.controller
-        if (firstController is LibraryController && router.backstack.size == 2) {
-            router.handleBack()
-            firstController.search(text)
+        if (router.backstackSize < 2) {
+            return
+        }
+
+        when (val previousController = router.backstack[router.backstackSize - 2].controller) {
+            is LibraryController -> {
+                router.handleBack()
+                previousController.search(text)
+            }
+            is RecentsController -> {
+                // Manually navigate to LibraryController
+                router.handleBack()
+                (activity as? MainActivity)?.goToTab(R.id.nav_library)
+                val controller =
+                    router.getControllerWithTag(R.id.nav_library.toString()) as LibraryController
+                controller.search(text)
+            }
+            is BrowseSourceController -> {
+                if (presenter.source is HttpSource) {
+                    router.handleBack()
+                    previousController.searchWithGenre(text)
+                }
+            }
         }
     }
 
