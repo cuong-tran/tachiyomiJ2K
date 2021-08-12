@@ -565,10 +565,9 @@ class LibraryController(
             )
 
         // Using a double post because when the filter sheet is open it hides the hopper
-        view.post {
-            view.post {
-                updateHopperY()
-            }
+        viewScope.launchUI {
+            delay(50)
+            updateHopperY()
         }
         setSwipeRefresh()
 
