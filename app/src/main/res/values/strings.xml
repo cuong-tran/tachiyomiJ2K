@@ -312,6 +312,7 @@
     <string name="version_">Version: %1$s</string>
     <string name="language_">Language: %1$s</string>
     <string name="nsfw_short">18+</string>
+    <string name="installed_">Installed %1$s</string>
     <string name="unofficial">Unofficial</string>
     <string name="extensions_miui_warning">MIUI Optimization must be disabled to install extensions.</string>
     <string name="may_contain_nsfw">May contain NSFW (18+) content</string>
@@ -963,6 +964,9 @@
     <string name="move_to_top">Move to top</string>
     <string name="move_to_">Move to %1$s</string>
     <string name="moved_to_">Moved to %1$s</string>
+    <string name="name">Name</string>
+    <string name="recently_updated">Recently updated</string>
+    <string name="recently_installed">Recently installed</string>
     <string name="never">Never</string>
     <string name="newest">Newest</string>
     <string name="next">Next</string>
