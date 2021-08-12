@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
@@ -296,7 +295,7 @@ class PreferencesHelper(val context: Context) {
 
     fun librarySortingAscending() = rxPrefs.getBoolean("library_sorting_ascending", true)
 
-    fun automaticExtUpdates() = rxPrefs.getBoolean(Keys.automaticExtUpdates, true)
+    fun automaticExtUpdates() = flowPrefs.getBoolean(Keys.automaticExtUpdates, true)
 
     fun collapsedCategories() = rxPrefs.getStringSet("collapsed_categories", mutableSetOf())
 
