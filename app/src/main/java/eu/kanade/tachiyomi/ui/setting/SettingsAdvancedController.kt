@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.PREF_DOH_ADGUARD
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
 import eu.kanade.tachiyomi.source.SourceManager
@@ -33,11 +34,7 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.openInBrowser
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -190,12 +187,16 @@ class SettingsAdvancedController : SettingsController() {
                     activity?.toast(R.string.cookies_cleared)
                 }
             }
-
             intListPreference(activity) {
                 key = PreferenceKeys.dohProvider
                 titleRes = R.string.doh
-                entriesRes = arrayOf(R.string.disabled, R.string.cloudflare, R.string.google)
-                entryValues = listOf(-1, PREF_DOH_CLOUDFLARE, PREF_DOH_GOOGLE)
+                entriesRes = arrayOf(
+                    R.string.disabled,
+                    R.string.cloudflare,
+                    R.string.google,
+                    R.string.adGuard
+                )
+                entryValues = listOf(-1, PREF_DOH_CLOUDFLARE, PREF_DOH_GOOGLE, PREF_DOH_ADGUARD)
 
                 defaultValue = -1
                 onChange {

@@ -7,8 +7,9 @@ import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
-import com.chuckerteam.chucker.api.ChuckerInterceptor
-import okhttp3.OkHttpClient
+import eu.kanade.tachiyomi.network.NetworkHelper
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class CoilSetup(context: Context) {
     init {
@@ -26,11 +27,8 @@ class CoilSetup(context: Context) {
                 add(SvgDecoder(context))
                 add(MangaFetcher())
                 add(ByteArrayFetcher())
-            }.okHttpClient {
-                OkHttpClient.Builder()
-                    .addInterceptor(ChuckerInterceptor(context))
-                    .build()
             }
+            .okHttpClient(Injekt.get<NetworkHelper>().coilClient)
             .build()
 
         Coil.setImageLoader(imageLoader)
