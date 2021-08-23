@@ -167,6 +167,13 @@ class ExtensionInstallService(
         }
 
         /**
+         * Returns the status of the service.
+         *
+         * @return true if the service is running, false otherwise.
+         */
+        fun isRunning() = instance != null
+
+        /**
          * Key that defines what should be updated.
          */
         private const val KEY_EXTENSION = "extension"

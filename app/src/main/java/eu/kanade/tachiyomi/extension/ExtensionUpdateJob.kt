@@ -17,6 +17,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -54,12 +55,16 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
         preferences.extensionUpdatesCount().set(extensions.size)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
             inputData.getBoolean(RUN_AUTO, true) &&
-            preferences.autoUpdateExtensions() != AutoUpdaterJob.NEVER
+            preferences.autoUpdateExtensions() != AutoUpdaterJob.NEVER &&
+            !ExtensionInstallService.isRunning()
         ) {
             val cm = context.connectivityManager
+            val libraryServiceRunning = LibraryUpdateService.isRunning()
             if (
-                preferences.autoUpdateExtensions() == AutoUpdaterJob.ALWAYS ||
-                !cm.isActiveNetworkMetered
+                (
+                    preferences.autoUpdateExtensions() == AutoUpdaterJob.ALWAYS ||
+                        !cm.isActiveNetworkMetered
+                    ) && !libraryServiceRunning
             ) {
                 val extensionManager = Injekt.get<ExtensionManager>()
                 val extensionsInstalledByApp =
@@ -83,8 +88,10 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                         extensions.removeAll(extensionsInstalledByApp)
                     }
                 }
-            } else {
+            } else if (!libraryServiceRunning) {
                 runJobAgain(context, NetworkType.UNMETERED)
+            } else {
+                LibraryUpdateService.runExtensionUpdatesAfter = true
             }
         }
         NotificationManagerCompat.from(context).apply {
