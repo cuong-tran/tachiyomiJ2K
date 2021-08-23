@@ -1,11 +1,13 @@
 package eu.kanade.tachiyomi.ui.extension
 
 import android.content.pm.PackageInstaller
+import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.extension.ExtensionInstallService
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.ExtensionsChangedListener
 import eu.kanade.tachiyomi.extension.model.Extension
@@ -300,31 +302,37 @@ class ExtensionBottomPresenter(
     }
 
     fun installExtension(extension: Extension.Available) {
-        if (isNotMIUIOptimized()) {
-            presenterScope.launch {
-                extensionManager.installExtension(ExtensionManager.ExtensionInfo(extension), presenterScope)
-                    .launchIn(this)
-            }
+        presenterScope.launch {
+            extensionManager.installExtension(
+                ExtensionManager.ExtensionInfo(extension),
+                presenterScope
+            )
+                .launchIn(this)
         }
     }
 
     fun updateExtension(extension: Extension.Installed) {
-        if (isNotMIUIOptimized()) {
-            val availableExt =
-                extensionManager.availableExtensions.find { it.pkgName == extension.pkgName } ?: return
-            presenterScope.launch {
-                extensionManager.installExtension(ExtensionManager.ExtensionInfo(availableExt), presenterScope)
-                    .launchIn(this)
-            }
-        }
+        val availableExt =
+            extensionManager.availableExtensions.find { it.pkgName == extension.pkgName } ?: return
+        installExtension(availableExt)
     }
 
-    fun isNotMIUIOptimized(): Boolean {
-//        if (MiuiUtil.isMiui() && !MiuiUtil.isMiuiOptimizationDisabled()) {
-//            preferences.context.toast(R.string.extensions_miui_warning, Toast.LENGTH_LONG)
-//            return false
-//        }
-        return true
+    fun updateExtensions(extensions: List<Extension.Installed>) {
+        if (extensions.isEmpty()) return
+        val context = bottomSheet.context
+        extensions.forEach {
+            val pkgName = it.pkgName
+            currentDownloads[pkgName] = InstallStep.Pending to null
+            val item = updateInstallStep(it, InstallStep.Pending, null) ?: return@forEach
+            bottomSheet.downloadUpdate(item)
+        }
+        val intent = ExtensionInstallService.jobIntent(
+            bottomSheet.context,
+            extensions.mapNotNull { extension ->
+                extensionManager.availableExtensions.find { it.pkgName == extension.pkgName }
+            }
+        )
+        ContextCompat.startForegroundService(context, intent)
     }
 
     fun uninstallExtension(pkgName: String) {
