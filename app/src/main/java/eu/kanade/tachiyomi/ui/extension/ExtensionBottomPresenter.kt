@@ -59,6 +59,7 @@ class ExtensionBottomPresenter(
     private val sourceManager: SourceManager = Injekt.get()
 
     private var selectedSource: Long? = null
+    private var firstLoad = true
     private val db: DatabaseHelper = Injekt.get()
 
     override fun onCreate() {
@@ -100,9 +101,21 @@ class ExtensionBottomPresenter(
         presenterScope.launch {
             extensionManager.downloadRelay
                 .collect {
-                    val extPageName = extensionManager.getExtension(it.first)
+                    if (it.first == "Finished") {
+                        firstLoad = true
+                        currentDownloads.clear()
+                        extensions = toItems(
+                            Triple(
+                                extensionManager.installedExtensions,
+                                extensionManager.untrustedExtensions,
+                                extensionManager.availableExtensions
+                            )
+                        )
+                        withUIContext { bottomSheet.setExtensions(extensions) }
+                        return@collect
+                    }
                     val extension = extensions.find { item ->
-                        extPageName == item.extension.pkgName
+                        it.first == item.extension.pkgName
                     } ?: return@collect
                     when (it.second.first) {
                         InstallStep.Installed, InstallStep.Error -> {
@@ -182,6 +195,15 @@ class ExtensionBottomPresenter(
         val (installed, untrusted, available) = tuple
 
         val items = mutableListOf<ExtensionItem>()
+
+        if (firstLoad) {
+            val listOfExtensions = installed + untrusted + available
+            listOfExtensions.forEach {
+                val installInfo = extensionManager.getInstallInfo(it.pkgName) ?: return@forEach
+                currentDownloads[it.pkgName] = installInfo
+            }
+            firstLoad = false
+        }
 
         val updatesSorted = installed.filter { it.hasUpdate && (showNsfwExtensions || !it.isNsfw) }.sortedBy { it.name }
         val sortOrder = InstalledExtensionsOrder.fromPreference(preferences)
