@@ -44,6 +44,9 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
 
         if (pendingUpdates.isNotEmpty()) {
             createUpdateNotification(pendingUpdates)
+        } else {
+            val preferences: PreferencesHelper by injectLazy()
+            preferences.extensionUpdatesCount().set(0)
         }
 
         Result.success()
