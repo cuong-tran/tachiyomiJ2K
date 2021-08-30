@@ -56,10 +56,14 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
         val extensions = extensionsList.toMutableList()
         val preferences: PreferencesHelper by injectLazy()
         preferences.extensionUpdatesCount().set(extensions.size)
+        val extensionsInstalledByApp by lazy {
+            extensions.filter { Injekt.get<ExtensionManager>().isInstalledByApp(it) }
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
             inputData.getBoolean(RUN_AUTO, true) &&
             preferences.autoUpdateExtensions() != AutoUpdaterJob.NEVER &&
-            !ExtensionInstallService.isRunning()
+            !ExtensionInstallService.isRunning() &&
+            extensionsInstalledByApp.isNotEmpty()
         ) {
             val cm = context.connectivityManager
             val libraryServiceRunning = LibraryUpdateService.isRunning()
@@ -69,27 +73,22 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                         !cm.isActiveNetworkMetered
                     ) && !libraryServiceRunning
             ) {
-                val extensionManager = Injekt.get<ExtensionManager>()
-                val extensionsInstalledByApp =
-                    extensions.filter { extensionManager.isInstalledByApp(it) }
-                if (extensionsInstalledByApp.isNotEmpty()) {
-                    val intent =
-                        ExtensionInstallService.jobIntent(
-                            context,
-                            extensionsInstalledByApp,
-                            // Re run this job if not all the extensions can be auto updated
-                            if (extensionsInstalledByApp.size == extensions.size) {
-                                1
-                            } else {
-                                2
-                            }
-                        )
-                    context.startForegroundService(intent)
-                    if (extensionsInstalledByApp.size == extensions.size) {
-                        return
-                    } else {
-                        extensions.removeAll(extensionsInstalledByApp)
-                    }
+                val intent =
+                    ExtensionInstallService.jobIntent(
+                        context,
+                        extensionsInstalledByApp,
+                        // Re run this job if not all the extensions can be auto updated
+                        if (extensionsInstalledByApp.size == extensions.size) {
+                            1
+                        } else {
+                            2
+                        }
+                    )
+                context.startForegroundService(intent)
+                if (extensionsInstalledByApp.size == extensions.size) {
+                    return
+                } else {
+                    extensions.removeAll(extensionsInstalledByApp)
                 }
             } else if (!libraryServiceRunning) {
                 runJobAgain(context, NetworkType.UNMETERED)
