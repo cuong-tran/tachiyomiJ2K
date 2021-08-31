@@ -86,6 +86,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isImeVisible
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
@@ -100,6 +101,7 @@ import eu.kanade.tachiyomi.util.view.smoothScrollToTop
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import eu.kanade.tachiyomi.widget.EmptyView
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
@@ -567,7 +569,6 @@ class LibraryController(
                 }
             )
 
-        // Using a double post because when the filter sheet is open it hides the hopper
         viewScope.launchUI {
             delay(50)
             updateHopperY()
@@ -988,8 +989,15 @@ class LibraryController(
         } else {
             binding.emptyView.show(
                 R.drawable.ic_heart_off_24dp,
-                if (binding.filterBottomSheet.filterBottomSheet.hasActiveFilters()) R.string.no_matches_for_filters
-                else R.string.library_is_empty_add_from_browse
+                if (hasActiveFilters) R.string.no_matches_for_filters
+                else R.string.library_is_empty_add_from_browse,
+                if (!hasActiveFilters) {
+                    listOf(
+                        EmptyView.Action(R.string.getting_started_guide) {
+                            activity?.openInBrowser("https://tachiyomi.org/help/guides/getting-started/#installing-an-extension")
+                        }
+                    )
+                } else emptyList()
             )
         }
         adapter.setItems(mangaMap)
