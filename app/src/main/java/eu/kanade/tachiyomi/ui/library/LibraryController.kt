@@ -678,6 +678,7 @@ class LibraryController(
                         }
                 )
             }
+            if (items.isEmpty()) return@setOnClickListener
             MaterialMenuSheet(
                 activity!!,
                 items,
@@ -774,7 +775,7 @@ class LibraryController(
     }
 
     fun hideHopper(hide: Boolean) {
-        binding.categoryHopperFrame.isVisible = !hide
+        binding.categoryHopperFrame.isVisible = !singleCategory && !hide
         binding.jumperCategoryText.isVisible = !hide
     }
 
