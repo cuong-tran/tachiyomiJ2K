@@ -28,11 +28,11 @@ fun runCommand(command: String): String {
 }
 
 android {
-    compileSdkVersion(AndroidVersions.compileSdk)
+    compileSdk = AndroidVersions.compileSdk
 
     defaultConfig {
-        minSdkVersion(AndroidVersions.minSdk)
-        targetSdkVersion(AndroidVersions.targetSdk)
+        minSdk = AndroidVersions.minSdk
+        targetSdk = AndroidVersions.targetSdk
         applicationId = "eu.kanade.tachiyomi"
         versionCode = AndroidVersions.versionCode
         versionName = AndroidVersions.versionName
@@ -61,18 +61,19 @@ android {
         viewBinding = true
     }
 
-    flavorDimensions("default")
+    flavorDimensions.add("default")
 
     productFlavors {
         create("standard") {
             buildConfigField("Boolean", "INCLUDE_UPDATER", "true")
         }
         create("dev") {
-            resConfig("en")
+            resourceConfigurations.clear()
+            resourceConfigurations.add("en")
         }
     }
 
-    lintOptions {
+    lint {
         disable("MissingTranslation")
         isAbortOnError = false
         isCheckReleaseBuilds = false
@@ -138,8 +139,8 @@ dependencies {
 
     // Chucker
     val chuckerVersion = "3.2.0"
-    debugImplementation("com.github.ChuckerTeam.Chucker:library:${Versions.CHUCKER}")
-    releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:${Versions.CHUCKER}")
+    debugImplementation("com.github.ChuckerTeam.Chucker:library:$chuckerVersion")
+    releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
 
     // hyperion
     debugImplementation("com.willowtreeapps.hyperion:hyperion-core:${Versions.HYPERION}")
