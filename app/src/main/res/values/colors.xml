@@ -32,6 +32,7 @@
     <color name="dialog">@color/md_white_1000</color>
     <color name="splashIcon">@color/md_black_1000</color>
     <color name="downloadBadgeDayNight">@color/download_badge</color>
+    <color name="downloadBadgeDayNightInverse">@color/download_badge_light</color>
     <color name="colorOnDownloadBadgeDayNight">@color/black</color>
 
     <!-- Text Colors -->
@@ -75,6 +76,16 @@
     <color name="primaryDuskDawn">#efe3f3</color>
     <color name="colorOnBackgroundDuskDawn">#DE240728</color>
     <color name="appBarTextDuskDawn">#DE4c0d4b</color>
+
+    <!-- Teal/Sapphire Theme -->
+    <color name="secondaryTealSapphire">#15a197</color>
+    <color name="secondaryVariantTealSapphire">#22786f</color>
+    <color name="primaryTealSapphire">#5f9c96</color>
+    <color name="primaryVariantTealSapphire">#d4f1e6</color>
+    <color name="backgroundTealSapphire">#f0f7f7</color>
+    <color name="colorOnBackgroundTealSapphire">#DE072926</color>
+    <color name="tabBarIconColorTealSapphire">#DE072927</color>
+    <color name="appBarTextTealSapphire">#DE0a302e</color>
 
     <!-- Flat Lime Theme -->
     <color name="primaryLime">#7CF7A5</color>

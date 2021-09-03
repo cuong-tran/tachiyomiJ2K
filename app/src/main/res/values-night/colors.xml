@@ -16,6 +16,7 @@
     <color name="holo_red">#cc4444</color>
     <color name="splashIcon">@color/md_white_1000</color>
     <color name="downloadBadgeDayNight">@color/download_badge_light</color>
+    <color name="downloadBadgeDayNightInverse">@color/pale_green</color>
     <color name="colorOnDownloadBadgeDayNight">@color/md_white_1000</color>
 
     <color name="background">#1C1C1D</color>
@@ -41,6 +42,16 @@
     <color name="primaryDuskDawn">#E570A0</color>
     <color name="colorOnBackgroundDuskDawn">@color/md_white_1000</color>
     <color name="appBarTextDuskDawn">@color/md_white_1000</color>
+
+    <!-- Teal/Sapphire Theme -->
+    <color name="secondaryTealSapphire">#589ab8</color>
+    <color name="secondaryVariantTealSapphire">#79aec6</color>
+    <color name="primaryTealSapphire">#3e6c81</color>
+    <color name="primaryVariantTealSapphire">#1d2528</color>
+    <color name="backgroundTealSapphire">#14191b</color>
+    <color name="colorOnBackgroundTealSapphire">@color/md_white_1000</color>
+    <color name="tabBarIconColorTealSapphire">#589ab8</color>
+    <color name="appBarTextTealSapphire">@color/md_white_1000</color>
 
     <!-- Yin Yang Theme -->
     <color name="secondaryYinYang">#FFFFFF</color>
