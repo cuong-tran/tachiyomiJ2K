@@ -31,13 +31,19 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             onClick { navigateTo(SettingsGeneralController()) }
         }
         preference {
-            iconRes = R.drawable.ic_book_24dp
+            iconRes = R.drawable.ic_appearance_outline_24dp
+            iconTint = tintColor
+            titleRes = R.string.appearance
+            onClick { navigateTo(SettingsAppearanceController()) }
+        }
+        preference {
+            iconRes = R.drawable.ic_library_outline_24dp
             iconTint = tintColor
             titleRes = R.string.library
             onClick { navigateTo(SettingsLibraryController()) }
         }
         preference {
-            iconRes = R.drawable.ic_read_24dp
+            iconRes = R.drawable.ic_read_outline_24dp
             iconTint = tintColor
             titleRes = R.string.reader
             onClick { navigateTo(SettingsReaderController()) }
@@ -49,7 +55,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             onClick { navigateTo(SettingsDownloadController()) }
         }
         preference {
-            iconRes = R.drawable.ic_browse_24dp
+            iconRes = R.drawable.ic_browse_outline_24dp
             iconTint = tintColor
             titleRes = R.string.sources
             onClick { navigateTo(SettingsBrowseController()) }

@@ -3,19 +3,10 @@ package eu.kanade.tachiyomi.ui.setting
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.asImmediateFlow
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
-import eu.kanade.tachiyomi.util.system.appDelegateNightMode
-import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.getPrefTheme
-import eu.kanade.tachiyomi.util.system.isInNightMode
-import kotlinx.coroutines.flow.launchIn
-import kotlin.math.max
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsGeneralController : SettingsController() {
@@ -73,81 +64,6 @@ class SettingsGeneralController : SettingsController() {
             defaultValue = true
         }
 
-        switchPreference {
-            key = Keys.hideBottomNavOnScroll
-            titleRes = R.string.hide_bottom_nav
-            summaryRes = R.string.hides_on_scroll
-            defaultValue = true
-        }
-
-        intListPreference(activity) {
-            key = Keys.sideNavIconAlignment
-            titleRes = R.string.side_nav_icon_alignment
-            entriesRes = arrayOf(
-                R.string.top,
-                R.string.center,
-                R.string.bottom,
-            )
-            entryRange = 0..2
-            defaultValue = 0
-            isVisible = max(context.resources.displayMetrics.widthPixels, context.resources.displayMetrics.heightPixels) >= 720.dpToPx
-        }
-
-        preferenceCategory {
-            titleRes = R.string.app_theme
-
-            themePreference = themePreference {
-                key = "theme_preference"
-                titleRes = R.string.app_theme
-                lastScrollPostionLight = lastThemeXLight
-                lastScrollPostionDark = lastThemeXDark
-                summary = context.getString(context.getPrefTheme(preferences).nameRes)
-                activity = this@SettingsGeneralController.activity
-            }
-
-            switchPreference {
-                key = "night_mode_switch"
-                isPersistent = false
-                titleRes = R.string.follow_system_theme
-                isChecked =
-                    preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-
-                onChange {
-                    if (it == true) {
-                        preferences.nightMode().set(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                        activity?.recreate()
-                    } else {
-                        preferences.nightMode().set(context.appDelegateNightMode())
-                        themePreference?.fastAdapterLight?.notifyDataSetChanged()
-                        themePreference?.fastAdapterDark?.notifyDataSetChanged()
-                    }
-                    true
-                }
-                preferences.nightMode().asImmediateFlow { mode ->
-                    isChecked = mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                }.launchIn(viewScope)
-            }
-
-            switchPreference {
-                key = Keys.themeDarkAmoled
-                titleRes = R.string.pure_black_dark_mode
-                defaultValue = false
-
-                preferences.nightMode().asImmediateFlowIn(viewScope) { mode ->
-                    isVisible = mode != AppCompatDelegate.MODE_NIGHT_NO
-                }
-
-                onChange {
-                    if (context.isInNightMode()) {
-                        activity?.recreate()
-                    } else {
-                        themePreference?.fastAdapterDark?.notifyDataSetChanged()
-                    }
-                    true
-                }
-            }
-        }
-
         preferenceCategory {
             titleRes = R.string.app_shortcuts
 
@@ -172,6 +88,20 @@ class SettingsGeneralController : SettingsController() {
             }
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && isUpdaterEnabled) {
+            preferenceCategory {
+                titleRes = R.string.auto_updates
+
+                intListPreference(activity) {
+                    key = Keys.shouldAutoUpdate
+                    titleRes = R.string.auto_update_app
+                    entryRange = 0..2
+                    entriesRes = arrayOf(R.string.over_any_network, R.string.over_wifi_only, R.string.dont_auto_update)
+                    defaultValue = AutoUpdaterJob.ONLY_ON_UNMETERED
+                }
+            }
+        }
+
         preferenceCategory {
             titleRes = R.string.locale
             listPreference(activity) {
@@ -186,20 +116,6 @@ class SettingsGeneralController : SettingsController() {
                     }
                 }
                 defaultValue = ""
-            }
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && isUpdaterEnabled) {
-            preferenceCategory {
-                titleRes = R.string.auto_updates
-
-                intListPreference(activity) {
-                    key = Keys.shouldAutoUpdate
-                    titleRes = R.string.auto_update_app
-                    entryRange = 0..2
-                    entriesRes = arrayOf(R.string.over_any_network, R.string.over_wifi_only, R.string.dont_auto_update)
-                    defaultValue = AutoUpdaterJob.ONLY_ON_UNMETERED
-                }
             }
         }
     }
