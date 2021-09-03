@@ -70,7 +70,7 @@
             android:maxLines="1"
             android:paddingStart="0dp"
             android:paddingEnd="8dp"
-            android:textColor="?android:textColorPrimary"
+            android:textColor="?attr/colorOnBackground"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/source_latest"
             app:layout_constraintStart_toEndOf="@+id/source_image"
@@ -87,7 +87,7 @@
             android:minWidth="50dp"
             android:text="@string/latest"
             android:textAllCaps="false"
-            android:textColor="?colorAccent"
+            android:textColor="?attr/colorSecondary"
             app:layout_constraintEnd_toStartOf="@id/source_pin" />
 
         <ImageButton
@@ -98,7 +98,7 @@
             android:layout_margin="10dp"
             android:layout_marginEnd="8dp"
             android:src="@drawable/ic_pin_24dp"
-            app:tint="?colorAccent"
+            app:tint="?attr/colorSecondary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"

@@ -275,7 +275,7 @@ class MangaHeaderHolder(
         }
         binding.trueBackdrop.setBackgroundColor(
             adapter.delegate.coverColor()
-                ?: itemView.context.getResourceColor(android.R.attr.colorBackground)
+                ?: itemView.context.getResourceColor(R.attr.background)
         )
 
         val tracked = presenter.isTracked() && !item.isLocked
@@ -358,7 +358,7 @@ class MangaHeaderHolder(
             val accentArray = FloatArray(3)
 
             ColorUtils.colorToHSL(baseTagColor, bgArray)
-            ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorAccent), accentArray)
+            ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorSecondary), accentArray)
             val downloadedColor = ColorUtils.setAlphaComponent(
                 ColorUtils.HSLToColor(
                     floatArrayOf(
@@ -413,7 +413,7 @@ class MangaHeaderHolder(
         if (checked) {
             backgroundTintList = ColorStateList.valueOf(
                 ColorUtils.setAlphaComponent(
-                    context.getResourceColor(R.attr.colorAccent),
+                    context.getResourceColor(R.attr.colorSecondary),
                     75
                 )
             )
