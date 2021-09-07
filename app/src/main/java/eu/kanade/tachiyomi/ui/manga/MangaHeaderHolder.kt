@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.animation.AnimatorInflater
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
@@ -360,7 +361,17 @@ class MangaHeaderHolder(
                 }
             )
             )
-        binding.mangaSource.text = presenter.source.toString()
+        binding.mangaSource.text = run {
+            val preferences = presenter.preferences
+            val enabledLanguages = preferences.enabledLanguages().get()
+                .filterNot { it == "all" }
+
+            if (enabledLanguages.size > 1 && presenter.extension?.lang == "all") {
+                presenter.source.toString()
+            } else {
+                return@run presenter.source.name
+            }
+        }
 
         binding.filtersText.text = presenter.currentFilters()
 

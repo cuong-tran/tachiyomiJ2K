@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.toSChapter
 import eu.kanade.tachiyomi.source.model.toSManga
+import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.track.SetTrackReadingDatesDialog
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
@@ -87,6 +88,7 @@ class MangaDetailsPresenter(
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
     private val chapterSort = ChapterSort(manga, chapterFilter, preferences)
+    val extension by lazy { (source as? HttpSource)?.getExtension() }
 
     var isLockedFromSearch = false
     var hasRequested = false

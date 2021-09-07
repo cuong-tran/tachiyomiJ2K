@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.source.online
 
+import eu.kanade.tachiyomi.extension.ExtensionManager
+import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
@@ -15,10 +17,13 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.net.URI
 import java.net.URISyntaxException
 import java.security.MessageDigest
+import java.util.Locale
 
 /**
  * A simple implementation for sources from a website.
@@ -54,7 +59,7 @@ abstract class HttpSource : CatalogueSource {
      * Note the generated id sets the sign bit to 0.
      */
     override val id by lazy {
-        val key = "${name.toLowerCase()}/$lang/$versionId"
+        val key = "${name.lowercase(Locale.getDefault())}/$lang/$versionId"
         val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
         (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }.reduce(Long::or) and Long.MAX_VALUE
     }
@@ -80,7 +85,7 @@ abstract class HttpSource : CatalogueSource {
     /**
      * Visible name of the source.
      */
-    override fun toString() = "$name (${lang.toUpperCase()})"
+    override fun toString() = "$name (${lang.uppercase(Locale.getDefault())})"
 
     /**
      * Returns an observable containing a page with a list of manga. Normally it's not needed to
@@ -94,6 +99,10 @@ abstract class HttpSource : CatalogueSource {
             .map { response ->
                 popularMangaParse(response)
             }
+    }
+
+    fun getExtension(): Extension.Installed? {
+        return Injekt.get<ExtensionManager>().installedExtensions.find { it.sources.contains(this) }
     }
 
     /**
@@ -341,7 +350,7 @@ abstract class HttpSource : CatalogueSource {
      */
     private fun getUrlWithoutDomain(orig: String): String {
         return try {
-            val uri = URI(orig)
+            val uri = URI(orig.replace(" ", "%20"))
             var out = uri.path
             if (uri.query != null) {
                 out += "?" + uri.query
