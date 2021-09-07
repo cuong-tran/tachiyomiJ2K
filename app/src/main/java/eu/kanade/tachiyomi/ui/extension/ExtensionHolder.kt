@@ -3,6 +3,9 @@ package eu.kanade.tachiyomi.ui.extension
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.View
+import androidx.core.text.buildSpannedString
+import androidx.core.text.color
+import androidx.core.text.scale
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import coil.clear
@@ -16,6 +19,7 @@ import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.ExtensionCardItemBinding
 import eu.kanade.tachiyomi.extension.model.InstalledExtensionsOrder
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import uy.kohesive.injekt.Injekt
@@ -43,7 +47,6 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
         val extension = item.extension
 
         // Set source name
-        binding.extTitle.text = extension.name
 
         val infoText = mutableListOf(extension.versionName)
         if (extension is Extension.Installed && !extension.hasUpdate) {
@@ -70,6 +73,18 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
             binding.date.isVisible = false
         }
         binding.lang.isVisible = binding.date.isGone
+        binding.extTitle.text = if (infoText.size > 1) {
+            buildSpannedString {
+                append(extension.name + " ")
+                color(binding.extTitle.context.getResourceColor(android.R.attr.textColorSecondary)) {
+                    scale(0.75f) {
+                        append(LocaleHelper.getDisplayName(extension.lang))
+                    }
+                }
+            }
+        } else {
+            extension.name
+        }
 
         binding.version.text = infoText.joinToString(" • ")
         binding.lang.text = LocaleHelper.getDisplayName(extension.lang)
