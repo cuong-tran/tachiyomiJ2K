@@ -433,6 +433,8 @@ class PreferencesHelper(val context: Context) {
 
     fun hasPromptedBeforeUpdateAll() = flowPrefs.getBoolean("has_prompted_update_all", false)
 
+    fun sideNavMode() = flowPrefs.getInt(Keys.sideNavMode, 0)
+
     fun shouldAutoUpdate() = prefs.getInt(Keys.shouldAutoUpdate, AutoUpdaterJob.ONLY_ON_UNMETERED)
 
     fun autoUpdateExtensions() = prefs.getInt(Keys.autoUpdateExtensions, AutoUpdaterJob.ONLY_ON_UNMETERED)

@@ -35,6 +35,7 @@ import coil.request.ImageRequest
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
 import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
+import com.afollestad.materialdialogs.utils.MDUtil.isLandscape
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -205,8 +206,7 @@ class MangaDetailsController :
 
     /** Check if device is tablet, and use a second recycler to hold the details header if so */
     private fun setTabletMode(view: View) {
-        isTablet = view.context.isTablet() &&
-            view.context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
+        isTablet = view.context.isTablet() && view.context.isLandscape()
         binding.tabletOverlay.isVisible = isTablet
         binding.tabletRecycler.isVisible = isTablet
         binding.tabletDivider.isVisible = isTablet

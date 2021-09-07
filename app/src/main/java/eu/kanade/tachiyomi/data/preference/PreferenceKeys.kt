@@ -233,6 +233,8 @@ object PreferenceKeys {
 
     const val incognitoMode = "incognito_mode"
 
+    const val sideNavMode = "side_nav_mode"
+
     const val shouldAutoUpdate = "should_auto_update"
 
     const val autoUpdateExtensions = "auto_update_extensions"
