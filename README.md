@@ -11,8 +11,8 @@ TachiyomiJ2K is a free and open source manga reader for Android 6.0 and above. B
 ## Features
 
 Features of Tachiyomi include:
-* Online reading from sources such as MangaDex, MangaSee, Mangakakalot, [and more](https://github.com/inorichi/tachiyomi-extensions)
-* Local reading of downloaded manga
+* Online reading from a variety of sources
+* Local reading of downloaded content
 * A configurable reader with multiple viewers, reading directions and other settings.
 * [MyAnimeList](https://myanimelist.net/), [AniList](https://anilist.co/), [Kitsu](https://kitsu.io/explore/anime), and [Shikimori](https://shikimori.one) support
 * Categories to organize your library
@@ -22,22 +22,20 @@ Features of Tachiyomi include:
 
 Plus some new features in this fork such as:
 * New Manga details screens
-* Combine 2 pages into a single one
-* Floating searchbar to easily start a search
+* Combine 2 pages into a single one for a better tablet experince
+* Floating searchbar to easily start a search in youre library or while browsing
+* Library redesigned as a single list view: See categories listed in a vertical view, that can be collasped or expanded with a tap
+* Drag & Drop Sorting in Library
+* Dynamic Categories: Group your library automatically by the tags, tracking status, source, and more
 * New Recents page: Providing quick access to newly added manga, new chapters, and to continue where you left on in a series
-* Android 10 edge to edge support (and a translucent nav bar for older versions): no more small ugly bar for the gesture navigation
-* Smart background based on manga page: For those that like having a white background to match the content, this will automatically set the background to match for moments such as a flashback section of a manga
 * New Themes
-* Dynamic Shortcuts
+* Dynamic Shortcuts: open the latest chapter of what you were last reading right from your homescreen
 * [New material snackbar](.github/readme-images/material%20snackbar.png): Removing manga now auto deletes chapters and has an undo button in case you change your mind
 * Batch Auto-Source Migration (taken from [TachiyomiEH](https://github.com/NerdNumber9/TachiyomiEH))
 * [Share sheets upgrade for Android 10](.github/readme-images/share%20menu.png)
 * View all chapters right in the reader
-* Drag & Drop Sorting in Library
-* Individual Category sorting
-* Library redesigned as a single list view
-* Expanding manga thumbnails
 * A lot more Material Design 2 additions
+* Android 12 (Beta) features
 
 ## Issues, Feature Requests and Contributing
 
@@ -45,7 +43,7 @@ Please make sure to read the full guidelines. Your issue may be closed without w
 
 <details><summary>Issues</summary>
 
-1. **Before reporting a new issue, take a look at the [FAQ](https://github.com/inorichi/tachiyomi/wiki/FAQ), the [changelog](https://github.com/inorichi/tachiyomi/releases) and the already opened [issues](https://github.com/inorichi/tachiyomi/issues).**
+1. **Before reporting a new issue, take a look at the [FAQ](https://github.com/tachiyomiorg/tachiyomi/wiki/FAQ), the [changelog](https://github.com/jays2kings/tachiyomi/releases) and the already opened [issues](https://github.com/tachiyomiorg/tachiyomi/issues).**
 2. If you are unsure, ask here: [![Discord](https://img.shields.io/discord/349436576037732353.svg)](https://discord.gg/tachiyomi)
 
 </details>
@@ -61,9 +59,9 @@ Please make sure to read the full guidelines. Your issue may be closed without w
 * For large logs use http://pastebin.com/ (or similar)
 * Don't group unrelated requests into one issue
 
-DO: https://github.com/inorichi/tachiyomi/issues/24 https://github.com/inorichi/tachiyomi/issues/71
+DO: https://github.com/tachiyomiorg/tachiyomi/issues/24 https://github.com/tachiyomiorg/tachiyomi/issues/71
 
-DON'T: https://github.com/inorichi/tachiyomi/issues/75
+DON'T: https://github.com/tachiyomiorg/tachiyomi/issues/75
 
 </details>
 
@@ -72,7 +70,7 @@ DON'T: https://github.com/inorichi/tachiyomi/issues/75
 * Write a detailed issue, explaning what it should do or how. Avoid writing just "like X app does"
 * Include screenshot (if needed)
 
-Source requests should be created at https://github.com/inorichi/tachiyomi-extensions, they do not belong in this repository.
+Source requests should be created at https://github.com/tachiyomiorg/tachiyomi-extensions, they do not belong in this repository.
 </details>
 
 ## FAQ
