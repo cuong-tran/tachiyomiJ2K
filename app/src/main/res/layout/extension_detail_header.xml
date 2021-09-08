@@ -90,14 +90,15 @@
             android:layout_height="wrap_content"
             android:elevation="3dp"
             android:ellipsize="middle"
-            android:singleLine="true"
+            android:layout_marginTop="6dp"
+            android:maxLines="1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/extension_title"
             app:layout_constraintTop_toBottomOf="@id/extension_nsfw"
             tools:text="eu.kanade.tachiyomi.extension.en.myext" />
 
         <Button
-            android:id="@+id/extension_uninstall_button"
+            android:id="@+id/extension_app_info_button"
             style="@style/Theme.Widget.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -105,8 +106,24 @@
             android:paddingStart="32dp"
             android:textAllCaps="false"
             android:paddingEnd="32dp"
-            android:text="@string/uninstall"
+            android:layout_marginStart="4dp"
+            android:text="@string/app_info"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/extension_uninstall_button"
+            app:layout_constraintTop_toBottomOf="@id/extension_pkg" />
+
+        <Button
+            android:id="@+id/extension_uninstall_button"
+            style="@style/Theme.Widget.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingStart="32dp"
+            android:layout_marginEnd="4dp"
+            android:paddingEnd="32dp"
+            android:text="@string/uninstall"
+            app:layout_constraintEnd_toStartOf="@id/extension_app_info_button"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/extension_pkg" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

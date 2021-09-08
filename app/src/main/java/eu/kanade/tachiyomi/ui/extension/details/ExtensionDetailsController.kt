@@ -2,10 +2,7 @@ package eu.kanade.tachiyomi.ui.extension.details
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.util.TypedValue
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
@@ -156,7 +153,6 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_history -> openCommitHistory()
-            R.id.action_app_info -> openInSettings()
         }
         return super.onOptionsItemSelected(item)
     }
@@ -169,13 +165,6 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
             else -> "$URL_EXTENSION_COMMITS/src/${pkgName.replace(".", "/")}"
         }
         openInBrowser(url)
-    }
-
-    private fun openInSettings() {
-        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-            data = Uri.fromParts("package", presenter.pkgName, null)
-        }
-        startActivity(intent)
     }
 
     private fun addPreferencesForSource(screen: PreferenceScreen, source: Source, isMultiSource: Boolean, isMultiLangSingleSource: Boolean) {
