@@ -53,7 +53,7 @@ class BrowseSourceItem(
                 } else {
                     binding.constraintLayout.background = ContextCompat.getDrawable(
                         context,
-                        R.drawable.library_item_selector
+                        R.drawable.library_confortable_grid_selector
                     )
                 }
                 binding.constraintLayout.layoutParams = FrameLayout.LayoutParams(

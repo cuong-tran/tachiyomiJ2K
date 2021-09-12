@@ -5,7 +5,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/library_item_selector">
+    android:background="@drawable/library_confortable_grid_selector">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card"
