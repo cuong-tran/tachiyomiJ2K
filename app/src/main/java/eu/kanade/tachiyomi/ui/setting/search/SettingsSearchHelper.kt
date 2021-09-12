@@ -8,6 +8,7 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.ui.setting.SettingsAdvancedController
+import eu.kanade.tachiyomi.ui.setting.SettingsAppearanceController
 import eu.kanade.tachiyomi.ui.setting.SettingsBackupController
 import eu.kanade.tachiyomi.ui.setting.SettingsBrowseController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
@@ -34,6 +35,7 @@ object SettingsSearchHelper {
         SettingsBrowseController::class,
         SettingsDownloadController::class,
         SettingsGeneralController::class,
+        SettingsAppearanceController::class,
         SettingsSecurityController::class,
         SettingsLibraryController::class,
         SettingsReaderController::class,
