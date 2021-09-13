@@ -91,6 +91,22 @@ class AboutController : SettingsController() {
 
         preferenceCategory {
             preference {
+                key = "pref_about_help_translate"
+                titleRes = R.string.help_translate
+
+                onClick {
+                    openInBrowser("https://hosted.weblate.org/projects/tachiyomi/tachiyomi-j2k/")
+                }
+            }
+            preference {
+                key = "pref_about_helpful_translation_links"
+                titleRes = R.string.helpful_translation_links
+
+                onClick {
+                    openInBrowser("https://tachiyomi.org/help/contribution/#translation")
+                }
+            }
+            preference {
                 key = "pref_about_website"
                 titleRes = R.string.website
                 "https://tachiyomi.org".also {
