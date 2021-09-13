@@ -96,7 +96,7 @@ open class MangaImpl : Manga {
 
         val manga = other as Manga
 
-        return url == manga.url
+        return url == manga.url && source == manga.source
     }
 
     override fun hashCode(): Int {
