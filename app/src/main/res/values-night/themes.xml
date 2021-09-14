@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
-
-    <style name="Theme.Tachiyomi" parent="Theme.Base">
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
-        <item name="colorOnSurface">@color/md_white_1000</item>
-        <item name="colorOnBackground">@color/md_white_1000</item>
-    </style>
-
+<resources>
     <style name="Theme.Tachiyomi.Strawberries">
         <item name="colorPrimary">@color/primaryRed</item>
         <item name="colorSecondary">@color/holo_red</item>
@@ -28,6 +20,4 @@
         <item name="colorDownloadBadge">@color/download_badge_light</item>
         <item name="colorOnDownloadBadge">@color/md_white_1000</item>
     </style>
-
-
 </resources>
