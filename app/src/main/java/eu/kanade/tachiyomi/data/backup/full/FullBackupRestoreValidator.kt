@@ -29,7 +29,7 @@ class FullBackupRestoreValidator : AbstractBackupRestoreValidator() {
         val sources = backup.backupSources.map { it.sourceId to it.name }.toMap()
         val missingSources = sources
             .filter { sourceManager.get(it.key) == null }
-            .values
+            .map { sourceManager.getOrStub(it.key).name }
             .sorted()
 
         val trackers = backup.backupManga

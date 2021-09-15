@@ -16,6 +16,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.text.buildSpannedString
+import androidx.core.text.scale
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -30,6 +32,7 @@ import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.ChapterHeaderItemBinding
 import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
 import eu.kanade.tachiyomi.source.LocalSource
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -361,15 +364,25 @@ class MangaHeaderHolder(
                 }
             )
             )
-        binding.mangaSource.text = run {
-            val preferences = presenter.preferences
-            val enabledLanguages = preferences.enabledLanguages().get()
+        with(binding.mangaSource) {
+            val enabledLanguages = presenter.preferences.enabledLanguages().get()
                 .filterNot { it == "all" }
 
-            if (enabledLanguages.size > 1 && presenter.extension?.lang == "all") {
-                presenter.source.toString()
-            } else {
-                return@run presenter.source.name
+            text = buildSpannedString {
+                append(
+                    if (enabledLanguages.size > 1 && presenter.extension?.lang == "all") {
+                        presenter.source.toString()
+                    } else {
+                        presenter.source.name
+                    }
+                )
+                if (presenter.source is SourceManager.StubSource &&
+                    presenter.source.name != presenter.source.id.toString()
+                ) {
+                    scale(0.9f) {
+                        append(" (${context.getString(R.string.source_not_installed)})")
+                    }
+                }
             }
         }
 

@@ -112,7 +112,10 @@ class ExtensionManager(
             availableExtensionsRelay.call(value)
             updatedInstalledExtensionsStatuses(value)
             listener?.extensionsUpdated()
+            setupAvailableSourcesMap()
         }
+
+    private var availableSources = hashMapOf<String, Extension.AvailableSource>()
 
     /**
      * Relay used to notify the untrusted extensions.
@@ -199,6 +202,15 @@ class ExtensionManager(
             }
         }
     }
+
+    private fun setupAvailableSourcesMap() {
+        availableSources = hashMapOf()
+        availableExtensions.map { it.sources.orEmpty() }.flatten().forEach {
+            availableSources[it.id] = it
+        }
+    }
+
+    fun getStubSource(id: Long) = availableSources[id.toString()]
 
     /**
      * Finds the available extensions in the [api] and updates [availableExtensions].

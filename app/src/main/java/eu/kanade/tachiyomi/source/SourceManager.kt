@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source
 
 import android.content.Context
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -12,12 +13,15 @@ import eu.kanade.tachiyomi.source.online.all.MangaDex
 import eu.kanade.tachiyomi.source.online.english.KireiCake
 import eu.kanade.tachiyomi.source.online.english.MangaPlus
 import rx.Observable
+import uy.kohesive.injekt.injectLazy
 
 open class SourceManager(private val context: Context) {
 
     private val sourcesMap = mutableMapOf<Long, Source>()
 
     private val stubSourcesMap = mutableMapOf<Long, StubSource>()
+
+    protected val extensionManager: ExtensionManager by injectLazy()
 
     private val delegatedSources = listOf(
         DelegatedSource(
@@ -83,10 +87,10 @@ open class SourceManager(private val context: Context) {
         LocalSource(context)
     )
 
-    private inner class StubSource(override val id: Long) : Source {
+    inner class StubSource(override val id: Long) : Source {
 
         override val name: String
-            get() = id.toString()
+            get() = extensionManager.getStubSource(id)?.name ?: id.toString()
 
         override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
             return Observable.error(getSourceNotInstalledException())
@@ -108,7 +112,7 @@ open class SourceManager(private val context: Context) {
             return SourceNotFoundException(
                 context.getString(
                     R.string.source_not_installed_,
-                    id.toString()
+                    extensionManager.getStubSource(id)?.name ?: id.toString()
                 ),
                 id
             )
@@ -116,6 +120,13 @@ open class SourceManager(private val context: Context) {
 
         override fun hashCode(): Int {
             return id.hashCode()
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            other as StubSource
+            return id == other.id
         }
     }
 

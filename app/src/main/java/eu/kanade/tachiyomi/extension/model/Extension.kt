@@ -33,8 +33,16 @@ sealed class Extension {
         override val lang: String,
         override val isNsfw: Boolean,
         val apkName: String,
-        val iconUrl: String
+        val iconUrl: String,
+        val sources: List<AvailableSource>? = null
     ) : Extension()
+
+    data class AvailableSource(
+        val name: String,
+        val id: String,
+        val lang: String,
+        val baseUrl: String
+    )
 
     data class Untrusted(
         override val name: String,

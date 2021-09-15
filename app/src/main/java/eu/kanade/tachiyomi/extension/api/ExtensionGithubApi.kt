@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import uy.kohesive.injekt.injectLazy
@@ -30,9 +31,9 @@ internal class ExtensionGithubApi {
         }
     }
 
-    suspend fun checkForUpdates(context: Context): List<Extension.Available> {
+    suspend fun checkForUpdates(context: Context, prefetchedExtensions: List<Extension.Available>? = null): List<Extension.Available> {
         return withIOContext {
-            val extensions = findExtensions()
+            val extensions = prefetchedExtensions ?: findExtensions()
 
             val installedExtensions = ExtensionLoader.loadExtensions(context)
                 .filterIsInstance<LoadResult.Success>()
@@ -68,9 +69,16 @@ internal class ExtensionGithubApi {
                 val versionCode = element.jsonObject["code"]!!.jsonPrimitive.int
                 val lang = element.jsonObject["lang"]!!.jsonPrimitive.content
                 val nsfw = element.jsonObject["nsfw"]!!.jsonPrimitive.int == 1
+                val sources = element.jsonObject["sources"]?.jsonArray?.map f@{
+                    val sName = it.jsonObject["name"]?.jsonPrimitive?.content ?: return@f null
+                    val sId = it.jsonObject["id"]?.jsonPrimitive?.content ?: return@f null
+                    val sLang = it.jsonObject["lang"]?.jsonPrimitive?.content ?: ""
+                    val sBaseUrl = it.jsonObject["baseUrl"]?.jsonPrimitive?.content ?: ""
+                    Extension.AvailableSource(sName, sId, sLang, sBaseUrl)
+                }?.filterNotNull()
                 val icon = "${REPO_URL_PREFIX}icon/${apkName.replace(".apk", ".png")}"
 
-                Extension.Available(name, pkgName, versionName, versionCode, lang, nsfw, apkName, icon)
+                Extension.Available(name, pkgName, versionName, versionCode, lang, nsfw, apkName, icon, sources)
             }
     }
 

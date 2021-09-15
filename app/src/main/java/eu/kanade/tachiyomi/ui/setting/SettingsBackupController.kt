@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.data.backup.full.models.BackupFull
 import eu.kanade.tachiyomi.data.backup.legacy.LegacyBackupRestoreValidator
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.getFilePicker
 import eu.kanade.tachiyomi.util.system.MiuiUtil
 import eu.kanade.tachiyomi.util.system.toast
@@ -78,6 +79,7 @@ class SettingsBackupController : SettingsController() {
                 }
 
                 if (!BackupRestoreService.isRunning(context)) {
+                    (activity as? MainActivity)?.getExtensionUpdates(true)
                     val intent = Intent(Intent.ACTION_GET_CONTENT)
                     intent.addCategory(Intent.CATEGORY_OPENABLE)
                     intent.type = "application/*"

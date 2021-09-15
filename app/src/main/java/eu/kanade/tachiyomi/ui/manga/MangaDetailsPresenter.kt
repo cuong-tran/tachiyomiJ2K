@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.UnattendedTrackService
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.SourceNotFoundException
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.toSChapter
 import eu.kanade.tachiyomi.source.model.toSManga
@@ -438,7 +439,9 @@ class MangaDetailsPresenter(
 
     private fun trimException(e: java.lang.Exception): String {
         return (
-            if (e.message?.contains(": ") == true) e.message?.split(": ")?.drop(1)
+            if (e !is SourceNotFoundException &&
+                e.message?.contains(": ") == true
+            ) e.message?.split(": ")?.drop(1)
                 ?.joinToString(": ")
             else e.message
             ) ?: preferences.context.getString(R.string.unknown_error)

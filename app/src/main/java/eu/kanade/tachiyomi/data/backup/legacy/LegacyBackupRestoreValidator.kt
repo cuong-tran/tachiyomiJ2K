@@ -34,7 +34,7 @@ class LegacyBackupRestoreValidator : AbstractBackupRestoreValidator() {
         val sources = getSourceMapping(json)
         val missingSources = sources
             .filter { sourceManager.get(it.key) == null }
-            .values
+            .map { sourceManager.getOrStub(it.key).name }
             .sorted()
 
         val trackers = mangas
