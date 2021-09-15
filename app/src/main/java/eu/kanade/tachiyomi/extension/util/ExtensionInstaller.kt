@@ -78,10 +78,18 @@ internal class ExtensionInstaller(private val context: Context) {
      */
     suspend fun downloadAndInstall(url: String, extension: ExtensionManager.ExtensionInfo, scope: CoroutineScope): Flow<ExtensionIntallInfo> {
         val pkgName = extension.pkgName
-
+        downloadsStateFlow.value
         val oldDownload = activeDownloads[pkgName]
         if (oldDownload != null) {
             deleteDownload(pkgName)
+        }
+        val oldInstall = downloadInstallerMap[pkgName]
+        if (oldInstall != null) {
+            try {
+                context.packageManager.packageInstaller.abandonSession(oldInstall)
+            } catch (_: Exception) {
+            }
+            downloadInstallerMap.remove(pkgName)
         }
 
         // Register the receiver after removing (and unregistering) the previous download

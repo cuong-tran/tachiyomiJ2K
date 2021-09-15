@@ -362,7 +362,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         updateExtUpdateAllButton()
     }
 
-    fun updateExtUpdateAllButton() {
+    private fun updateExtUpdateAllButton() {
         val updateHeader =
             extAdapter?.headerItems?.find { it is ExtensionGroupItem && it.canUpdate != null } as? ExtensionGroupItem
                 ?: return

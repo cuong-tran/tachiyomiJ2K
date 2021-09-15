@@ -73,20 +73,8 @@ class ExtensionManager(
         private set(value) {
             field = value
             installedExtensionsRelay.call(value)
-            listener?.extensionsUpdated()
+            downloadRelay.tryEmit("Finished/Installed/${value.size}" to (InstallStep.Done to null))
         }
-
-    private var listener: ExtensionsChangedListener? = null
-
-    fun setListener(listener: ExtensionsChangedListener) {
-        this.listener = listener
-    }
-
-    fun removeListener(listener: ExtensionsChangedListener) {
-        if (this.listener == listener) {
-            this.listener = null
-        }
-    }
 
     fun getAppIconForSource(source: Source): Drawable? {
         val pkgName =
@@ -111,7 +99,7 @@ class ExtensionManager(
             field = value
             availableExtensionsRelay.call(value)
             updatedInstalledExtensionsStatuses(value)
-            listener?.extensionsUpdated()
+            downloadRelay.tryEmit("Finished/Available/${value.size}" to (InstallStep.Done to null))
             setupAvailableSourcesMap()
         }
 
@@ -129,7 +117,7 @@ class ExtensionManager(
         private set(value) {
             field = value
             untrustedExtensionsRelay.call(value)
-            listener?.extensionsUpdated()
+            downloadRelay.tryEmit("Finished/Untrusted/${value.size}" to (InstallStep.Done to null))
         }
 
     /**
@@ -388,7 +376,8 @@ class ExtensionManager(
      * @param extension The extension to be registered.
      */
     private fun registerNewExtension(extension: Extension.Installed) {
-        installedExtensions += extension
+        installedExtensions = installedExtensions + extension
+        downloadRelay.tryEmit("Finished/${extension.pkgName}" to ExtensionIntallInfo(InstallStep.Installed, null))
         extension.sources.forEach { sourceManager.registerSource(it) }
     }
 
@@ -407,6 +396,7 @@ class ExtensionManager(
         }
         mutInstalledExtensions += extension
         installedExtensions = mutInstalledExtensions
+        downloadRelay.tryEmit("Finished/${extension.pkgName}" to ExtensionIntallInfo(InstallStep.Installed, null))
         extension.sources.forEach { sourceManager.registerSource(it) }
     }
 
@@ -419,12 +409,12 @@ class ExtensionManager(
     private fun unregisterExtension(pkgName: String) {
         val installedExtension = installedExtensions.find { it.pkgName == pkgName }
         if (installedExtension != null) {
-            installedExtensions -= installedExtension
+            installedExtensions = installedExtensions - installedExtension
             installedExtension.sources.forEach { sourceManager.unregisterSource(it) }
         }
         val untrustedExtension = untrustedExtensions.find { it.pkgName == pkgName }
         if (untrustedExtension != null) {
-            untrustedExtensions -= untrustedExtension
+            untrustedExtensions = untrustedExtensions - untrustedExtension
         }
     }
 
@@ -478,8 +468,4 @@ class ExtensionManager(
             versionCode = extension.versionCode
         )
     }
-}
-
-interface ExtensionsChangedListener {
-    fun extensionsUpdated()
 }

@@ -49,23 +49,28 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
         // Set source name
 
         val infoText = mutableListOf(extension.versionName)
+        binding.date.isVisible = false
         if (extension is Extension.Installed && !extension.hasUpdate) {
             when (InstalledExtensionsOrder.fromValue(adapter.installedSortOrder)) {
                 InstalledExtensionsOrder.RecentlyUpdated -> {
-                    binding.date.isVisible = true
-                    binding.date.text = itemView.context.getString(
-                        R.string.updated_,
-                        extensionUpdateDate(extension.pkgName).timeSpanFromNow
-                    )
-                    infoText.add("")
+                    extensionUpdateDate(extension.pkgName)?.let {
+                        binding.date.isVisible = true
+                        binding.date.text = itemView.context.getString(
+                            R.string.updated_,
+                            it.timeSpanFromNow
+                        )
+                        infoText.add("")
+                    }
                 }
                 InstalledExtensionsOrder.RecentlyInstalled -> {
-                    binding.date.isVisible = true
-                    binding.date.text = itemView.context.getString(
-                        R.string.installed_,
-                        extensionInstallDate(extension.pkgName).timeSpanFromNow
-                    )
-                    infoText.add("")
+                    extensionInstallDate(extension.pkgName)?.let {
+                        binding.date.isVisible = true
+                        binding.date.text = itemView.context.getString(
+                            R.string.installed_,
+                            it.timeSpanFromNow
+                        )
+                        infoText.add("")
+                    }
                 }
                 else -> binding.date.isVisible = false
             }
@@ -159,21 +164,21 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
         }
     }
 
-    private fun extensionInstallDate(pkgName: String): Long {
+    private fun extensionInstallDate(pkgName: String): Long? {
         val context = itemView.context
         return try {
             context.packageManager.getPackageInfo(pkgName, 0).firstInstallTime
         } catch (e: java.lang.Exception) {
-            0
+            null
         }
     }
 
-    private fun extensionUpdateDate(pkgName: String): Long {
+    private fun extensionUpdateDate(pkgName: String): Long? {
         val context = itemView.context
         return try {
             context.packageManager.getPackageInfo(pkgName, 0).lastUpdateTime
         } catch (e: java.lang.Exception) {
-            0
+            null
         }
     }
 }
