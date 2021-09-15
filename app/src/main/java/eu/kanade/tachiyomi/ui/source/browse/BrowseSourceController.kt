@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -465,11 +466,14 @@ open class BrowseSourceController(bundle: Bundle) :
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
 
-        val searchItem = (activity as? MainActivity)?.binding?.cardToolbar?.menu?.findItem(R.id.action_search)
-        val searchView = searchItem?.actionView as? SearchView ?: return
-        setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = false) {
-            searchWithQuery(it ?: "")
-            true
+        if (BuildConfig.DEBUG && presenter.query.isBlank()) {
+            val searchItem =
+                (activity as? MainActivity)?.binding?.cardToolbar?.menu?.findItem(R.id.action_search)
+            val searchView = searchItem?.actionView as? SearchView ?: return
+            setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = false) {
+                searchWithQuery(it ?: "")
+                true
+            }
         }
     }
 
