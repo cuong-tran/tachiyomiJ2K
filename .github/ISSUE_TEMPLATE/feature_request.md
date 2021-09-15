@@ -1,6 +1,6 @@
 ---
 name: "\U0001F31F Feature request"
-about: Suggest a feature to improve Tachiyomi
+about: Suggest a feature to improve TachiyomiJ2K
 title: "[Feature Request] Write short description here"
 labels: feature
 assignees: ''
@@ -11,7 +11,7 @@ assignees: ''
 
 I acknowledge that:
 
-- I have updated to the latest version of the app (latest J2K is v1.3.0)
+- I have updated to the latest version of the app (latest J2K is v1.3.1)
 - I will not repeat a request for a feature already requested
 - If this is an request for an extension/source, that I should be opening an issue in https://github.com/tachiyomiorg/tachiyomi-extensions
 
