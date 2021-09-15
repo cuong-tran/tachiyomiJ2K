@@ -384,10 +384,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 }
             }
         }
-        preferences.extensionUpdatesCount().asObservable().subscribe {
-            setExtensionsBadge()
-        }
 
+        preferences.extensionUpdatesCount()
+            .asImmediateFlowIn(lifecycleScope) {
+                setExtensionsBadge()
+            }
         preferences.incognitoMode()
             .asImmediateFlowIn(lifecycleScope) {
                 binding.toolbar.setIncognitoMode(it)
@@ -496,7 +497,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     private fun setExtensionsBadge() {
-        val updates = preferences.extensionUpdatesCount().getOrDefault()
+        val updates = preferences.extensionUpdatesCount().get()
         if (updates > 0) {
             val badge = nav.getOrCreateBadge(R.id.nav_browse)
             badge.number = updates

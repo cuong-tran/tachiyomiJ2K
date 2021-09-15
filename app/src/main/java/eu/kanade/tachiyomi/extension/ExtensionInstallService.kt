@@ -9,7 +9,6 @@ import androidx.work.NetworkType
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.ExtensionManager.ExtensionInfo
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
@@ -105,7 +104,7 @@ class ExtensionInstallService(
                                     installedExtensions.add(extension)
                                     installed++
                                     val prefCount =
-                                        preferences.extensionUpdatesCount().getOrDefault()
+                                        preferences.extensionUpdatesCount().get()
                                     preferences.extensionUpdatesCount().set(max(prefCount - 1, 0))
                                 }
                                 notifier.showProgressNotification(installed, list.size)

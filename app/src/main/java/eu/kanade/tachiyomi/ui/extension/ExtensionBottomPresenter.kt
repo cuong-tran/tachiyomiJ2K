@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.ExtensionInstallService
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.ExtensionsChangedListener
@@ -293,7 +292,7 @@ class ExtensionBottomPresenter(
         }
     }
 
-    fun getExtensionUpdateCount(): Int = preferences.extensionUpdatesCount().getOrDefault()
+    fun getExtensionUpdateCount(): Int = preferences.extensionUpdatesCount().get()
 
     @Synchronized
     private fun updateInstallStep(
