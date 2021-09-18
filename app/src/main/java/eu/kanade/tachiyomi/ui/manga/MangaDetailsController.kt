@@ -1173,7 +1173,9 @@ class MangaDetailsController :
     }
 
     override fun setFavButtonPopup(popupView: View) {
-        if (isLocked()) return
+        if (presenter.isLockedFromSearch) {
+            return
+        }
         val manga = presenter.manga
         if (!manga.favorite) {
             popupView.setOnTouchListener(null)
