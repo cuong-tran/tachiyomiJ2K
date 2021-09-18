@@ -94,7 +94,7 @@ interface Manga : SManga {
                 TYPE_COMIC -> R.string.comic
                 else -> R.string.manga
             }
-        ).toLowerCase(Locale.getDefault())
+        ).lowercase(Locale.getDefault())
     }
 
     fun getGenres(): List<String>? {
@@ -113,7 +113,7 @@ interface Manga : SManga {
     fun seriesType(useOriginalTags: Boolean = false, customTags: String? = null, sourceManager: SourceManager? = null): Int {
         val sourceName by lazy { (sourceManager ?: Injekt.get()).getOrStub(source).name }
         val tags = customTags ?: if (useOriginalTags) originalGenre else genre
-        val currentTags = tags?.split(",")?.map { it.trim().toLowerCase(Locale.US) } ?: emptyList()
+        val currentTags = tags?.split(",")?.map { it.trim().lowercase(Locale.US) } ?: emptyList()
         return if (currentTags.any { tag -> isMangaTag(tag) }) {
             TYPE_MANGA
         } else if (currentTags.any { tag -> isComicTag(tag) } ||
@@ -173,7 +173,7 @@ interface Manga : SManga {
     }
 
     fun isSeriesTag(tag: String): Boolean {
-        val tagLower = tag.toLowerCase(Locale.ROOT)
+        val tagLower = tag.lowercase(Locale.ROOT)
         return isMangaTag(tagLower) || isManhuaTag(tagLower) ||
             isManhwaTag(tagLower) || isComicTag(tagLower) || isWebtoonTag(tagLower)
     }
@@ -188,7 +188,7 @@ interface Manga : SManga {
 
     fun isLongStrip(): Boolean {
         val currentTags =
-            genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) } ?: emptyList()
+            genre?.split(",")?.map { it.trim().lowercase(Locale.US) } ?: emptyList()
         val sourceName by lazy { Injekt.get<SourceManager>().getOrStub(source).name }
         return currentTags.any { it == "long strip" } || sourceName.contains("webtoon", true)
     }
