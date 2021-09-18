@@ -14,8 +14,6 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
@@ -97,24 +95,24 @@ class CoverCache(val context: Context) {
      * Clear out all online covers
      */
     suspend fun deleteAllCachedCovers() {
-            val directory = onlineCoverDirectory
-            var deletedSize = 0L
-            val files =
-                directory.listFiles()?.sortedBy { it.lastModified() }?.iterator() ?: return
-            while (files.hasNext()) {
-                val file = files.next()
-                deletedSize += file.length()
-                file.delete()
-            }
-            withContext(Dispatchers.Main) {
-                context.toast(
-                    context.getString(
-                        R.string.deleted_,
-                        Formatter.formatFileSize(context, deletedSize)
-                    )
+        val directory = onlineCoverDirectory
+        var deletedSize = 0L
+        val files =
+            directory.listFiles()?.sortedBy { it.lastModified() }?.iterator() ?: return
+        while (files.hasNext()) {
+            val file = files.next()
+            deletedSize += file.length()
+            file.delete()
+        }
+        withContext(Dispatchers.Main) {
+            context.toast(
+                context.getString(
+                    R.string.deleted_,
+                    Formatter.formatFileSize(context, deletedSize)
                 )
-            }
-            context.imageLoader.memoryCache.clear()
+            )
+        }
+        context.imageLoader.memoryCache.clear()
 
         lastClean = System.currentTimeMillis()
     }

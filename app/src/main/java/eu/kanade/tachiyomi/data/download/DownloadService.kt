@@ -201,8 +201,11 @@ class DownloadService : Service() {
     private fun onNetworkStateChanged() {
         val manager = connectivityManager
         val networkCapabilities = manager.getNetworkCapabilities(manager.activeNetwork)
-        if (networkCapabilities == null || !(networkCapabilities.hasCapability(NET_CAPABILITY_INTERNET) &&
-                networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED))) {
+        if (networkCapabilities == null || !(
+            networkCapabilities.hasCapability(NET_CAPABILITY_INTERNET) &&
+                networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)
+            )
+        ) {
             downloadManager.stopDownloads(getString(R.string.no_network_connection))
             return
         }
