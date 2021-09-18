@@ -87,7 +87,6 @@
             android:minWidth="50dp"
             android:text="@string/latest"
             android:textAllCaps="false"
-            android:textColor="?attr/colorSecondary"
             app:layout_constraintEnd_toStartOf="@id/source_pin" />
 
         <ImageButton
