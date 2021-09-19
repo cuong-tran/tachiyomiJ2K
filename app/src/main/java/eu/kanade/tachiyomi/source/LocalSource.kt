@@ -240,12 +240,10 @@ class LocalSource(private val context: Context) : CatalogueSource {
                     ChapterRecognition.parseChapterNumber(this, manga)
                 }
             }
-            .sortedWith(
-                Comparator { c1, c2 ->
-                    val c = c2.chapter_number.compareTo(c1.chapter_number)
-                    if (c == 0) c2.name.compareToCaseInsensitiveNaturalOrder(c1.name) else c
-                }
-            )
+            .sortedWith { c1, c2 ->
+                val c = c2.chapter_number.compareTo(c1.chapter_number)
+                if (c == 0) c2.name.compareToCaseInsensitiveNaturalOrder(c1.name) else c
+            }
             .toList()
 
         return Observable.just(chapters)
