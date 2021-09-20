@@ -8,8 +8,10 @@ import android.view.MenuItem
 import androidx.appcompat.widget.SearchView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
+import androidx.core.os.bundleOf
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -22,14 +24,22 @@ import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchCardAdapter
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchPresenter
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class SearchController(
     private var manga: Manga? = null,
     private var sources: List<CatalogueSource>? = null
-) : GlobalSearchController(manga?.title), BottomNavBarInterface {
+) : GlobalSearchController(
+    manga?.originalTitle,
+    bundle = bundleOf(
+        OLD_MANGA to manga?.id,
+        SOURCES to sources?.map { it.id }?.toLongArray()
+    )
+),
+    BottomNavBarInterface {
 
-    private var newManga: Manga? = null
     private var progress = 1
     var totalProgress = 0
 
@@ -39,6 +49,18 @@ class SearchController(
     init {
         setHasOptionsMenu(true)
     }
+
+    constructor(mangaId: Long, sources: LongArray) :
+        this(
+            Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking(),
+            sources.map { Injekt.get<SourceManager>().getOrStub(it) }.filterIsInstance<CatalogueSource>()
+        )
+
+    @Suppress("unused")
+    constructor(bundle: Bundle) : this(
+        bundle.getLong(OLD_MANGA),
+        bundle.getLongArray(SOURCES) ?: LongArray(0)
+    )
 
     override fun getTitle(): String? {
         if (totalProgress > 1) {
@@ -50,18 +72,6 @@ class SearchController(
 
     override fun createPresenter(): GlobalSearchPresenter {
         return SearchPresenter(initialQuery, manga!!, sources = sources)
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putSerializable(::manga.name, manga)
-        outState.putSerializable(::newManga.name, newManga)
-        super.onSaveInstanceState(outState)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        manga = savedInstanceState.getSerializable(::manga.name) as? Manga
-        newManga = savedInstanceState.getSerializable(::newManga.name) as? Manga
     }
 
     /*override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -203,5 +213,10 @@ class SearchController(
             as? BottomNavBarInterface
         if (migrationListController != null) return migrationListController.canChangeTabs(block)
         return true
+    }
+
+    companion object {
+        const val OLD_MANGA = "old_manga"
+        const val SOURCES = "sources"
     }
 }
