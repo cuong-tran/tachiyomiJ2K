@@ -46,7 +46,11 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
+import androidx.window.layout.DisplayFeature
+import androidx.window.layout.FoldingFeature
+import androidx.window.layout.WindowInfoTracker
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -117,6 +121,7 @@ import eu.kanade.tachiyomi.widget.doOnStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.merge
@@ -211,6 +216,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     }
 
     var isScrollingThroughPagesOrChapters = false
+    private var hingeGapSize = 0
+        set(value) {
+            field = value
+            (viewer as? PagerViewer)?.config?.hingeGapSize = value
+        }
 
     companion object {
 
@@ -315,6 +325,30 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 SecureActivityDelegate.setSecure(this)
             }
         reEnableBackPressedCallBack()
+        lifecycleScope.launchUI {
+            // The block passed to repeatOnLifecycle is executed when the lifecycle
+            // is at least STARTED and is cancelled when the lifecycle is STOPPED.
+            // It automatically restarts the block when the lifecycle is STARTED again.
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Safely collects from windowInfoRepository when the lifecycle is
+                // STARTED and stops collection when the lifecycle is STOPPED.
+                WindowInfoTracker.getOrCreate(this@ReaderActivity).windowLayoutInfo(this@ReaderActivity)
+                    .collect { newLayoutInfo ->
+                        hingeGapSize = 0
+                        for (displayFeature: DisplayFeature in newLayoutInfo.displayFeatures) {
+                            if (displayFeature is FoldingFeature && displayFeature.occlusionType == FoldingFeature.OcclusionType.FULL &&
+                                displayFeature.isSeparating && displayFeature.orientation == FoldingFeature.Orientation.VERTICAL
+                            ) {
+                                hingeGapSize = displayFeature.bounds.width()
+                            }
+                        }
+//                        newLayoutInfo.displayFeatures.
+                        // Check newLayoutInfo.displayFeatures to see if the
+                        // feature list includes a FoldingFeature, then check
+                        // the feature's data.
+                    }
+            }
+        }
     }
 
     /**
@@ -1097,6 +1131,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
 
         if (newViewer is PagerViewer) {
+            newViewer.config.hingeGapSize = hingeGapSize
             if (preferences.pageLayout().get() == PageLayout.AUTOMATIC.value) {
                 setDoublePageMode(newViewer)
             }

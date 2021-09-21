@@ -429,6 +429,7 @@ object ImageUtil {
         imageBitmap2: Bitmap,
         isLTR: Boolean,
         @ColorInt background: Int = Color.WHITE,
+        hingeGap: Int = 0,
         progressCallback: ((Int) -> Unit)? = null,
     ): ByteArrayInputStream {
         val height = imageBitmap.height
@@ -436,21 +437,22 @@ object ImageUtil {
         val height2 = imageBitmap2.height
         val width2 = imageBitmap2.width
         val maxHeight = max(height, height2)
-        val result = Bitmap.createBitmap(width + width2, max(height, height2), Bitmap.Config.ARGB_8888)
+        val maxWidth = max(width, width2)
+        val result = Bitmap.createBitmap((maxWidth * 2) + hingeGap, max(height, height2), Bitmap.Config.ARGB_8888)
         val canvas = Canvas(result)
         canvas.drawColor(background)
         val upperPart = Rect(
-            if (isLTR) 0 else width2,
+            if (isLTR) max(maxWidth - imageBitmap.width, 0) else maxWidth + hingeGap,
             (maxHeight - imageBitmap.height) / 2,
-            (if (isLTR) 0 else width2) + imageBitmap.width,
+            (if (isLTR) max(maxWidth - imageBitmap.width, 0) else maxWidth + hingeGap) + imageBitmap.width,
             imageBitmap.height + (maxHeight - imageBitmap.height) / 2,
         )
         canvas.drawBitmap(imageBitmap, imageBitmap.rect, upperPart, null)
         progressCallback?.invoke(98)
         val bottomPart = Rect(
-            if (!isLTR) 0 else width,
+            if (!isLTR) max(maxWidth - imageBitmap2.width, 0) else maxWidth + hingeGap,
             (maxHeight - imageBitmap2.height) / 2,
-            (if (!isLTR) 0 else width) + imageBitmap2.width,
+            (if (!isLTR) max(maxWidth - imageBitmap2.width, 0) else maxWidth + hingeGap) + imageBitmap2.width,
             imageBitmap2.height + (maxHeight - imageBitmap2.height) / 2,
         )
         canvas.drawBitmap(imageBitmap2, imageBitmap2.rect, bottomPart, null)
