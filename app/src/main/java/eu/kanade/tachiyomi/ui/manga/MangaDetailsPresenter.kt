@@ -109,7 +109,7 @@ class MangaDetailsPresenter(
 
     var headerItem = MangaHeaderItem(manga, controller.fromCatalogue)
     var tabletChapterHeaderItem: MangaHeaderItem? = null
-
+    var allChapterScanlators: Set<String> = emptySet()
     fun onCreate() {
         headerItem.isTablet = controller.isTablet
         if (controller.isTablet) {
@@ -158,7 +158,7 @@ class MangaDetailsPresenter(
 
         // Find downloaded chapters
         setDownloadedChapters(chapters)
-
+        allChapterScanlators = chapters.flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }.toSet()
         // Store the last emission
         allChapters = chapters
         this.chapters = applyChapterFilters(chapters)
@@ -627,6 +627,13 @@ class MangaDetailsPresenter(
         filtersId.add(if (manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_BOOKMARKED) R.string.bookmarked else null)
         filtersId.add(if (manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED) R.string.not_bookmarked else null)
         return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
+    }
+
+    fun setScanlatorFilter(filteredScanlators: Set<String>) {
+        val manga = manga
+        manga.filtered_scanlators = if (filteredScanlators.size == allChapterScanlators.size || filteredScanlators.isEmpty()) null else ChapterUtil.getScanlatorString(filteredScanlators)
+        db.updateMangaFilteredScanlators(manga).executeAsBlocking()
+        asyncUpdateMangaAndChapters()
     }
 
     fun toggleFavorite(): Boolean {
