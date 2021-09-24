@@ -228,7 +228,9 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     }
 
     private fun startTransition(duration: Long = 100) {
-        val transition = androidx.transition.AutoTransition()
+        val transition = androidx.transition.TransitionSet()
+            .addTransition(androidx.transition.ChangeBounds())
+            .addTransition(androidx.transition.Fade())
         transition.duration = duration
         val mainView = binding.root.parent as ViewGroup
         TransitionManager.endTransitions(mainView)
@@ -257,6 +259,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     }
 
     private fun search(query: String) {
+        startTransition()
         binding.searchProgress.visibility = View.VISIBLE
         binding.trackSearchRecycler.visibility = View.GONE
         setMiddleTrackView(binding.searchProgress.id)
@@ -303,9 +306,10 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     fun onSearchResultsError(error: Throwable) {
         Timber.e(error)
+        startTransition()
         setMiddleTrackView(binding.searchEmptyView.id)
-        binding.searchProgress.visibility = View.VISIBLE
-        binding.trackSearchRecycler.visibility = View.GONE
+        binding.searchProgress.isVisible = false
+        binding.trackSearchRecycler.isVisible = false
         searchItemAdapter.clear()
         binding.searchEmptyView.show(
             R.drawable.ic_search_off_24dp,
