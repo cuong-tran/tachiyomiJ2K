@@ -9,7 +9,7 @@ import uy.kohesive.injekt.api.get
 
 class ChapterFilter(val preferences: PreferencesHelper = Injekt.get(), val downloadManager: DownloadManager = Injekt.get()) {
 
-    // filters chapters based on the manga values
+    /** filters chapters based on the manga values */
     fun <T : Chapter> filterChapters(chapters: List<T>, manga: Manga): List<T> {
         val readEnabled = manga.readFilter(preferences) == Manga.CHAPTER_SHOW_READ
         val unreadEnabled = manga.readFilter(preferences) == Manga.CHAPTER_SHOW_UNREAD
@@ -38,7 +38,7 @@ class ChapterFilter(val preferences: PreferencesHelper = Injekt.get(), val downl
         }
     }
 
-    // filter chapters for the reader
+    /** filter chapters for the reader */
     fun <T : Chapter> filterChaptersForReader(chapters: List<T>, manga: Manga, selectedChapter: T? = null): List<T> {
         var filteredChapters = filterChaptersByScanlators(chapters, manga)
         // if neither preference is enabled don't even filter
@@ -64,8 +64,8 @@ class ChapterFilter(val preferences: PreferencesHelper = Injekt.get(), val downl
 
         return filteredChapters
     }
-    // filters chapters for scanlators
 
+    /** filters chapters for scanlators */
     fun <T : Chapter> filterChaptersByScanlators(chapters: List<T>, manga: Manga): List<T> {
         return manga.filtered_scanlators?.let { filteredScanlatorString ->
             val filteredScanlators = ChapterUtil.getScanlators(filteredScanlatorString)
