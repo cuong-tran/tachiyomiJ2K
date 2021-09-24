@@ -42,6 +42,7 @@ class SearchController(
 
     private var progress = 1
     var totalProgress = 0
+    var newManga: Manga? = null
 
     /**
      * Called when controller is initialized.
