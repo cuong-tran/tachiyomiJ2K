@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
@@ -44,7 +45,7 @@ class SettingsBrowseController : SettingsController() {
                 }
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                intListPreference(activity) {
+                val intPref = intListPreference(activity) {
                     key = PreferenceKeys.autoUpdateExtensions
                     titleRes = R.string.auto_update_extensions
                     entryRange = 0..2
@@ -55,8 +56,8 @@ class SettingsBrowseController : SettingsController() {
                     )
                     defaultValue = AutoUpdaterJob.ONLY_ON_UNMETERED
                 }
-                infoPreference(R.string.some_extensions_may_not_update)
-                switchPreference {
+                val infoPref = infoPreference(R.string.some_extensions_may_not_update)
+                val switchPref = switchPreference {
                     key = "notify_ext_updated"
                     isPersistent = false
                     titleRes = R.string.notify_extension_updated
@@ -72,6 +73,9 @@ class SettingsBrowseController : SettingsController() {
                         }
                         startActivity(intent)
                     }
+                }
+                preferences.automaticExtUpdates().asImmediateFlowIn(viewScope) { value ->
+                    arrayOf(intPref, infoPref, switchPref).forEach { it.isVisible = value }
                 }
             }
         }
