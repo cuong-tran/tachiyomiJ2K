@@ -153,7 +153,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
             binding.chapterFilterLayout.setAsDefaultFilter.isInvisible = true
             binding.chapterFilterLayout.resetAsDefaultFilter.isInvisible = true
         }
-        binding.filterGroupsButton.isVisible = presenter.allChapterScanlators.isNotEmpty()
+        binding.filterGroupsButton.isVisible = presenter.allChapterScanlators.size > 1
 
         binding.filterGroupsButton.setOnClickListener {
             val scanlators = presenter.allChapterScanlators.toList()
