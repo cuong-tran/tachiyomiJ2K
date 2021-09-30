@@ -141,16 +141,7 @@ class MangaHeaderHolder(
                 )
                 true
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                backdrop.alpha = 0.2f
-                backdrop.setRenderEffect(
-                    RenderEffect.createBlurEffect(
-                        20f,
-                        20f,
-                        Shader.TileMode.MIRROR
-                    )
-                )
-            }
+            applyBlur()
             mangaCover.setOnClickListener { adapter.delegate.zoomImageFromThumb(coverCard) }
             trackButton.setOnClickListener { adapter.delegate.showTrackingSheet() }
             if (startExpanded) expandDesc()
@@ -159,6 +150,19 @@ class MangaHeaderHolder(
                 chapterLayout.isVisible = false
                 expandDesc()
             }
+        }
+    }
+
+    private fun applyBlur() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            binding?.backdrop?.alpha = 0.2f
+            binding?.backdrop?.setRenderEffect(
+                RenderEffect.createBlurEffect(
+                    20f,
+                    20f,
+                    Shader.TileMode.MIRROR
+                )
+            )
         }
     }
 
@@ -579,6 +583,7 @@ class MangaHeaderHolder(
                             Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height - yOffset)
                                 .toDrawable(itemView.resources)
                         )
+                        applyBlur()
                     }
                 )
             }
