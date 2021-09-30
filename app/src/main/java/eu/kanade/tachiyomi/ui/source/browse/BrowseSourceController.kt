@@ -243,7 +243,7 @@ open class BrowseSourceController(bundle: Bundle) :
 //            .map { it.queryText().toString() }
 //            .subscribeUntilDestroy { searchWithQuery(it) }
 
-        setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = false) {
+        setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = true) {
             searchWithQuery(it ?: "")
             true
         }
