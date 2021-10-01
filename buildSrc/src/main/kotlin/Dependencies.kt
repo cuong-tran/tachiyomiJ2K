@@ -5,7 +5,6 @@ object Versions {
     const val RETROFIT = "2.7.2"
     const val ROBO_ELECTRIC = "3.1.4"
     const val RX_BINDING = "1.0.1"
-    const val TIMBER = "4.7.1"
     const val androidAppCompat = "1.1.0"
     const val androidWorkManager = "2.4.0"
     const val changelog = "2.1.0"

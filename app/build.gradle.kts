@@ -209,7 +209,7 @@ dependencies {
     implementation("io.coil-kt:coil-svg:$coilVersion")
 
     // Logging
-    implementation("com.jakewharton.timber:timber:${Versions.TIMBER}")
+    implementation("com.jakewharton.timber:timber:4.7.1")
 
     // Sort
     implementation("com.github.gpanther:java-nat-sort:natural-comparator-1.1")
