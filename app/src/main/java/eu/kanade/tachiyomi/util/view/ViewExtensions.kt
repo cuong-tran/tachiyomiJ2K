@@ -26,7 +26,6 @@ import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.FloatRange
 import androidx.annotation.IdRes
-import androidx.annotation.Px
 import androidx.annotation.RequiresApi
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.PopupMenu
@@ -38,6 +37,7 @@ import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePaddingRelative
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
@@ -251,15 +251,6 @@ fun View.requestApplyInsetsWhenAttached() {
     }
 }
 
-inline fun View.updatePadding(
-    @Px left: Int = paddingLeft,
-    @Px top: Int = paddingTop,
-    @Px right: Int = paddingRight,
-    @Px bottom: Int = paddingBottom
-) {
-    setPadding(left, top, right, bottom)
-}
-
 private fun createStateForView(view: View) = ViewPaddingState(
     view.paddingLeft,
     view.paddingTop,
@@ -277,15 +268,6 @@ data class ViewPaddingState(
     val start: Int,
     val end: Int
 )
-
-inline fun View.updatePaddingRelative(
-    @Px start: Int = paddingStart,
-    @Px top: Int = paddingTop,
-    @Px end: Int = paddingEnd,
-    @Px bottom: Int = paddingBottom
-) {
-    setPaddingRelative(start, top, end, bottom)
-}
 
 fun setBottomEdge(view: View, activity: Activity) {
     val marginB = view.marginBottom

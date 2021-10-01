@@ -6,8 +6,8 @@ import androidx.lifecycle.lifecycleScope
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.util.system.setThemeAndNight
 import eu.kanade.tachiyomi.util.system.getThemeWithExtras
+import eu.kanade.tachiyomi.util.system.setThemeAndNight
 import nucleus.view.NucleusAppCompatActivity
 import uy.kohesive.injekt.injectLazy
 

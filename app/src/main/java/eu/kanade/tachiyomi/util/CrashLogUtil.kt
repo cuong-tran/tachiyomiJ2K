@@ -2,9 +2,9 @@ package eu.kanade.tachiyomi.util
 
 import android.content.Context
 import android.net.Uri
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.BuildConfig
 import android.os.Build
+import eu.kanade.tachiyomi.BuildConfig
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.storage.getUriCompat

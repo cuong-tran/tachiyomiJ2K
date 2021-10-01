@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.math.MathUtils
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
+import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.afollestad.materialdialogs.MaterialDialog
