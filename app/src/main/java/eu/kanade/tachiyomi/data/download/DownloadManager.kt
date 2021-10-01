@@ -366,7 +366,7 @@ class DownloadManager(val context: Context) {
         val oldFolder = mangaDir.findFile(oldName)
         if (oldFolder?.renameTo(newName) == true) {
             cache.removeChapters(listOf(oldChapter), manga)
-            cache.addChapter(newName, mangaDir, manga)
+            cache.addChapter(newName, manga)
         } else {
             Timber.e("Could not rename downloaded chapter: %s.", oldName)
         }
