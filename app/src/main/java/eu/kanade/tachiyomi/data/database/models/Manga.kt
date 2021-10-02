@@ -218,7 +218,8 @@ interface Manga : SManga {
             sourceName.contains("cyanide", true) ||
             sourceName.contains("xkcd", true) ||
             sourceName.contains("tapas", true) ||
-            sourceName.contains("ComicExtra", true)
+            sourceName.contains("ComicExtra", true) ||
+            sourceName.contains("Read Comics Online", true)
     }
 
     fun isOneShotOrCompleted(db: DatabaseHelper): Boolean {
