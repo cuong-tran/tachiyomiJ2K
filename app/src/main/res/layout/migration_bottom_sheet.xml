@@ -111,7 +111,7 @@
             app:layout_constraintStart_toStartOf="@+id/sourceGroup"
             app:layout_constraintTop_toBottomOf="@+id/sourceGroup" />
 
-        <EditText
+        <eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText
             android:id="@+id/extra_search_param_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

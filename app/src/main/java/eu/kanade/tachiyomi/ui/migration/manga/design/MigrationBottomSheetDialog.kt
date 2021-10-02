@@ -79,7 +79,9 @@ class MigrationBottomSheetDialog(
         binding.fab.setOnClickListener {
             preferences.skipPreMigration().set(binding.skipStep.isChecked)
             listener.startMigration(
-                if (binding.extraSearchParam.isChecked && binding.extraSearchParamText.text.isNotBlank()) binding.extraSearchParamText.text.toString() else null
+                binding.extraSearchParamText.text?.toString()?.takeIf {
+                    it.isNotBlank() && binding.extraSearchParam.isChecked
+                }
             )
             dismiss()
         }

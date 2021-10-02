@@ -42,6 +42,7 @@ import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.view.openInBrowser
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText.Companion.setIncognito
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -226,6 +227,14 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
                 pref.fragment = "source_${source.id}"
                 pref.order = Int.MAX_VALUE
                 pref.isVisible = source.isEnabled()
+
+                // Apply incognito IME for EditTextPreference
+                if (pref is EditTextPreference) {
+                    pref.setOnBindEditTextListener {
+                        it.setIncognito(viewScope)
+                    }
+                }
+
                 prefs.add(pref)
                 newScreen.removePreference(pref)
                 screen.addPreference(pref)
