@@ -23,7 +23,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
@@ -82,19 +81,9 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     init {
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        sheetBehavior.peekHeight = 500.dpToPx + height
-
-        sheetBehavior.addBottomSheetCallback(
-            object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onSlide(bottomSheet: View, progress: Float) { }
-
-                override fun onStateChanged(p0: View, state: Int) {
-                    if (state == BottomSheetBehavior.STATE_EXPANDED) {
-                        sheetBehavior.skipCollapsed = true
-                    }
-                }
-            }
-        )
+        sheetBehavior.peekHeight = 525.dpToPx + height
+        sheetBehavior.expand()
+        sheetBehavior.skipCollapsed = true
 
         binding.searchCloseButton.setOnClickListener {
             onBackPressed()
