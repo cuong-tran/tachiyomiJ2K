@@ -8,12 +8,11 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceScreen
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -30,8 +29,10 @@ import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.CrashLogUtil
+import eu.kanade.tachiyomi.util.system.disableItems
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.openInBrowser
 import kotlinx.coroutines.CoroutineStart
@@ -229,18 +230,32 @@ class SettingsAdvancedController : SettingsController() {
         }
     }
 
-    class CleanupDownloadsDialogController() : DialogController() {
+    class CleanupDownloadsDialogController : DialogController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            return MaterialDialog(activity!!).show {
-                title(R.string.clean_up_downloaded_chapters)
-                    .listItemsMultiChoice(R.array.clean_up_downloads, disabledIndices = intArrayOf(0), initialSelection = intArrayOf(0, 1, 2)) { dialog, selections, items ->
-                        val deleteRead = selections.contains(1)
-                        val deleteNonFavorite = selections.contains(2)
-                        (targetController as? SettingsAdvancedController)?.cleanupDownloads(deleteRead, deleteNonFavorite)
+            return activity!!.materialAlertDialog()
+                .setTitle(R.string.clean_up_downloaded_chapters)
+                .setMultiChoiceItems(
+                    R.array.clean_up_downloads,
+                    booleanArrayOf(true, true, true)
+                ) { dialog, position, _ ->
+                    if (position == 0) {
+                        val listView = (dialog as AlertDialog).listView
+                        listView.setItemChecked(position, true)
                     }
-                positiveButton(android.R.string.ok)
-                negativeButton(android.R.string.cancel)
-            }
+                }
+                .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                    val listView = (dialog as AlertDialog).listView
+                    val deleteRead = listView.isItemChecked(1)
+                    val deleteNonFavorite = listView.isItemChecked(2)
+                    (targetController as? SettingsAdvancedController)?.cleanupDownloads(
+                        deleteRead,
+                        deleteNonFavorite
+                    )
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .create().apply {
+                    this.disableItems(arrayOf(activity!!.getString(R.string.clean_orphaned_downloads)))
+                }
         }
     }
 
@@ -322,12 +337,13 @@ class SettingsAdvancedController : SettingsController() {
 
     class ClearDatabaseDialogController : DialogController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            return MaterialDialog(activity!!)
-                .message(R.string.clear_database_confirmation)
-                .positiveButton(android.R.string.ok) {
+            return activity!!.materialAlertDialog()
+                .setMessage(R.string.clear_database_confirmation)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
                     (targetController as? SettingsAdvancedController)?.clearDatabase()
                 }
-                .negativeButton(android.R.string.cancel)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
         }
     }
 

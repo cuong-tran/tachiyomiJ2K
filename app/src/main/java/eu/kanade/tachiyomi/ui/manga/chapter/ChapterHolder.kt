@@ -2,8 +2,10 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.res.ColorStateList
 import android.view.View
 import androidx.core.view.isVisible
+import androidx.core.widget.TextViewCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -12,6 +14,7 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import eu.kanade.tachiyomi.widget.StartAnimatorListener
 
@@ -147,6 +150,17 @@ class ChapterHolder(
     }
 
     fun notifyStatus(status: Download.State, locked: Boolean, progress: Int, animated: Boolean = false) = with(binding.downloadButton.downloadButton) {
+        adapter.delegate.accentColor()?.let {
+            binding.startView.backgroundTintList = ColorStateList.valueOf(it)
+            binding.bookmark.imageTintList = ColorStateList.valueOf(
+                context.getResourceColor(android.R.attr.textColorPrimaryInverse)
+            )
+            TextViewCompat.setCompoundDrawableTintList(
+                binding.chapterTitle,
+                ColorStateList.valueOf(it)
+            )
+            colorSecondary = it
+        }
         if (locked) {
             isVisible = false
             return

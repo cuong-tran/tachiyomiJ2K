@@ -1,157 +1,169 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical">
+    android:layout_height="wrap_content">
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:orientation="vertical">
 
-    <FrameLayout
-        android:id="@+id/cover_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:foreground="?attr/selectableItemBackground"
-        android:layout_marginBottom="10dp">
+            <FrameLayout
+                android:id="@+id/cover_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:foreground="?attr/selectableItemBackground"
+                android:layout_marginBottom="10dp">
 
-        <ImageView
-            android:id="@+id/manga_cover"
-            android:layout_width="wrap_content"
-            android:adjustViewBounds="true"
-            android:minWidth="75dp"
-            android:layout_height="150dp"
-            android:contentDescription="@string/cover_of_image"
-            android:background="@drawable/image_border_background"
-            android:src="@mipmap/ic_launcher"/>
-    </FrameLayout>
+                <ImageView
+                    android:id="@+id/manga_cover"
+                    android:layout_width="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:minWidth="75dp"
+                    android:layout_height="150dp"
+                    android:contentDescription="@string/cover_of_image"
+                    android:background="@drawable/image_border_background"
+                    android:src="@mipmap/ic_launcher"/>
+            </FrameLayout>
 
-    <Button
-        android:id="@+id/reset_cover"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Theme.Widget.Button.Primary"
-        android:textAllCaps="false"
-        android:layout_gravity="center"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:text="@string/reset_cover" />
+            <Button
+                android:id="@+id/reset_cover"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Theme.Widget.Button.Primary"
+                android:textAllCaps="false"
+                android:layout_gravity="center"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:text="@string/reset_cover" />
 
-    <eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText
-        android:id="@+id/title"
+            <eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/title"
+                android:layout_marginEnd="16dp"
+                android:importantForAutofill="no"
+                android:layout_marginStart="16dp"
+                android:inputType="text"
+                android:maxLines="1"/>
+            <eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText
+                android:id="@+id/manga_author"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/author"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="1"/>
+
+            <eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText
+                android:id="@+id/manga_artist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/artist"
+                android:layout_marginEnd="16dp"
+                android:importantForAutofill="no"
+                android:layout_marginStart="16dp"
+                android:inputType="text"
+                android:maxLines="1"/>
+
+            <eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText
+                android:id="@+id/manga_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:importantForAutofill="no"
+                android:hint="@string/description"
+                android:inputType="text|textMultiLine"
+                android:scrollHorizontally="false" />
+
+            <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+                android:id="@+id/manga_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="18dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="6dp"
+                android:entries="@array/manga_statuses"
+                app:title="@string/status" />
+
+            <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+                android:id="@+id/series_type"
+                app:title="@string/series_type"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="18dp"
+                android:entries="@array/series_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/resets_reading_mode"
+                android:text="@string/changing_will_reset_reading_mode"
+                android:textColor="?android:attr/textColorSecondary"
+                android:layout_marginEnd="24dp"
+                android:layout_marginStart="24dp"
+                android:textAlignment="center"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_marginBottom="6dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/manga_genres_tags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp" >
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/add_tag_chip"
+                    android:layout_width="wrap_content"
+                    style="@style/Widget.Tachiyomi.Chip.AddTag"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_tag"/>
+
+                <eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText
+                    android:id="@+id/add_tag_edit_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:importantForAutofill="no"
+                    android:hint="@string/add_tag"
+                    android:inputType="text"
+                    android:maxLines="1"/>
+            </com.google.android.material.chip.ChipGroup>
+
+            <Button
+                android:id="@+id/reset_tags"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Theme.Widget.Button.Primary"
+                android:textAllCaps="false"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:text="@string/clear_tags" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:id="@+id/scroll_indicator_down"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/title"
-        android:layout_marginEnd="16dp"
-        android:importantForAutofill="no"
-        android:layout_marginStart="16dp"
-        android:inputType="text"
-        android:maxLines="1"/>
-    <eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText
-        android:id="@+id/manga_author"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/author"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:importantForAutofill="no"
-        android:inputType="text"
-        android:maxLines="1"/>
-
-    <eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText
-        android:id="@+id/manga_artist"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/artist"
-        android:layout_marginEnd="16dp"
-        android:importantForAutofill="no"
-        android:layout_marginStart="16dp"
-        android:inputType="text"
-        android:maxLines="1"/>
-
-    <eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText
-        android:id="@+id/manga_description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:importantForAutofill="no"
-        android:hint="@string/description"
-        android:inputType="text|textMultiLine"
-        android:scrollHorizontally="false" />
-
-    <eu.kanade.tachiyomi.widget.MaterialSpinnerView
-        android:id="@+id/manga_status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="18dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="6dp"
-        android:entries="@array/manga_statuses"
-        app:title="@string/status" />
-
-    <eu.kanade.tachiyomi.widget.MaterialSpinnerView
-        android:id="@+id/series_type"
-        app:title="@string/series_type"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="18dp"
-        android:entries="@array/series_type"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/resets_reading_mode"
-        android:text="@string/changing_will_reset_reading_mode"
-        android:textColor="?android:attr/textColorSecondary"
-        android:layout_marginEnd="24dp"
-        android:layout_marginStart="24dp"
-        android:textAlignment="center"
-        android:visibility="gone"
-        tools:visibility="visible"
-        android:layout_marginBottom="6dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/manga_genres_tags"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        app:chipSpacing="-12dp"
-        android:layout_marginBottom="8dp" >
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/add_tag_chip"
-            android:layout_width="wrap_content"
-            style="@style/Theme.Widget.Chip.AddTag"
-            android:layout_height="wrap_content"
-            android:text="@string/add_tag"/>
-
-        <eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText
-            android:id="@+id/add_tag_edit_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:importantForAutofill="no"
-            android:hint="@string/add_tag"
-            android:inputType="text"
-            android:maxLines="1"/>
-    </com.google.android.material.chip.ChipGroup>
-
-    <Button
-        android:id="@+id/reset_tags"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Theme.Widget.Button.Primary"
-        android:textAllCaps="false"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:text="@string/clear_tags" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/divider"/>
-
-</LinearLayout>
+        android:alpha="0.5"
+        android:layout_gravity="bottom" />
+</FrameLayout>

@@ -59,6 +59,8 @@
         android:id="@+id/cover_card"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
+        app:strokeWidth="0dp"
+        app:cardElevation="2dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="16dp"
@@ -83,7 +85,7 @@
 
     <TextView
         android:id="@+id/title"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
+        style="?textAppearanceHeadlineSmall"
         android:layout_width="wrap_content"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constrainedWidth="true"
@@ -110,7 +112,7 @@
         android:ellipsize="end"
         android:maxLines="2"
         android:text="@string/author"
-        android:textAppearance="@style/TextAppearance.Regular.Body1.SemiBold"
+        style="?textAppearanceLabelLarge"
         android:textColor="?android:attr/textColorSecondary"
         android:textIsSelectable="false"
         app:layout_constraintEnd_toEndOf="parent"
@@ -119,7 +121,7 @@
 
     <TextView
         android:id="@+id/manga_status"
-        style="@style/TextAppearance.Regular.Body1.Secondary"
+        style="?textAppearanceBodySecondary"
         android:layout_width="wrap_content"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constrainedWidth="true"
@@ -134,7 +136,7 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/manga_source"
-        style="@style/TextAppearance.Regular.Body1.Secondary"
+        style="?textAppearanceBodySecondary"
         android:layout_width="wrap_content"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constrainedWidth="true"
@@ -180,13 +182,13 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/favorite_button"
-                style="@style/Theme.Widget.Button.RoundedOutline"
+                style="@style/Widget.Tachiyomi.Button.OutlinedButton.Icon"
                 android:text="@string/add_to_library"
                 app:icon="@drawable/ic_heart_outline_24dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/track_button"
-                style="@style/Theme.Widget.Button.RoundedOutline"
+                style="@style/Widget.Tachiyomi.Button.OutlinedButton.Icon"
                 android:layout_marginStart="6dp"
                 android:text="@string/tracking"
                 app:icon="@drawable/ic_sync_24dp" />
@@ -221,7 +223,7 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/manga_summary_label"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
+        style="?textAppearanceTitleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -237,7 +239,7 @@
 
     <TextView
         android:id="@+id/manga_summary"
-        style="@style/TextAppearance.Regular.Body1.Secondary"
+        style="?textAppearanceBodySecondary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -380,7 +382,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/chapters_title"
-            style="@style/TextAppearance.MaterialComponents.Headline6"
+            style="?textAppearanceTitleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"

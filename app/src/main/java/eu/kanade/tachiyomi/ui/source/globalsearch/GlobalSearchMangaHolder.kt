@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import eu.kanade.tachiyomi.databinding.SourceGlobalSearchControllerCardItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.util.view.makeShapeCorners
 
 class GlobalSearchMangaHolder(view: View, adapter: GlobalSearchCardAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
@@ -23,6 +24,8 @@ class GlobalSearchMangaHolder(view: View, adapter: GlobalSearchCardAdapter) :
                 adapter.mangaClickListener.onMangaClick(item.manga)
             }
         }
+        binding.favoriteButton.shapeAppearanceModel =
+            binding.card.makeShapeCorners(binding.card.radius, binding.card.radius)
         itemView.setOnLongClickListener {
             adapter.mangaClickListener.onMangaLongClick(flexibleAdapterPosition, adapter)
             true

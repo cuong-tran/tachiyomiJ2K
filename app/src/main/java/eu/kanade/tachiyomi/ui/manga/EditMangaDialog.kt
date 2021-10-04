@@ -15,9 +15,6 @@ import androidx.core.view.children
 import androidx.core.view.isVisible
 import coil.loadAny
 import coil.request.Parameters
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.customview.customView
-import com.afollestad.materialdialogs.customview.getCustomView
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import eu.kanade.tachiyomi.R
@@ -33,6 +30,7 @@ import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -66,18 +64,23 @@ class EditMangaDialog : DialogController {
     }
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        val dialog = MaterialDialog(activity!!).apply {
-            customView(viewRes = R.layout.edit_manga_dialog, scrollable = true)
-            negativeButton(android.R.string.cancel)
-            positiveButton(R.string.save) { onPositiveButtonClick() }
+        binding = EditMangaDialogBinding.inflate(activity!!.layoutInflater)
+        val dialog = activity!!.materialAlertDialog().apply {
+            setView(binding.root)
+            setNegativeButton(android.R.string.cancel, null)
+            setPositiveButton(R.string.save) { _, _ -> onPositiveButtonClick() }
         }
-        binding = EditMangaDialogBinding.bind(dialog.getCustomView())
         onViewCreated()
-        dialog.setOnShowListener {
-            val dView = (it as? MaterialDialog)?.view
-            dView?.contentLayout?.scrollView?.scrollTo(0, 0)
+        val updateScrollIndicators = {
+            binding.scrollIndicatorDown.isVisible = binding.scrollView.canScrollVertically(1)
         }
-        return dialog
+        binding.scrollView.setOnScrollChangeListener { _, _, _, _, _ ->
+            updateScrollIndicators()
+        }
+        binding.scrollView.post {
+            updateScrollIndicators()
+        }
+        return dialog.create()
     }
 
     fun onViewCreated() {

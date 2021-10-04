@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.extension
 
+import android.animation.AnimatorInflater
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.View
@@ -129,6 +130,8 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
         val extension = item.extension
         val installStep = item.installStep
         strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
+        rippleColor = ColorStateList.valueOf(context.getResourceColor(R.attr.colorControlHighlight))
+        stateListAnimator = null
         if (installStep != null) {
             setText(
                 when (installStep) {
@@ -149,6 +152,8 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
             when {
                 extension.hasUpdate -> {
                     isActivated = true
+                    stateListAnimator = AnimatorInflater.loadStateListAnimator(context, R.animator.icon_btn_state_list_anim)
+                    rippleColor = ColorStateList.valueOf(context.getColor(R.color.on_secondary_highlight))
                     setText(R.string.update)
                 }
                 else -> {

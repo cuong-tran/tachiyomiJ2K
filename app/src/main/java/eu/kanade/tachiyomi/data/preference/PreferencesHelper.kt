@@ -423,6 +423,8 @@ class PreferencesHelper(val context: Context) {
     fun showNsfwExtension() = flowPrefs.getBoolean(Keys.showNsfwExtension, true)
     fun labelNsfwExtension() = prefs.getBoolean(Keys.labelNsfwExtension, true)
 
+    fun themeMangaDetails() = prefs.getBoolean(Keys.themeMangaDetails, true)
+
     fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
 
     fun showSeriesInShortcuts() = prefs.getBoolean(Keys.showSeriesInShortcuts, true)

@@ -1,5 +1,4 @@
 object Versions {
-    const val HYPERION = "0.9.27"
     const val NUCLEUS = "3.0.0"
     const val OSS_LICENSE = "17.0.0"
     const val RETROFIT = "2.7.2"
@@ -8,7 +7,6 @@ object Versions {
     const val androidAppCompat = "1.1.0"
     const val androidWorkManager = "2.4.0"
     const val changelog = "2.1.0"
-    const val chucker = "3.2.0"
     const val coil = "1.1.1"
     const val conductor = "2.1.5"
     const val directionalViewPager = "a844dbca0a"
@@ -25,7 +23,6 @@ object Versions {
     const val junit = "4.13"
     const val kotlin = "1.5.21"
     const val kotson = "2.5.0"
-    const val materialDialogs = "3.1.1"
     const val mockito = "1.10.19"
     const val moshi = "1.9.3"
     const val nucleus = "3.0.0"

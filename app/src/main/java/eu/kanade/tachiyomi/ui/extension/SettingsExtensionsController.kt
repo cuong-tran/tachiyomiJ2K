@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.extension
 
 import androidx.preference.PreferenceScreen
-import androidx.preference.SwitchPreference
+import androidx.preference.SwitchPreferenceCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.ui.setting.SettingsController
@@ -28,7 +28,7 @@ class SettingsExtensionsController : SettingsController() {
             }
 
         availableLangs.forEach {
-            SwitchPreference(context).apply {
+            SwitchPreferenceCompat(context).apply {
                 preferenceScreen.addPreference(this)
                 title = LocaleHelper.getSourceDisplayName(it, context)
                 isPersistent = false

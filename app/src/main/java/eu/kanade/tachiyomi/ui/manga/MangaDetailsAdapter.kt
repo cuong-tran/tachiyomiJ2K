@@ -124,6 +124,7 @@ class MangaDetailsAdapter(
 
     interface MangaHeaderInterface {
         fun coverColor(): Int?
+        fun accentColor(): Int?
         fun mangaPresenter(): MangaDetailsPresenter
         fun prepareToShareManga()
         fun openInWebView()

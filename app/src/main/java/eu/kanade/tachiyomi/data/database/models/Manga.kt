@@ -269,6 +269,12 @@ interface Manga : SManga {
         get() = viewer_flags and OrientationType.MASK
         set(rotationType) = setViewerFlags(rotationType, OrientationType.MASK)
 
+    var vibrantCoverColor: Int?
+        get() = vibrantCoverColorMap[id]
+        set(value) {
+            id?.let { vibrantCoverColorMap[it] = value }
+        }
+
     companion object {
 
         // Generic filter that does not filter anything
@@ -310,6 +316,8 @@ interface Manga : SManga {
         const val TYPE_MANHUA = 3
         const val TYPE_COMIC = 4
         const val TYPE_WEBTOON = 5
+
+        private val vibrantCoverColorMap: HashMap<Long, Int?> = hashMapOf()
 
         fun create(source: Long): Manga = MangaImpl().apply {
             this.source = source

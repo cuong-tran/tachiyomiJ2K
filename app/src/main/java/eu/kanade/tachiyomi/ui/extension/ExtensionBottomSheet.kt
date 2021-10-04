@@ -9,7 +9,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.RecyclerView
-import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -28,6 +27,7 @@ import eu.kanade.tachiyomi.ui.migration.SourceAdapter
 import eu.kanade.tachiyomi.ui.migration.SourceItem
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.source.BrowseController
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -207,10 +207,10 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     override fun onUpdateAllClicked(position: Int) {
         if (!presenter.preferences.hasPromptedBeforeUpdateAll().get()) {
-            MaterialDialog(controller.activity!!)
-                .title(R.string.update_all)
-                .message(R.string.some_extensions_may_prompt)
-                .positiveButton(android.R.string.ok) {
+            controller.activity!!.materialAlertDialog()
+                .setTitle(R.string.update_all)
+                .setMessage(R.string.some_extensions_may_prompt)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
                     presenter.preferences.hasPromptedBeforeUpdateAll().set(true)
                     updateAllExtensions(position)
                 }

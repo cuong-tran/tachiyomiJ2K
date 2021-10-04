@@ -12,7 +12,7 @@
 
     <TextView
         android:id="@+id/chapter_title"
-        style="@style/TextAppearance.MaterialComponents.Body2"
+        style="?textAppearanceBodyMedium"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -27,7 +27,7 @@
 
     <TextView
         android:id="@+id/chapter_subtitle"
-        style="@style/TextAppearance.MaterialComponents.Caption"
+        style="?textAppearanceCaption"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -45,7 +45,7 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginEnd="12dp"
-        android:background="@drawable/rounded_ripple"
+        android:background="@drawable/round_ripple"
         android:clickable="true"
         android:focusable="true"
         android:src="@drawable/ic_bookmark_24dp"

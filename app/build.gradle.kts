@@ -99,9 +99,9 @@ dependencies {
     implementation("tachiyomi.sourceapi:source-api:1.1")
 
     // Android X libraries
-    implementation("androidx.appcompat:appcompat:1.3.1")
+    implementation("androidx.appcompat:appcompat:1.4.0-alpha03")
     implementation("androidx.cardview:cardview:1.0.0")
-    implementation("com.google.android.material:material:1.4.0")
+    implementation("com.google.android.material:material:1.5.0-alpha04")
     implementation("androidx.webkit:webkit:1.4.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.preference:preference:1.1.1")
@@ -139,23 +139,9 @@ dependencies {
     implementation("com.squareup.okio:okio:2.10.0")
 
     // Chucker
-    val chuckerVersion = "3.2.0"
+    val chuckerVersion = "3.5.2"
     debugImplementation("com.github.ChuckerTeam.Chucker:library:$chuckerVersion")
     releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
-
-    // hyperion
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-core:${Versions.HYPERION}")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-timber:${Versions.HYPERION}")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-core:${Versions.HYPERION}")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-attr:${Versions.HYPERION}")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-build-config:${Versions.HYPERION}")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-crash:${Versions.HYPERION}")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-disk:${Versions.HYPERION}")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-geiger-counter:${Versions.HYPERION}")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-measurement:${Versions.HYPERION}")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-phoenix:${Versions.HYPERION}")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-recorder:${Versions.HYPERION}")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-shared-preferences:${Versions.HYPERION}")
 
     // REST
     implementation("com.squareup.retrofit2:retrofit:${Versions.RETROFIT}")
@@ -182,7 +168,7 @@ dependencies {
     implementation("org.jsoup:jsoup:1.13.1")
 
     // Job scheduling
-    implementation("androidx.work:work-runtime-ktx:2.5.0")
+    implementation("androidx.work:work-runtime-ktx:2.6.0")
 
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
@@ -222,10 +208,6 @@ dependencies {
     implementation("eu.davidea:flexible-adapter:5.1.0")
     implementation("eu.davidea:flexible-adapter-ui:1.0.0")
     implementation("com.nononsenseapps:filepicker:2.5.2")
-    implementation("com.afollestad.material-dialogs:core:${Versions.materialDialogs}")
-    implementation("com.afollestad.material-dialogs:input:${Versions.materialDialogs}")
-    implementation("com.afollestad.material-dialogs:datetime:${Versions.materialDialogs}")
-    implementation("me.zhanghai.android.systemuihelper:library:1.0.0")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
     implementation("com.github.mthli:Slice:v1.2")
 

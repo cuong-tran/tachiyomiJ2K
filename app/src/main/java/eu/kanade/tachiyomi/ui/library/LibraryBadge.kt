@@ -1,15 +1,18 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.util.AttributeSet
 import androidx.core.view.isVisible
 import androidx.core.view.updatePaddingRelative
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.shape.MaterialShapeDrawable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.UnreadDownloadBadgeBinding
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.view.makeShapeCorners
 
 class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     MaterialCardView(context, attrs) {
@@ -19,9 +22,16 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
     override fun onFinishInflate() {
         super.onFinishInflate()
         binding = UnreadDownloadBadgeBinding.bind(this)
+
+        shapeAppearanceModel = makeShapeCorners(radius, radius)
     }
 
-    fun setUnreadDownload(unread: Int, downloads: Int, showTotalChapters: Boolean) {
+    fun setUnreadDownload(
+        unread: Int,
+        downloads: Int,
+        showTotalChapters: Boolean,
+        changeShape: Boolean
+    ) {
         // Update the unread count and its visibility.
 
         val unreadBadgeBackground = if (showTotalChapters) {
@@ -48,22 +58,50 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         // Update the download count or local status and its visibility.
         with(binding.downloadText) {
             isVisible = downloads == -2 || downloads > 0
-            if (!isVisible) { return@with }
+            if (!isVisible) {
+                return@with
+            }
             text = if (downloads == -2) {
                 resources.getString(R.string.local)
             } else {
                 downloads.toString()
             }
 
-            setTextColor(context.getResourceColor(R.attr.colorOnDownloadBadge))
-            setBackgroundColor(context.getResourceColor(R.attr.colorDownloadBadge))
+            setTextColor(context.getResourceColor(R.attr.colorOnTertiary))
+            setBackgroundColor(context.getResourceColor(R.attr.colorTertiary))
+        }
+
+        if (changeShape) {
+            shapeAppearanceModel = makeShapeCorners(radius, radius)
+            if (binding.downloadText.isVisible) {
+                binding.downloadText.background =
+                    MaterialShapeDrawable(makeShapeCorners(topStart = radius)).apply {
+                        this.fillColor =
+                            ColorStateList.valueOf(context.getResourceColor(R.attr.colorTertiary))
+                    }
+                binding.unreadText.background =
+                    MaterialShapeDrawable(makeShapeCorners(bottomEnd = radius)).apply {
+                        this.fillColor = ColorStateList.valueOf(unreadBadgeBackground)
+                    }
+            } else {
+                binding.unreadText.background =
+                    MaterialShapeDrawable(makeShapeCorners(radius, radius)).apply {
+                        this.fillColor = ColorStateList.valueOf(unreadBadgeBackground)
+                    }
+                if (unread == -1) {
+                    shapeAppearanceModel = shapeAppearanceModel.withCornerSize(radius)
+                }
+            }
+        } else {
+            shapeAppearanceModel = shapeAppearanceModel.withCornerSize(radius)
         }
 
         // Show the badge card if unread or downloads exists
         isVisible = binding.downloadText.isVisible || binding.unreadText.isVisible
 
         // Show the angles divider if both unread and downloads exists
-        binding.unreadAngle.isVisible = binding.downloadText.isVisible && binding.unreadText.isVisible
+        binding.unreadAngle.isVisible =
+            binding.downloadText.isVisible && binding.unreadText.isVisible
 
         binding.unreadAngle.setColorFilter(unreadBadgeBackground)
         if (binding.unreadAngle.isVisible) {
@@ -76,7 +114,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     fun setChapters(chapters: Int?) {
-        setUnreadDownload(chapters ?: 0, 0, chapters != null)
+        setUnreadDownload(chapters ?: 0, 0, chapters != null, true)
     }
 
     fun setInLibrary(inLibrary: Boolean) {
@@ -85,5 +123,10 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         binding.unreadText.updatePaddingRelative(start = 5.dpToPx)
         binding.unreadText.isVisible = inLibrary
         binding.unreadText.text = resources.getText(R.string.in_library)
+        binding.unreadText.background =
+            MaterialShapeDrawable(makeShapeCorners(radius, radius)).apply {
+                this.fillColor =
+                    ColorStateList.valueOf(context.getResourceColor(R.attr.colorSecondary))
+            }
     }
 }

@@ -40,12 +40,6 @@ class MigrationController :
     }
 
     override fun createBinding(inflater: LayoutInflater) = MigrationControllerBinding.inflate(inflater)
-    fun searchController(manga: Manga): SearchController {
-        val controller = SearchController(manga)
-        controller.targetController = this
-
-        return controller
-    }
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)

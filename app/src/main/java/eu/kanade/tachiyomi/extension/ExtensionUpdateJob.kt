@@ -122,7 +122,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                     ) {
                         val intent = ExtensionInstallService.jobIntent(context, extensions)
                         val pendingIntent =
-                            PendingIntent.getForegroundService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                            PendingIntent.getForegroundService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                         addAction(
                             R.drawable.ic_file_download_24dp,
                             context.getString(R.string.update_all),

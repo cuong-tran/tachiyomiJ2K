@@ -41,7 +41,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/migration_all"
-            style="@style/Theme.Widget.Button.Borderless.Small"
+            style="@style/Widget.Tachiyomi.Button.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/all"

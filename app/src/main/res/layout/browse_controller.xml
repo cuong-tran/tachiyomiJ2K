@@ -21,24 +21,7 @@
 
     </FrameLayout>
 
-    <View
-        android:id="@+id/shadow"
-        android:layout_width="match_parent"
-        android:layout_height="24dp"
-        android:alpha="0.15"
-        android:background="@drawable/shape_gradient_top_shadow"
-        android:paddingBottom="10dp"
-        app:layout_anchorGravity="top"
-        app:layout_anchor="@id/bottom_sheet" />
     <!-- Adding bottom sheet after main content -->
     <include layout="@layout/extensions_bottom_sheet"
         android:id="@+id/bottom_sheet"/>
-
-    <View
-        android:id="@+id/shadow2"
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_gravity="bottom"
-        android:alpha="0.05"
-        android:background="@drawable/shape_gradient_top_shadow" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

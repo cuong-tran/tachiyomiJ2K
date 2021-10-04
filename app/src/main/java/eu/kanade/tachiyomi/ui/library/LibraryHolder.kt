@@ -44,7 +44,8 @@ abstract class LibraryHolder(
                 item.manga.source == LocalSource.ID -> -2
                 else -> item.downloadCount
             },
-            showTotal
+            showTotal,
+            this is LibraryGridHolder
         )
     }
 

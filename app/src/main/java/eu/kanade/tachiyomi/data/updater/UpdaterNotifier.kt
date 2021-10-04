@@ -68,7 +68,7 @@ internal class UpdaterNotifier(private val context: Context) {
                     context,
                     0,
                     intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
             )
             addReleasePageAction()
@@ -84,7 +84,7 @@ internal class UpdaterNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_new_releases_24dp,
                 context.getString(R.string.release_page),
-                PendingIntent.getActivity(context, releaseUrl.hashCode(), releaseIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                PendingIntent.getActivity(context, releaseUrl.hashCode(), releaseIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             )
         }
     }
@@ -175,7 +175,7 @@ internal class UpdaterNotifier(private val context: Context) {
                 context,
                 0,
                 context.packageManager.getLaunchIntentForPackage(BuildConfig.APPLICATION_ID),
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             setContentIntent(pendingIntent)
             clearActions()

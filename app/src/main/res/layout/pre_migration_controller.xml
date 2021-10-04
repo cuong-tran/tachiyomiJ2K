@@ -25,6 +25,7 @@
         style="@style/Theme.Widget.FAB"
         android:src="@drawable/ic_arrow_forward_24dp"
         app:layout_anchor="@id/recycler"
+        android:contentDescription="@string/migrate"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

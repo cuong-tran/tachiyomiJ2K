@@ -58,11 +58,10 @@
 
         <TextView
             android:id="@+id/lang"
-            style="@style/TextAppearance.Regular.Body1.Secondary"
+            style="?textAppearanceBodySmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="1"
-            android:textSize="12sp"
             android:layout_marginEnd="4dp"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintVertical_bias="0.0"
@@ -76,12 +75,11 @@
 
         <TextView
             android:id="@+id/version"
-            style="@style/TextAppearance.Regular.Body1.Secondary"
+            style="?textAppearanceBodySmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:ellipsize="middle"
-            android:textSize="12sp"
             app:layout_constraintTop_toBottomOf="@+id/ext_title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/lang"
@@ -90,13 +88,12 @@
 
         <TextView
             android:id="@+id/date"
-            style="@style/TextAppearance.Regular.Body1.Secondary"
+            style="?textAppearanceBodySmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:ellipsize="start"
             app:layout_constrainedWidth="true"
-            android:textSize="12sp"
             app:layout_constraintTop_toBottomOf="@+id/ext_title"
             app:layout_constraintStart_toEndOf="@id/version"
             app:layout_constraintEnd_toStartOf="@id/warning"
@@ -104,7 +101,7 @@
 
         <TextView
             android:id="@+id/warning"
-            style="@style/TextAppearance.Regular.Body1.Secondary"
+            style="?textAppearanceBodySmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
@@ -130,7 +127,8 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/ext_button"
-                style="@style/Theme.Widget.Button.OutlinedButtonAccent"
+                style="@style/Widget.Tachiyomi.Button.OutlinedButton"
+                app:strokeColor="@android:color/transparent"
                 android:textAllCaps="false"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

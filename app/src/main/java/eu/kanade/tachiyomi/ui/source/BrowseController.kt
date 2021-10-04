@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.ui.source
 
 import android.animation.ValueAnimator
 import android.app.Activity
-import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.Menu
@@ -60,8 +60,8 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Date
 import java.util.Locale
-import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 /**
  * This controller shows and manages the different catalogues enabled by the user.
@@ -95,8 +95,6 @@ class BrowseController :
     var showingExtensions = false
 
     var snackbar: Snackbar? = null
-    val shadowAlpha = 0.15f
-    val shadow2Alpha = 0.05f
 
     /**
      * Called when controller is initialized.
@@ -160,7 +158,6 @@ class BrowseController :
                 bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
             )
             val isCollapsed = binding.bottomSheet.root.sheetBehavior.isCollapsed()
-            binding.shadow.alpha = if (isCollapsed) shadowAlpha else 0f
             updateTitleAndMenu()
         }
 
@@ -169,15 +166,10 @@ class BrowseController :
 
         binding.bottomSheet.root.sheetBehavior?.isGestureInsetBottomIgnored = true
 
-        binding.shadow.alpha =
-            if (binding.bottomSheet.root.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) shadowAlpha else 0f
-
         binding.bottomSheet.root.sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior
             .BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, progress: Float) {
-                    binding.shadow2.alpha = (1 - max(0f, progress)) * shadow2Alpha
-                    binding.shadow.alpha = (1 - abs(progress)) * shadowAlpha
                     activityBinding?.appBar?.y = max(activityBinding!!.appBar.y, -headerHeight * (1 - progress))
                     val oldShow = showingExtensions
                     showingExtensions = progress > 0.92f
@@ -209,11 +201,6 @@ class BrowseController :
                         } else extBottomSheet.shouldCallApi = true
                     }
 
-                    if (state == BottomSheetBehavior.STATE_EXPANDED || state == BottomSheetBehavior.STATE_COLLAPSED) {
-                        binding.shadow.alpha =
-                            if (state == BottomSheetBehavior.STATE_COLLAPSED) shadowAlpha else 0f
-                    }
-
                     retainViewMode = if (state == BottomSheetBehavior.STATE_EXPANDED) {
                         RetainViewMode.RETAIN_DETACH
                     } else RetainViewMode.RELEASE_DETACH
@@ -237,8 +224,20 @@ class BrowseController :
 
     fun updateTitleAndMenu() {
         if (router.backstack.lastOrNull()?.controller == this) {
+            val activity = (activity as? MainActivity) ?: return
             (activity as? MainActivity)?.setFloatingToolbar(!showingExtensions)
-            activity?.invalidateOptionsMenu()
+            if (showingExtensions) {
+                val color = activity.getResourceColor(R.attr.colorPrimaryVariant)
+                activityBinding?.appBar?.setBackgroundColor(color)
+                activity.window?.statusBarColor =
+                    ColorUtils.setAlphaComponent(color, (0.87f * 255).roundToInt())
+            } else {
+                activityBinding?.appBar?.setBackgroundColor(Color.TRANSPARENT)
+                activity.window?.statusBarColor = activity.getResourceColor(
+                    android.R.attr.statusBarColor
+                )
+            }
+            activity.invalidateOptionsMenu()
             setTitle()
         }
     }
@@ -258,7 +257,7 @@ class BrowseController :
             bottomSheet.context.getResourceColor(R.attr.actionBarTintColor),
             153
         )
-        binding.bottomSheet.sheetLayout.elevation = progress * 5
+//        binding.bottomSheet.sheetLayout.elevation = progress * 5
         binding.bottomSheet.pager.alpha = progress * 10
         binding.bottomSheet.tabs.setSelectedTabIndicatorColor(selectedColor)
         binding.bottomSheet.tabs.setTabTextColors(
@@ -274,13 +273,13 @@ class BrowseController :
             )
         )
 
-        binding.bottomSheet.sheetLayout.backgroundTintList = ColorStateList.valueOf(
+        /*binding.bottomSheet.sheetLayout.backgroundTintList = ColorStateList.valueOf(
             ColorUtils.blendARGB(
                 bottomSheet.context.getResourceColor(R.attr.colorPrimaryVariant),
                 bottomSheet.context.getResourceColor(R.attr.colorSurface),
                 progress
             )
-        )
+        )*/
     }
 
     private fun setBottomPadding() {
@@ -290,7 +289,6 @@ class BrowseController :
             (-pad).toInt(),
             view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
         )
-        binding.shadow2.translationY = pad
         binding.bottomSheet.root.sheetBehavior?.peekHeight = 56.spToPx + padding
         binding.bottomSheet.root.extensionFrameLayout?.binding?.fastScroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = -pad.toInt()
@@ -324,7 +322,7 @@ class BrowseController :
         }
     }
 
-    override fun sheetIsExpanded(): Boolean = binding.bottomSheet.root.sheetBehavior.isExpanded()
+    override fun sheetIsFullscreen(): Boolean = binding.bottomSheet.root.sheetBehavior.isExpanded()
 
     override fun handleSheetBack(): Boolean {
         if (showingExtensions) {
@@ -367,6 +365,7 @@ class BrowseController :
         if (type.isEnter) {
             binding.bottomSheet.root.canExpand = true
             setBottomPadding()
+            updateTitleAndMenu()
         }
     }
 
@@ -535,9 +534,9 @@ class BrowseController :
                         SettingsExtensionsController()
                     } else SettingsSourcesController()
                 router.pushController(
-                    (RouterTransaction.with(controller)).popChangeHandler(
-                        SettingsSourcesFadeChangeHandler()
-                    ).pushChangeHandler(FadeChangeHandler())
+                    RouterTransaction.with(controller)
+                        .popChangeHandler(SettingsSourcesFadeChangeHandler())
+                        .pushChangeHandler(FadeChangeHandler())
                 )
             }
             R.id.action_migration_guide -> {

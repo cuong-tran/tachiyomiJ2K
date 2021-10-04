@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -38,6 +37,7 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
@@ -428,21 +428,14 @@ class MigrationListController(bundle: Bundle? = null) :
     }
 
     override fun handleBack(): Boolean {
-        activity?.let {
-            MaterialDialog(it).show {
-                title(R.string.stop_migrating)
-                positiveButton(R.string.stop) {
-                    router.popCurrentController()
-                    migrationsJob?.cancel()
-                }
-                negativeButton(android.R.string.cancel)
+        activity?.materialAlertDialog()
+            ?.setTitle(R.string.stop_migrating)
+            ?.setPositiveButton(R.string.stop) { _, _ ->
+                router.popCurrentController()
+                migrationsJob?.cancel()
             }
-        }
+            ?.setNegativeButton(android.R.string.cancel, null)?.show()
         return true
-    }
-
-    override fun onDestroyView(view: View) {
-        super.onDestroyView(view)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -498,16 +491,13 @@ class MigrationListController(bundle: Bundle? = null) :
 
     override fun canChangeTabs(block: () -> Unit): Boolean {
         if (migrationsJob?.isCancelled == false || adapter?.allMangasDone() == true) {
-            activity?.let {
-                MaterialDialog(it).show {
-                    title(R.string.stop_migrating)
-                    positiveButton(R.string.stop) {
-                        block()
-                        migrationsJob?.cancel()
-                    }
-                    negativeButton(android.R.string.cancel)
+            activity?.materialAlertDialog()
+                ?.setTitle(R.string.stop_migrating)
+                ?.setPositiveButton(R.string.stop) { _, _ ->
+                    block()
+                    migrationsJob?.cancel()
                 }
-            }
+                ?.setNegativeButton(android.R.string.cancel, null)
             return false
         }
         return true

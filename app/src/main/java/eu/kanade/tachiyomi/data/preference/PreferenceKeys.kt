@@ -231,6 +231,8 @@ object PreferenceKeys {
     const val showNsfwExtension = "show_nsfw_extension"
     const val labelNsfwExtension = "label_nsfw_extension"
 
+    const val themeMangaDetails = "theme_manga_details"
+
     const val incognitoMode = "incognito_mode"
 
     const val sideNavMode = "side_nav_mode"

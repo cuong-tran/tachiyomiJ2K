@@ -54,7 +54,12 @@ class ExtensionInstallBroadcast : BroadcastReceiver() {
                 .putExtra(ExtensionInstaller.EXTRA_DOWNLOAD_ID, downloadId)
                 .putExtra(EXTRA_SESSION_ID, sessionId)
 
-            val pendingIntent = PendingIntent.getBroadcast(context, downloadId.hashCode(), newIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val mutableFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_MUTABLE
+            } else {
+                0
+            }
+            val pendingIntent = PendingIntent.getBroadcast(context, downloadId.hashCode(), newIntent, PendingIntent.FLAG_UPDATE_CURRENT or mutableFlag)
             val statusReceiver = pendingIntent.intentSender
             session.commit(statusReceiver)
             val extensionManager: ExtensionManager by injectLazy()
@@ -147,8 +152,12 @@ class ExtensionInstallActivity : Activity() {
                 .setAction(PACKAGE_INSTALLED_ACTION)
                 .putExtra(ExtensionInstaller.EXTRA_DOWNLOAD_ID, downloadId)
                 .putExtra(EXTRA_SESSION_ID, sessionId)
-
-            val pendingIntent = PendingIntent.getActivity(this, downloadId.hashCode(), newIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val mutableFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_MUTABLE
+            } else {
+                0
+            }
+            val pendingIntent = PendingIntent.getActivity(this, downloadId.hashCode(), newIntent, PendingIntent.FLAG_UPDATE_CURRENT or mutableFlag)
             val statusReceiver = pendingIntent.intentSender
             session.commit(statusReceiver)
             val extensionManager: ExtensionManager by injectLazy()

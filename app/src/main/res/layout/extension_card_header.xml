@@ -11,7 +11,7 @@
 
         <TextView
             android:id="@+id/title"
-            style="@style/TextAppearance.MaterialComponents.Headline4"
+            style="?textAppearanceHeadlineMedium"
             android:textColor="?android:textColorPrimary"
             android:textSize="16sp"
             android:layout_width="0dp"
@@ -60,7 +60,7 @@
             android:maxLines="2"
             android:padding="6dp"
             android:textAlignment="textEnd"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+            style="?textAppearanceBodyMedium"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="14sp"
             android:textStyle="normal"
