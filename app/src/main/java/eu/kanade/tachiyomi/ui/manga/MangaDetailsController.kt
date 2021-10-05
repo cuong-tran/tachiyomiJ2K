@@ -931,7 +931,7 @@ class MangaDetailsController :
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.manga_details, menu)
         colorToolbar(binding.recycler.canScrollVertically(-1))
-        setActionBar(toolbarIsColored)
+        setActionBar(!toolbarIsColored)
         val editItem = menu.findItem(R.id.action_edit)
         editItem.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch &&
