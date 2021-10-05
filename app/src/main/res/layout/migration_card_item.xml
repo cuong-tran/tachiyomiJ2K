@@ -32,7 +32,7 @@
             android:paddingStart="0dp"
             android:paddingEnd="8dp"
             android:ellipsize="end"
-            android:textAppearance="@style/TextAppearance.Regular.SubHeading"
+            style="?textAppearanceBodyLarge"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/source_image"
             app:layout_constraintTop_toTopOf="parent"

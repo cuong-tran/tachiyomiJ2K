@@ -41,13 +41,12 @@
 
         <TextView
             android:id="@+id/ext_title"
-            style="@style/TextAppearance.Regular"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.Regular.SubHeading"
+            android:textAppearance="?textAppearanceBodyMedium"
             android:textSize="14sp"
             app:layout_constraintBottom_toTopOf="@id/version"
             app:layout_constraintEnd_toStartOf="@id/button_layout"
