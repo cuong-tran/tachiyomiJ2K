@@ -56,7 +56,7 @@ class LibraryUpdateNotifier(private val context: Context) {
      * Cached progress notification to avoid creating a lot.
      */
     val progressNotificationBuilder by lazy {
-        context.notificationBuilder(Notifications.CHANNEL_LIBRARY) {
+        context.notificationBuilder(Notifications.CHANNEL_LIBRARY_PROGRESS) {
             setContentTitle(context.getString(R.string.app_name))
             setSmallIcon(R.drawable.ic_refresh_24dp)
             setLargeIcon(notificationBitmap)
@@ -103,7 +103,7 @@ class LibraryUpdateNotifier(private val context: Context) {
 
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_ERROR,
-            context.notificationBuilder(Notifications.CHANNEL_LIBRARY) {
+            context.notificationBuilder(Notifications.CHANNEL_LIBRARY_ERROR) {
                 setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed, errors.size, errors.size))
                 setStyle(
                     NotificationCompat.BigTextStyle().bigText(
