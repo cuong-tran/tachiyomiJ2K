@@ -89,7 +89,7 @@ fun List<Manga>.moveCategories(
         categories.map {
             when (it) {
                 in commonCategories -> TriStateCheckBox.State.CHECKED
-                in mixedCategories -> TriStateCheckBox.State.INDETERMINATE
+                in mixedCategories -> TriStateCheckBox.State.IGNORE
                 else -> TriStateCheckBox.State.UNCHECKED
             }
         }.toTypedArray(),
