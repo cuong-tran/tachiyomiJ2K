@@ -44,6 +44,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
@@ -283,7 +284,7 @@ class BrowseController :
         val pad = bottomBar?.translationY?.minus(bottomBar.height) ?: 0f
         val padding = max(
             (-pad).toInt(),
-            view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
+            view?.rootWindowInsetsCompat?.getBottomGestureInsets() ?: 0
         )
         binding.bottomSheet.root.sheetBehavior?.peekHeight = 56.spToPx + padding
         binding.bottomSheet.root.extensionFrameLayout?.binding?.fastScroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -295,7 +296,7 @@ class BrowseController :
         binding.sourceRecycler.updatePaddingRelative(
             bottom = (
                 activityBinding?.bottomNav?.height
-                    ?: view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
+                    ?: view?.rootWindowInsetsCompat?.getBottomGestureInsets() ?: 0
                 ) + 58.spToPx
         )
     }
