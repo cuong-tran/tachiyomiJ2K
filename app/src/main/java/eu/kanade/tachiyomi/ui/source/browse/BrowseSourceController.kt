@@ -10,6 +10,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -188,7 +189,7 @@ open class BrowseSourceController(bundle: Bundle) :
             afterInsets = { insets ->
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
                     binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        bottomMargin = insets.systemWindowInsetBottom + 16.dpToPx
+                        bottomMargin = insets.getInsets(systemBars()).bottom + 16.dpToPx
                     }
                 }
             }

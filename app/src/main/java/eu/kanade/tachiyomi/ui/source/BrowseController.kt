@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.RecyclerView
@@ -54,7 +55,7 @@ import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Date
@@ -66,7 +67,6 @@ import kotlin.math.roundToInt
  * This controller shows and manages the different catalogues enabled by the user.
  * This controller should only handle UI actions, IO actions should be done by [SourcePresenter]
  * [SourceAdapter.SourceListener] call function data on browse item click.
- * [SourceAdapter.OnLatestClickListener] call function data on latest item click
  */
 class BrowseController :
     BaseController<BrowseControllerBinding>(),
@@ -136,7 +136,7 @@ class BrowseController :
             binding.sourceRecycler,
             customPadding = true,
             afterInsets = {
-                headerHeight = it.systemWindowInsetTop + appBarHeight
+                headerHeight = it.getInsets(systemBars()).top + appBarHeight
                 binding.sourceRecycler.updatePaddingRelative(
                     top = headerHeight,
                     bottom = (activityBinding?.bottomNav?.height ?: it.getBottomGestureInsets()) + 58.spToPx
@@ -155,7 +155,6 @@ class BrowseController :
             binding.sourceRecycler.updatePaddingRelative(
                 bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
             )
-            val isCollapsed = binding.bottomSheet.root.sheetBehavior.isCollapsed()
             updateTitleAndMenu()
         }
 
