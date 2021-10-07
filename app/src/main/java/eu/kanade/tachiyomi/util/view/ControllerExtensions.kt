@@ -41,10 +41,12 @@ import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
+import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toast
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.abs
@@ -134,36 +136,36 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
         recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
     }
 
-    var elevationAnim: ValueAnimator? = null
-    var elevate = false
-    val elevateFunc: (Boolean) -> Unit = f@{ el ->
-        elevate = el
-        elevationAnim?.cancel()
+    var toolbarColorAnim: ValueAnimator? = null
+    var isToolbarColored = false
+
+    val colorToolbar: (Boolean) -> Unit = f@{ isColored ->
+        isToolbarColored = isColored
+        toolbarColorAnim?.cancel()
         val floatingBar =
             !(activityBinding?.toolbar?.isVisible == true || activityBinding?.tabsFrameLayout?.isVisible == true)
+        val percent = ImageUtil.getPercentOfColor(
+            activityBinding!!.appBar.backgroundColor ?: Color.TRANSPARENT,
+            activity!!.getResourceColor(R.attr.colorSurface),
+            activity!!.getResourceColor(R.attr.colorPrimaryVariant)
+        )
         if (floatingBar) {
-            activityBinding?.appBar?.elevation = 0f
             setAppBarBG(0f)
             return@f
         }
-        elevationAnim = ValueAnimator.ofFloat(
-            activityBinding?.appBar?.elevation ?: 0f,
-            if (el) 15f else 0f
-        )
-        elevationAnim?.addUpdateListener { valueAnimator ->
-            setAppBarBG(valueAnimator.animatedValue as Float / 15f)
-            activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
+        toolbarColorAnim = ValueAnimator.ofFloat(percent, isColored.toInt().toFloat())
+        toolbarColorAnim?.addUpdateListener { valueAnimator ->
+            setAppBarBG(valueAnimator.animatedValue as Float)
         }
-        elevationAnim?.start()
+        toolbarColorAnim?.start()
     }
 
     val floatingBar =
         !(activityBinding?.toolbar?.isVisible == true || activityBinding?.tabsFrameLayout?.isVisible == true)
     if (floatingBar) {
         setAppBarBG(0f)
-        activityBinding?.appBar?.elevation = 0f
     }
-    elevateFunc(recycler.canScrollVertically(-1))
+    colorToolbar(recycler.canScrollVertically(-1))
     recycler.addOnScrollListener(
         object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -172,7 +174,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
                     ?.controller == this@liftAppbarWith && activity != null
                 ) {
                     val notAtTop = recycler.canScrollVertically(-1)
-                    if (notAtTop != elevate) elevateFunc(notAtTop)
+                    if (notAtTop != isToolbarColored) colorToolbar(notAtTop)
                 }
             }
         }
@@ -193,7 +195,6 @@ fun Controller.scrollViewWith(
     var statusBarHeight = -1
     val tabBarHeight = 48.dpToPx
     activityBinding?.appBar?.y = 0f
-    activityBinding?.tabsFrameLayout?.elevation = 0f
     val isSideNavWithTabs = activityBinding?.sideNav != null && includeTabView && recycler.context.isTablet()
     val attrsArray = intArrayOf(R.attr.actionBarSize)
     val array = recycler.context.obtainStyledAttributes(attrsArray)
@@ -241,37 +242,36 @@ fun Controller.scrollViewWith(
         afterInsets?.invoke(insets)
     }
 
-    var elevationAnim: ValueAnimator? = null
-    var elevate = false
+    var toolbarColorAnim: ValueAnimator? = null
+    var isToolbarColor = false
     var isInView = true
     val preferences: PreferencesHelper by injectLazy()
-    val elevateFunc: (Boolean) -> Unit = f@{ el ->
-        elevate = el
+    val colorToolbar: (Boolean) -> Unit = f@{ isColored ->
+        isToolbarColor = isColored
         if (liftOnScroll != null) {
-            liftOnScroll.invoke(el)
+            liftOnScroll.invoke(isColored)
         } else {
-            elevationAnim?.cancel()
+            toolbarColorAnim?.cancel()
             val floatingBar =
                 (this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView
             if (floatingBar) {
                 setAppBarBG(0f, includeTabView)
-                activityBinding?.appBar?.elevation = 0f
                 return@f
             }
-            elevationAnim = ValueAnimator.ofFloat(
-                activityBinding?.appBar?.elevation ?: 0f,
-                if (el) 15f else 0f
+            val percent = ImageUtil.getPercentOfColor(
+                activityBinding!!.appBar.backgroundColor ?: Color.TRANSPARENT,
+                activity!!.getResourceColor(R.attr.colorSurface),
+                activity!!.getResourceColor(R.attr.colorPrimaryVariant)
             )
-            elevationAnim?.addUpdateListener { valueAnimator ->
-                setAppBarBG(valueAnimator.animatedValue as Float / 15f, includeTabView)
-                activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
+            toolbarColorAnim = ValueAnimator.ofFloat(percent, isColored.toInt().toFloat())
+            toolbarColorAnim?.addUpdateListener { valueAnimator ->
+                setAppBarBG(valueAnimator.animatedValue as Float, includeTabView)
             }
-            elevationAnim?.start()
+            toolbarColorAnim?.start()
         }
     }
     if ((this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView) {
         setAppBarBG(0f, includeTabView)
-        activityBinding?.appBar?.elevation = 0f
     }
     addLifecycleListener(
         object : Controller.LifecycleListener() {
@@ -283,7 +283,7 @@ fun Controller.scrollViewWith(
                 super.onChangeStart(controller, changeHandler, changeType)
                 isInView = changeType.isEnter
                 if (changeType.isEnter) {
-                    elevateFunc(elevate)
+                    colorToolbar(isToolbarColor)
                     if (fakeToolbarView?.parent != null) {
                         val parent = fakeToolbarView?.parent as? ViewGroup ?: return
                         parent.removeView(fakeToolbarView)
@@ -336,16 +336,16 @@ fun Controller.scrollViewWith(
                         v.setBackgroundColor(v.context.getResourceColor(R.attr.colorPrimaryVariant))
                         v.layoutParams = params
                     }
-                    elevationAnim?.cancel()
+                    toolbarColorAnim?.cancel()
                     if (activityBinding!!.toolbar.tag == randomTag) activityBinding!!.toolbar.setOnClickListener(null)
                 }
             }
         }
     )
-    elevateFunc(recycler.canScrollVertically(-1))
+    colorToolbar(recycler.canScrollVertically(-1))
 
     recycler.post {
-        elevateFunc(recycler.canScrollVertically(-1))
+        colorToolbar(recycler.canScrollVertically(-1))
     }
     val isTablet = recycler.context.isTablet() && recycler.context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
     recycler.addOnScrollListener(
@@ -376,7 +376,7 @@ fun Controller.scrollViewWith(
                             }
                         }
                         lastY = 0f
-                        if (elevate) elevateFunc(false)
+                        if (isToolbarColor) colorToolbar(false)
                     } else {
                         if (!isTablet) {
                             activityBinding!!.appBar.y -= dy
@@ -402,7 +402,7 @@ fun Controller.scrollViewWith(
                                 }
                             }
 
-                            if (!elevate && (
+                            if (!isToolbarColor && (
                                 dy == 0 ||
                                     (
                                         activityBinding!!.appBar.y <= -activityBinding!!.appBar.height.toFloat() ||
@@ -410,11 +410,11 @@ fun Controller.scrollViewWith(
                                         )
                                 )
                             ) {
-                                elevateFunc(true)
+                                colorToolbar(true)
                             }
                         } else {
                             val notAtTop = recycler.canScrollVertically(-1)
-                            if (notAtTop != elevate) elevateFunc(notAtTop)
+                            if (notAtTop != isToolbarColor) colorToolbar(notAtTop)
                         }
                         lastY = activityBinding!!.appBar.y
                     }
@@ -464,8 +464,8 @@ fun Controller.scrollViewWith(
                                 animator?.start()
                             }
                         }
-                        if (recycler.canScrollVertically(-1) && !elevate) elevateFunc(true)
-                        else if (!recycler.canScrollVertically(-1) && elevate) elevateFunc(false)
+                        if (recycler.canScrollVertically(-1) && !isToolbarColor) colorToolbar(true)
+                        else if (!recycler.canScrollVertically(-1) && isToolbarColor) colorToolbar(false)
                     }
                 } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
                     val view = activity?.window?.currentFocus ?: return
@@ -477,7 +477,7 @@ fun Controller.scrollViewWith(
             }
         }
     )
-    return elevateFunc
+    return colorToolbar
 }
 
 fun Controller.setAppBarBG(value: Float, includeTabView: Boolean = false) {

@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.source
 
-import android.animation.ValueAnimator
 import android.app.Activity
 import android.graphics.Color
 import android.os.Parcelable
@@ -133,7 +132,6 @@ class BrowseController :
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appBarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
-        var elevationAnim: ValueAnimator? = null
         scrollViewWith(
             binding.sourceRecycler,
             customPadding = true,
@@ -257,7 +255,6 @@ class BrowseController :
             bottomSheet.context.getResourceColor(R.attr.actionBarTintColor),
             153
         )
-//        binding.bottomSheet.sheetLayout.elevation = progress * 5
         binding.bottomSheet.pager.alpha = progress * 10
         binding.bottomSheet.tabs.setSelectedTabIndicatorColor(selectedColor)
         binding.bottomSheet.tabs.setTabTextColors(
