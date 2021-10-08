@@ -750,7 +750,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
 
         // Set initial visibility
-        setMenuVisibility(menuVisible)
+        setMenuVisibility(menuVisible, false)
         binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.isHideable = !menuVisible
         if (!menuVisible) binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
         binding.chaptersSheet.root.sheetBehavior?.isGestureInsetBottomIgnored = true
@@ -879,6 +879,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * [animate] the views.
      */
     private fun setMenuVisibility(visible: Boolean, animate: Boolean = true) {
+        val oldVisibility = menuVisible
         menuVisible = visible
         if (visible) coroutine?.cancel()
         binding.viewerContainer.requestLayout()
@@ -893,7 +894,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             if (!binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded() && sheetManageNavColor) {
                 window.navigationBarColor = Color.TRANSPARENT
             }
-            if (animate) {
+            if (animate && oldVisibility != menuVisible) {
                 if (!menuStickyVisible) {
                     val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                     toolbarAnimation.setAnimationListener(
@@ -912,7 +913,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 wic.hide(systemBars())
             }
 
-            if (animate) {
+            if (animate && oldVisibility != menuVisible) {
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top)
                 toolbarAnimation.setAnimationListener(
                     object : SimpleAnimationListener() {
