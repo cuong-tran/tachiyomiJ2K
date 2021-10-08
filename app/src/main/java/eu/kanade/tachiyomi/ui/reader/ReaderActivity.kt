@@ -755,12 +755,15 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         if (!menuVisible) binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
         binding.chaptersSheet.root.sheetBehavior?.isGestureInsetBottomIgnored = true
         val peek = 50.dpToPx
+        lastVis = window.decorView.rootWindowInsetsCompat?.isVisible(statusBars()) ?: false
+        var firstPass = true
         binding.readerLayout.doOnApplyWindowInsetsCompat { _, insets, _ ->
             setNavColor(insets)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                if (lastVis != insets.isVisible(statusBars()) && preferences.fullscreen().get()) {
+                if (!firstPass && lastVis != insets.isVisible(statusBars()) && preferences.fullscreen().get()) {
                     onVisibilityChange(insets.isVisible(statusBars()))
                 }
+                firstPass = false
                 lastVis = insets.isVisible(statusBars())
             }
 
@@ -913,7 +916,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 wic.hide(systemBars())
             }
 
-            if (animate && oldVisibility != menuVisible) {
+            if (animate && binding.readerMenu.isVisible) {
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top)
                 toolbarAnimation.setAnimationListener(
                     object : SimpleAnimationListener() {
@@ -925,7 +928,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 binding.appBar.startAnimation(toolbarAnimation)
                 BottomSheetBehavior.from(binding.chaptersSheet.chaptersBottomSheet).isHideable = true
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
-            } else {
+            } else if (!animate) {
                 binding.readerMenu.isVisible = false
             }
         }
