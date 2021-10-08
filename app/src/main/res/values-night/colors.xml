@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Application Colors -->
-    <color name="primaryVariantTachiyomi">#212121</color>
+    <color name="primaryVariantTachiyomi">#272829</color>
     <color name="colorPrimaryInactive">@color/md_white_1000_76</color>
     <color name="primaryTachiyomi">#78bcff</color>
     <color name="primaryInverseTachiyomi">#2c517f</color>
@@ -32,7 +32,7 @@
     <color name="primaryStrawberry">#e14e4e</color>
     <color name="primaryInverseStrawberry">#9f1414</color>
     <color name="secondaryVariantStrawberry">#f9bab2</color>
-    <color name="primaryVariantStrawberry">#211b19</color>
+    <color name="primaryVariantStrawberry">#2B2320</color>
 
     <!-- Tako Theme -->
     <color name="primaryTako">#fccd9f</color>
@@ -53,7 +53,7 @@
     <color name="primaryInverseDuskDawn">#8d0c3f</color>
     <color name="secondaryVariantDuskDawn">#ffc1da</color>
     <color name="backgroundDuskDawn">#16151D</color>
-    <color name="dialogDuskDawn">#201F27</color>
+    <color name="primaryVariantDuskDawn">#272026</color>
     <color name="primaryDuskDawn">#E570A0</color>
     <color name="colorOnBackgroundDuskDawn">@color/md_white_1000</color>
     <color name="appBarTextDuskDawn">@color/md_white_1000</color>
@@ -75,5 +75,5 @@
     <color name="secondaryYinYang">#FFFFFF</color>
     <color name="secondaryVariantYinYang">#FFFFFF</color>
     <color name="onSecondaryYinYang">@color/md_black_1000</color>
-    <color name="primaryVariantYinYang">#212121</color>
+    <color name="primaryVariantYinYang">#2C2C2C</color>
 </resources>
