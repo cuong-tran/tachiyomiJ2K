@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -28,9 +29,10 @@ import eu.kanade.tachiyomi.ui.migration.SourceItem
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.source.BrowseController
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.popupMenu
@@ -95,10 +97,11 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         binding.pager.adapter = TabbedSheetAdapter()
         binding.tabs.setupWithViewPager(binding.pager)
         this.controller = controller
-        binding.pager.doOnApplyWindowInsets { _, insets, _ ->
+        binding.pager.doOnApplyWindowInsetsCompat { _, insets, _ ->
             val bottomBar = controller.activityBinding?.bottomNav
-            extensionFrameLayout?.binding?.recycler?.updatePaddingRelative(bottom = bottomBar?.height ?: insets.systemWindowInsetBottom)
-            migrationFrameLayout?.binding?.recycler?.updatePaddingRelative(bottom = bottomBar?.height ?: insets.systemWindowInsetBottom)
+            val bottomH = bottomBar?.height ?: insets.getInsets(systemBars()).bottom
+            extensionFrameLayout?.binding?.recycler?.updatePaddingRelative(bottom = bottomH)
+            migrationFrameLayout?.binding?.recycler?.updatePaddingRelative(bottom = bottomH)
         }
         binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -369,7 +372,6 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         val items = extAdapter?.getSectionItemPositions(updateHeader) ?: return
         updateHeader.canUpdate = items.any {
             val extItem = (extAdapter?.getItem(it) as? ExtensionItem) ?: return
-            val extension = (extAdapter?.getItem(it) as? ExtensionItem)?.extension ?: return
             extItem.installStep == null
         }
         extAdapter?.updateItem(updateHeader)
@@ -411,7 +413,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             )
             val view: RecyclerWithScrollerView = binding.root
             val height = this@ExtensionBottomSheet.controller.activityBinding?.bottomNav?.height
-                ?: view.rootWindowInsets?.systemWindowInsetBottom ?: 0
+                ?: view.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom ?: 0
             view.setUp(this@ExtensionBottomSheet, binding, height)
 
             return view

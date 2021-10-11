@@ -24,6 +24,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
+import java.util.Locale
 
 /**
  * Presenter of [GlobalSearchController]
@@ -223,7 +224,7 @@ open class GlobalSearchPresenter(
                             // Same as initial sort, i.e. pinned first then alphabetically
                             { it.source.id.toString() !in pinnedSourceIds },
                             { loadTime[it.source.id] ?: 0L },
-                            { "${it.source.name.toLowerCase()} (${it.source.lang})" }
+                            { "${it.source.name.lowercase(Locale.getDefault())} (${it.source.lang})" }
                         )
                     )
             }

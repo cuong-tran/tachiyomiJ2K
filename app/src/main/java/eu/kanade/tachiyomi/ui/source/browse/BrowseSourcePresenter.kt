@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.source.browse
 
 import android.os.Bundle
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.davidea.flexibleadapter.items.ISectionable
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -333,14 +332,14 @@ open class BrowseSourcePresenter(
                 is Filter.Select<*> -> SelectItem(it)
                 is Filter.Group<*> -> {
                     val group = GroupItem(it)
-                    val subItems = it.state.mapNotNull {
-                        when (it) {
-                            is Filter.CheckBox -> CheckboxSectionItem(it)
-                            is Filter.TriState -> TriStateSectionItem(it)
-                            is Filter.Text -> TextSectionItem(it)
-                            is Filter.Select<*> -> SelectSectionItem(it)
+                    val subItems = it.state.mapNotNull { type ->
+                        when (type) {
+                            is Filter.CheckBox -> CheckboxSectionItem(type)
+                            is Filter.TriState -> TriStateSectionItem(type)
+                            is Filter.Text -> TextSectionItem(type)
+                            is Filter.Select<*> -> SelectSectionItem(type)
                             else -> null
-                        } as? ISectionable<*, *>
+                        }
                     }
                     subItems.forEach { it.header = group }
                     group.subItems = subItems

@@ -164,7 +164,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 
                 val body = payload.toString().toRequestBody(jsonMime)
                 val request = Request.Builder().url(apiUrl).post(body).build()
-                val result = authClient.newCall(request).await()
+                authClient.newCall(request).await()
                 return@withContext true
             } catch (e: Exception) {
                 Timber.w(e)

@@ -113,7 +113,7 @@ class SettingsBrowseController : SettingsController() {
                 onClick {
                     val ogSources = preferences.migrationSources().get()
                     val pinnedSources =
-                        (preferences.pinnedCatalogues().get() ?: emptySet()).joinToString("/")
+                        preferences.pinnedCatalogues().get().joinToString("/")
                     preferences.migrationSources().set(pinnedSources)
                     (activity as? MainActivity)?.setUndoSnackBar(
                         view?.snack(

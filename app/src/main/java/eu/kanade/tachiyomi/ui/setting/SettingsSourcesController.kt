@@ -66,7 +66,6 @@ class SettingsSourcesController : SettingsController() {
 
                         onChange { newValue ->
                             val checked = newValue as Boolean
-                            val current = preferences.enabledLanguages().get()
                             if (!checked) {
                                 preferences.enabledLanguages() -= lang
                                 removeAll()

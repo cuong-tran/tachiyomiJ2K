@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,7 +24,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.marginBottom
@@ -65,15 +66,15 @@ class PreMigrationController(bundle: Bundle? = null) :
         ourAdapter.isHandleDragEnabled = true
         dialog = null
         val fabBaseMarginBottom = binding.fab.marginBottom
-        binding.recycler.doOnApplyWindowInsets { v, insets, padding ->
+        binding.recycler.doOnApplyWindowInsetsCompat { v, insets, _ ->
 
             binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
+                bottomMargin = fabBaseMarginBottom + insets.getInsets(systemBars()).bottom
             }
             v.post {
                 // offset the binding.recycler by the binding.fab's inset + some inset on top
                 v.updatePaddingRelative(
-                    bottom = insets.systemWindowInsetBottom + binding.fab.marginBottom +
+                    bottom = insets.getInsets(systemBars()).bottom + binding.fab.marginBottom +
                         (binding.fab.height)
                 )
             }
@@ -177,7 +178,7 @@ class PreMigrationController(bundle: Bundle? = null) :
                 val enabledSources = if (item.itemId == R.id.action_match_enabled) {
                     prefs.hiddenSources().get().mapNotNull { it.toLongOrNull() }
                 } else {
-                    prefs.pinnedCatalogues().get().mapNotNull { it.toLongOrNull() } ?: emptyList()
+                    prefs.pinnedCatalogues().get().mapNotNull { it.toLongOrNull() }
                 }
                 val items = adapter?.currentItems?.toList() ?: return true
                 items.forEach {
