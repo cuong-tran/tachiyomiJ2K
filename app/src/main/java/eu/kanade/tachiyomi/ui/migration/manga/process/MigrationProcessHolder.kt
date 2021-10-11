@@ -105,6 +105,7 @@ class MigrationProcessHolder(
                             )
                         }
                     } else {
+                        binding.migrationMangaCardTo.coverThumbnail.setImageDrawable(null)
                         binding.migrationMangaCardTo.progress.isVisible = false
                         binding.migrationMangaCardTo.title.text =
                             view.context.getString(R.string.no_alternatives_found)

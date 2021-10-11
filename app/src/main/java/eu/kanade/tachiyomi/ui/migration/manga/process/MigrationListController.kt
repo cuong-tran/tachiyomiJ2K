@@ -160,7 +160,7 @@ class MigrationListController(bundle: Bundle? = null) :
                             val processedSources = AtomicInteger()
 
                             validSources.map { source ->
-                                async {
+                                async source@{
                                     sourceSemaphore.withPermit {
                                         try {
                                             val searchResult = smartSearchEngine.normalSearch(
@@ -189,7 +189,7 @@ class MigrationListController(bundle: Bundle? = null) :
                                                         source
                                                     )
                                                 } catch (e: Exception) {
-                                                    return@async null
+                                                    return@source null
                                                 }
                                                 manga.progress.send(validSources.size to processedSources.incrementAndGet())
                                                 localManga to chapters.size
@@ -381,11 +381,11 @@ class MigrationListController(bundle: Bundle? = null) :
 
                 migratingManga.manga.migrationStatus = MigrationStatus.MANGA_FOUND
                 migratingManga.manga.searchResult.set(result.id)
-                adapter?.notifyDataSetChanged()
+                adapter?.notifyItemChanged(firstIndex)
             } else {
                 migratingManga.manga.migrationStatus = MigrationStatus.MANGA_NOT_FOUND
                 activity?.toast(R.string.no_chapters_found_for_migration, Toast.LENGTH_LONG)
-                adapter?.notifyDataSetChanged()
+                adapter?.notifyItemChanged(firstIndex)
             }
         }
     }

@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.smartsearch
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.CatalogueSource
-import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.util.system.await
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein
@@ -59,7 +58,7 @@ class SmartSearchEngine(
             val searchQuery = if (extraSearchParams != null) {
                 "$title ${extraSearchParams.trim()}"
             } else title
-            val searchResults = source.fetchSearchManga(1, searchQuery, FilterList()).toSingle().await(Schedulers.io())
+            val searchResults = source.fetchSearchManga(1, searchQuery, source.getFilterList()).toSingle().await(Schedulers.io())
 
             if (searchResults.mangas.size == 1) {
                 return@supervisorScope listOf(SearchEntry(searchResults.mangas.first(), 0.0))
