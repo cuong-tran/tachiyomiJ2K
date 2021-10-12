@@ -309,7 +309,7 @@ class LibraryUpdateService(
 
     private fun checkIfMassiveUpdate() {
         val largestSourceSize = mangaToUpdate.groupBy { it.source }.maxOfOrNull { it.value.size } ?: 0
-        if (largestSourceSize > QUEUE_SIZE_WARNING_THRESHOLD_SOURCE) {
+        if (largestSourceSize > PER_SOURCE_QUEUE_WARNING_THRESHOLD) {
             notifier.showQueueSizeWarningNotification()
         }
     }
@@ -668,4 +668,4 @@ interface LibraryServiceListener {
     fun onUpdateManga(manga: Manga? = null)
 }
 
-const val QUEUE_SIZE_WARNING_THRESHOLD_SOURCE = 80
+const val PER_SOURCE_QUEUE_WARNING_THRESHOLD = 60

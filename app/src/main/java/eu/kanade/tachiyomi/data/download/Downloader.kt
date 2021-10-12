@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
-import eu.kanade.tachiyomi.data.library.QUEUE_SIZE_WARNING_THRESHOLD_SOURCE
+import eu.kanade.tachiyomi.data.library.PER_SOURCE_QUEUE_WARNING_THRESHOLD
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -286,7 +286,7 @@ class Downloader(
             // Start downloader if needed
             if (autoStart && wasEmpty) {
                 val largestSourceSize = queue.groupBy { it.source }.maxOfOrNull { it.value.size } ?: 0
-                if (largestSourceSize > QUEUE_SIZE_WARNING_THRESHOLD_SOURCE) {
+                if (largestSourceSize > PER_SOURCE_QUEUE_WARNING_THRESHOLD) {
                     notifier.onWarning(context.getString(R.string.notification_size_warning))
                 }
                 DownloadService.start(context)
