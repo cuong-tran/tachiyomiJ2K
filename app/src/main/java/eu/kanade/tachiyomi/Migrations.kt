@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.data.updater.UpdaterService
@@ -165,6 +166,11 @@ object Migrations {
                     remove("pref_rotation_type_key")
                     putInt("pref_default_reading_mode_key", newReadingMode)
                     remove("pref_default_viewer_key")
+                }
+            }
+            if (oldVersion < 83) {
+                if (preferences.enabledLanguages().isSet()) {
+                    preferences.enabledLanguages() += "all"
                 }
             }
             return true
