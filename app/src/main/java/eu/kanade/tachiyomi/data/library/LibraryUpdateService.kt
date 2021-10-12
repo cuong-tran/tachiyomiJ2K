@@ -256,6 +256,7 @@ class LibraryUpdateService(
     private fun addManga(mangaToAdd: List<LibraryManga>) {
         val distinctManga = mangaToAdd.filter { it !in mangaToUpdate }
         mangaToUpdate.addAll(distinctManga)
+        checkIfMassiveUpdate()
         distinctManga.groupBy { it.source }.forEach {
             // if added queue items is a new source not in the async list or an async list has
             // finished running
@@ -306,11 +307,19 @@ class LibraryUpdateService(
         return null
     }
 
+    private fun checkIfMassiveUpdate() {
+        val largestSourceSize = mangaToUpdate.groupBy { it.source }.maxOfOrNull { it.value.size } ?: 0
+        if (largestSourceSize > QUEUE_SIZE_WARNING_THRESHOLD_SOURCE) {
+            notifier.showQueueSizeWarningNotification()
+        }
+    }
+
     private suspend fun updateChaptersJob(mangaToAdd: List<LibraryManga>) {
         // Initialize the variables holding the progress of the updates.
 
         mangaToUpdate.addAll(mangaToAdd)
         mangaToUpdateMap.putAll(mangaToAdd.groupBy { it.source })
+        checkIfMassiveUpdate()
         coroutineScope {
             jobCount.andIncrement
             val list = mangaToUpdateMap.keys.map { source ->
@@ -658,3 +667,5 @@ class LibraryUpdateService(
 interface LibraryServiceListener {
     fun onUpdateManga(manga: Manga? = null)
 }
+
+const val QUEUE_SIZE_WARNING_THRESHOLD_SOURCE = 80

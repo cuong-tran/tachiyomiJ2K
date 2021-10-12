@@ -205,7 +205,7 @@ internal class DownloadNotifier(private val context: Context) {
             setContentTitle(context.getString(R.string.downloads))
             setContentText(reason)
             color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
-            setSmallIcon(android.R.drawable.stat_sys_warning)
+            setSmallIcon(R.drawable.ic_warning_white_24dp)
             setAutoCancel(true)
             clearActions()
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
