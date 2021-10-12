@@ -178,7 +178,7 @@ class ExtensionBottomPresenter(
     private fun toItems(tuple: ExtensionTuple): List<ExtensionItem> {
         val context = bottomSheet.context
         val activeLangs = preferences.enabledLanguages().get()
-        val showNsfwExtensions = preferences.showNsfwExtension().get()
+        val showNsfwSources = preferences.showNsfwSources().get()
 
         val (installed, untrusted, available) = tuple
 
@@ -193,10 +193,10 @@ class ExtensionBottomPresenter(
             firstLoad = false
         }
 
-        val updatesSorted = installed.filter { it.hasUpdate && (showNsfwExtensions || !it.isNsfw) }.sortedBy { it.name }
+        val updatesSorted = installed.filter { it.hasUpdate && (showNsfwSources || !it.isNsfw) }.sortedBy { it.name }
         val sortOrder = InstalledExtensionsOrder.fromPreference(preferences)
         val installedSorted = installed
-            .filter { !it.hasUpdate && (showNsfwExtensions || !it.isNsfw) }
+            .filter { !it.hasUpdate && (showNsfwSources || !it.isNsfw) }
             .sortedWith(
                 compareBy(
                     { !it.isObsolete },
@@ -218,7 +218,7 @@ class ExtensionBottomPresenter(
                 installed.none { it.pkgName == avail.pkgName } &&
                     untrusted.none { it.pkgName == avail.pkgName } &&
                     (avail.lang in activeLangs || avail.lang == "all") &&
-                    (showNsfwExtensions || !avail.isNsfw)
+                    (showNsfwSources || !avail.isNsfw)
             }
             .sortedBy { it.name }
 

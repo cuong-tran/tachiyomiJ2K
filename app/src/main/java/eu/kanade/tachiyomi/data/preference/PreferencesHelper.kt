@@ -421,9 +421,7 @@ class PreferencesHelper(val context: Context) {
 
     fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 1)
 
-    fun showNsfwSource() = flowPrefs.getBoolean(Keys.showNsfwSource, true)
-    fun showNsfwExtension() = flowPrefs.getBoolean(Keys.showNsfwExtension, true)
-    fun labelNsfwExtension() = prefs.getBoolean(Keys.labelNsfwExtension, true)
+    fun showNsfwSources() = flowPrefs.getBoolean(Keys.showNsfwSource, true)
 
     fun themeMangaDetails() = prefs.getBoolean(Keys.themeMangaDetails, true)
 

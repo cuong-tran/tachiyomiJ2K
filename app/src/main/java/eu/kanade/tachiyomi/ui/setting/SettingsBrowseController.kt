@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
-import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
@@ -20,7 +19,6 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.migration.MigrationController
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import kotlinx.coroutines.flow.launchIn
 import uy.kohesive.injekt.injectLazy
 
 class SettingsBrowseController : SettingsController() {
@@ -161,23 +159,10 @@ class SettingsBrowseController : SettingsController() {
 
             switchPreference {
                 key = PreferenceKeys.showNsfwSource
-                titleRes = R.string.show_in_sources
+                titleRes = R.string.show_in_sources_and_extensions
                 summaryRes = R.string.requires_app_restart
                 defaultValue = true
             }
-            switchPreference {
-                key = PreferenceKeys.showNsfwExtension
-                titleRes = R.string.show_in_extensions
-                defaultValue = true
-            }
-            switchPreference {
-                key = PreferenceKeys.labelNsfwExtension
-                titleRes = R.string.label_in_extensions
-                defaultValue = true
-
-                preferences.showNsfwExtension().asImmediateFlow { isVisible = it }.launchIn(viewScope)
-            }
-
             infoPreference(R.string.does_not_prevent_unofficial_nsfw)
         }
     }

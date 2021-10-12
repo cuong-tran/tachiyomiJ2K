@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import dalvik.system.PathClassLoader
 import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.annotations.Nsfw
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.model.Extension
@@ -29,7 +28,7 @@ internal object ExtensionLoader {
 
     private val preferences: PreferencesHelper by injectLazy()
     private val loadNsfwSource by lazy {
-        preferences.showNsfwSource().get()
+        preferences.showNsfwSources().get()
     }
 
     private const val EXTENSION_FEATURE = "tachiyomi.extension"
@@ -168,13 +167,7 @@ internal object ExtensionLoader {
                 try {
                     when (val obj = Class.forName(it, false, classLoader).newInstance()) {
                         is Source -> listOf(obj)
-                        is SourceFactory -> {
-                            if (isSourceNsfw(obj)) {
-                                emptyList()
-                            } else {
-                                obj.createSources()
-                            }
-                        }
+                        is SourceFactory -> obj.createSources()
                         else -> throw Exception("Unknown source class type! ${obj.javaClass}")
                     }
                 } catch (e: Throwable) {
@@ -228,23 +221,5 @@ internal object ExtensionLoader {
         } else {
             null
         }
-    }
-
-    /**
-     * Checks whether a Source or SourceFactory is annotated with @Nsfw.
-     */
-    private fun isSourceNsfw(clazz: Any): Boolean {
-        if (loadNsfwSource) {
-            return false
-        }
-
-        if (clazz !is Source && clazz !is SourceFactory) {
-            return false
-        }
-
-        // Annotations are proxied, hence this janky way of checking for them
-        return clazz.javaClass.annotations
-            .flatMap { it.javaClass.interfaces.map { it.simpleName } }
-            .firstOrNull { it == Nsfw::class.java.simpleName } != null
     }
 }

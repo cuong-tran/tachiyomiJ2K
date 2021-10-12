@@ -6,7 +6,6 @@ import android.os.Looper
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ViewConfiguration
-import androidx.core.content.ContextCompat
 import kotlin.math.abs
 
 /**

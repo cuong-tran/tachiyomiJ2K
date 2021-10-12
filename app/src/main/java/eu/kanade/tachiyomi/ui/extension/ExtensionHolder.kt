@@ -13,7 +13,6 @@ import coil.clear
 import coil.load
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.ExtensionCardItemBinding
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
@@ -23,7 +22,6 @@ import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
 
@@ -38,10 +36,6 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
         binding.cancelButton.setOnClickListener {
             adapter.buttonClickListener.onCancelClick(flexibleAdapterPosition)
         }
-    }
-
-    private val shouldLabelNsfw by lazy {
-        Injekt.get<PreferencesHelper>().labelNsfwExtension()
     }
 
     fun bind(item: ExtensionItem) {
@@ -98,7 +92,7 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
             extension is Extension.Untrusted -> itemView.context.getString(R.string.untrusted)
             extension is Extension.Installed && extension.isObsolete -> itemView.context.getString(R.string.obsolete)
             extension is Extension.Installed && extension.isUnofficial -> itemView.context.getString(R.string.unofficial)
-            extension.isNsfw && shouldLabelNsfw -> itemView.context.getString(R.string.nsfw_short)
+            extension.isNsfw -> itemView.context.getString(R.string.nsfw_short)
             else -> ""
         }.uppercase(Locale.ROOT)
         binding.installProgress.progress = item.sessionProgress ?: 0

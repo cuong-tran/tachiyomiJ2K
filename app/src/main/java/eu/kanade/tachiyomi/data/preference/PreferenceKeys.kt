@@ -230,8 +230,6 @@ object PreferenceKeys {
     const val dohProvider = "doh_provider"
 
     const val showNsfwSource = "show_nsfw_source"
-    const val showNsfwExtension = "show_nsfw_extension"
-    const val labelNsfwExtension = "label_nsfw_extension"
 
     const val themeMangaDetails = "theme_manga_details"
 
