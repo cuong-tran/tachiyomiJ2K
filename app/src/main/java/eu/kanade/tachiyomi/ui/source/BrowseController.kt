@@ -30,7 +30,7 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
-import eu.kanade.tachiyomi.ui.extension.SettingsExtensionsController
+import eu.kanade.tachiyomi.ui.extension.ExtensionFilterController
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -528,7 +528,7 @@ class BrowseController :
             R.id.action_filter -> {
                 val controller =
                     if (showingExtensions) {
-                        SettingsExtensionsController()
+                        ExtensionFilterController()
                     } else SettingsSourcesController()
                 router.pushController(
                     RouterTransaction.with(controller)

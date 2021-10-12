@@ -3,29 +3,27 @@ package eu.kanade.tachiyomi.ui.extension
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.minusAssign
+import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.onChange
 import eu.kanade.tachiyomi.ui.setting.titleRes
 import eu.kanade.tachiyomi.util.system.LocaleHelper
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
-class SettingsExtensionsController : SettingsController() {
+class ExtensionFilterController : SettingsController() {
+
+    private val extensionManager: ExtensionManager by injectLazy()
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
-        titleRes = R.string.filter
+        titleRes = R.string.extensions
 
         val activeLangs = preferences.enabledLanguages().get()
 
-        val availableLangs =
-            Injekt.get<ExtensionManager>().availableExtensions.groupBy {
-                it.lang
-            }.keys.minus("all").partition {
-                it in activeLangs
-            }.let {
-                it.first + it.second
-            }
+        val availableLangs = extensionManager.availableExtensions.groupBy { it.lang }.keys
+            .sortedWith(compareBy({ it !in activeLangs }, { LocaleHelper.getSourceDisplayName(it, context) }))
 
         availableLangs.forEach {
             SwitchPreferenceCompat(context).apply {
@@ -35,13 +33,10 @@ class SettingsExtensionsController : SettingsController() {
                 isChecked = it in activeLangs
 
                 onChange { newValue ->
-                    val checked = newValue as Boolean
-                    val currentActiveLangs = preferences.enabledLanguages().get()
-
-                    if (checked) {
-                        preferences.enabledLanguages().set(currentActiveLangs + it)
+                    if (newValue as Boolean) {
+                        preferences.enabledLanguages() += it
                     } else {
-                        preferences.enabledLanguages().set(currentActiveLangs - it)
+                        preferences.enabledLanguages() -= it
                     }
                     true
                 }

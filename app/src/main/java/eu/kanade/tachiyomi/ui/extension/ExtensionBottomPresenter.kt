@@ -217,7 +217,7 @@ class ExtensionBottomPresenter(
             .filter { avail ->
                 installed.none { it.pkgName == avail.pkgName } &&
                     untrusted.none { it.pkgName == avail.pkgName } &&
-                    (avail.lang in activeLangs || avail.lang == "all") &&
+                    (avail.lang in activeLangs) &&
                     (showNsfwSources || !avail.isNsfw)
             }
             .sortedBy { it.name }
