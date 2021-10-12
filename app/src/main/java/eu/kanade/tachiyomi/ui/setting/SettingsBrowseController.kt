@@ -27,7 +27,7 @@ class SettingsBrowseController : SettingsController() {
     var updatedExtNotifPref: SwitchPreferenceCompat? = null
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
-        titleRes = R.string.sources
+        titleRes = R.string.browse
 
         preferenceCategory {
             titleRes = R.string.extensions

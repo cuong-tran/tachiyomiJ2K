@@ -57,7 +57,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
         preference {
             iconRes = R.drawable.ic_browse_outline_24dp
             iconTint = tintColor
-            titleRes = R.string.sources
+            titleRes = R.string.browse
             onClick { navigateTo(SettingsBrowseController()) }
         }
         preference {
