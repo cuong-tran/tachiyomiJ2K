@@ -10,7 +10,6 @@ import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.preference.minusAssign
 import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.source.SourceManager
@@ -38,7 +37,7 @@ class SettingsSourcesController : SettingsController() {
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.filter
-        sorting = SourcesSort.from(preferences.sourceSorting().getOrDefault()) ?: SourcesSort.Alpha
+        sorting = SourcesSort.from(preferences.sourceSorting().get()) ?: SourcesSort.Alpha
         activity?.invalidateOptionsMenu()
         // Get the list of active language codes.
         val activeLangsCodes = preferences.enabledLanguages().get()

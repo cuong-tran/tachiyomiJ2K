@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.source.SourceManager
@@ -94,7 +93,7 @@ class SettingsBrowseController : SettingsController() {
                 titleRes = R.string.source_migration
                 onClick { router.pushController(MigrationController().withFadeTransaction()) }
             }
-            if (preferences.skipPreMigration().getOrDefault() || preferences.migrationSources()
+            if (preferences.skipPreMigration().get() || preferences.migrationSources()
                 .isSet()
             ) {
                 switchPreference {

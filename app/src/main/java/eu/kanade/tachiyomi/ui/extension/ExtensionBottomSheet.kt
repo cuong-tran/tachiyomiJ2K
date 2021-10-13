@@ -16,7 +16,6 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.ExtensionsBottomSheetBinding
 import eu.kanade.tachiyomi.databinding.RecyclerWithScrollerBinding
 import eu.kanade.tachiyomi.extension.model.Extension
@@ -268,7 +267,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
                 if (item is MangaItem) {
                     PreMigrationController.navigateToMigration(
-                        Injekt.get<PreferencesHelper>().skipPreMigration().getOrDefault(),
+                        Injekt.get<PreferencesHelper>().skipPreMigration().get(),
                         controller.router,
                         listOf(item.manga.id!!)
                     )
@@ -296,7 +295,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             presenter.mangaItems[item.source.id]?.mapNotNull { it.manga.id }?.toList()
                 ?: emptyList()
         PreMigrationController.navigateToMigration(
-            Injekt.get<PreferencesHelper>().skipPreMigration().getOrDefault(),
+            Injekt.get<PreferencesHelper>().skipPreMigration().get(),
             controller.router,
             sourceMangas
         )

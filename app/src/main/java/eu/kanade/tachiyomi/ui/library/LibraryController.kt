@@ -58,7 +58,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.LibraryControllerBinding
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
@@ -139,8 +138,8 @@ class LibraryController(
     /**
      * Position of the active category.
      */
-    private var activeCategory: Int = preferences.lastUsedCategory().getOrDefault()
-    private var lastUsedCategory: Int = preferences.lastUsedCategory().getOrDefault()
+    private var activeCategory: Int = preferences.lastUsedCategory().get()
+    private var lastUsedCategory: Int = preferences.lastUsedCategory().get()
 
     private var justStarted = true
 
@@ -599,7 +598,7 @@ class LibraryController(
                     presenter.allCategories.size <= 1 || presenter.groupType > BY_DEFAULT -> {
                         updateLibrary()
                     }
-                    preferences.updateOnRefresh().getOrDefault() == -1 -> {
+                    preferences.updateOnRefresh().get() == -1 -> {
                         var selected = 0
                         activity!!.materialAlertDialog()
                             .setTitle(R.string.what_should_update)
@@ -633,7 +632,7 @@ class LibraryController(
                             }
                     }
                     else -> {
-                        when (preferences.updateOnRefresh().getOrDefault()) {
+                        when (preferences.updateOnRefresh().get()) {
                             0 -> updateLibrary(presenter.allCategories.first())
                             else -> updateLibrary()
                         }
@@ -1745,7 +1744,7 @@ class LibraryController(
                 destroyActionModeIfNeeded()
             }
             R.id.action_migrate -> {
-                val skipPre = preferences.skipPreMigration().getOrDefault()
+                val skipPre = preferences.skipPreMigration().get()
                 PreMigrationController.navigateToMigration(
                     skipPre,
                     router,

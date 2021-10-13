@@ -6,7 +6,6 @@ import androidx.annotation.StringRes
 import com.google.gson.Gson
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import timber.log.Timber
@@ -72,7 +71,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override fun getScoreList(): List<String> {
-        return when (scorePreference.getOrDefault()) {
+        return when (scorePreference.get()) {
             // 10 point
             POINT_10 -> IntRange(0, 10).map(Int::toString)
             // 100 point
@@ -88,7 +87,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override fun indexToScore(index: Int): Float {
-        return when (scorePreference.getOrDefault()) {
+        return when (scorePreference.get()) {
             // 10 point
             POINT_10 -> index * 10f
             // 100 point
@@ -112,7 +111,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     override fun displayScore(track: Track): String {
         val score = track.score
 
-        return when (scorePreference.getOrDefault()) {
+        return when (scorePreference.get()) {
             POINT_5 -> when (score) {
                 0f -> "0 ★"
                 else -> "${((score + 10) / 20).toInt()} ★"

@@ -11,7 +11,6 @@ import androidx.multidex.MultiDex
 import eu.kanade.tachiyomi.data.image.coil.CoilSetup
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import org.acra.ACRA
 import org.acra.config.httpSender
@@ -62,7 +61,7 @@ open class App : Application(), LifecycleObserver {
     @Suppress("unused")
     fun onAppBackgrounded() {
         // App in background
-        if (!SecureActivityDelegate.isAuthenticating && preferences.lockAfter().getOrDefault() >= 0) {
+        if (!SecureActivityDelegate.isAuthenticating && preferences.lockAfter().get() >= 0) {
             SecureActivityDelegate.locked = true
         }
     }

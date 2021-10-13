@@ -25,7 +25,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateRanker.rankingScheme
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.UnattendedTrackService
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
@@ -140,7 +139,7 @@ class LibraryUpdateService(
 
         instance = this
 
-        val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
+        val selectedScheme = preferences.libraryUpdatePrioritization().get()
         val savedMangasList = intent.getLongArrayExtra(KEY_MANGAS)?.asList()
 
         val mangaList = (
@@ -284,14 +283,14 @@ class LibraryUpdateService(
     }
 
     private fun addMangaToQueue(categoryId: Int, manga: List<LibraryManga>) {
-        val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
+        val selectedScheme = preferences.libraryUpdatePrioritization().get()
         val mangas = manga.sortedWith(rankingScheme[selectedScheme])
         categoryIds.add(categoryId)
         addManga(mangas)
     }
 
     private fun addCategory(categoryId: Int) {
-        val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
+        val selectedScheme = preferences.libraryUpdatePrioritization().get()
         val mangas =
             getMangaToUpdate(categoryId, Target.CHAPTERS).sortedWith(
                 rankingScheme[selectedScheme]
@@ -346,7 +345,7 @@ class LibraryUpdateService(
         if (newUpdates.isNotEmpty()) {
             notifier.showResultNotification(newUpdates)
 
-            if (preferences.refreshCoversToo().getOrDefault() && job?.isCancelled == false) {
+            if (preferences.refreshCoversToo().get() && job?.isCancelled == false) {
                 updateDetails(newUpdates.keys.toList())
                 notifier.cancelProgressNotification()
                 if (downloadNew && hasDownloads) {

@@ -8,10 +8,11 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.storage.DiskUtil
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -30,15 +31,16 @@ class DownloadProvider(private val context: Context) {
     /**
      * The root directory for downloads.
      */
-    private var downloadsDir = preferences.downloadsDirectory().getOrDefault().let {
+    private var downloadsDir = preferences.downloadsDirectory().get().let {
         val dir = UniFile.fromUri(context, it.toUri())
         DiskUtil.createNoMediaFile(dir, context)
         dir
     }
 
     init {
-        preferences.downloadsDirectory().asObservable().skip(1)
-            .subscribe { downloadsDir = UniFile.fromUri(context, it.toUri()) }
+        preferences.downloadsDirectory().asFlow().drop(1).onEach {
+            downloadsDir = UniFile.fromUri(context, it.toUri())
+        }
     }
 
     /**

@@ -53,7 +53,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdateChecker
 import eu.kanade.tachiyomi.data.updater.UpdateResult
 import eu.kanade.tachiyomi.data.updater.UpdaterNotifier
@@ -583,7 +582,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     fun getExtensionUpdates(force: Boolean) {
         if ((force && extensionManager.availableExtensions.isEmpty()) ||
-            Date().time >= preferences.lastExtCheck().getOrDefault() + TimeUnit.HOURS.toMillis(6)
+            Date().time >= preferences.lastExtCheck().get() + TimeUnit.HOURS.toMillis(6)
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 try {

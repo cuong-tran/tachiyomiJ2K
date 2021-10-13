@@ -53,7 +53,6 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.image.coil.getBestColor
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.databinding.MangaDetailsControllerBinding
 import eu.kanade.tachiyomi.source.LocalSource
@@ -997,7 +996,7 @@ class MangaDetailsController :
             R.id.action_migrate ->
                 if (!isNotOnline()) {
                     PreMigrationController.navigateToMigration(
-                        presenter.preferences.skipPreMigration().getOrDefault(),
+                        presenter.preferences.skipPreMigration().get(),
                         router,
                         listOf(manga!!.id!!)
                     )

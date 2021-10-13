@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
@@ -350,7 +349,7 @@ class ExtensionManager(
 
         ExtensionLoader.trustedSignatures += signature
         val preference = preferences.trustedSignatures()
-        preference.set(preference.getOrDefault() + signature)
+        preference.set(preference.get() + signature)
 
         val nowTrustedExtensions = untrustedExtensions.filter { it.signatureHash == signature }
         untrustedExtensions -= nowTrustedExtensions
