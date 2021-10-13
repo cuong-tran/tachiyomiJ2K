@@ -239,6 +239,11 @@ class RecentsController(bundle: Bundle? = null) :
                                 (progress * 2f).coerceIn(0f, 1f)
                             )
                         )
+                    val oldShow = showingDownloads
+                    showingDownloads = progress > 0.92f
+                    if (router.backstack.lastOrNull()?.controller != this@RecentsController) {
+                        return
+                    }
                     binding.downloadBottomSheet.root.backgroundTintList =
                         binding.downloadBottomSheet.sheetLayout.backgroundTintList
                     activityBinding?.appBar?.y = max(
@@ -253,8 +258,6 @@ class RecentsController(bundle: Bundle? = null) :
                             tabs.isVisible = true
                         }
                     }
-                    val oldShow = showingDownloads
-                    showingDownloads = progress > 0.92f
                     if (oldShow != showingDownloads) {
                         updateTitleAndMenu()
                         activity?.invalidateOptionsMenu()
@@ -272,8 +275,10 @@ class RecentsController(bundle: Bundle? = null) :
                         activity?.invalidateOptionsMenu()
                     }
 
-                    activityBinding?.tabsFrameLayout?.isVisible =
-                        state != BottomSheetBehavior.STATE_EXPANDED
+                    if (router.backstack.lastOrNull()?.controller == this@RecentsController) {
+                        activityBinding?.tabsFrameLayout?.isVisible =
+                            state != BottomSheetBehavior.STATE_EXPANDED
+                    }
                     if (state == BottomSheetBehavior.STATE_COLLAPSED) {
                         if (hasQueue()) {
                             binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable =
