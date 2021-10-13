@@ -49,7 +49,7 @@ class CustomMangaManager(val context: Context) {
                 description = mangaObject["description"]?.nullString
                 genre = mangaObject["genre"]?.asJsonArray?.mapNotNull { it.nullString }
                     ?.joinToString(", ")
-                status = mangaObject["status"]?.nullInt ?: 0
+                status = mangaObject["status"]?.nullInt ?: -1
             }
             id to manga
         }.toMap().toMutableMap()
@@ -58,7 +58,7 @@ class CustomMangaManager(val context: Context) {
     fun saveMangaInfo(manga: MangaJson) {
         if (manga.title == null && manga.author == null && manga.artist == null &&
             manga.description == null && manga.genre == null &&
-            (manga.status == null || manga.status == -1)
+            manga.status ?: -1 == -1
         ) {
             customMangaMap.remove(manga.id)
         } else {
