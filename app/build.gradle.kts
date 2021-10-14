@@ -149,7 +149,7 @@ dependencies {
     implementation(kotlin("reflect", version = Versions.kotlin))
 
     // JSON
-    val kotlinSerialization =  "1.2.1"
+    val kotlinSerialization =  "1.3.0"
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinSerialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${kotlinSerialization}")
     implementation("com.google.code.gson:gson:2.8.7")
