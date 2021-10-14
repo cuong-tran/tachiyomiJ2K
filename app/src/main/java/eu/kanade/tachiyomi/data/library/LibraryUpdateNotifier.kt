@@ -75,16 +75,11 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param total the total progress.
      */
     fun showProgressNotification(manga: Manga, current: Int, total: Int) {
-        val title = if (preferences.hideNotificationContent()) {
-            context.getString(R.string.checking_for_new_chapters)
-        } else {
-            manga.title
-        }
-
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_PROGRESS,
             progressNotificationBuilder
-                .setContentTitle(title)
+                .setContentTitle("${context.getString(R.string.updating_library)} (${current + 1}/$total)")
+                .setContentText(if (preferences.hideNotificationContent()) null else manga.title)
                 .setProgress(total, current, false)
                 .build()
         )
