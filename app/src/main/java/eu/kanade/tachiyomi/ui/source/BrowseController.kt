@@ -128,8 +128,7 @@ class BrowseController :
         binding.sourceRecycler.adapter = adapter
         adapter?.isSwipeEnabled = true
         adapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-        // binding.sourceRecycler.addItemDecoration(SourceDividerItemDecoration(view.context))
-        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+        val attrsArray = intArrayOf(R.attr.mainActionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appBarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
