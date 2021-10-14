@@ -1422,19 +1422,30 @@ class MangaDetailsController :
      * @param label Label to show to the user describing the content
      */
     override fun copyToClipboard(content: String, label: Int, useToast: Boolean) {
+        val view = view ?: return
+        val contentType = view.context.getString(label)
+        copyToClipboard(content, contentType, useToast)
+    }
+
+    /**
+     * Copies a string to clipboard
+     *
+     * @param content the actual text to copy to the board
+     * @param label Label to show to the user describing the content
+     */
+    override fun copyToClipboard(content: String, label: String, useToast: Boolean) {
         if (content.isBlank()) return
 
         val activity = activity ?: return
         val view = view ?: return
 
-        val contentType = view.context.getString(label)
-        val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.setPrimaryClip(ClipData.newPlainText(contentType, content))
+        val clipboard = activity.getSystemService(ClipboardManager::class.java)
+        clipboard.setPrimaryClip(ClipData.newPlainText(label, content))
 
         if (useToast) {
-            activity.toast(view.context.getString(R.string._copied_to_clipboard, contentType))
+            activity.toast(view.context.getString(R.string._copied_to_clipboard, label))
         } else {
-            snack = view.snack(view.context.getString(R.string._copied_to_clipboard, contentType))
+            snack = view.snack(view.context.getString(R.string._copied_to_clipboard, label))
         }
     }
 
