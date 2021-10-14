@@ -62,7 +62,7 @@ class MigrationProcessHolder(
             binding.migrationMangaCardTo.resetManga()
             if (manga != null) {
                 withContext(Dispatchers.Main) {
-                    binding.migrationMangaCardFrom.attachManga(manga, source, false)
+                    binding.migrationMangaCardFrom.attachManga(manga, source)
                     binding.migrationMangaCardFrom.root.setOnClickListener {
                         adapter.controller.router.pushController(
                             MangaDetailsController(
@@ -95,7 +95,7 @@ class MigrationProcessHolder(
                         return@withContext
                     }
                     if (searchResult != null && resultSource != null) {
-                        binding.migrationMangaCardTo.attachManga(searchResult, resultSource, true)
+                        binding.migrationMangaCardTo.attachManga(searchResult, resultSource)
                         binding.migrationMangaCardTo.root.setOnClickListener {
                             adapter.controller.router.pushController(
                                 MangaDetailsController(
@@ -130,7 +130,7 @@ class MigrationProcessHolder(
         root.setOnClickListener(null)
     }
 
-    private fun MangaGridItemBinding.attachManga(manga: Manga, source: Source, isTo: Boolean) {
+    private fun MangaGridItemBinding.attachManga(manga: Manga, source: Source) {
         (root.layoutParams as ConstraintLayout.LayoutParams).verticalBias = 1f
         progress.isVisible = false
 

@@ -95,9 +95,9 @@ class LocalSource(private val context: Context) : CatalogueSource {
         when (state?.index) {
             0 -> {
                 mangaDirs = if (state.ascending) {
-                    mangaDirs.sortedBy { it.name.toLowerCase(Locale.ENGLISH) }
+                    mangaDirs.sortedBy { it.name.lowercase(Locale.ENGLISH) }
                 } else {
-                    mangaDirs.sortedByDescending { it.name.toLowerCase(Locale.ENGLISH) }
+                    mangaDirs.sortedByDescending { it.name.lowercase(Locale.ENGLISH) }
                 }
             }
             1 -> {
@@ -288,7 +288,7 @@ class LocalSource(private val context: Context) : CatalogueSource {
     }
 
     private fun isSupportedFile(extension: String): Boolean {
-        return extension.toLowerCase() in SUPPORTED_ARCHIVE_TYPES
+        return extension.lowercase(Locale.getDefault()) in SUPPORTED_ARCHIVE_TYPES
     }
 
     fun getFormat(chapter: SChapter): Format {

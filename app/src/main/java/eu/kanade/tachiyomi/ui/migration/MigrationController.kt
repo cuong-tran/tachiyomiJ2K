@@ -77,7 +77,6 @@ class MigrationController :
             }
             adapter?.updateDataSet(state.sourcesWithManga)
         } else {
-            val switching = title == resources?.getString(R.string.source_migration)
             title = state.selectedSource.toString()
             if (adapter !is MangaAdapter) {
                 adapter = MangaAdapter(this)

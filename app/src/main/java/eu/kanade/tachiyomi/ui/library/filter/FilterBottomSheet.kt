@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.StringRes
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isVisible
 import androidx.core.view.updatePaddingRelative
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
@@ -21,6 +22,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryGroup
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.compatToolTipText
@@ -110,7 +112,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         libraryRecyler?.post {
             bottomBarHeight =
                 controller.activityBinding?.bottomNav?.height
-                ?: controller.activityBinding?.root?.rootWindowInsets?.systemWindowInsetBottom
+                ?: controller.activityBinding?.root?.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom
                 ?: 0
         }
         sheetBehavior?.addBottomSheetCallback(

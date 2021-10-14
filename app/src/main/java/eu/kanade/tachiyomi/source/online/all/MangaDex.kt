@@ -21,6 +21,7 @@ import okhttp3.CacheControl
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.util.Locale
 
 class MangaDex : DelegatedHttpSource() {
 
@@ -57,11 +58,11 @@ class MangaDex : DelegatedHttpSource() {
         val mangaId = dataObject["mangaId"]?.nullInt ?: throw Exception(
             "No manga associated with chapter"
         )
-        val langCode = getRealLangCode(dataObject["language"]?.nullString ?: "en").toUpperCase()
+        val langCode = getRealLangCode(dataObject["language"]?.nullString ?: "en").uppercase(Locale.getDefault())
         // Use the correct MangaDex source based on the language code, or the api will not return
         // the correct chapter list
         delegate = sourceManager.getOnlineSources().find { it.toString() == "MangaDex ($langCode)" }
-            ?: return error("Source not found")
+            ?: error("Source not found")
         val mangaUrl = "/manga/$mangaId/"
         return withContext(Dispatchers.IO) {
             val deferredManga = async {
@@ -81,7 +82,7 @@ class MangaDex : DelegatedHttpSource() {
     }
 
     fun getRealLangCode(langCode: String): String {
-        return when (langCode.toLowerCase()) {
+        return when (langCode.lowercase(Locale.getDefault())) {
             "gb" -> "en"
             "vn" -> "vi"
             "mx" -> "es-419"
