@@ -34,7 +34,7 @@ Plus some new features in this fork such as:
 * Batch Auto-Source Migration (taken from [TachiyomiEH](https://github.com/NerdNumber9/TachiyomiEH))
 * [Share sheets upgrade for Android 10](.github/readme-images/share%20menu.png)
 * View all chapters right in the reader
-* A lot more Material Design 2 additions
+* A lot more Material Design You additions
 * Android 12 (Beta) features
 
 ## Issues, Feature Requests and Contributing
