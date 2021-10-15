@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Tachiyomi.Strawberries">
-        <item name="colorPrimary">@color/primaryStrawberry</item>
-        <item name="colorPrimaryInverse">@color/primaryInverseStrawberry</item>
-        <item name="colorSecondary">@color/holo_red</item>
-        <item name="colorSecondaryVariant">@color/secondaryVariantStrawberry</item>
-        <item name="colorPrimaryVariant">@color/primaryVariantStrawberry</item>
-        <item name="background">@color/backgroundChocolateStrawberries</item>
-        <item name="colorSurface">@color/backgroundChocolateStrawberries</item>
-    </style>
-
     <style name="Theme.Tachiyomi.FlatLime">
         <item name="colorPrimary">@color/primaryLime</item>
         <item name="colorPrimaryInverse">@color/primaryInverseLime</item>
         <item name="colorSecondary">@color/secondaryLime</item>
+        <item name="colorControlHighlight">@color/rippleColorLime</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantLime</item>
         <item name="colorPrimaryVariant">@color/dialogLime</item>
         <item name="colorSurface">@color/backgroundLime</item>
