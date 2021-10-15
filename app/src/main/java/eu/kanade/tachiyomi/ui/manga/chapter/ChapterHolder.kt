@@ -146,7 +146,10 @@ class ChapterHolder(
     }
 
     private fun resetFrontView() {
-        if (binding.frontView.translationX != 0f) itemView.post { adapter.notifyItemChanged(flexibleAdapterPosition) }
+        if (binding.frontView.translationX != 0f) itemView.post {
+            androidx.transition.TransitionManager.endTransitions(adapter.recyclerView)
+            adapter.notifyItemChanged(flexibleAdapterPosition)
+        }
     }
 
     fun notifyStatus(status: Download.State, locked: Boolean, progress: Int, animated: Boolean = false) = with(binding.downloadButton.downloadButton) {
