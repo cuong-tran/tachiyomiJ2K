@@ -223,6 +223,7 @@ class MangaDetailsController :
 
     private fun setAccentColorValue(colorToUse: Int? = null) {
         val context = view?.context ?: return
+        setCoverColorValue(colorToUse)
         accentColor = if (presenter.preferences.themeMangaDetails()) {
             (colorToUse ?: manga?.vibrantCoverColor)?.let {
                 val luminance = ColorUtils.calculateLuminance(it).toFloat()
@@ -240,6 +241,34 @@ class MangaDetailsController :
         } else {
             null
         }
+    }
+
+    private fun setCoverColorValue(colorToUse: Int? = null) {
+        val context = view?.context ?: return
+        val colorBack = context.getResourceColor(R.attr.background)
+        coverColor =
+            (
+                if (presenter.preferences.themeMangaDetails()) {
+                    (colorToUse ?: manga?.vibrantCoverColor)
+                } else {
+                    ColorUtils.blendARGB(
+                        context.getResourceColor(R.attr.colorSecondary),
+                        colorBack,
+                        0.5f
+                    )
+                }
+                )?.let {
+                // this makes the color more consistent regardless of theme
+                val dominant = it
+                val domLum = ColorUtils.calculateLuminance(dominant)
+                val lumWrongForTheme =
+                    (if (context.isInNightMode()) domLum > 0.8 else domLum <= 0.2)
+                ColorUtils.blendARGB(
+                    it,
+                    colorBack,
+                    if (lumWrongForTheme) 0.9f else 0.7f
+                )
+            }
     }
 
     private fun setRefreshStyle() {
@@ -458,19 +487,6 @@ class MangaDetailsController :
                     if (bitmap != null) {
                         Palette.from(bitmap).generate {
                             if (it == null) return@generate
-                            val colorBack = view.context.getResourceColor(R.attr.background)
-                            // this makes the color more consistent regardless of theme
-                            val dominant = it.getDominantColor(colorBack)
-                            val domLum = ColorUtils.calculateLuminance(dominant)
-                            val lumWrongForTheme = (if (view.context.isInNightMode()) domLum > 0.8 else domLum <= 0.2)
-                            val backDropColor =
-                                ColorUtils.blendARGB(
-                                    it.getDominantColor(colorBack),
-                                    colorBack,
-                                    if (lumWrongForTheme) 0.9f else 0.65f
-                                )
-
-                            coverColor = backDropColor
                             if (presenter.preferences.themeMangaDetails()) {
                                 launchUI {
                                     view.context.getResourceColor(R.attr.colorSecondary)
@@ -493,7 +509,8 @@ class MangaDetailsController :
                                     }
                                 }
                             } else {
-                                getHeader()?.setBackDrop(backDropColor)
+                                setCoverColorValue()
+                                coverColor?.let { color -> getHeader()?.setBackDrop(color) }
                             }
                         }
                     }
