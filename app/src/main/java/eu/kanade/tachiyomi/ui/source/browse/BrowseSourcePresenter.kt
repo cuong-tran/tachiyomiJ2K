@@ -167,6 +167,7 @@ open class BrowseSourcePresenter(
 
         val browseAsList = prefs.browseAsList()
         val sourceListType = prefs.libraryLayout()
+        val outlineCovers = prefs.outlineOnCovers()
 
         // Prepare the pager.
         pagerSubscription?.let { remove(it) }
@@ -174,7 +175,7 @@ open class BrowseSourcePresenter(
             .observeOn(Schedulers.io())
             .map { it.first to it.second.map { networkToLocalManga(it, sourceId) } }
             .doOnNext { initializeMangas(it.second) }
-            .map { it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType) } }
+            .map { it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType, outlineCovers) } }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeReplay(
                 { view, (page, mangas) ->

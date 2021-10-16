@@ -177,6 +177,8 @@ object PreferenceKeys {
 
     const val uniformGrid = "uniform_grid"
 
+    const val outlineOnCovers = "outline_on_covers"
+
     const val dateFormat = "app_date_format"
 
     const val defaultCategory = "default_category"

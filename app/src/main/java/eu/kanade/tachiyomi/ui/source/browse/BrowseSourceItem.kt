@@ -23,7 +23,8 @@ import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 class BrowseSourceItem(
     val manga: Manga,
     private val catalogueAsList: Preference<Boolean>,
-    private val catalogueListType: Preference<Int>
+    private val catalogueListType: Preference<Int>,
+    private val outlineOnCovers: Preference<Boolean>
 ) :
     AbstractFlexibleItem<BrowseSourceHolder>() {
 
@@ -79,9 +80,9 @@ class BrowseSourceItem(
                     (parent.itemWidth / 3f * 3.7f).toInt()
                 )
             }
-            BrowseSourceGridHolder(view, adapter, listType == 1)
+            BrowseSourceGridHolder(view, adapter, listType == 1, outlineOnCovers.get())
         } else {
-            BrowseSourceListHolder(view, adapter)
+            BrowseSourceListHolder(view, adapter, outlineOnCovers.get())
         }
     }
 
