@@ -56,7 +56,7 @@ object AndroidVersions {
     const val minSdk = 23
     const val targetSdk = 30
     const val versionCode = 84
-    const val versionName = "1.4.1"
+    const val versionName = "1.4.2"
     const val ndk = "22.0.7026061"
 }
 
