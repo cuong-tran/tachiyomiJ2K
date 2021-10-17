@@ -2,17 +2,24 @@ package eu.kanade.tachiyomi.ui.migration.manga.design
 
 import android.os.Bundle
 import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class MigrationSourceAdapter(
     var items: List<MigrationSourceItem>,
-    val controllerPre: PreMigrationController
+    controllerPre: PreMigrationController
 ) : FlexibleAdapter<MigrationSourceItem>(
     items,
     controllerPre,
     true
 ) {
+
+    val isMultiLanguage =
+        Injekt.get<PreferencesHelper>().enabledLanguages().get().filterNot { it == "all" }.size > 1
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
