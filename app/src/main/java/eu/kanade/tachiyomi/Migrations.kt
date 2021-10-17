@@ -38,12 +38,15 @@ object Migrations {
         if (oldVersion < BuildConfig.VERSION_CODE) {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
 
+            // Always set up background tasks to ensure they're running
+            if (BuildConfig.INCLUDE_UPDATER) {
+                UpdaterJob.setupTask(context)
+            }
+            ExtensionUpdateJob.setupTask(context)
+            LibraryUpdateJob.setupTask(context)
+            BackupCreatorJob.setupTask(context)
+
             if (oldVersion == 0) {
-                if (BuildConfig.INCLUDE_UPDATER) {
-                    UpdaterJob.setupTask(context)
-                }
-                ExtensionUpdateJob.setupTask(context)
-                LibraryUpdateJob.setupTask(context)
                 return BuildConfig.DEBUG
             }
 
