@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.getThemeWithExtras
-import eu.kanade.tachiyomi.util.system.setThemeAndNight
+import eu.kanade.tachiyomi.util.system.setThemeByPref
 import uy.kohesive.injekt.injectLazy
 
 abstract class BaseThemedActivity : AppCompatActivity() {
@@ -15,7 +15,7 @@ abstract class BaseThemedActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         updatedTheme = null
-        setThemeAndNight(preferences)
+        setThemeByPref(preferences)
         super.onCreate(savedInstanceState)
     }
 

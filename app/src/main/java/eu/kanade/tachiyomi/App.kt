@@ -3,15 +3,19 @@ package eu.kanade.tachiyomi
 import android.app.Application
 import android.content.Context
 import android.os.Build
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.multidex.MultiDex
 import eu.kanade.tachiyomi.data.image.coil.CoilSetup
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import kotlinx.coroutines.flow.launchIn
 import org.acra.ACRA
 import org.acra.config.httpSender
 import org.acra.data.StringFormat
@@ -52,6 +56,10 @@ open class App : Application(), LifecycleObserver {
         setupNotificationChannels()
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+
+        preferences.nightMode()
+            .asImmediateFlow { AppCompatDelegate.setDefaultNightMode(it) }
+            .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
 
         // Reset Incognito Mode on relaunch
         preferences.incognitoMode().set(false)
