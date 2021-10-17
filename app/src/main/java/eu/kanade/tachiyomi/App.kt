@@ -10,9 +10,8 @@ import android.content.IntentFilter
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.multidex.MultiDex
@@ -43,7 +42,7 @@ import java.security.Security
 //    buildConfigClass = BuildConfig::class,
 //    excludeMatchingSharedPreferencesKeys = [".*username.*", ".*password.*", ".*token.*"]
 // )
-open class App : Application(), LifecycleObserver {
+open class App : Application(), DefaultLifecycleObserver {
 
     val preferences: PreferencesHelper by injectLazy()
 
@@ -51,7 +50,7 @@ open class App : Application(), LifecycleObserver {
 
     @SuppressLint("LaunchActivityFromNotification")
     override fun onCreate() {
-        super.onCreate()
+        super<Application>.onCreate()
         if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
 
         // TLS 1.3 support for Android 10 and below
@@ -102,10 +101,7 @@ open class App : Application(), LifecycleObserver {
             .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    @Suppress("unused")
-    fun onAppBackgrounded() {
-        // App in background
+    override fun onPause(owner: LifecycleOwner) {
         if (!SecureActivityDelegate.isAuthenticating && preferences.lockAfter().get() >= 0) {
             SecureActivityDelegate.locked = true
         }
