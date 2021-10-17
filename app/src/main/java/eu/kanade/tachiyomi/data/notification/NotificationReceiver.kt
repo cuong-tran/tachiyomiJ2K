@@ -16,7 +16,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.updater.UpdaterService
+import eu.kanade.tachiyomi.data.updater.AppUpdateService
 import eu.kanade.tachiyomi.extension.ExtensionInstallService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -216,7 +216,7 @@ class NotificationReceiver : BroadcastReceiver() {
     }
 
     private fun cancelDownloadUpdate(context: Context) {
-        UpdaterService.stop(context)
+        AppUpdateService.stop(context)
     }
 
     companion object {

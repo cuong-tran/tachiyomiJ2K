@@ -1,22 +1,22 @@
 package eu.kanade.tachiyomi.data.updater.github
 
 import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.data.updater.UpdateChecker
-import eu.kanade.tachiyomi.data.updater.UpdateResult
+import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
+import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 
-class GithubUpdateChecker : UpdateChecker() {
+class GithubAppUpdateChecker : AppUpdateChecker() {
 
     private val service: GithubService = GithubService.create()
 
-    override suspend fun checkForUpdate(): UpdateResult {
+    override suspend fun checkForUpdate(): AppUpdateResult {
         val release = service.getLatestVersion()
         val newVersion = release.version.replace("[^\\d.]".toRegex(), "")
 
         // Check if latest version is different from current version
         return if (newVersion != BuildConfig.VERSION_NAME) {
-            GithubUpdateResult.NewUpdate(release)
+            GithubAppUpdateResult.NewUpdate(release)
         } else {
-            GithubUpdateResult.NoNewUpdate()
+            GithubAppUpdateResult.NoNewUpdate()
         }
     }
 }

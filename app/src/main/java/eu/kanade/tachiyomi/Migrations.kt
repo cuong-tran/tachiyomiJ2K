@@ -9,8 +9,8 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.data.updater.UpdaterJob
-import eu.kanade.tachiyomi.data.updater.UpdaterService
+import eu.kanade.tachiyomi.data.updater.AppUpdateJob
+import eu.kanade.tachiyomi.data.updater.AppUpdateService
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
@@ -32,7 +32,7 @@ object Migrations {
         val context = preferences.context
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.edit {
-            remove(UpdaterService.NOTIFY_ON_INSTALL_KEY)
+            remove(AppUpdateService.NOTIFY_ON_INSTALL_KEY)
         }
         val oldVersion = preferences.lastVersionCode().get()
         if (oldVersion < BuildConfig.VERSION_CODE) {
@@ -40,7 +40,7 @@ object Migrations {
 
             // Always set up background tasks to ensure they're running
             if (BuildConfig.INCLUDE_UPDATER) {
-                UpdaterJob.setupTask(context)
+                AppUpdateJob.setupTask(context)
             }
             ExtensionUpdateJob.setupTask(context)
             LibraryUpdateJob.setupTask(context)
@@ -53,7 +53,7 @@ object Migrations {
             if (oldVersion < 14) {
                 // Restore jobs after upgrading to evernote's job scheduler.
                 if (BuildConfig.INCLUDE_UPDATER) {
-                    UpdaterJob.setupTask(context)
+                    AppUpdateJob.setupTask(context)
                 }
                 LibraryUpdateJob.setupTask(context)
             }
@@ -90,7 +90,7 @@ object Migrations {
                 LibraryPresenter.updateDB()
                 // Restore jobs after migrating from Evernote's job scheduler to WorkManager.
                 if (BuildConfig.INCLUDE_UPDATER) {
-                    UpdaterJob.setupTask(context)
+                    AppUpdateJob.setupTask(context)
                 }
                 LibraryUpdateJob.setupTask(context)
                 BackupCreatorJob.setupTask(context)
@@ -130,7 +130,7 @@ object Migrations {
             if (oldVersion < 74) {
                 // Turn on auto updates for all users
                 if (BuildConfig.INCLUDE_UPDATER) {
-                    UpdaterJob.setupTask(context)
+                    AppUpdateJob.setupTask(context)
                 }
             }
             if (oldVersion < 75) {
