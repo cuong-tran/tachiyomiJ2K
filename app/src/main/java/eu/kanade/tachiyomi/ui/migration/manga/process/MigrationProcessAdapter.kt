@@ -23,6 +23,7 @@ class MigrationProcessAdapter(
     var items: List<MigrationProcessItem> = emptyList()
     val preferences: PreferencesHelper by injectLazy()
 
+    var showOutline = preferences.outlineOnCovers().get()
     val menuItemListener: MigrationProcessInterface = controller
 
     override fun updateDataSet(items: List<MigrationProcessItem>?) {

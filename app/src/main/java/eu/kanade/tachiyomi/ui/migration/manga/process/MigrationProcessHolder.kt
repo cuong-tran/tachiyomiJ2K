@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.view.setCards
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +42,9 @@ class MigrationProcessHolder(
         // PopupMenu is shown.
         binding.migrationMenu.setOnClickListener { it.post { showPopupMenu(it) } }
         binding.skipManga.setOnClickListener { it.post { adapter.removeManga(flexibleAdapterPosition) } }
+        arrayOf(binding.migrationMangaCardFrom, binding.migrationMangaCardTo).forEach {
+            setCards(adapter.showOutline, it.card, it.unreadDownloadBadge.badgeView)
+        }
     }
 
     fun bind(item: MigrationProcessItem) {

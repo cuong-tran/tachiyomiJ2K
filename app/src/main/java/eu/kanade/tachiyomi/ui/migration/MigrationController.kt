@@ -79,7 +79,7 @@ class MigrationController :
         } else {
             title = state.selectedSource.toString()
             if (adapter !is MangaAdapter) {
-                adapter = MangaAdapter(this)
+                adapter = MangaAdapter(this, presenter.preferences.outlineOnCovers().get())
                 binding.migrationRecycler.adapter = adapter
             }
             adapter?.updateDataSet(state.mangaForSource, true)

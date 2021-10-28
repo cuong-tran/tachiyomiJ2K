@@ -330,7 +330,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     fun setMigrationManga(manga: List<MangaItem>?) {
         if (migAdapter !is MangaAdapter) {
-            migAdapter = MangaAdapter(this)
+            migAdapter = MangaAdapter(this, presenter.preferences.outlineOnCovers().get())
             migrationFrameLayout?.onBind(migAdapter!!)
             migAdapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }

@@ -23,7 +23,7 @@ import java.util.Date
 class MigrationPresenter(
     private val sourceManager: SourceManager = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
-    private val preferences: PreferencesHelper = Injekt.get()
+    val preferences: PreferencesHelper = Injekt.get()
 ) : BasePresenter<MigrationController>() {
 
     var state = ViewState()
