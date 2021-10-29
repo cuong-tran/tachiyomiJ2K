@@ -99,9 +99,9 @@ dependencies {
     implementation("tachiyomi.sourceapi:source-api:1.1")
 
     // Android X libraries
-    implementation("androidx.appcompat:appcompat:1.4.0-beta01")
+    implementation("androidx.appcompat:appcompat:1.4.0-rc01")
     implementation("androidx.cardview:cardview:1.0.0")
-    implementation("com.google.android.material:material:1.5.0-alpha04")
+    implementation("com.google.android.material:material:1.5.0-alpha05")
     implementation("androidx.webkit:webkit:1.4.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.preference:preference:1.1.1")
@@ -109,7 +109,7 @@ dependencies {
     implementation("androidx.browser:browser:1.3.0")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.core:core-ktx:1.6.0")
+    implementation("androidx.core:core-ktx:1.7.0")
 
     implementation("androidx.constraintlayout:constraintlayout:2.1.1")
 
@@ -167,7 +167,7 @@ dependencies {
     implementation("org.jsoup:jsoup:1.13.1")
 
     // Job scheduling
-    implementation("androidx.work:work-runtime-ktx:2.6.0")
+    implementation("androidx.work:work-runtime-ktx:2.7.0")
 
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
