@@ -43,7 +43,6 @@ import eu.kanade.tachiyomi.util.view.openInBrowser
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText.Companion.setIncognito
-import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.Injekt
@@ -263,18 +262,6 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
         lastOpenPreferencePosition = (0 until screen.preferenceCount).indexOfFirst {
             screen.getPreference(it) === preference
-        }
-
-        if (preference is ListPreference) {
-            ListMatPreference(activity, preference.context).apply {
-                key = preference.key
-                sharedPref = preference.fragment
-                otherPref = preference
-                preferenceDataStore = preference.preferenceDataStore
-                entries = preference.entries.mapNotNull { it.toString() }
-                entryValues = preference.entryValues.mapNotNull { it.toString() }
-            }.dialog().show()
-            return
         }
 
         val f = when (preference) {
