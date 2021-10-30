@@ -167,7 +167,7 @@ dependencies {
     implementation("org.jsoup:jsoup:1.13.1")
 
     // Job scheduling
-    implementation("androidx.work:work-runtime-ktx:2.7.0")
+    implementation("androidx.work:work-runtime-ktx:2.6.0")
 
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
