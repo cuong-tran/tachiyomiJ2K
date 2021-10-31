@@ -130,8 +130,11 @@ open class GlobalSearchPresenter(
             return enabledSources
         }
 
-        val filterSources = extensionManager.installedExtensions.filter { it.pkgName == filter }
-            .flatMap { it.sources }.filter { it in enabledSources }
+        val languages = preferences.enabledLanguages().get()
+        val filterSources = extensionManager.installedExtensions
+            .filter { it.pkgName == filter }
+            .flatMap { it.sources }
+            .filter { it.lang in languages }
             .filterIsInstance<CatalogueSource>()
 
         if (filterSources.isEmpty()) {
