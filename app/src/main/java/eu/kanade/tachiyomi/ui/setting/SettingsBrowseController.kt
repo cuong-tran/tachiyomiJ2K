@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
-import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
+import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -51,7 +51,7 @@ class SettingsBrowseController : SettingsController() {
                         R.string.over_wifi_only,
                         R.string.dont_auto_update
                     )
-                    defaultValue = AutoUpdaterJob.ONLY_ON_UNMETERED
+                    defaultValue = AutoAppUpdaterJob.ONLY_ON_UNMETERED
                 }
                 val infoPref = infoPreference(R.string.some_extensions_may_not_update)
                 val switchPref = switchPreference {
