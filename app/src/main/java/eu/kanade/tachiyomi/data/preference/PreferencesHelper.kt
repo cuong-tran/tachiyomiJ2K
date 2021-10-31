@@ -422,6 +422,8 @@ class PreferencesHelper(val context: Context) {
 
     fun autoUpdateExtensions() = prefs.getInt(Keys.autoUpdateExtensions, AutoAppUpdaterJob.ONLY_ON_UNMETERED)
 
+    fun useShizukuForExtensions() = prefs.getBoolean(Keys.useShizuku, false)
+
     fun filterChapterByRead() = flowPrefs.getInt(Keys.defaultChapterFilterByRead, Manga.SHOW_ALL)
 
     fun filterChapterByDownloaded() = flowPrefs.getInt(Keys.defaultChapterFilterByDownloaded, Manga.SHOW_ALL)

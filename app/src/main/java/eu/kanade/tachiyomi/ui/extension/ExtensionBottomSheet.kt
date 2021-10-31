@@ -208,7 +208,9 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     }
 
     override fun onUpdateAllClicked(position: Int) {
-        if (!presenter.preferences.hasPromptedBeforeUpdateAll().get()) {
+        if (!presenter.preferences.useShizukuForExtensions() &&
+            !presenter.preferences.hasPromptedBeforeUpdateAll().get()
+        ) {
             controller.activity!!.materialAlertDialog()
                 .setTitle(R.string.update_all)
                 .setMessage(R.string.some_extensions_may_prompt)

@@ -33,6 +33,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
+import com.hippo.unifile.UniFile
 import com.nononsenseapps.filepicker.FilePickerActivity
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -220,6 +221,27 @@ fun Context.acquireWakeLock(tag: String): PowerManager.WakeLock {
     val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag:WakeLock")
     wakeLock.acquire()
     return wakeLock
+}
+
+/**
+ * Gets document size of provided [Uri]
+ *
+ * @return document size of [uri] or null if size can't be obtained
+ */
+fun Context.getUriSize(uri: Uri): Long? {
+    return UniFile.fromUri(this, uri).length().takeIf { it >= 0 }
+}
+
+/**
+ * Returns true if [packageName] is installed.
+ */
+fun Context.isPackageInstalled(packageName: String): Boolean {
+    return try {
+        packageManager.getApplicationInfo(packageName, 0)
+        true
+    } catch (e: Exception) {
+        false
+    }
 }
 
 /**

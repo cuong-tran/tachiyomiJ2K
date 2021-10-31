@@ -2,8 +2,11 @@ package eu.kanade.tachiyomi.extension
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Parcelable
+import androidx.preference.PreferenceManager
 import com.jakewharton.rxrelay.BehaviorRelay
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.extension.model.Extension
@@ -466,5 +469,13 @@ class ExtensionManager(
             name = extension.name,
             versionCode = extension.versionCode
         )
+    }
+
+    companion object {
+        fun canAutoInstallUpdates(context: Context): Boolean {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ||
+                prefs.getBoolean(PreferenceKeys.useShizuku, false)
+        }
     }
 }

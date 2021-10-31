@@ -6,7 +6,9 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
+import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.util.system.notificationManager
 
 /**
@@ -97,8 +99,14 @@ object Notifications {
         deprecatedChannels.forEach(context.notificationManager::deleteNotificationChannel)
 
         listOf(
-            NotificationChannelGroup(GROUP_BACKUP_RESTORE, context.getString(R.string.backup_and_restore)),
-            NotificationChannelGroup(GROUP_EXTENSION_UPDATES, context.getString(R.string.extension_updates)),
+            NotificationChannelGroup(
+                GROUP_BACKUP_RESTORE,
+                context.getString(R.string.backup_and_restore)
+            ),
+            NotificationChannelGroup(
+                GROUP_EXTENSION_UPDATES,
+                context.getString(R.string.extension_updates)
+            ),
             NotificationChannelGroup(GROUP_LIBRARY, context.getString(R.string.library)),
         ).forEach(context.notificationManager::createNotificationChannelGroup)
 
@@ -175,6 +183,28 @@ object Notifications {
         )
         context.notificationManager.createNotificationChannels(channels)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            addAutoUpdateExtensionsNotifications(true, context)
+            context.notificationManager.createNotificationChannel(
+                NotificationChannel(
+                    CHANNEL_UPDATED,
+                    context.getString(R.string.update_completed),
+                    NotificationManager.IMPORTANCE_DEFAULT
+                ).apply {
+                    setShowBadge(false)
+                }
+            )
+        } else {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            addAutoUpdateExtensionsNotifications(
+                prefs.getBoolean(PreferenceKeys.useShizuku, false),
+                context
+            )
+        }
+    }
+
+    fun addAutoUpdateExtensionsNotifications(canAutoUpdate: Boolean, context: Context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        if (canAutoUpdate) {
             val newChannels = listOf(
                 NotificationChannel(
                     CHANNEL_EXT_PROGRESS,
@@ -191,16 +221,12 @@ object Notifications {
                     NotificationManager.IMPORTANCE_DEFAULT
                 ).apply {
                     group = GROUP_EXTENSION_UPDATES
-                },
-                NotificationChannel(
-                    CHANNEL_UPDATED,
-                    context.getString(R.string.update_completed),
-                    NotificationManager.IMPORTANCE_DEFAULT
-                ).apply {
-                    setShowBadge(false)
                 }
             )
             context.notificationManager.createNotificationChannels(newChannels)
+        } else {
+            context.notificationManager.deleteNotificationChannel(CHANNEL_EXT_PROGRESS)
+            context.notificationManager.deleteNotificationChannel(CHANNEL_EXT_UPDATED)
         }
     }
 

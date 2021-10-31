@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.extension
 
 import android.app.PendingIntent
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -27,6 +28,7 @@ import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.notification
 import kotlinx.coroutines.coroutineScope
+import rikka.shizuku.Shizuku
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -57,9 +59,17 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
         val preferences: PreferencesHelper by injectLazy()
         preferences.extensionUpdatesCount().set(extensions.size)
         val extensionsInstalledByApp by lazy {
-            extensions.filter { Injekt.get<ExtensionManager>().isInstalledByApp(it) }
+            if (preferences.useShizukuForExtensions()) {
+                if (Shizuku.pingBinder() && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                    extensions
+                } else {
+                    emptyList()
+                }
+            } else {
+                extensions.filter { Injekt.get<ExtensionManager>().isInstalledByApp(it) }
+            }
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+        if (ExtensionManager.canAutoInstallUpdates(context) &&
             inputData.getBoolean(RUN_AUTO, true) &&
             preferences.autoUpdateExtensions() != AutoAppUpdaterJob.NEVER &&
             !ExtensionInstallService.isRunning() &&
@@ -84,7 +94,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                             2
                         }
                     )
-                context.startForegroundService(intent)
+                ContextCompat.startForegroundService(context, intent)
                 if (extensionsInstalledByApp.size == extensions.size) {
                     return
                 } else {
@@ -117,12 +127,26 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                             context
                         )
                     )
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    if (ExtensionManager.canAutoInstallUpdates(context) &&
                         extensions.size == extensionsList.size
                     ) {
                         val intent = ExtensionInstallService.jobIntent(context, extensions)
                         val pendingIntent =
-                            PendingIntent.getForegroundService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                PendingIntent.getForegroundService(
+                                    context,
+                                    0,
+                                    intent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                                )
+                            } else {
+                                PendingIntent.getService(
+                                    context,
+                                    0,
+                                    intent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                                )
+                            }
                         addAction(
                             R.drawable.ic_file_download_24dp,
                             context.getString(R.string.update_all),

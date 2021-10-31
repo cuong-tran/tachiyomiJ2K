@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.extension
 
 import android.annotation.SuppressLint
-import android.os.Build
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -28,7 +27,7 @@ class ExtensionGroupHolder(view: View, adapter: FlexibleAdapter<IFlexible<Recycl
     @SuppressLint("SetTextI18n")
     fun bind(item: ExtensionGroupItem) {
         binding.title.text = item.name
-        binding.extButton.isVisible = item.canUpdate != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        binding.extButton.isVisible = item.canUpdate != null
         binding.extButton.isEnabled = item.canUpdate == true
         binding.extSort.isVisible = item.installedSorting != null
         binding.extSort.setText(InstalledExtensionsOrder.fromValue(item.installedSorting ?: 0).nameRes)

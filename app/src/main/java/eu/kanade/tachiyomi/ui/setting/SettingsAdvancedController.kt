@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
@@ -21,7 +22,9 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
+import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
+import eu.kanade.tachiyomi.extension.ShizukuInstaller
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.PREF_DOH_ADGUARD
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
@@ -30,6 +33,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.disableItems
+import eu.kanade.tachiyomi.util.system.isPackageInstalled
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
@@ -207,6 +211,35 @@ class SettingsAdvancedController : SettingsController() {
                 onChange {
                     activity?.toast(R.string.requires_app_restart)
                     true
+                }
+            }
+        }
+
+        preferenceCategory {
+            titleRes = R.string.extensions
+            switchPreference {
+                key = PreferenceKeys.useShizuku
+                titleRes = R.string.use_shizuku_to_install
+                summaryRes = R.string.use_shizuku_summary
+                defaultValue = false
+                onChange {
+                    it as Boolean
+                    if (it && !context.isPackageInstalled(ShizukuInstaller.shizukuPkgName)) {
+                        context.materialAlertDialog()
+                            .setTitle(R.string.shizuku)
+                            .setMessage(R.string.ext_installer_shizuku_unavailable_dialog)
+                            .setPositiveButton(R.string.download) { _, _ ->
+                                openInBrowser(ShizukuInstaller.downloadLink)
+                            }
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show()
+                        false
+                    } else {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                            Notifications.addAutoUpdateExtensionsNotifications(it, context)
+                        }
+                        true
+                    }
                 }
             }
         }

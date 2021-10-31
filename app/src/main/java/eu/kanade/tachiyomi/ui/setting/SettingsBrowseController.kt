@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
+import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -41,7 +42,7 @@ class SettingsBrowseController : SettingsController() {
                     true
                 }
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ExtensionManager.canAutoInstallUpdates(context)) {
                 val intPref = intListPreference(activity) {
                     key = PreferenceKeys.autoUpdateExtensions
                     titleRes = R.string.auto_update_extensions
@@ -53,26 +54,41 @@ class SettingsBrowseController : SettingsController() {
                     )
                     defaultValue = AutoAppUpdaterJob.ONLY_ON_UNMETERED
                 }
-                val infoPref = infoPreference(R.string.some_extensions_may_not_update)
-                val switchPref = switchPreference {
-                    key = "notify_ext_updated"
-                    isPersistent = false
-                    titleRes = R.string.notify_extension_updated
-                    isChecked = Notifications.isNotificationChannelEnabled(context, Notifications.CHANNEL_EXT_UPDATED)
-                    updatedExtNotifPref = this
-                    onChange {
-                        false
-                    }
-                    onClick {
-                        val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
-                            putExtra(Settings.EXTRA_APP_PACKAGE, BuildConfig.APPLICATION_ID)
-                            putExtra(Settings.EXTRA_CHANNEL_ID, Notifications.CHANNEL_EXT_UPDATED)
+                val infoPref = if (!preferences.useShizukuForExtensions()) {
+                    infoPreference(R.string.some_extensions_may_not_update)
+                } else {
+                    null
+                }
+                val switchPref = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    switchPreference {
+                        key = "notify_ext_updated"
+                        isPersistent = false
+                        titleRes = R.string.notify_extension_updated
+                        isChecked = Notifications.isNotificationChannelEnabled(
+                            context,
+                            Notifications.CHANNEL_EXT_UPDATED
+                        )
+                        updatedExtNotifPref = this
+                        onChange {
+                            false
                         }
-                        startActivity(intent)
+                        onClick {
+                            val intent =
+                                Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+                                    putExtra(Settings.EXTRA_APP_PACKAGE, BuildConfig.APPLICATION_ID)
+                                    putExtra(
+                                        Settings.EXTRA_CHANNEL_ID,
+                                        Notifications.CHANNEL_EXT_UPDATED
+                                    )
+                                }
+                            startActivity(intent)
+                        }
                     }
+                } else {
+                    null
                 }
                 preferences.automaticExtUpdates().asImmediateFlowIn(viewScope) { value ->
-                    arrayOf(intPref, infoPref, switchPref).forEach { it.isVisible = value }
+                    arrayOf(intPref, infoPref, switchPref).forEach { it?.isVisible = value }
                 }
             }
         }

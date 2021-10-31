@@ -305,6 +305,11 @@
     <string name="trust">Trust</string>
     <string name="untrusted">Untrusted</string>
     <string name="uninstall">Uninstall</string>
+    <string name="ext_installer_shizuku_stopped">Shizuku is not running</string>
+    <string name="ext_installer_shizuku_unavailable_dialog">Install and start Shizuku to use Shizuku as extension installer.</string>
+    <string name="use_shizuku_to_install">Use Shizuku to install extensions</string>
+    <string name="shizuku" translatable="false">Shizuku</string>
+    <string name="use_shizuku_summary">Allows extensions to be installed without user prompts and enables automatic updates for devices under Android 12</string>
     <string name="untrusted_extension">Untrusted extension</string>
     <string name="untrusted_extension_message">This extension was signed with an untrusted certificate and wasn\'t activated.\n\nA malicious extension could read any login credentials stored in Tachiyomi or execute arbitrary code.\n\nBy trusting this certificate you accept these risks.</string>
     <string name="obsolete_extension_message">This extension is no longer available.</string>

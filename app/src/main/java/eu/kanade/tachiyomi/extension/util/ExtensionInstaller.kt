@@ -10,12 +10,18 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import androidx.core.net.toUri
+import androidx.preference.PreferenceManager
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.extension.ExtensionManager
+import eu.kanade.tachiyomi.extension.ShizukuInstaller
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.ui.extension.ExtensionIntallInfo
 import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,6 +66,28 @@ internal class ExtensionInstaller(private val context: Context) {
      * returned by the download manager.
      */
     val activeDownloads = hashMapOf<String, Long>()
+    private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private var installer: ShizukuInstaller? = null
+
+    private val shizukuInstaller: ShizukuInstaller?
+        get() = installer ?: run {
+            try {
+                installer = ShizukuInstaller(context) {
+                    it.onDestroy()
+                    ioScope.launch {
+                        delay(500)
+                        downloadsStateFlow.emit("Finished" to (InstallStep.Installed to null))
+                    }
+                    installer = null
+                }
+            } catch (e: Exception) {
+                ioScope.launchUI {
+                    context.toast(e.message)
+                }
+            }
+            installer
+        }
 
     /**
      * StateFlow used to notify the installation step of every download.
@@ -160,6 +188,7 @@ internal class ExtensionInstaller(private val context: Context) {
                         cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
                     }
                 } catch (_: Exception) {
+                    null
                 }
                 if (newDownloadState != null) {
                     emit(newDownloadState)
@@ -203,7 +232,7 @@ internal class ExtensionInstaller(private val context: Context) {
             .takeWhile { info ->
                 val sessionId = downloadInstallerMap[pkgName]
                 if (sessionId != null) {
-                    info.second != null
+                    info.second != null || installer?.isInQueue(pkgName) == true
                 } else {
                     true
                 }
@@ -226,19 +255,25 @@ internal class ExtensionInstaller(private val context: Context) {
         val useActivity =
             pkgName?.let { !ExtensionLoader.isExtensionInstalledByApp(context, pkgName) } ?: true ||
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.S
-        val intent =
-            if (useActivity) {
-                Intent(context, ExtensionInstallActivity::class.java)
-            } else {
-                Intent(context, ExtensionInstallBroadcast::class.java)
-            }
-                .setDataAndType(uri, APK_MIME)
-                .putExtra(EXTRA_DOWNLOAD_ID, downloadId)
-                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        if (useActivity) {
-            context.startActivity(intent)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        if (prefs.getBoolean(PreferenceKeys.useShizuku, false) && pkgName != null) {
+            setInstalling(pkgName, uri.hashCode())
+            shizukuInstaller?.addToQueue(downloadId, pkgName, uri)
         } else {
-            context.sendBroadcast(intent)
+            val intent =
+                if (useActivity) {
+                    Intent(context, ExtensionInstallActivity::class.java)
+                } else {
+                    Intent(context, ExtensionInstallBroadcast::class.java)
+                }
+                    .setDataAndType(uri, APK_MIME)
+                    .putExtra(EXTRA_DOWNLOAD_ID, downloadId)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            if (useActivity) {
+                context.startActivity(intent)
+            } else {
+                context.sendBroadcast(intent)
+            }
         }
     }
 
@@ -295,10 +330,6 @@ internal class ExtensionInstaller(private val context: Context) {
         val step = if (result) InstallStep.Installed else InstallStep.Error
         downloadInstallerMap.remove(pkgName)
         downloadsStateFlow.tryEmit(pkgName to ExtensionIntallInfo(step, null))
-    }
-
-    fun softDeleteDownload(downloadId: Long) {
-        downloadManager.remove(downloadId)
     }
 
     /**
