@@ -50,7 +50,8 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     ),
     LIME(
         R.style.Theme_Tachiyomi_FlatLime,
-        AppCompatDelegate.MODE_NIGHT_YES,
+        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        R.string.lime_time,
         R.string.flat_lime
     ),
     YOTSUBA(
