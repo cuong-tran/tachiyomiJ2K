@@ -85,19 +85,6 @@
         <item name="actionBarTintColor">@color/md_white_1000</item>
         <item name="popupMenuBackground">@drawable/alt_popupmenu_background</item>
         <item name="actionBarTheme">@style/Theme.ActionBar.Dark.DayNight</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
-        <item name="android:statusBarColor">@color/surface_status_bar</item>
-    </style>
-
-    <style name="ThemeOverlay.Tachiyomi.AllBlue" parent="">
-        <item name="colorPrimaryVariant">@color/legacyBlue</item>
-        <item name="colorSurface">@color/primaryTachiyomi</item>
-        <item name="colorBackgroundFloating">?background</item>
-        <item name="android:colorBackgroundFloating">?background</item>
-        <item name="actionBarTintColor">@color/md_white_1000</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
         <item name="android:statusBarColor">@color/surface_status_bar</item>
     </style>
 
@@ -109,6 +96,10 @@
     </style>
 
     <style name="Theme.Tachiyomi.FlatLime"/>
+    <style name="ThemeOverlay.Tachiyomi.AllBlue" parent="">
+        <item name="colorSurface">@color/legacyBlue</item>
+        <item name="colorPrimaryVariant">@color/legacyBlue</item>
+    </style>
 
     <style name="Theme.Tachiyomi.MidnightDusk">
         <item name="colorPrimary">@color/primaryDuskDawn</item>
