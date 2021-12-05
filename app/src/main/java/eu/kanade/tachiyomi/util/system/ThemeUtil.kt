@@ -49,7 +49,6 @@ object ThemeUtil {
                 when (lightTheme) {
                     "SPRING" -> Themes.SPRING_AND_DUSK
                     "STRAWBERRY_DAIQUIRI" -> Themes.STRAWBERRIES
-                    "LIGHT_BLUE" -> Themes.CLASSIC_BLUE
                     else -> Themes.DEFAULT
                 }.name
             )
@@ -72,10 +71,6 @@ object ThemeUtil {
     fun isPitchBlack(context: Context): Boolean {
         val preferences: PreferencesHelper by injectLazy()
         return context.isInNightMode() && preferences.themeDarkAmoled().get()
-    }
-
-    fun hasDarkActionBarInLight(context: Context, theme: Themes): Boolean {
-        return !context.isInNightMode() && isColoredTheme(theme)
     }
 
     fun readerBackgroundColor(theme: Int): Int {

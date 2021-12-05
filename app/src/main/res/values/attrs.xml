@@ -14,7 +14,6 @@
     <attr name="tabBarIconInactive" format="reference|integer"/>
     <attr name="mainActionBarSize" format="dimension"/>
     <attr name="tabHighlightBackground" format="color"/>
-    <attr name="hasColoredActionBar" format="boolean">false</attr>
 
     <declare-styleable name="MaterialSpinnerView">
         <attr name="title" format="reference|string"/>
