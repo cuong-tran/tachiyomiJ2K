@@ -570,6 +570,12 @@ fun Controller.withFadeTransaction(): RouterTransaction {
         .popChangeHandler(OneWayFadeChangeHandler())
 }
 
+fun Controller.withFadeInTransaction(): RouterTransaction {
+    return RouterTransaction.with(this)
+        .pushChangeHandler(OneWayFadeChangeHandler().apply { fadeOut = false })
+        .popChangeHandler(OneWayFadeChangeHandler())
+}
+
 fun Controller.openInBrowser(url: String) {
     try {
         val intent = Intent(Intent.ACTION_VIEW, url.toUri())
