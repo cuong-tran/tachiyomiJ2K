@@ -291,8 +291,8 @@ class Downloader(
             // Start downloader if needed
             if (autoStart && wasEmpty) {
                 val largestSourceSize = queue.groupBy { it.source }.maxOfOrNull { it.value.size } ?: 0
-                if (largestSourceSize > PER_SOURCE_QUEUE_WARNING_THRESHOLD) {
-                    notifier.onWarning(context.getString(R.string.notification_size_warning))
+                if (largestSourceSize > CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD) {
+                    notifier.onWarning(context.getString(R.string.download_queue_size_warning))
                 }
                 DownloadService.start(context)
             } else if (!isRunning && !LibraryUpdateService.isRunning()) {
@@ -591,3 +591,5 @@ class Downloader(
         const val MIN_DISK_SPACE = 50 * 1024 * 1024
     }
 }
+
+private const val CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 15
