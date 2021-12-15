@@ -88,7 +88,7 @@ class DownloadProvider(private val context: Context) {
     fun findChapterDir(chapter: Chapter, manga: Manga, source: Source): UniFile? {
         val mangaDir = findMangaDir(manga, source)
         return getValidChapterDirNames(chapter).asSequence()
-            .mapNotNull { mangaDir?.findFile(it, true) }
+            .mapNotNull { mangaDir?.findFile(it, true) ?: mangaDir?.findFile("$it.cbz", true) }
             .firstOrNull()
     }
 
@@ -103,10 +103,14 @@ class DownloadProvider(private val context: Context) {
         val mangaDir = findMangaDir(manga, source) ?: return emptyList()
         val chapterNameHashSet = chapters.map { it.name }.toHashSet()
         val scanalatorNameHashSet = chapters.map { getChapterDirName(it) }.toHashSet()
+        val scanalatorCbzNameHashSet = chapters.map { "${getChapterDirName(it)}.cbz" }.toHashSet()
 
         return mangaDir.listFiles()!!.asList().filter { file ->
             file.name?.let { fileName ->
                 if (scanalatorNameHashSet.contains(fileName)) {
+                    return@filter true
+                }
+                if (scanalatorCbzNameHashSet.contains(fileName)) {
                     return@filter true
                 }
                 val afterScanlatorCheck = fileName.substringAfter("_")
@@ -165,6 +169,7 @@ class DownloadProvider(private val context: Context) {
         val mangaDir = findMangaDir(manga, source) ?: return emptyList()
         val chapterNameHashSet = chapters.map { it.name }.toHashSet()
         val scanalatorNameHashSet = chapters.map { getChapterDirName(it) }.toHashSet()
+        val scanalatorCbzNameHashSet = chapters.map { "${getChapterDirName(it)}.cbz" }.toHashSet()
 
         return mangaDir.listFiles()!!.asList().filter { file ->
             file.name?.let { fileName ->
@@ -175,6 +180,10 @@ class DownloadProvider(private val context: Context) {
                 if (scanalatorNameHashSet.contains(fileName)) {
                     return@filter false
                 }
+                if (scanalatorCbzNameHashSet.contains(fileName)) {
+                    return@filter false
+                }
+
                 val afterScanlatorCheck = fileName.substringAfter("_")
                 // check both these dont exist because who knows how a chapter name is and it might not trim scanlator correctly
                 return@filter !chapterNameHashSet.contains(fileName) && !chapterNameHashSet.contains(afterScanlatorCheck)

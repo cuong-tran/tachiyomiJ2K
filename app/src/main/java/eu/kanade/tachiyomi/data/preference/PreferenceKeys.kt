@@ -259,6 +259,8 @@ object PreferenceKeys {
 
     const val chaptersDescAsDefault = "chapters_desc_as_default"
 
+    const val saveChaptersAsCBZ = "save_chapter_as_cbz"
+
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
 
     fun trackPassword(syncId: Int) = "pref_mangasync_password_$syncId"
