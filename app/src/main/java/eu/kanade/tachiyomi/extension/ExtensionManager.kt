@@ -472,10 +472,13 @@ class ExtensionManager(
     }
 
     companion object {
-        fun canAutoInstallUpdates(context: Context): Boolean {
+        fun canAutoInstallUpdates(context: Context, checkIfShizukuIsRunning: Boolean = false): Boolean {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ||
-                prefs.getBoolean(PreferenceKeys.useShizuku, false)
+                (
+                    prefs.getBoolean(PreferenceKeys.useShizuku, false) &&
+                        (!checkIfShizukuIsRunning || ShizukuInstaller.isShizukuRunning())
+                    )
         }
     }
 }

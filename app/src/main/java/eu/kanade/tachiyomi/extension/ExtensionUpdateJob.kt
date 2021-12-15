@@ -69,7 +69,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                 extensions.filter { Injekt.get<ExtensionManager>().isInstalledByApp(it) }
             }
         }
-        if (ExtensionManager.canAutoInstallUpdates(context) &&
+        if (ExtensionManager.canAutoInstallUpdates(context, true) &&
             inputData.getBoolean(RUN_AUTO, true) &&
             preferences.autoUpdateExtensions() != AutoAppUpdaterJob.NEVER &&
             !ExtensionInstallService.isRunning() &&
@@ -127,7 +127,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                             context
                         )
                     )
-                    if (ExtensionManager.canAutoInstallUpdates(context) &&
+                    if (ExtensionManager.canAutoInstallUpdates(context, true) &&
                         extensions.size == extensionsList.size
                     ) {
                         val intent = ExtensionInstallService.jobIntent(context, extensions)
