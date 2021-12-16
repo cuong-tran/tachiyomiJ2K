@@ -49,7 +49,7 @@ class ExtensionInstallService(
 
     private val preferences: PreferencesHelper = Injekt.get()
 
-    private var activeInstalls = listOf<String>()
+    private var activeInstalls = mutableListOf<String>()
 
     /**
      * This method needs to be implemented, but it's not used/needed.
@@ -88,7 +88,7 @@ class ExtensionInstallService(
         }
             ?: return START_NOT_STICKY
 
-        activeInstalls = list.map { it.pkgName }
+        activeInstalls = list.map { it.pkgName }.toMutableList()
         serviceScope.launch {
             list.forEach { extensionManager.setPending(it.pkgName) }
         }
@@ -101,6 +101,7 @@ class ExtensionInstallService(
                         extensionManager.installExtension(extension, serviceScope)
                             .collect {
                                 if (it.first.isCompleted()) {
+                                    activeInstalls.remove(extension.pkgName)
                                     installedExtensions.add(extension)
                                     installed++
                                     val prefCount =
@@ -108,6 +109,9 @@ class ExtensionInstallService(
                                     preferences.extensionUpdatesCount().set(max(prefCount - 1, 0))
                                 }
                                 notifier.showProgressNotification(installed, list.size)
+                                if (activeInstalls.isEmpty()) {
+                                    job?.cancel()
+                                }
                             }
                     }
                 }
@@ -151,6 +155,7 @@ class ExtensionInstallService(
         job?.cancel()
         serviceScope.cancel()
         activeInstalls.forEach { extensionManager.cleanUpInstallation(it) }
+        activeInstalls.clear()
         extensionManager.downloadRelay.tryEmit("Finished" to (InstallStep.Installed to null))
         if (instance == this) {
             instance = null
