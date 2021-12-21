@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.reader.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ReaderGeneralLayoutBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.bindToPreference
@@ -45,12 +44,6 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
         binding.fullscreen.bindToPreference(preferences.fullscreen())
         binding.keepscreen.bindToPreference(preferences.keepScreenOn())
         binding.alwaysShowChapterTransition.bindToPreference(preferences.alwaysShowChapterTransition())
-    }
-
-    fun checkIfShouldDisableReadingMode() {
-        if (activity.presenter.manga?.isLongStrip() == true) {
-            binding.viewerSeries.setDisabledState(R.string.webtoon_cannot_change)
-        }
     }
 
     /**

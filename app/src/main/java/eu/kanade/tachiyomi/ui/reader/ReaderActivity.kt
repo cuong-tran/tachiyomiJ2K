@@ -391,9 +391,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     private fun updateBottomShortcuts() {
         val enabledButtons = preferences.readerBottomButtons().get()
         with(binding.chaptersSheet) {
-            readingMode.isVisible =
-                presenter?.manga?.isLongStrip() != true &&
-                ReaderBottomButton.ReadingMode.isIn(enabledButtons)
+            readingMode.isVisible = ReaderBottomButton.ReadingMode.isIn(enabledButtons)
             rotationSheetButton.isVisible =
                 ReaderBottomButton.Rotation.isIn(enabledButtons)
             doublePage.isVisible = viewer is PagerViewer &&
@@ -981,7 +979,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 ),
                 4000
             ) {
-                if (presenter.manga?.isLongStrip() != true) setAction(R.string.use_default) {
+                setAction(R.string.use_default) {
                     presenter.setMangaReadingMode(0)
                 }
             }
