@@ -81,7 +81,7 @@ open class FoolSlide(override val domainName: String, private val urlModifier: S
         val request = GET("${delegate!!.baseUrl}$url")
         val document = network.client.newCall(allowAdult(request)).await().asJsoup()
         val mangaDetailsInfoSelector = "div.info"
-        val infoElement = document.select(mangaDetailsInfoSelector).first().text()
+        val infoElement = document.select(mangaDetailsInfoSelector).first()?.text() ?: return null
         return MangaImpl().apply {
             this.url = url
             source = delegate?.id ?: -1
