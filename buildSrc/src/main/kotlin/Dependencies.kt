@@ -19,7 +19,6 @@ object Versions {
     const val gradleVersions = "0.29.0"
     const val gson = "2.8.6"
     const val injekt = "65b0440"
-    const val jsoup = "1.13.1"
     const val junit = "4.13"
     const val kotlin = "1.5.21"
     const val kotson = "2.5.0"

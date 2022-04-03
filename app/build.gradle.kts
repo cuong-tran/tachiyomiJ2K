@@ -156,7 +156,9 @@ dependencies {
     implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
 
     // JavaScript engine
-    implementation("com.squareup.duktape:duktape-android:1.3.0")
+    implementation("app.cash.quickjs:quickjs-android:0.9.2")
+    // TODO: remove Duktape once all extensions are using QuickJS
+    implementation("com.squareup.duktape:duktape-android:1.4.0")
 
     // Disk
     implementation("com.jakewharton:disklrucache:2.0.2")
@@ -164,7 +166,7 @@ dependencies {
     implementation("com.github.junrar:junrar:7.4.0")
 
     // HTML parser
-    implementation("org.jsoup:jsoup:1.13.1")
+    implementation("org.jsoup:jsoup:1.14.3")
 
     // Job scheduling
     implementation("androidx.work:work-runtime-ktx:2.6.0")
