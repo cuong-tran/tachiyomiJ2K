@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.UnmeteredSource
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.fetchAllImageUrlsFromPageList
@@ -289,7 +290,10 @@ class Downloader(
 
             // Start downloader if needed
             if (autoStart && wasEmpty) {
-                val largestSourceSize = queue.groupBy { it.source }.maxOfOrNull { it.value.size } ?: 0
+                val largestSourceSize = queue
+                    .groupBy { it.source }
+                    .filterKeys { it !is UnmeteredSource }
+                    .maxOfOrNull { it.value.size } ?: 0
                 if (largestSourceSize > CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD) {
                     notifier.onWarning(context.getString(R.string.download_queue_size_warning))
                 }

@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.UnattendedTrackService
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.UnmeteredSource
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.toSChapter
 import eu.kanade.tachiyomi.source.model.toSManga
@@ -307,8 +308,11 @@ class LibraryUpdateService(
     }
 
     private fun checkIfMassiveUpdate() {
-        val largestSourceSize = mangaToUpdate.groupBy { it.source }.maxOfOrNull { it.value.size } ?: 0
-        if (largestSourceSize > PER_SOURCE_QUEUE_WARNING_THRESHOLD) {
+        val largestSourceSize = mangaToUpdate
+            .groupBy { it.source }
+            .filterKeys { sourceManager.get(it) !is UnmeteredSource }
+            .maxOfOrNull { it.value.size } ?: 0
+        if (largestSourceSize > MANGA_PER_SOURCE_QUEUE_WARNING_THRESHOLD) {
             notifier.showQueueSizeWarningNotification()
         }
     }
@@ -669,4 +673,4 @@ interface LibraryServiceListener {
     fun onUpdateManga(manga: Manga? = null)
 }
 
-const val PER_SOURCE_QUEUE_WARNING_THRESHOLD = 60
+const val MANGA_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 60
