@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
@@ -22,7 +21,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
-import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.extension.ShizukuInstaller
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -235,9 +233,6 @@ class SettingsAdvancedController : SettingsController() {
                             .show()
                         false
                     } else {
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                            Notifications.addAutoUpdateExtensionsNotifications(it, context)
-                        }
                         true
                     }
                 }

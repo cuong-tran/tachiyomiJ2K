@@ -6,9 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
-import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.util.system.notificationManager
 
 /**
@@ -179,55 +177,32 @@ object Notifications {
                 CHANNEL_INCOGNITO_MODE,
                 context.getString(R.string.incognito_mode),
                 NotificationManager.IMPORTANCE_LOW
-            )
+            ),
+            NotificationChannel(
+                CHANNEL_EXT_PROGRESS,
+                context.getString(R.string.updating_extensions),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                group = GROUP_EXTENSION_UPDATES
+                setShowBadge(false)
+                setSound(null, null)
+            },
+            NotificationChannel(
+                CHANNEL_EXT_UPDATED,
+                context.getString(R.string.extensions_updated),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                group = GROUP_EXTENSION_UPDATES
+            },
+            NotificationChannel(
+                CHANNEL_UPDATED,
+                context.getString(R.string.update_completed),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                setShowBadge(false)
+            }
         )
         context.notificationManager.createNotificationChannels(channels)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            addAutoUpdateExtensionsNotifications(true, context)
-            context.notificationManager.createNotificationChannel(
-                NotificationChannel(
-                    CHANNEL_UPDATED,
-                    context.getString(R.string.update_completed),
-                    NotificationManager.IMPORTANCE_DEFAULT
-                ).apply {
-                    setShowBadge(false)
-                }
-            )
-        } else {
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            addAutoUpdateExtensionsNotifications(
-                prefs.getBoolean(PreferenceKeys.useShizuku, false),
-                context
-            )
-        }
-    }
-
-    fun addAutoUpdateExtensionsNotifications(canAutoUpdate: Boolean, context: Context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-        if (canAutoUpdate) {
-            val newChannels = listOf(
-                NotificationChannel(
-                    CHANNEL_EXT_PROGRESS,
-                    context.getString(R.string.updating_extensions),
-                    NotificationManager.IMPORTANCE_LOW
-                ).apply {
-                    group = GROUP_EXTENSION_UPDATES
-                    setShowBadge(false)
-                    setSound(null, null)
-                },
-                NotificationChannel(
-                    CHANNEL_EXT_UPDATED,
-                    context.getString(R.string.extensions_updated),
-                    NotificationManager.IMPORTANCE_DEFAULT
-                ).apply {
-                    group = GROUP_EXTENSION_UPDATES
-                }
-            )
-            context.notificationManager.createNotificationChannels(newChannels)
-        } else {
-            context.notificationManager.deleteNotificationChannel(CHANNEL_EXT_PROGRESS)
-            context.notificationManager.deleteNotificationChannel(CHANNEL_EXT_UPDATED)
-        }
     }
 
     fun isNotificationChannelEnabled(context: Context, channelId: String?): Boolean {
