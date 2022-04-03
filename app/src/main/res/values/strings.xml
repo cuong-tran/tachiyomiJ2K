@@ -587,6 +587,9 @@
     <string name="bangumi" translatable="false">Bangumi</string>
     <string name="shikimori" translatable="false">Shikimori</string>
     <string name="komga" translatable="false">Komga</string>
+    <string name="update_tracking_scoring_type">Update %1$s\'s scoring type</string>
+    <string name="scoring_type_updated">Scoring type updated</string>
+    <string name="could_not_update_scoring_">Could not update scoring type: %1$s</string>
     <string name="started_reading_date">Started reading date</string>
     <string name="finished_reading_date">Finished reading date</string>
     <string name="myanimelist_relogin">Please log in to MAL again</string>

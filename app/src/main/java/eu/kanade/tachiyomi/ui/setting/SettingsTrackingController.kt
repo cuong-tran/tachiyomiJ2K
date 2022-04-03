@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Activity
+import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.track.NoLoginTrackService
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -10,7 +12,9 @@ import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
 import eu.kanade.tachiyomi.data.track.bangumi.BangumiApi
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeListApi
 import eu.kanade.tachiyomi.data.track.shikimori.ShikimoriApi
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.TrackLoginDialog
 import eu.kanade.tachiyomi.widget.preference.TrackLogoutDialog
@@ -47,6 +51,33 @@ class SettingsTrackingController :
             trackPreference(trackManager.aniList) {
                 activity?.openInBrowser(AnilistApi.authUrl(), trackManager.aniList.getLogoColor())
             }
+            preference {
+                key = "update_anilist_scoring"
+                isPersistent = false
+                isIconSpaceReserved = true
+                title = context.getString(R.string.update_tracking_scoring_type, context.getString(R.string.anilist))
+
+                preferences.getStringPref(Keys.trackUsername(trackManager.aniList.id))
+                    .asImmediateFlowIn(viewScope) {
+                        isVisible = it.isNotEmpty()
+                    }
+
+                onClick {
+                    viewScope.launchIO {
+                        val (result, error) = trackManager.aniList.updatingScoring()
+                        if (result) {
+                            view?.snack(R.string.scoring_type_updated)
+                        } else {
+                            view?.snack(
+                                context.getString(
+                                    R.string.could_not_update_scoring_,
+                                    error?.localizedMessage.orEmpty()
+                                )
+                            )
+                        }
+                    }
+                }
+            }
             trackPreference(trackManager.kitsu) {
                 val dialog = TrackLoginDialog(trackManager.kitsu, R.string.email)
                 dialog.targetController = this@SettingsTrackingController
@@ -55,26 +86,25 @@ class SettingsTrackingController :
             trackPreference(trackManager.shikimori) {
                 activity?.openInBrowser(ShikimoriApi.authUrl(), trackManager.shikimori.getLogoColor())
             }
-            trackPreference(trackManager.bangumi) {
-                activity?.openInBrowser(BangumiApi.authUrl(), trackManager.bangumi.getLogoColor())
-            }
             trackPreference(trackManager.komga) {
                 trackManager.komga.loginNoop()
                 updatePreference(trackManager.komga.id)
             }
+            trackPreference(trackManager.bangumi) {
+                activity?.openInBrowser(BangumiApi.authUrl(), trackManager.bangumi.getLogoColor())
+            }
         }
     }
 
-    private inline fun PreferenceScreen.trackPreference(
+    private inline fun PreferenceGroup.trackPreference(
         service: TrackService,
         crossinline login: () -> Unit
     ): LoginPreference {
-        return initThenAdd(
+        return add(
             LoginPreference(context).apply {
                 key = Keys.trackUsername(service.id)
                 title = context.getString(service.nameRes())
-            },
-            {
+
                 onClick {
                     if (service.isLogged) {
                         if (service is NoLoginTrackService) {

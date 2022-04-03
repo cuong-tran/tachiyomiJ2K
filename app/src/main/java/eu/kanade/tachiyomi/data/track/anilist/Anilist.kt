@@ -196,6 +196,17 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
+    suspend fun updatingScoring(): Pair<Boolean, Exception?> {
+        return try {
+            val (_, scoreType) = api.getCurrentUser()
+            scorePreference.set(scoreType)
+            true to null
+        } catch (e: Exception) {
+            Timber.e(e)
+            false to e
+        }
+    }
+
     override fun logout() {
         super.logout()
         preferences.trackToken(this).delete()
