@@ -33,6 +33,9 @@
     <string name="unknown_status">Unknown Status</string>
     <string name="licensed">Licensed</string>
     <string name="completed">Completed</string>
+    <string name="publishing_finished">Publishing finished</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="on_hiatus">On hiatus</string>
 
     <!-- Security -->
     <string name="unlock_library">Unlock to access Library</string>

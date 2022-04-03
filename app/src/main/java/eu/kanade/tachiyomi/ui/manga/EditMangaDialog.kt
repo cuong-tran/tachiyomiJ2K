@@ -124,7 +124,7 @@ class EditMangaDialog : DialogController {
             }
         }
         setGenreTags(manga.getGenres().orEmpty())
-        binding.mangaStatus.setSelection(manga.status.coerceIn(SManga.UNKNOWN, SManga.LICENSED))
+        binding.mangaStatus.setSelection(manga.status.coerceIn(SManga.UNKNOWN, SManga.ON_HIATUS))
         val oldType = manga.seriesType()
         binding.seriesType.setSelection(oldType - 1)
         binding.seriesType.onItemSelectedListener = {

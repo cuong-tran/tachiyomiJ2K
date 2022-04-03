@@ -45,6 +45,9 @@
         <item>@string/ongoing</item>
         <item>@string/completed</item>
         <item>@string/licensed</item>
+        <item>@string/publishing_finished</item>
+        <item>@string/cancelled</item>
+        <item>@string/on_hiatus</item>
     </string-array>
 
     <string-array name="series_type">
