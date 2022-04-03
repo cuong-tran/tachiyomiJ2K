@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.ExtensionManager.ExtensionInfo
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
+import eu.kanade.tachiyomi.util.system.acquireWakeLock
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CoroutineScope
@@ -140,11 +141,7 @@ class ExtensionInstallService(
         super.onCreate()
         notificationManager.cancel(Notifications.ID_UPDATES_TO_EXTS)
         notifier = ExtensionInstallNotifier(this)
-        wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK,
-            "ExtensionInstallService:WakeLock"
-        )
-        wakeLock.acquire(TimeUnit.MINUTES.toMillis(30))
+        wakeLock = acquireWakeLock(timeout = TimeUnit.MINUTES.toMillis(30))
         startForeground(Notifications.ID_EXTENSION_PROGRESS, notifier.progressNotificationBuilder.build())
     }
 

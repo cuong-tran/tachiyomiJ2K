@@ -79,7 +79,7 @@ class BackupRestoreService : Service() {
 
         ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         notifier = BackupNotifier(this)
-        wakeLock = acquireWakeLock(javaClass.name)
+        wakeLock = acquireWakeLock()
 
         startForeground(Notifications.ID_RESTORE_PROGRESS, notifier.showRestoreProgress().build())
     }

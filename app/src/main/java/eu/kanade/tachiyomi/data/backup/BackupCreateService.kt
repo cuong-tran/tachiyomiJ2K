@@ -71,7 +71,7 @@ class BackupCreateService : Service() {
         super.onCreate()
 
         notifier = BackupNotifier(this)
-        wakeLock = acquireWakeLock(javaClass.name)
+        wakeLock = acquireWakeLock()
 
         startForeground(Notifications.ID_BACKUP_PROGRESS, notifier.showBackupProgress().build())
     }
