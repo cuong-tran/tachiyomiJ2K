@@ -116,9 +116,7 @@ fun Manga.addOrRemoveToFavorites(
             defaultCategory != null -> {
                 favorite = true
                 date_added = Date().time
-                if (preferences.autoAddTrack()) {
-                    autoAddTrack(db, onMangaMoved)
-                }
+                autoAddTrack(db, onMangaMoved)
                 db.insertManga(this).executeAsBlocking()
                 val mc = MangaCategory.create(this, defaultCategory)
                 db.setMangaCategories(listOf(mc), listOf(this))
@@ -132,9 +130,7 @@ fun Manga.addOrRemoveToFavorites(
             defaultCategoryId == 0 || categories.isEmpty() -> { // 'Default' or no category
                 favorite = true
                 date_added = Date().time
-                if (preferences.autoAddTrack()) {
-                    autoAddTrack(db, onMangaMoved)
-                }
+                autoAddTrack(db, onMangaMoved)
                 db.insertManga(this).executeAsBlocking()
                 db.setMangaCategories(emptyList(), listOf(this))
                 onMangaMoved()
@@ -160,9 +156,7 @@ fun Manga.addOrRemoveToFavorites(
                     true
                 ) {
                     onMangaAdded()
-                    if (preferences.autoAddTrack()) {
-                        autoAddTrack(db, onMangaMoved)
-                    }
+                    autoAddTrack(db, onMangaMoved)
                 }.show()
             }
         }

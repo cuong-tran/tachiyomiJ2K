@@ -1376,9 +1376,7 @@ class MangaDetailsController :
             },
             onMangaMoved = {
                 updateHeader()
-                if (presenter.preferences.autoAddTrack()) {
-                    presenter.fetchChapters(andTracking = true)
-                }
+                presenter.fetchChapters(andTracking = true)
             },
             onMangaDeleted = { presenter.confirmDeletion() }
         )

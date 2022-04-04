@@ -97,8 +97,6 @@ object PreferenceKeys {
 
     const val autoUpdateTrack = "pref_auto_update_manga_sync_key"
 
-    const val autoAddTrack = "pref_auto_add_track_key"
-
     const val trackingsToAddOnline = "pref_tracking_for_online"
 
     const val lastUsedCatalogueSource = "last_catalogue_source"

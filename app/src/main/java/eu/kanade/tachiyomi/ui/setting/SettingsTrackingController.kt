@@ -36,12 +36,6 @@ class SettingsTrackingController :
             titleRes = R.string.sync_chapters_after_reading
             defaultValue = true
         }
-        switchPreference {
-            key = Keys.autoAddTrack
-            titleRes = R.string.track_when_adding_to_library
-            summaryRes = R.string.only_applies_silent_trackers
-            defaultValue = true
-        }
         preferenceCategory {
             titleRes = R.string.services
 
@@ -86,13 +80,18 @@ class SettingsTrackingController :
             trackPreference(trackManager.shikimori) {
                 activity?.openInBrowser(ShikimoriApi.authUrl(), trackManager.shikimori.getLogoColor())
             }
+            trackPreference(trackManager.bangumi) {
+                activity?.openInBrowser(BangumiApi.authUrl(), trackManager.bangumi.getLogoColor())
+            }
+            infoPreference(R.string.tracking_info)
+        }
+        preferenceCategory {
+            titleRes = R.string.enhanced_services
             trackPreference(trackManager.komga) {
                 trackManager.komga.loginNoop()
                 updatePreference(trackManager.komga.id)
             }
-            trackPreference(trackManager.bangumi) {
-                activity?.openInBrowser(BangumiApi.authUrl(), trackManager.bangumi.getLogoColor())
-            }
+            infoPreference(R.string.enhanced_tracking_info)
         }
     }
 
