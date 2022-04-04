@@ -117,14 +117,13 @@ inline fun PreferenceScreen.switchPreference(block: (@DSL SwitchPreferenceCompat
 
 fun PreferenceGroup.infoPreference(@StringRes infoRes: Int): Preference {
     return initThenAdd(
-        Preference(context),
-        {
-            iconRes = R.drawable.ic_info_outline_24dp
-            iconTint = context.getResourceColor(android.R.attr.textColorSecondary)
-            summaryRes = infoRes
-            isSelectable = false
-        }
-    )
+        Preference(context)
+    ) {
+        iconRes = R.drawable.ic_info_outline_24dp
+        iconTint = context.getResourceColor(android.R.attr.textColorSecondary)
+        summaryRes = infoRes
+        isSelectable = false
+    }
 }
 
 inline fun PreferenceScreen.preferenceScreen(block: (@DSL PreferenceScreen).() -> Unit): PreferenceScreen {
