@@ -10,9 +10,9 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.EnhancedTrackService
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.track.UnattendedTrackService
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
@@ -192,7 +192,7 @@ fun Manga.autoAddTrack(db: DatabaseHelper, onMangaMoved: () -> Unit) {
     val loggedServices = Injekt.get<TrackManager>().services.filter { it.isLogged }
     val source = Injekt.get<SourceManager>().getOrStub(this.source)
     loggedServices
-        .filterIsInstance<UnattendedTrackService>()
+        .filterIsInstance<EnhancedTrackService>()
         .filter { it.accept(source) }
         .forEach { service ->
             launchIO {

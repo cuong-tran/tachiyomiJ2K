@@ -6,16 +6,16 @@ import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.track.EnhancedTrackService
 import eu.kanade.tachiyomi.data.track.NoLoginTrackService
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.track.UnattendedTrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import eu.kanade.tachiyomi.source.Source
 import okhttp3.Dns
 import okhttp3.OkHttpClient
 
-class Komga(private val context: Context, id: Int) : TrackService(id), UnattendedTrackService, NoLoginTrackService {
+class Komga(private val context: Context, id: Int) : TrackService(id), EnhancedTrackService, NoLoginTrackService {
 
     companion object {
         const val UNREAD = 1
@@ -106,6 +106,18 @@ class Komga(private val context: Context, id: Int) : TrackService(id), Unattende
     }
 
     override fun accept(source: Source): Boolean = source::class.qualifiedName == ACCEPTED_SOURCE
+
+    override fun getAcceptedSources() = listOf("eu.kanade.tachiyomi.extension.all.komga.Komga")
+
+    override fun isTrackFrom(track: Track, manga: Manga, source: Source?): Boolean =
+        track.tracking_url == manga.url && source?.let { accept(it) } == true
+
+    override fun migrateTrack(track: Track, manga: Manga, newSource: Source): Track? =
+        if (accept(newSource)) {
+            track.also { track.tracking_url = manga.url }
+        } else {
+            null
+        }
 
     override suspend fun match(manga: Manga): TrackSearch? =
         try {

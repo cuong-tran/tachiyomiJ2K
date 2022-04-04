@@ -29,8 +29,8 @@ import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.listeners.addClickListener
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.track.EnhancedTrackService
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.track.UnattendedTrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.databinding.TrackChaptersDialogBinding
 import eu.kanade.tachiyomi.databinding.TrackScoreDialogBinding
@@ -202,7 +202,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
             return
         }
 
-        if (item.service is UnattendedTrackService) {
+        if (item.service is EnhancedTrackService) {
             if (item.track != null) {
                 controller.presenter.removeTracker(item, false)
                 return

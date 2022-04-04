@@ -7,11 +7,17 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.EnhancedTrackService
+import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
 import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
 
@@ -22,9 +28,12 @@ class MigrationProcessAdapter(
     private val db: DatabaseHelper by injectLazy()
     var items: List<MigrationProcessItem> = emptyList()
     val preferences: PreferencesHelper by injectLazy()
+    val sourceManager: SourceManager by injectLazy()
 
     var showOutline = preferences.outlineOnCovers().get()
     val menuItemListener: MigrationProcessInterface = controller
+
+    private val enhancedServices by lazy { Injekt.get<TrackManager>().services.filterIsInstance<EnhancedTrackService>() }
 
     override fun updateDataSet(items: List<MigrationProcessItem>?) {
         this.items = items ?: emptyList()
@@ -63,8 +72,13 @@ class MigrationProcessAdapter(
                         val toMangaObj =
                             db.getManga(manga.searchResult.get() ?: return@forEach).executeAsBlocking()
                                 ?: return@forEach
+                        val prevManga = manga.manga() ?: return@forEach
+                        val source = sourceManager.get(toMangaObj.source) ?: return@forEach
+                        val prevSource = sourceManager.get(prevManga.source)
                         migrateMangaInternal(
-                            manga.manga() ?: return@forEach,
+                            prevSource,
+                            source,
+                            prevManga,
                             toMangaObj,
                             !copy
                         )
@@ -81,8 +95,13 @@ class MigrationProcessAdapter(
                 val toMangaObj =
                     db.getManga(manga.searchResult.get() ?: return@launchUI).executeAsBlocking()
                         ?: return@launchUI
+                val prevManga = manga.manga() ?: return@launchUI
+                val source = sourceManager.get(toMangaObj.source) ?: return@launchUI
+                val prevSource = sourceManager.get(prevManga.source)
                 migrateMangaInternal(
-                    manga.manga() ?: return@launchUI,
+                    prevSource,
+                    source,
+                    prevManga,
                     toMangaObj,
                     !copy
                 )
@@ -101,6 +120,8 @@ class MigrationProcessAdapter(
     }
 
     private fun migrateMangaInternal(
+        prevSource: Source?,
+        source: Source,
         prevManga: Manga,
         manga: Manga,
         replace: Boolean
@@ -143,12 +164,16 @@ class MigrationProcessAdapter(
         }
         // Update track
         if (MigrationFlags.hasTracks(flags)) {
-            val tracks = db.getTracks(prevManga).executeAsBlocking()
-            for (track in tracks) {
+            val tracksToUpdate = db.getTracks(prevManga).executeAsBlocking().mapNotNull { track ->
                 track.id = null
                 track.manga_id = manga.id!!
+
+                val service = enhancedServices
+                    .firstOrNull { it.isTrackFrom(track, prevManga, prevSource) }
+                if (service != null) service.migrateTrack(track, manga, source)
+                else track
             }
-            db.insertTracks(tracks).executeAsBlocking()
+            db.insertTracks(tracksToUpdate).executeAsBlocking()
         }
         // Update favorite status
         if (replace) {

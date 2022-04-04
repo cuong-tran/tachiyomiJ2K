@@ -27,9 +27,9 @@ import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.EnhancedTrackService
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.track.UnattendedTrackService
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceNotFoundException
@@ -879,7 +879,7 @@ class MangaDetailsPresenter(
                         }
                         if (trackItem != null) {
                             db.insertTrack(trackItem).executeAsBlocking()
-                            if (item.service is UnattendedTrackService) {
+                            if (item.service is EnhancedTrackService) {
                                 syncChaptersWithTrackServiceTwoWay(db, chapters, trackItem, item.service)
                             }
                             trackItem
@@ -922,7 +922,7 @@ class MangaDetailsPresenter(
                         db.insertTrack(binding).executeAsBlocking()
                     }
 
-                    if (service is UnattendedTrackService) {
+                    if (service is EnhancedTrackService) {
                         syncChaptersWithTrackServiceTwoWay(db, chapters, item, service)
                     }
                 }
