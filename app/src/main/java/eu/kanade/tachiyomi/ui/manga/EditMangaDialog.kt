@@ -24,10 +24,13 @@ import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
 import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.EditMangaDialogBinding
 import eu.kanade.tachiyomi.source.LocalSource
+import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.lang.chop
+import eu.kanade.tachiyomi.util.system.ImageUtil
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
@@ -124,6 +127,15 @@ class EditMangaDialog : DialogController {
             }
         }
         setGenreTags(manga.getGenres().orEmpty())
+        if (!isLocal) {
+            binding.mangaStatus.originalPosition = manga.originalStatus
+            binding.seriesType.originalPosition = manga.seriesType(true) - 1
+            infoController.presenter.source.icon()?.let { icon ->
+                val bitD = ImageUtil.resizeBitMapDrawable(icon, resources, 24.dpToPx)
+                binding.mangaStatus.originalIcon = bitD ?: icon
+                binding.seriesType.originalIcon = bitD ?: icon
+            }
+        }
         binding.mangaStatus.setSelection(manga.status.coerceIn(SManga.UNKNOWN, SManga.ON_HIATUS))
         val oldType = manga.seriesType()
         binding.seriesType.setSelection(oldType - 1)
