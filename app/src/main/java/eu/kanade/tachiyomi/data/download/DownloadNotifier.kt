@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.lang.chop
+import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import uy.kohesive.injekt.injectLazy
 import java.util.regex.Pattern
@@ -215,6 +216,24 @@ internal class DownloadNotifier(private val context: Context) {
 
         // Reset download information
         isDownloading = false
+    }
+
+    /**
+     * Called when the downloader has too many downloads from one source.
+     */
+    fun massDownloadWarning() {
+        val notification = context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER) {
+            setContentTitle(context.getString(R.string.warning))
+            setSmallIcon(R.drawable.ic_warning_white_24dp)
+            setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.download_queue_size_warning)))
+            setTimeoutAfter(30000)
+        }
+            .build()
+
+        context.notificationManager.notify(
+            Notifications.ID_DOWNLOAD_SIZE_WARNING,
+            notification,
+        )
     }
 
     /**

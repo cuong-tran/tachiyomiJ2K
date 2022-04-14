@@ -252,6 +252,7 @@ class LibraryUpdateNotifier(private val context: Context) {
             setContentTitle(context.getString(R.string.warning))
             setSmallIcon(R.drawable.ic_warning_white_24dp)
             setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.notification_size_warning)))
+            setTimeoutAfter(30000)
         }
             .build()
 

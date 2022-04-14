@@ -295,7 +295,7 @@ class Downloader(
                     .filterKeys { it !is UnmeteredSource }
                     .maxOfOrNull { it.value.size } ?: 0
                 if (largestSourceSize > CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD) {
-                    notifier.onWarning(context.getString(R.string.download_queue_size_warning))
+                    notifier.massDownloadWarning()
                 }
                 DownloadService.start(context)
             } else if (!isRunning && !LibraryUpdateService.isRunning()) {
