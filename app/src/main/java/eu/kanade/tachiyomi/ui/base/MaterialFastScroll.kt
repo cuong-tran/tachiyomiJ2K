@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.core.view.ViewCompat
+import androidx.core.view.marginTop
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -12,7 +13,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.isLTR
-import eu.kanade.tachiyomi.util.view.marginTop
 import kotlin.math.abs
 
 class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
