@@ -241,7 +241,7 @@ open class GlobalSearchController(
     fun setItems(searchResult: List<GlobalSearchItem>) {
         if (extensionFilter != null) {
             val results = searchResult.firstOrNull()?.results
-            if (results != null && results.size == 1) {
+            if (results != null && searchResult.size == 1 && results.size == 1) {
                 val manga = results.first().manga
                 router.replaceTopController(
                     MangaDetailsController(manga, true)
