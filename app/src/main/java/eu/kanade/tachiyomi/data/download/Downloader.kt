@@ -595,4 +595,4 @@ class Downloader(
     }
 }
 
-private const val CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 15
+private const val CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 30
