@@ -48,6 +48,7 @@ class NetworkHelper(val context: Context) {
                         PREF_DOH_CLOUDFLARE -> dohCloudflare()
                         PREF_DOH_GOOGLE -> dohGoogle()
                         PREF_DOH_ADGUARD -> dohAdGuard()
+                        PREF_DOH_QUAD9 -> dohQuad9()
                     }
                 }
 
