@@ -18,6 +18,9 @@ class LibraryBadgesView @JvmOverloads constructor(context: Context, attrs: Attri
         binding.downloadBadge.bindToPreference(preferences.downloadBadge()) {
             controller?.presenter?.requestDownloadBadgesUpdate()
         }
+        binding.languageBadge.bindToPreference(preferences.languageBadge()) {
+            controller?.presenter?.requestLanguageBadgesUpdate()
+        }
         binding.showNumberOfItems.bindToPreference(preferences.categoryNumberOfItems())
     }
 }

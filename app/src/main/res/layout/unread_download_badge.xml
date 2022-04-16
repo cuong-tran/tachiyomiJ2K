@@ -14,15 +14,61 @@
     tools:visibility="visible">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/card_constraint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/lang_image"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            tools:srcCompat="@drawable/ic_flag_en"
+            app:layout_constraintDimensionRatio="H,3:2"
+            app:strokeWidth="0dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintHeight_min="17sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintEnd_toStartOf="@id/download_text"
+            app:layout_constraintTop_toTopOf="@id/top_text_barrier"
+            app:layout_constraintBottom_toBottomOf="@id/bottom_text_barrier" />
+
+        <ImageView
+            android:id="@+id/download_angle"
+            android:layout_width="10dp"
+            android:scaleType="fitXY"
+            android:layout_height="0dp"
+            android:src="@drawable/unread_angled_badge"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:tint="?colorTertiary"
+            app:layout_constraintBottom_toBottomOf="@+id/download_text"
+            app:layout_constraintEnd_toStartOf="@id/download_text"
+            app:layout_constraintTop_toTopOf="@+id/download_text"
+            tools:ignore="ContentDescription" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/bottom_text_barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="download_text,unread_text" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/top_text_barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="top"
+            app:constraint_referenced_ids="download_text,unread_text" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/download_text"
             style="?textAppearanceCaption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/download_badge"
+            android:background="?colorTertiary"
             android:gravity="center"
             android:maxLines="1"
             android:paddingStart="5dp"
@@ -31,8 +77,9 @@
             android:textSize="13sp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/lang_image"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/unread_text"
             tools:text="1"
             tools:paddingEnd="8dp"
             tools:visibility="visible" />

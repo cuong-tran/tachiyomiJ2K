@@ -265,6 +265,8 @@ class PreferencesHelper(val context: Context) {
 
     fun downloadBadge() = flowPrefs.getBoolean(Keys.downloadBadge, false)
 
+    fun languageBadge() = flowPrefs.getBoolean(Keys.languageBadge, false)
+
     fun filterDownloaded() = flowPrefs.getInt(Keys.filterDownloaded, 0)
 
     fun filterUnread() = flowPrefs.getInt(Keys.filterUnread, 0)

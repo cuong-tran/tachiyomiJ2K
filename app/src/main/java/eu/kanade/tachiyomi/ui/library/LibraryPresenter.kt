@@ -159,6 +159,7 @@ class LibraryPresenter(
             library.apply {
                 setDownloadCount(library)
                 setUnreadBadge(library)
+                setSourceLanguage(library)
             }
             allLibraryItems = library
             var mangaMap = library
@@ -397,6 +398,17 @@ class LibraryPresenter(
         val unreadType = preferences.unreadBadgeType().get()
         for (item in itemList) {
             item.unreadType = unreadType
+        }
+    }
+
+    private fun setSourceLanguage(itemList: List<LibraryItem>) {
+        val showLanguageBadges = preferences.languageBadge().get()
+        for (item in itemList) {
+            item.sourceLanguage = if (showLanguageBadges) {
+                sourceManager.get(item.manga.source)?.lang
+            } else {
+                null
+            }
         }
     }
 
@@ -767,28 +779,30 @@ class LibraryPresenter(
         }
     }
 
-    /** Requests the library to have download badges added/removed. */
-    fun requestDownloadBadgesUpdate() {
+    fun requestBadgeUpdate(badgeUpdate: (List<LibraryItem>) -> Unit) {
         presenterScope.launch {
             val mangaMap = allLibraryItems
-            setDownloadCount(mangaMap)
+            badgeUpdate(mangaMap)
             allLibraryItems = mangaMap
             val current = libraryItems
-            setDownloadCount(current)
+            badgeUpdate(current)
             sectionLibrary(current)
         }
     }
 
+    /** Requests the library to have download badges added/removed. */
+    fun requestDownloadBadgesUpdate() {
+        requestBadgeUpdate { setDownloadCount(it) }
+    }
+
     /** Requests the library to have unread badges changed. */
     fun requestUnreadBadgesUpdate() {
-        presenterScope.launch {
-            val mangaMap = allLibraryItems
-            setUnreadBadge(mangaMap)
-            allLibraryItems = mangaMap
-            val current = libraryItems
-            setUnreadBadge(current)
-            sectionLibrary(current)
-        }
+        requestBadgeUpdate { setUnreadBadge(it) }
+    }
+
+    /** Requests the library to have language badges changed. */
+    fun requestLanguageBadgesUpdate() {
+        requestBadgeUpdate { setSourceLanguage(it) }
     }
 
     /** Requests the library to be sorted. */

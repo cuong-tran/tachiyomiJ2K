@@ -3,9 +3,11 @@ package eu.kanade.tachiyomi.ui.library
 import android.content.Context
 import android.content.res.ColorStateList
 import android.util.AttributeSet
+import android.view.View
 import androidx.core.view.isVisible
 import androidx.core.view.updatePaddingRelative
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.MaterialShapeDrawable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.UnreadDownloadBadgeBinding
@@ -30,6 +32,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         unread: Int,
         downloads: Int,
         showTotalChapters: Boolean,
+        lang: String?,
         changeShape: Boolean
     ) {
         // Update the unread count and its visibility.
@@ -71,42 +74,72 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
             setBackgroundColor(context.getResourceColor(R.attr.colorTertiary))
         }
 
+        with(binding.langImage) {
+            isVisible = !lang.isNullOrBlank()
+            if (!lang.isNullOrBlank()) {
+                val flagId = resources.getIdentifier(
+                    "ic_flag_${lang.replace("-", "_")}",
+                    "drawable",
+                    context.packageName
+                ).takeIf { it != 0 } ?: (
+                    if (lang.contains("-")) {
+                        resources.getIdentifier(
+                            "ic_flag_${lang.split("-").first()}",
+                            "drawable",
+                            context.packageName
+                        ).takeIf { it != 0 }
+                    } else null
+                    )
+                if (flagId != null) {
+                    setImageResource(flagId)
+                } else {
+                    isVisible = false
+                }
+            }
+        }
+
+        binding.unreadAngle.isVisible = false
+        binding.downloadAngle.isVisible = false
+        val visibleChildren: List<View> = (0 until binding.cardConstraint.childCount).mapNotNull {
+            binding.cardConstraint.getChildAt(it)
+        }.filter { it.isVisible }
         shapeAppearanceModel = shapeAppearanceModel.withCornerSize(radius)
         if (changeShape) {
-            shapeAppearanceModel = makeShapeCorners(radius, radius)
-            if (binding.downloadText.isVisible && binding.unreadText.isVisible) {
-                binding.downloadText.background =
-                    MaterialShapeDrawable(makeShapeCorners(topStart = radius)).apply {
-                        this.fillColor =
-                            ColorStateList.valueOf(context.getResourceColor(R.attr.colorTertiary))
+            if (visibleChildren.size == 1 && binding.unreadText.isVisible && unread == -1) {
+                binding.unreadText.setBackgroundColor(unreadBadgeBackground)
+                shapeAppearanceModel = shapeAppearanceModel.withCornerSize(radius)
+            } else {
+                shapeAppearanceModel = makeShapeCorners(radius, radius)
+                visibleChildren.forEachIndexed { index, view ->
+                    val startRadius = if (index == 0) radius else 0f
+                    val endRadius = if (index == visibleChildren.size - 1) radius else 0f
+                    val bgColor = when (view) {
+                        binding.downloadText -> context.getResourceColor(R.attr.colorTertiary)
+                        binding.unreadText -> unreadBadgeBackground
+                        else -> context.getResourceColor(R.attr.background)
                     }
-                binding.unreadText.background =
-                    MaterialShapeDrawable(makeShapeCorners(bottomEnd = radius)).apply {
-                        this.fillColor = ColorStateList.valueOf(unreadBadgeBackground)
+                    if (view is ShapeableImageView) {
+                        view.shapeAppearanceModel =
+                            makeShapeCorners(topStart = startRadius, bottomEnd = endRadius)
+                    } else {
+                        view.background = MaterialShapeDrawable(
+                            makeShapeCorners(topStart = startRadius, bottomEnd = endRadius)
+                        ).apply {
+                            this.fillColor = ColorStateList.valueOf(bgColor)
+                        }
                     }
-            } else if (binding.unreadText.isVisible) {
-                binding.unreadText.background =
-                    MaterialShapeDrawable(makeShapeCorners(radius, radius)).apply {
-                        this.fillColor = ColorStateList.valueOf(unreadBadgeBackground)
-                    }
-                if (unread == -1) {
-                    shapeAppearanceModel = shapeAppearanceModel.withCornerSize(radius)
                 }
-            } else if (binding.downloadText.isVisible) {
-                binding.downloadText.background =
-                    MaterialShapeDrawable(makeShapeCorners(radius, radius)).apply {
-                        this.fillColor =
-                            ColorStateList.valueOf(context.getResourceColor(R.attr.colorTertiary))
-                    }
             }
         }
 
         // Show the badge card if unread or downloads exists
-        isVisible = binding.downloadText.isVisible || binding.unreadText.isVisible
+        isVisible = visibleChildren.isNotEmpty()
 
         // Show the angles divider if both unread and downloads exists
         binding.unreadAngle.isVisible =
-            binding.downloadText.isVisible && binding.unreadText.isVisible
+            binding.unreadText.isVisible && visibleChildren.size > 1
+        binding.downloadAngle.isVisible =
+            binding.downloadText.isVisible && binding.langImage.isVisible
 
         binding.unreadAngle.setColorFilter(unreadBadgeBackground)
         if (binding.unreadAngle.isVisible) {
@@ -116,10 +149,17 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
             binding.downloadText.updatePaddingRelative(end = 5.dpToPx)
             binding.unreadText.updatePaddingRelative(start = 5.dpToPx)
         }
+        binding.downloadText.updatePaddingRelative(
+            start = if (binding.downloadAngle.isVisible) {
+                2.dpToPx
+            } else {
+                5.dpToPx
+            }
+        )
     }
 
     fun setChapters(chapters: Int?) {
-        setUnreadDownload(chapters ?: 0, 0, chapters != null, true)
+        setUnreadDownload(chapters ?: 0, 0, chapters != null, null, true)
     }
 
     fun setInLibrary(inLibrary: Boolean) {

@@ -55,6 +55,7 @@ abstract class LibraryHolder(
                 else -> item.downloadCount
             },
             showTotal,
+            item.sourceLanguage,
             this is LibraryGridHolder
         )
     }

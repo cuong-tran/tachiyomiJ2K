@@ -34,6 +34,7 @@ class LibraryItem(
 
     var downloadCount = -1
     var unreadType = 2
+    var sourceLanguage: String? = null
     var filter = ""
 
     private val sourceManager: SourceManager by injectLazy()
