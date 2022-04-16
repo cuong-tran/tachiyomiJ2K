@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.network
 
 import android.content.Context
 import coil.util.CoilUtils
+import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -32,7 +33,14 @@ class NetworkHelper(val context: Context) {
                 .addInterceptor(UserAgentInterceptor())
                 .apply {
                     if (BuildConfig.DEBUG) {
-                        addInterceptor(ChuckerInterceptor(context))
+                        addInterceptor(
+                            ChuckerInterceptor.Builder(context)
+                                .collector(ChuckerCollector(context))
+                                .maxContentLength(250000L)
+                                .redactHeaders(emptySet())
+                                .alwaysReadResponseBody(false)
+                                .build()
+                        )
                     }
 
                     when (preferences.dohProvider()) {
