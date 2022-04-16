@@ -5,6 +5,7 @@
     android:height="100dp"
     android:viewportHeight="10"
     android:viewportWidth="100"
+    android:autoMirrored="true"
     tools:background="@color/material_red_500">
 
     <path
