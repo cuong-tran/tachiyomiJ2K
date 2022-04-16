@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.Chapter.Companion.copy
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
@@ -1064,23 +1065,49 @@ class LibraryPresenter(
         }
     }
 
-    fun markReadStatus(mangaList: List<Manga>, markRead: Boolean) {
-        presenterScope.launch {
-            withContext(Dispatchers.IO) {
-                mangaList.forEach {
-                    withContext(Dispatchers.IO) {
-                        val chapters = db.getChapters(it).executeAsBlocking()
-                        chapters.forEach {
-                            it.read = markRead
-                            it.last_page_read = 0
-                        }
-                        db.updateChaptersProgress(chapters).executeAsBlocking()
-                        if (markRead && preferences.removeAfterMarkedAsRead()) {
-                            deleteChapters(it, chapters)
-                        }
-                    }
+    fun markReadStatus(
+        mangaList: List<Manga>,
+        markRead: Boolean
+    ): HashMap<Manga, List<Chapter>> {
+        val mapMangaChapters = HashMap<Manga, List<Chapter>>()
+        presenterScope.launchIO {
+            mangaList.forEach { manga ->
+                val oldChapters = db.getChapters(manga).executeAsBlocking()
+                val chapters = oldChapters.copy()
+                chapters.forEach {
+                    it.read = markRead
+                    it.last_page_read = 0
                 }
-                getLibrary()
+                db.updateChaptersProgress(chapters).executeAsBlocking()
+
+                mapMangaChapters[manga] = oldChapters
+            }
+            getLibrary()
+        }
+        return mapMangaChapters
+    }
+
+    fun undoMarkReadStatus(
+        mangaList: HashMap<Manga, List<Chapter>>,
+    ) {
+        launchIO {
+            mangaList.forEach { (_, chapters) ->
+                db.updateChaptersProgress(chapters).executeAsBlocking()
+            }
+            getLibrary()
+        }
+    }
+
+    fun confirmMarkReadStatus(
+        mangaList: HashMap<Manga, List<Chapter>>,
+        markRead: Boolean
+    ) {
+        if (preferences.removeAfterMarkedAsRead() && markRead) {
+            mangaList.forEach { (manga, oldChapters) ->
+                deleteChapters(manga, oldChapters)
+            }
+            if (preferences.downloadBadge().get()) {
+                requestDownloadBadgesUpdate()
             }
         }
     }

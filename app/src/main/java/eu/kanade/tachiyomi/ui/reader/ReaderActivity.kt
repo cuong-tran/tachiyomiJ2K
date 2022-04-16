@@ -51,7 +51,6 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.toggle
 import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -1379,14 +1378,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
     override fun onProvideAssistContent(outContent: AssistContent) {
         super.onProvideAssistContent(outContent)
-        val manga = presenter.manga ?: return
-        val source = presenter.source as? HttpSource ?: return
-        val url = try {
-            source.mangaDetailsRequest(manga).url.toString()
-        } catch (e: Exception) {
-            return
-        }
-        outContent.webUri = Uri.parse(url)
+        val chapterUrl = presenter.getChapterUrl() ?: return
+        outContent.webUri = Uri.parse(chapterUrl)
     }
 
     /**
@@ -1526,16 +1519,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
     private fun openMangaInBrowser() {
         val source = presenter.getSource() ?: return
-        val url = try {
-            source.mangaDetailsRequest(presenter.manga!!).url.toString()
-        } catch (e: Exception) {
-            return
-        }
+        val chapterUrl = presenter.getChapterUrl() ?: return
 
         val intent = WebViewActivity.newIntent(
             applicationContext,
             source.id,
-            url,
+            chapterUrl,
             presenter.manga!!.title
         )
         startActivity(intent)
