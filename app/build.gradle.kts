@@ -27,6 +27,8 @@ fun runCommand(command: String): String {
     return String(byteOut.toByteArray()).trim()
 }
 
+val supportedAbis = setOf("armeabi-v7a", "arm64-v8a", "x86")
+
 android {
     compileSdk = AndroidVersions.compileSdk
 
@@ -45,9 +47,19 @@ android {
         buildConfigField("Boolean", "INCLUDE_UPDATER", "false")
 
         ndk {
-            abiFilters += setOf("armeabi-v7a", "arm64-v8a", "x86")
+            abiFilters += supportedAbis
         }
     }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include(*supportedAbis.toTypedArray())
+            isUniversalApk = true
+        }
+    }
+
     buildTypes {
         getByName("debug") {
             applicationIdSuffix = ".debugJ2K"
