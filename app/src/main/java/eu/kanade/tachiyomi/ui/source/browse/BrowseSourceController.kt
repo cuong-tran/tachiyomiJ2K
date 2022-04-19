@@ -316,7 +316,7 @@ open class BrowseSourceController(bundle: Bundle) :
         sheet.onSearchClicked = {
             var matches = true
             for (i in presenter.sourceFilters.indices) {
-                val filter = oldFilters[i]
+                val filter = oldFilters.getOrNull(i)
                 if (filter is List<*>) {
                     for (j in filter.indices) {
                         if (filter[j] !=
@@ -329,7 +329,7 @@ open class BrowseSourceController(bundle: Bundle) :
                             break
                         }
                     }
-                } else if (oldFilters[i] != presenter.sourceFilters[i].state) {
+                } else if (filter != presenter.sourceFilters[i].state) {
                     matches = false
                     break
                 }
