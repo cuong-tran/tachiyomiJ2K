@@ -223,6 +223,7 @@ dependencies {
     implementation("com.nononsenseapps:filepicker:2.5.2")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
     implementation("com.github.mthli:Slice:v1.2")
+    implementation("io.noties.markwon:core:4.6.2")
 
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.tachiyomiorg:DirectionalViewPager:1.0.0")

@@ -4,6 +4,9 @@ import android.app.Dialog
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
+import android.view.View
+import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
@@ -21,6 +24,7 @@ import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.openInBrowser
+import io.noties.markwon.Markwon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -210,6 +214,10 @@ class AboutController : SettingsController() {
         )
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
+            val releaseBody = (args.getString(BODY_KEY) ?: "")
+                .replace("""---(\R|.)*Checksums(\R|.)*""".toRegex(), "")
+            val info = Markwon.create(activity!!).toMarkdown(releaseBody)
+
             val isOnA12 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
             val isBeta = args.getBoolean(IS_BETA, false)
             return activity!!.materialAlertDialog()
@@ -220,7 +228,7 @@ class AboutController : SettingsController() {
                         R.string.new_version_available
                     }
                 )
-                .setMessage(args.getString(BODY_KEY) ?: "")
+                .setMessage(info)
                 .setPositiveButton(if (isOnA12) R.string.update else R.string.download) { _, _ ->
                     val appContext = applicationContext
                     if (appContext != null) {
@@ -231,6 +239,12 @@ class AboutController : SettingsController() {
                 }
                 .setNegativeButton(R.string.ignore, null)
                 .create()
+        }
+
+        override fun onAttach(view: View) {
+            super.onAttach(view)
+            (dialog?.findViewById(android.R.id.message) as? TextView)?.movementMethod =
+                LinkMovementMethod.getInstance()
         }
 
         companion object {
