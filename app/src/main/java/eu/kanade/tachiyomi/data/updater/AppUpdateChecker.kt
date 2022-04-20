@@ -25,31 +25,45 @@ class AppUpdateChecker {
         }
 
         return withIOContext {
-            val result = networkService.client
-                .newCall(GET("https://api.github.com/repos/$GITHUB_REPO/releases/latest"))
-                .await()
-                .parseAs<GithubRelease>()
-                .let {
-                    preferences.lastAppCheck().set(Date().time)
+            val result = if (preferences.checkForBetas()) {
+                networkService.client
+                    .newCall(GET("https://api.github.com/repos/$GITHUB_REPO/releases"))
+                    .await()
+                    .parseAs<List<GithubRelease>>()
+                    .let {
+                        val release = it.firstOrNull() ?: return@let AppUpdateResult.NoNewUpdate
+                        preferences.lastAppCheck().set(Date().time)
 
-                    // Check if latest version is different from current version
-                    if (isNewVersion(it.version)) {
-                        AppUpdateResult.NewUpdate(it)
-                    } else {
-                        AppUpdateResult.NoNewUpdate
+                        // Check if latest version is different from current version
+                        if (isNewVersion(release.version)) {
+                            AppUpdateResult.NewUpdate(release)
+                        } else {
+                            AppUpdateResult.NoNewUpdate
+                        }
                     }
-                }
+            } else {
+                networkService.client
+                    .newCall(GET("https://api.github.com/repos/$GITHUB_REPO/releases/latest"))
+                    .await()
+                    .parseAs<GithubRelease>()
+                    .let {
+                        preferences.lastAppCheck().set(Date().time)
+
+                        // Check if latest version is different from current version
+                        if (isNewVersion(it.version)) {
+                            AppUpdateResult.NewUpdate(it)
+                        } else {
+                            AppUpdateResult.NoNewUpdate
+                        }
+                    }
+            }
             if (doExtrasAfterNewUpdate && result is AppUpdateResult.NewUpdate) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
                     preferences.appShouldAutoUpdate() != AutoAppUpdaterJob.NEVER
                 ) {
                     AutoAppUpdaterJob.setupTask(context)
                 }
-                AppUpdateNotifier(context).promptUpdate(
-                    result.release.info,
-                    result.release.downloadLink,
-                    result.release.releaseLink
-                )
+                AppUpdateNotifier(context).promptUpdate(result.release)
             }
 
             result

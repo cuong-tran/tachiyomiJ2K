@@ -15,16 +15,17 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GithubRelease(
     @SerialName("tag_name") val version: String,
-    @SerialName("body") override val info: String,
-    @SerialName("html_url") override val releaseLink: String,
+    @SerialName("body") val info: String,
+    @SerialName("html_url") val releaseLink: String,
+    @SerialName("prerelease") val preRelease: Boolean?,
     @SerialName("assets") private val assets: List<Assets>
-) : Release {
+) {
 
     /**
      * Get download link of latest release from the assets.
      * @return download link of latest release.
      */
-    override val downloadLink: String
+    val downloadLink: String
         get() {
             val apkVariant = when (Build.SUPPORTED_ABIS[0]) {
                 "arm64-v8a" -> "-arm64-v8a"

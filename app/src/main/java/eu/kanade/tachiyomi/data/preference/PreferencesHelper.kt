@@ -361,6 +361,8 @@ class PreferencesHelper(val context: Context) {
 
     fun lastAppCheck() = flowPrefs.getLong("last_app_check", 0)
 
+    fun checkForBetas() = prefs.getBoolean(Keys.checkForBetas, false)
+
     fun unreadBadgeType() = flowPrefs.getInt("unread_badge_type", 2)
 
     fun categoryNumberOfItems() = flowPrefs.getBoolean(Keys.categoryNumberOfItems, false)

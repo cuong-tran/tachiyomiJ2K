@@ -241,6 +241,8 @@ object PreferenceKeys {
 
     const val sideNavMode = "side_nav_mode"
 
+    const val checkForBetas = "check_for_betas"
+
     const val shouldAutoUpdate = "should_auto_update"
 
     const val autoUpdateExtensions = "auto_update_extensions"

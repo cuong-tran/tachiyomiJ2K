@@ -120,6 +120,7 @@
     <string name="updating_">Updating %1$s</string>
     <string name="update_available">Update available</string>
     <string name="new_version_available">New version available!</string>
+    <string name="new_beta_version_available">New beta version available!</string>
     <string name="no_new_updates_available">No new updates available</string>
     <string name="searching_for_updates">Searching for updates…</string>
     <string name="release_page">Release page</string>
@@ -760,6 +761,10 @@
     <string name="force_download_cache_refresh_summary">This will force the download cache to recalculate. Useful if you modified downloads outside of this app and want the app to pick them up</string>
 
     <string name="data_management">Data Management</string>
+    <string name="check_for_beta_releases">Check for beta releases</string>
+    <string name="try_new_features">Try new features before they\'re officially released. Beta releases may be unstable and are provided to give feedback to the developer.</string>
+    <string name="warning_unenroll_from_beta">Rolling back to the previous production version may cause issues and could require clearing app data.</string>
+    <string name="warning_enroll_into_beta">Beta releases may be unstable and could require clearing app data.</string>
     <string name="crash_logs">Crash logs</string>
     <string name="dump_crash_logs">Dump crash logs</string>
     <string name="saves_error_logs">Saves error logs to a file for sharing with the developers</string>

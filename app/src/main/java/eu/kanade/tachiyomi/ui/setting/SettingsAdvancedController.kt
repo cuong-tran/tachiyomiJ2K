@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceScreen
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -49,6 +50,7 @@ import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsAdvancedController : SettingsController() {
 
@@ -61,6 +63,8 @@ class SettingsAdvancedController : SettingsController() {
     private val coverCache: CoverCache by injectLazy()
 
     private val downloadManager: DownloadManager by injectLazy()
+
+    private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
 
     @SuppressLint("BatteryLife")
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
@@ -110,6 +114,41 @@ class SettingsAdvancedController : SettingsController() {
 
             onClick {
                 openInBrowser("https://dontkillmyapp.com/")
+            }
+        }
+
+        if (isUpdaterEnabled) {
+            switchPreference {
+                titleRes = R.string.check_for_beta_releases
+                summaryRes = R.string.try_new_features
+                key = Keys.checkForBetas
+
+                onChange {
+                    it as Boolean
+                    if (!it && BuildConfig.VERSION_NAME.contains("-b")) {
+                        activity!!.materialAlertDialog()
+                            .setTitle(R.string.warning)
+                            .setMessage(R.string.warning_unenroll_from_beta)
+                            .setPositiveButton(android.R.string.ok) { _, _ ->
+                                isChecked = false
+                            }
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show()
+                        false
+                    } else if (it && !BuildConfig.VERSION_NAME.contains("-b")) {
+                        activity!!.materialAlertDialog()
+                            .setTitle(R.string.warning)
+                            .setMessage(R.string.warning_enroll_into_beta)
+                            .setPositiveButton(android.R.string.ok) { _, _ ->
+                                isChecked = true
+                            }
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show()
+                        false
+                    } else {
+                        true
+                    }
+                }
             }
         }
 

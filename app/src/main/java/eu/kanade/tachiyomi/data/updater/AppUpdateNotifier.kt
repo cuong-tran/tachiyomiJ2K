@@ -43,7 +43,12 @@ internal class AppUpdateNotifier(private val context: Context) {
         context.notificationManager.notify(id, build())
     }
 
-    fun promptUpdate(body: String, url: String, releaseUrl: String) {
+    fun promptUpdate(release: GithubRelease) {
+        val body = release.info
+        val url = release.downloadLink
+        val releaseUrl = release.releaseLink
+        val isBeta = release.preRelease == true
+
         val intent = Intent(context, AppUpdateService::class.java).apply {
             putExtra(AppUpdateService.EXTRA_DOWNLOAD_URL, url)
             putExtra(AppUpdateService.EXTRA_NOTIFY_ON_INSTALL, true)
@@ -53,7 +58,15 @@ internal class AppUpdateNotifier(private val context: Context) {
         releasePageUrl = releaseUrl
         with(notificationBuilder) {
             setContentTitle(context.getString(R.string.app_name))
-            setContentText(context.getString(R.string.new_version_available))
+            setContentText(
+                context.getString(
+                    if (isBeta) {
+                        R.string.new_beta_version_available
+                    } else {
+                        R.string.new_version_available
+                    }
+                )
+            )
             setContentIntent(pendingIntent)
             setAutoCancel(true)
             setSmallIcon(android.R.drawable.stat_sys_download_done)

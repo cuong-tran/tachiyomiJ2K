@@ -560,11 +560,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     if (result is AppUpdateResult.NewUpdate) {
                         val body = result.release.info
                         val url = result.release.downloadLink
+                        val isBeta = result.release.preRelease == true
 
                         // Create confirmation window
                         withContext(Dispatchers.Main) {
                             AppUpdateNotifier.releasePageUrl = result.release.releaseLink
-                            AboutController.NewUpdateDialogController(body, url).showDialog(router)
+                            AboutController.NewUpdateDialogController(body, url, isBeta).showDialog(router)
                         }
                     }
                 } catch (error: Exception) {

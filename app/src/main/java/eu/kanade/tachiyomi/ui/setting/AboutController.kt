@@ -182,11 +182,12 @@ class AboutController : SettingsController() {
                 is AppUpdateResult.NewUpdate -> {
                     val body = result.release.info
                     val url = result.release.downloadLink
+                    val isBeta = result.release.preRelease == true
 
                     // Create confirmation window
                     withContext(Dispatchers.Main) {
                         AppUpdateNotifier.releasePageUrl = result.release.releaseLink
-                        NewUpdateDialogController(body, url).showDialog(router)
+                        NewUpdateDialogController(body, url, isBeta).showDialog(router)
                     }
                 }
                 is AppUpdateResult.NoNewUpdate -> {
@@ -200,17 +201,25 @@ class AboutController : SettingsController() {
 
     class NewUpdateDialogController(bundle: Bundle? = null) : DialogController(bundle) {
 
-        constructor(body: String, url: String) : this(
+        constructor(body: String, url: String, isBeta: Boolean?) : this(
             Bundle().apply {
                 putString(BODY_KEY, body)
                 putString(URL_KEY, url)
+                putBoolean(IS_BETA, isBeta == true)
             }
         )
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             val isOnA12 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+            val isBeta = args.getBoolean(IS_BETA, false)
             return activity!!.materialAlertDialog()
-                .setTitle(R.string.new_version_available)
+                .setTitle(
+                    if (isBeta) {
+                        R.string.new_beta_version_available
+                    } else {
+                        R.string.new_version_available
+                    }
+                )
                 .setMessage(args.getString(BODY_KEY) ?: "")
                 .setPositiveButton(if (isOnA12) R.string.update else R.string.download) { _, _ ->
                     val appContext = applicationContext
@@ -227,6 +236,7 @@ class AboutController : SettingsController() {
         companion object {
             const val BODY_KEY = "NewUpdateDialogController.body"
             const val URL_KEY = "NewUpdateDialogController.key"
+            const val IS_BETA = "NewUpdateDialogController.is_beta"
         }
     }
 
