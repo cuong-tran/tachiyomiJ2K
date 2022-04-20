@@ -1,8 +1,8 @@
-package eu.kanade.tachiyomi.data.updater.github
+package eu.kanade.tachiyomi.data.updater
 
 import android.os.Build
-import com.google.gson.annotations.SerializedName
-import eu.kanade.tachiyomi.data.updater.Release
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * Release object.
@@ -12,11 +12,12 @@ import eu.kanade.tachiyomi.data.updater.Release
  * @param info log of latest release.
  * @param assets assets of latest release.
  */
-class GithubRelease(
-    @SerializedName("tag_name") val version: String,
-    @SerializedName("body") override val info: String,
-    @SerializedName("html_url") override val releaseLink: String,
-    @SerializedName("assets") private val assets: List<Assets>
+@Serializable
+data class GithubRelease(
+    @SerialName("tag_name") val version: String,
+    @SerialName("body") override val info: String,
+    @SerialName("html_url") override val releaseLink: String,
+    @SerialName("assets") private val assets: List<Assets>
 ) : Release {
 
     /**
@@ -40,5 +41,6 @@ class GithubRelease(
      * Assets class containing download url.
      * @param downloadLink download url.
      */
-    inner class Assets(@SerializedName("browser_download_url") val downloadLink: String)
+    @Serializable
+    data class Assets(@SerialName("browser_download_url") val downloadLink: String)
 }

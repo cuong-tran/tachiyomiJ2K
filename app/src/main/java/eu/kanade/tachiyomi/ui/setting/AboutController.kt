@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateNotifier
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.AppUpdateService
+import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.lang.toTimestampString
 import eu.kanade.tachiyomi.util.system.isOnline
@@ -36,7 +37,7 @@ class AboutController : SettingsController() {
     /**
      * Checks for new releases
      */
-    private val updateChecker by lazy { AppUpdateChecker.getUpdateChecker() }
+    private val updateChecker by lazy { AppUpdateChecker() }
 
     private val userPreferences: PreferencesHelper by injectLazy()
 
@@ -58,7 +59,7 @@ class AboutController : SettingsController() {
                     if (BuildConfig.DEBUG) {
                         "https://github.com/Jays2Kings/tachiyomiJ2K/commits/master"
                     } else {
-                        "https://github.com/Jays2Kings/tachiyomiJ2K/releases/tag/v${BuildConfig.VERSION_NAME}"
+                        RELEASE_URL
                     }.toUri()
                 )
                 startActivity(intent)
@@ -165,20 +166,20 @@ class AboutController : SettingsController() {
      * Checks version and shows a user prompt if an update is available.
      */
     private fun checkVersion() {
-        if (activity == null) return
+        val activity = activity ?: return
 
-        activity?.toast(R.string.searching_for_updates)
+        activity.toast(R.string.searching_for_updates)
         viewScope.launch {
             val result = try {
-                updateChecker.checkForUpdate()
+                updateChecker.checkForUpdate(activity, true)
             } catch (error: Exception) {
                 withContext(Dispatchers.Main) {
-                    activity?.toast(error.message)
+                    activity.toast(error.message)
                     Timber.e(error)
                 }
             }
             when (result) {
-                is AppUpdateResult.NewUpdate<*> -> {
+                is AppUpdateResult.NewUpdate -> {
                     val body = result.release.info
                     val url = result.release.downloadLink
 
@@ -190,7 +191,7 @@ class AboutController : SettingsController() {
                 }
                 is AppUpdateResult.NoNewUpdate -> {
                     withContext(Dispatchers.Main) {
-                        activity?.toast(R.string.no_new_updates_available)
+                        activity.toast(R.string.no_new_updates_available)
                     }
                 }
             }
