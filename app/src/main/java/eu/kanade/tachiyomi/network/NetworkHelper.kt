@@ -30,7 +30,7 @@ class NetworkHelper(val context: Context) {
                 .cookieJar(cookieManager)
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
-                .callTimeout(90, TimeUnit.SECONDS)
+                .callTimeout(2, TimeUnit.MINUTES)
                 .addInterceptor(UserAgentInterceptor())
                 .apply {
                     if (BuildConfig.DEBUG) {
