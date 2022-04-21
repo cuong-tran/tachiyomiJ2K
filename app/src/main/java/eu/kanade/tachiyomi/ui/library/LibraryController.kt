@@ -994,7 +994,6 @@ class LibraryController(
 
     override fun onDestroyView(view: View) {
         LibraryUpdateService.removeListener(this)
-        activityBinding?.appBar?.lockYPos = false
         destroyActionModeIfNeeded()
         if (isBindingInitialized) {
             binding.libraryGridRecycler.recycler.removeOnScrollListener(scrollListener)
@@ -1045,7 +1044,9 @@ class LibraryController(
                 }
             }
         }
-        activityBinding?.appBar?.lockYPos = false
+        if (isControllerVisible) {
+            activityBinding?.appBar?.lockYPos = false
+        }
         binding.libraryGridRecycler.recycler.post {
             elevateAppBar(binding.libraryGridRecycler.recycler.canScrollVertically(-1))
             setActiveCategory()
