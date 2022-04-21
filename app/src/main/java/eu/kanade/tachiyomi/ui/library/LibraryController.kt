@@ -1136,7 +1136,6 @@ class LibraryController(
         binding.recyclerShadow.animate().translationY(translateY - 8.dpToPx).start()
         binding.recyclerCover.animate().translationY(translateY).start()
         binding.recyclerCover.animate().alpha(if (show) 0.75f else 0f).start()
-        binding.libraryGridRecycler.recycler.suppressLayout(show)
         activityBinding?.appBar?.updateAppBarAfterY(binding.libraryGridRecycler.recycler)
         binding.swipeRefresh.isEnabled = !show
         setSubtitle()
@@ -1164,7 +1163,6 @@ class LibraryController(
         val headerPosition = adapter.indexOf(pos)
         if (headerPosition > -1) {
             val activityBinding = activityBinding ?: return
-            binding.libraryGridRecycler.recycler.suppressLayout(true)
             val appbarOffset = if (pos <= 0) 0 else -fullAppBarHeight!! + activityBinding.cardFrame.height
             val previousHeader = adapter.getItem(adapter.indexOf(pos - 1)) as? LibraryHeaderItem
             (binding.libraryGridRecycler.recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
@@ -1182,7 +1180,6 @@ class LibraryController(
             }
             activeCategory = pos
             preferences.lastUsedCategory().set(pos)
-            binding.libraryGridRecycler.recycler.suppressLayout(false)
             binding.libraryGridRecycler.recycler.post {
                 activityBinding.appBar.y = 0f
                 activityBinding.appBar.updateAppBarAfterY(binding.libraryGridRecycler.recycler)
