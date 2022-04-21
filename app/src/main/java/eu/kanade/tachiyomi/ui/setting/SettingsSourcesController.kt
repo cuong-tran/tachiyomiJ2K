@@ -173,15 +173,15 @@ class SettingsSourcesController : SettingsController(), FloatingSearchInterface 
         else menu.findItem(R.id.action_sort_enabled).isChecked = true
 
         val useSearchTB = showFloatingBar()
-        val searchItem = if (useSearchTB) activityBinding?.cardToolbar?.searchItem
+        val searchItem = if (useSearchTB) activityBinding?.searchToolbar?.searchItem
         else (menu.findItem(R.id.action_search))
-        val searchView = if (useSearchTB) activityBinding?.cardToolbar?.searchView
+        val searchView = if (useSearchTB) activityBinding?.searchToolbar?.searchView
         else searchItem?.actionView as? SearchView
         if (!useSearchTB) {
             searchView?.maxWidth = Int.MAX_VALUE
         }
 
-        activityBinding?.cardToolbar?.setQueryHint(getSearchTitle(), query.isEmpty())
+        activityBinding?.searchToolbar?.setQueryHint(getSearchTitle(), query.isEmpty())
 
         if (query.isNotEmpty()) {
             searchItem?.expandActionView()
@@ -189,7 +189,7 @@ class SettingsSourcesController : SettingsController(), FloatingSearchInterface 
             searchView?.clearFocus()
         }
 
-        setOnQueryTextChangeListener(activityBinding?.cardToolbar?.searchView) {
+        setOnQueryTextChangeListener(activityBinding?.searchToolbar?.searchView) {
             query = it ?: ""
             drawSources()
             true
@@ -275,10 +275,10 @@ class SettingsSourcesController : SettingsController(), FloatingSearchInterface 
         }
         item.isChecked = true
         (activity as? MainActivity)?.let {
-            val otherTB = if (it.currentToolbar == it.binding.cardToolbar) {
+            val otherTB = if (it.currentToolbar == it.binding.searchToolbar) {
                 it.binding.toolbar
             } else {
-                it.binding.cardToolbar
+                it.binding.searchToolbar
             }
             otherTB.menu.findItem(item.itemId).isChecked = true
         }

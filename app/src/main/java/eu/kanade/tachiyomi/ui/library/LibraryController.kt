@@ -407,9 +407,9 @@ class LibraryController(
         if (isBindingInitialized && !singleCategory && presenter.showAllCategories &&
             !binding.headerTitle.text.isNullOrBlank() && !binding.recyclerCover.isClickable
         ) {
-            activityBinding?.cardToolbar?.subtitle = binding.headerTitle.text.toString()
+            activityBinding?.searchToolbar?.subtitle = binding.headerTitle.text.toString()
         } else {
-            activityBinding?.cardToolbar?.subtitle = null
+            activityBinding?.searchToolbar?.subtitle = null
         }
     }
 
@@ -545,7 +545,7 @@ class LibraryController(
             showCategories(show = false, closeSearch = true)
         }
         binding.categoryRecycler.setOnTouchListener { _, _ ->
-            val searchView = activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.actionView
+            val searchView = activityBinding?.searchToolbar?.menu?.findItem(R.id.action_search)?.actionView
                 ?: return@setOnTouchListener false
             val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
             imm!!.hideSoftInputFromWindow(searchView.windowToken, 0)
@@ -565,7 +565,7 @@ class LibraryController(
                 swipeRefreshLayout = binding.swipeRefresh,
                 afterInsets = { insets ->
                     binding.categoryRecycler.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        topMargin = insets.getInsets(systemBars()).top + (activityBinding?.cardToolbar?.height ?: 0) + 12.dpToPx
+                        topMargin = insets.getInsets(systemBars()).top + (activityBinding?.searchToolbar?.height ?: 0) + 12.dpToPx
                     }
                     updateSmallerViewsTopMargins()
                     binding.headerCard.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -710,7 +710,7 @@ class LibraryController(
                 3 -> showGroupOptions()
                 2 -> showDisplayOptions()
                 1 -> if (canCollapseOrExpandCategory() != null) presenter.toggleAllCategoryVisibility()
-                else -> activityBinding?.cardToolbar?.menu?.performIdentifierAction(
+                else -> activityBinding?.searchToolbar?.menu?.performIdentifierAction(
                     R.id.action_search,
                     0
                 )
@@ -954,11 +954,11 @@ class LibraryController(
             singleCategory = presenter.categories.size <= 1
 
             if (preferences.showLibrarySearchSuggestions().get()) {
-                activityBinding?.cardToolbar?.setOnLongClickListener {
+                activityBinding?.searchToolbar?.setOnLongClickListener {
                     val suggestion = preferences.librarySearchSuggestion().get()
                     if (suggestion.isNotBlank()) {
-                        val searchItem = activityBinding?.cardToolbar?.searchItem
-                        val searchView = activityBinding?.cardToolbar?.searchView
+                        val searchItem = activityBinding?.searchToolbar?.searchItem
+                        val searchView = activityBinding?.searchToolbar?.searchView
                             ?: return@setOnLongClickListener false
                         searchItem?.expandActionView()
                         searchView.setQuery(suggestion.removeSuffix("…"), false)
@@ -974,7 +974,7 @@ class LibraryController(
             if (binding.filterBottomSheet.filterBottomSheet.sheetBehavior.isHidden()) {
                 binding.filterBottomSheet.filterBottomSheet.isInvisible = true
             }
-            activityBinding?.cardToolbar?.setOnLongClickListener(null)
+            activityBinding?.searchToolbar?.setOnLongClickListener(null)
         }
     }
 
@@ -1124,7 +1124,7 @@ class LibraryController(
             moveRecyclerViewUp()
         }
         if (closeSearch) {
-            activityBinding?.cardToolbar?.searchItem?.collapseActionView()
+            activityBinding?.searchToolbar?.searchItem?.collapseActionView()
         }
         val full = binding.categoryRecycler.height.toFloat() + binding.categoryRecycler.marginTop
         val translateY = if (show) full else 0f
@@ -1639,12 +1639,12 @@ class LibraryController(
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.library, menu)
 
-        val searchItem = activityBinding?.cardToolbar?.searchItem
-        val searchView = activityBinding?.cardToolbar?.searchView
-        activityBinding?.cardToolbar?.setQueryHint(resources?.getString(R.string.library_search_hint), query.isEmpty())
+        val searchItem = activityBinding?.searchToolbar?.searchItem
+        val searchView = activityBinding?.searchToolbar?.searchView
+        activityBinding?.searchToolbar?.setQueryHint(resources?.getString(R.string.library_search_hint), query.isEmpty())
 
         if (query.isNotEmpty()) {
-            if (activityBinding?.cardToolbar?.isSearchExpanded != true) {
+            if (activityBinding?.searchToolbar?.isSearchExpanded != true) {
                 searchItem?.expandActionView()
                 searchView?.setQuery(query, true)
                 searchView?.clearFocus()
@@ -1652,11 +1652,11 @@ class LibraryController(
                 searchView?.setQuery(query, false)
             }
             search(query)
-        } else if (activityBinding?.cardToolbar?.isSearchExpanded == true) {
+        } else if (activityBinding?.searchToolbar?.isSearchExpanded == true) {
             searchItem?.collapseActionView()
         }
 
-        setOnQueryTextChangeListener(activityBinding?.cardToolbar?.searchView) {
+        setOnQueryTextChangeListener(activityBinding?.searchToolbar?.searchView) {
             if (!it.isNullOrEmpty() && binding.recyclerCover.isClickable) {
                 showCategories(false)
             }

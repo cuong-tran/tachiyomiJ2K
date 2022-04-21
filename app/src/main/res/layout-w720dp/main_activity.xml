@@ -114,7 +114,7 @@
                 android:layout_height="match_parent" >
 
                 <eu.kanade.tachiyomi.ui.base.FloatingToolbar
-                    android:id="@+id/card_toolbar"
+                    android:id="@+id/search_toolbar"
                     tools:title="Search Library..."
                     app:contentInsetStartWithNavigation="0dp"
                     app:contentInsetEndWithActions="0dp"

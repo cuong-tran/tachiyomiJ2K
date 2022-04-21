@@ -151,11 +151,11 @@ open class GlobalSearchController(
         inflater.inflate(R.menu.catalogue_new_list, menu)
 
         // Initialize search menu
-        activityBinding?.cardToolbar?.setQueryHint(view?.context?.getString(R.string.global_search), false)
-        activityBinding?.cardToolbar?.searchItem?.expandActionView()
-        activityBinding?.cardToolbar?.searchView?.setQuery(presenter.query, false)
+        activityBinding?.searchToolbar?.setQueryHint(view?.context?.getString(R.string.global_search), false)
+        activityBinding?.searchToolbar?.searchItem?.expandActionView()
+        activityBinding?.searchToolbar?.searchView?.setQuery(presenter.query, false)
 
-        setOnQueryTextChangeListener(activityBinding?.cardToolbar?.searchView, onlyOnSubmit = true, hideKbOnSubmit = true) {
+        setOnQueryTextChangeListener(activityBinding?.searchToolbar?.searchView, onlyOnSubmit = true, hideKbOnSubmit = true) {
             presenter.search(it ?: "")
             setTitle() // Update toolbar title
             true
@@ -165,8 +165,8 @@ open class GlobalSearchController(
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            val searchView = activityBinding?.cardToolbar?.searchView ?: return
-            val searchItem = activityBinding?.cardToolbar?.searchItem ?: return
+            val searchView = activityBinding?.searchToolbar?.searchView ?: return
+            val searchItem = activityBinding?.searchToolbar?.searchItem ?: return
             searchItem.expandActionView()
             searchView.setQuery(presenter.query, false)
             searchView.clearFocus()
@@ -174,7 +174,7 @@ open class GlobalSearchController(
     }
 
     override fun onActionViewExpand(item: MenuItem?) {
-        val searchView = activityBinding?.cardToolbar?.searchView ?: return
+        val searchView = activityBinding?.searchToolbar?.searchView ?: return
         searchView.setQuery(presenter.query, false)
     }
 

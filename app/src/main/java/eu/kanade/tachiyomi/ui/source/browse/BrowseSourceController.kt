@@ -248,7 +248,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
         if (oldPosition != RecyclerView.NO_POSITION) {
             (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(oldPosition, oldOffset.roundToInt())
-            if (oldPosition > 0 && (activity as? MainActivity)?.currentToolbar != activityBinding?.cardToolbar) {
+            if (oldPosition > 0 && (activity as? MainActivity)?.currentToolbar != activityBinding?.searchToolbar) {
                 activityBinding?.appBar?.useSearchToolbarForMenu(true)
             }
         }
@@ -259,16 +259,16 @@ open class BrowseSourceController(bundle: Bundle) :
         inflater.inflate(R.menu.browse_source, menu)
 
         // Initialize search menu
-        val searchItem = activityBinding?.cardToolbar?.searchItem
-        val searchView = activityBinding?.cardToolbar?.searchView
+        val searchItem = activityBinding?.searchToolbar?.searchItem
+        val searchView = activityBinding?.searchToolbar?.searchView
 
-        activityBinding?.cardToolbar?.setQueryHint("", !isBehindGlobalSearch && presenter.query.isBlank())
+        activityBinding?.searchToolbar?.setQueryHint("", !isBehindGlobalSearch && presenter.query.isBlank())
         val query = presenter.query
         if (query.isNotBlank()) {
             searchItem?.expandActionView()
             searchView?.setQuery(query, true)
             searchView?.clearFocus()
-        } else if (activityBinding?.cardToolbar?.isSearchExpanded == true) {
+        } else if (activityBinding?.searchToolbar?.isSearchExpanded == true) {
             searchItem?.collapseActionView()
             searchView?.setQuery("", true)
         }
@@ -499,7 +499,7 @@ open class BrowseSourceController(bundle: Bundle) :
         super.onActivityResumed(activity)
 
         if (BuildConfig.DEBUG && isControllerVisible) {
-            val searchView = activityBinding?.cardToolbar?.searchView
+            val searchView = activityBinding?.searchToolbar?.searchView
             setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = true) {
                 searchWithQuery(it ?: "")
                 true
@@ -618,7 +618,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
         val isListMode = !presenter.prefs.browseAsList().get()
         presenter.prefs.browseAsList().set(isListMode)
-        listOf(activityBinding?.toolbar?.menu, activityBinding?.cardToolbar?.menu).forEach {
+        listOf(activityBinding?.toolbar?.menu, activityBinding?.searchToolbar?.menu).forEach {
             updateDisplayMenuItem(it, isListMode)
         }
         setupRecycler(view)

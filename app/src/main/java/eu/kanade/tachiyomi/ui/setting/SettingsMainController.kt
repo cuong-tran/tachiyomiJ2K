@@ -89,7 +89,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.settings_main, menu)
         // Change hint to show global search.
-        activityBinding?.cardToolbar?.searchQueryHint = applicationContext?.getString(R.string.search_settings)
+        activityBinding?.searchToolbar?.searchQueryHint = applicationContext?.getString(R.string.search_settings)
     }
 
     override fun onActionViewExpand(item: MenuItem?) {

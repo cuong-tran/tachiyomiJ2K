@@ -98,7 +98,7 @@ fun Controller.setOnQueryTextChangeListener(
 }
 
 fun Controller.removeQueryListener() {
-    val searchView = activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
+    val searchView = activityBinding?.searchToolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
     val searchView2 = activityBinding?.toolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
     searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String?) = true

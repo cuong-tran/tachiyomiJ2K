@@ -136,7 +136,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
         setOnActionExpandListener(
             object : MenuItem.OnActionExpandListener {
                 override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                    hideItemsIfExpanded(item, activityBinding?.cardToolbar?.menu, true)
+                    hideItemsIfExpanded(item, activityBinding?.searchToolbar?.menu, true)
                     return onExpand?.invoke(item) ?: true
                 }
 

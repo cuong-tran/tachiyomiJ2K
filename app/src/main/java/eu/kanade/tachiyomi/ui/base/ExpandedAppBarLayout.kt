@@ -36,7 +36,7 @@ import kotlin.math.roundToInt
 class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     AppBarLayout(context, attrs) {
 
-    var cardToolbar: FloatingToolbar? = null
+    var searchToolbar: FloatingToolbar? = null
     var cardFrame: FrameLayout? = null
     var mainToolbar: CenteredToolbar? = null
     var bigTitleView: TextView? = null
@@ -177,7 +177,7 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
     override fun onFinishInflate() {
         super.onFinishInflate()
         bigTitleView = findViewById(R.id.big_title)
-        cardToolbar = findViewById(R.id.card_toolbar)
+        searchToolbar = findViewById(R.id.search_toolbar)
         mainToolbar = findViewById(R.id.toolbar)
         bigView = findViewById(R.id.big_toolbar)
         cardFrame = findViewById(R.id.card_frame)
@@ -328,7 +328,7 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
         val useSearchToolbar = mainToolbar.alpha <= 0.025f
         val idle = RecyclerView.SCROLL_STATE_IDLE
         if (if (useSearchToolbar) -y >= height || recyclerView?.scrollState ?: idle <= idle || context.isTablet()
-            else mainActivity.currentToolbar == cardToolbar
+            else mainActivity.currentToolbar == searchToolbar
         ) {
             useSearchToolbarForMenu(useSearchToolbar)
         }
@@ -373,12 +373,12 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
         val mainActivity = mainActivity ?: return
         if (lockYPos) return
         if ((showCardTB || toolbarMode == ToolbarState.SEARCH_ONLY) && cardFrame?.isVisible == true) {
-            if (mainActivity.currentToolbar != cardToolbar) {
+            if (mainActivity.currentToolbar != searchToolbar) {
                 mainActivity.setFloatingToolbar(true, showSearchAnyway = true)
             } else {
                 mainActivity.setSearchTBMenuIfInvalid()
             }
-            if (mainActivity.currentToolbar == cardToolbar) {
+            if (mainActivity.currentToolbar == searchToolbar) {
                 if (toolbarMode == ToolbarState.EXPANDED) {
                     mainToolbar?.isInvisible = true
                 }

@@ -475,7 +475,7 @@ class BrowseController :
             updateSheetMenu()
         }
         if (BuildConfig.DEBUG && isControllerVisible) {
-            val searchView = activityBinding?.cardToolbar?.searchView
+            val searchView = activityBinding?.searchToolbar?.searchView
 
             setOnQueryTextChangeListener(searchView, onlyOnSubmit = true) {
                 if (!it.isNullOrBlank()) performGlobalSearch(it)
@@ -560,7 +560,7 @@ class BrowseController :
 
     override fun expandSearch() {
         if (showingExtensions) binding.bottomSheet.root.sheetBehavior?.collapse()
-        else activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
+        else activityBinding?.searchToolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
     }
 
     /**
@@ -574,10 +574,10 @@ class BrowseController :
         inflater.inflate(R.menu.catalogue_main, menu)
 
         // Initialize search option.
-        val searchView = activityBinding?.cardToolbar?.searchView
+        val searchView = activityBinding?.searchToolbar?.searchView
 
         // Change hint to show global search.
-        activityBinding?.cardToolbar?.searchQueryHint = view?.context?.getString(R.string.global_search)
+        activityBinding?.searchToolbar?.searchQueryHint = view?.context?.getString(R.string.global_search)
 
         // Create query listener which opens the global search view.
         setOnQueryTextChangeListener(searchView, true) {

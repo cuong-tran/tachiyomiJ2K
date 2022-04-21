@@ -278,7 +278,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
 
-        arrayOf(binding.toolbar, binding.cardToolbar).forEach { toolbar ->
+        arrayOf(binding.toolbar, binding.searchToolbar).forEach { toolbar ->
             toolbar.setNavigationIconTint(getResourceColor(R.attr.actionBarTintColor))
             toolbar.router = router
         }
@@ -333,19 +333,19 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             onBackPressed()
         }
 
-        binding.cardToolbar.setNavigationOnClickListener {
+        binding.searchToolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
             if ((
                 rootSearchController is RootSearchInterface ||
-                    (currentToolbar != binding.cardToolbar && binding.appBar.useLargeToolbar)
+                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
                 ) &&
                 rootSearchController !is SmallToolbarInterface
             ) {
-                binding.cardToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+                binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
             } else onBackPressed()
         }
 
-        binding.cardToolbar.searchItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+        binding.searchToolbar.searchItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 val controller = router.backstack.lastOrNull()?.controller
                 binding.appBar.compactSearchMode = binding.appBar.useLargeToolbar && resources.configuration.screenHeightDp < 600
@@ -357,7 +357,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 }
                 (controller as? BaseController<*>)?.onActionViewExpand(item)
                 (controller as? SettingsController)?.onActionViewExpand(item)
-                binding.cardToolbar.menu.forEach { it.isVisible = false }
+                binding.searchToolbar.menu.forEach { it.isVisible = false }
                 return true
             }
 
@@ -374,11 +374,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         binding.appBar.alpha = 1f
 
-        binding.cardToolbar.setOnClickListener {
-            binding.cardToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+        binding.searchToolbar.setOnClickListener {
+            binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
         }
 
-        binding.cardToolbar.setOnMenuItemClickListener {
+        binding.searchToolbar.setOnMenuItemClickListener {
             if (router.backstack.lastOrNull()?.controller?.onOptionsItemSelected(it) == true) {
                 return@setOnMenuItemClickListener true
             } else return@setOnMenuItemClickListener onOptionsItemSelected(it)
@@ -455,7 +455,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         preferences.incognitoMode()
             .asImmediateFlowIn(lifecycleScope) {
                 binding.toolbar.setIncognitoMode(it)
-                binding.cardToolbar.setIncognitoMode(it)
+                binding.searchToolbar.setIncognitoMode(it)
             }
         preferences.sideNavIconAlignment()
             .asImmediateFlowIn(lifecycleScope) {
@@ -470,7 +470,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     override fun onTitleChanged(title: CharSequence?, color: Int) {
         super.onTitleChanged(title, color)
-        binding.cardToolbar.title = searchTitle
+        binding.searchToolbar.title = searchTitle
         val onExpandedController = if (this::router.isInitialized) router.backstack.lastOrNull()?.controller !is SmallToolbarInterface else false
         binding.appBar.setTitle(title, onExpandedController)
     }
@@ -481,11 +481,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.getSearchTitle()
                     ?: (router.backstack.lastOrNull()?.controller as? SettingsController)?.getSearchTitle()
             } catch (_: Exception) {
-                binding.cardToolbar.title?.toString()
+                binding.searchToolbar.title?.toString()
             }
         }
         set(title) {
-            binding.cardToolbar.title = title
+            binding.searchToolbar.title = title
         }
 
     open fun setFloatingToolbar(show: Boolean, solidBG: Boolean = false, changeBG: Boolean = true, showSearchAnyway: Boolean = false) {
@@ -494,7 +494,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val onSearchController = canShowFloatingToolbar(controller)
         val onSmallerController = controller is SmallToolbarInterface || !useLargeTB
         currentToolbar = if (show && ((showSearchAnyway && onSearchController) || onSmallerController)) {
-            binding.cardToolbar
+            binding.searchToolbar
         } else {
             binding.toolbar
         }
@@ -507,18 +507,18 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             )
         }
         setupSearchTBMenu(binding.toolbar.menu)
-        if (currentToolbar != binding.cardToolbar) {
-            binding.cardToolbar.menu?.children?.toList()?.forEach {
+        if (currentToolbar != binding.searchToolbar) {
+            binding.searchToolbar.menu?.children?.toList()?.forEach {
                 it.isVisible = false
             }
         }
         val onRoot = !this::router.isInitialized || router.backstackSize == 1
         if (!useLargeTB) {
-            binding.cardToolbar.navigationIcon = if (onRoot) searchDrawable else backDrawable
+            binding.searchToolbar.navigationIcon = if (onRoot) searchDrawable else backDrawable
         } else if (showSearchAnyway) {
-            binding.cardToolbar.navigationIcon = if (!show || onRoot) searchDrawable else backDrawable
+            binding.searchToolbar.navigationIcon = if (!show || onRoot) searchDrawable else backDrawable
         }
-        binding.cardToolbar.title = searchTitle
+        binding.searchToolbar.title = searchTitle
     }
 
     private fun setNavBarColor(insets: WindowInsetsCompat?) {
@@ -790,13 +790,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         if (isBindingInitialized) {
             binding.appBar.mainActivity = null
             binding.toolbar.setNavigationOnClickListener(null)
-            binding.cardToolbar.setNavigationOnClickListener(null)
+            binding.searchToolbar.setNavigationOnClickListener(null)
         }
     }
 
     override fun onBackPressed() {
-        if (binding.cardToolbar.isSearchExpanded && binding.cardFrame.isVisible) {
-            binding.cardToolbar.searchItem?.collapseActionView()
+        if (binding.searchToolbar.isSearchExpanded && binding.cardFrame.isVisible) {
+            binding.searchToolbar.searchItem?.collapseActionView()
             return
         }
         backPress()
@@ -874,7 +874,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     fun setSearchTBMenuIfInvalid() = setupSearchTBMenu(binding.toolbar.menu)
 
     private fun setupSearchTBMenu(menu: Menu?, showAnyway: Boolean = false) {
-        val toolbar = binding.cardToolbar
+        val toolbar = binding.searchToolbar
         val currentItemsId = toolbar.menu.children.toList().map { it.itemId }
         val newMenuIds = menu?.children?.toList()?.map { it.itemId }.orEmpty()
         menu?.children?.toList()?.let { menuItems ->
@@ -1045,8 +1045,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val onRoot = router.backstackSize == 1
         val navIcon = if (onRoot) searchDrawable else backDrawable
         binding.toolbar.navigationIcon = if (onRoot) null else backDrawable
-        binding.cardToolbar.navigationIcon = if (binding.appBar.useLargeToolbar) searchDrawable else navIcon
-        binding.cardToolbar.subtitle = null
+        binding.searchToolbar.navigationIcon = if (binding.appBar.useLargeToolbar) searchDrawable else navIcon
+        binding.searchToolbar.subtitle = null
 
         nav.visibility = if (!hideBottomNav) View.VISIBLE else nav.visibility
         if (nav == binding.sideNav) {
@@ -1226,7 +1226,7 @@ interface RootSearchInterface {
     fun expandSearch() {
         if (this is Controller) {
             val mainActivity = activity as? MainActivity ?: return
-            mainActivity.binding.cardToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+            mainActivity.binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
         }
     }
 }

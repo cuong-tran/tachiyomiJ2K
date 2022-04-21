@@ -63,10 +63,10 @@ class SettingsSearchController :
         // Inflate menu.
         inflater.inflate(R.menu.settings_main, menu)
 
-        val searchItem = activityBinding?.cardToolbar?.searchItem
-        searchView = activityBinding?.cardToolbar?.searchView
+        val searchItem = activityBinding?.searchToolbar?.searchItem
+        searchView = activityBinding?.searchToolbar?.searchView
 
-        activityBinding?.cardToolbar?.setQueryHint(applicationContext?.getString(R.string.search_settings), false)
+        activityBinding?.searchToolbar?.setQueryHint(applicationContext?.getString(R.string.search_settings), false)
 
         searchItem?.expandActionView()
         setItems(getResultSet())
