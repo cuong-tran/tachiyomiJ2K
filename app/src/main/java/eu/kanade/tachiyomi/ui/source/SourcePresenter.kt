@@ -145,5 +145,10 @@ class SourcePresenter(
 
         private var lastSources: List<SourceItem>? = null
         private var lastUsedItemRem: SourceItem? = null
+
+        fun onLowMemory() {
+            lastSources = null
+            lastUsedItemRem = null
+        }
     }
 }
