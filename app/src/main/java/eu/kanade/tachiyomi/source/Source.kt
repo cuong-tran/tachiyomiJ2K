@@ -40,24 +40,35 @@ interface Source : tachiyomi.source.Source {
      *
      * @param manga the manga to update.
      */
-    @Deprecated("Use getMangaDetails instead")
-    fun fetchMangaDetails(manga: SManga): Observable<SManga>
+    @Deprecated(
+        "Use the 1.x API instead",
+        ReplaceWith("getMangaDetails"),
+    )
+    fun fetchMangaDetails(manga: SManga): Observable<SManga> = throw IllegalStateException("Not used")
 
     /**
      * Returns an observable with all the available chapters for a manga.
      *
      * @param manga the manga to update.
      */
-    @Deprecated("Use getChapterList instead")
-    fun fetchChapterList(manga: SManga): Observable<List<SChapter>>
+    @Deprecated(
+        "Use the 1.x API instead",
+        ReplaceWith("getChapterList"),
+    )
+    fun fetchChapterList(manga: SManga): Observable<List<SChapter>> = throw IllegalStateException("Not used")
+
+    // TODO: remove direct usages on this method
 
     /**
      * Returns an observable with the list of pages a chapter has.
      *
      * @param chapter the chapter.
      */
-    @Deprecated("Use getPageList instead")
-    fun fetchPageList(chapter: SChapter): Observable<List<Page>>
+    @Deprecated(
+        "Use the 1.x API instead",
+        ReplaceWith("getPageList"),
+    )
+    fun fetchPageList(chapter: SChapter): Observable<List<Page>> = Observable.empty()
 
     /**
      * [1.x API] Get the updated details for a manga.
@@ -75,7 +86,8 @@ interface Source : tachiyomi.source.Source {
      */
     @Suppress("DEPRECATION")
     override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
-        return fetchChapterList(manga.toSManga()).awaitSingle().map { it.toChapterInfo() }
+        return fetchChapterList(manga.toSManga()).awaitSingle()
+            .map { it.toChapterInfo() }
     }
 
     /**
@@ -83,7 +95,8 @@ interface Source : tachiyomi.source.Source {
      */
     @Suppress("DEPRECATION")
     override suspend fun getPageList(chapter: ChapterInfo): List<tachiyomi.source.model.Page> {
-        return fetchPageList(chapter.toSChapter()).awaitSingle().map { it.toPageUrl() }
+        return fetchPageList(chapter.toSChapter()).awaitSingle()
+            .map { it.toPageUrl() }
     }
 }
 
