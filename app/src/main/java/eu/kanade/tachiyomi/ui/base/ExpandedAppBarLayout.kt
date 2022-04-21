@@ -205,8 +205,7 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
     }
 
     fun getEstimatedLayout(includeSearchToolbar: Boolean, includeTabs: Boolean, includeLargeToolbar: Boolean, ignoreSearch: Boolean = false): Int {
-        val hasLargeToolbar = includeLargeToolbar && useLargeToolbar &&
-            ((!compactSearchMode && toolbarMode == ToolbarState.EXPANDED) || ignoreSearch)
+        val hasLargeToolbar = includeLargeToolbar && useLargeToolbar && (!compactSearchMode || ignoreSearch)
         val appBarHeight = attrToolbarHeight * (if (includeSearchToolbar && hasLargeToolbar) 2 else 1)
         val widthMeasureSpec = MeasureSpec.makeMeasureSpec(resources.displayMetrics.widthPixels, MeasureSpec.AT_MOST)
         val heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
