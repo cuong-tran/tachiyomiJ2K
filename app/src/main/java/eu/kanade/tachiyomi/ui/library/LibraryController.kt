@@ -112,6 +112,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
@@ -1061,6 +1062,9 @@ class LibraryController(
             }
         )
         with(binding.filterBottomSheet.root) {
+            viewScope.launch {
+                checkForManhwa(presenter.sourceManager)
+            }
             updateGroupTypeButton(presenter.groupType)
             setExpandText(canCollapseOrExpandCategory())
         }
