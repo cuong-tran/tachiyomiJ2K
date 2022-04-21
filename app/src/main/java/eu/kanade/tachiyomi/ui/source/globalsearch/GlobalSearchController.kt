@@ -169,6 +169,7 @@ open class GlobalSearchController(
             val searchItem = activityBinding?.cardToolbar?.searchItem ?: return
             searchItem.expandActionView()
             searchView.setQuery(presenter.query, false)
+            searchView.clearFocus()
         }
     }
 
