@@ -9,6 +9,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.ItemTouchHelper
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.databinding.CategoriesItemBinding
@@ -139,13 +140,16 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         )
     }
 
-    /**
-     * Called when an item is released.
-     *
-     * @param position The position of the released item.
-     */
+    override fun onActionStateChanged(position: Int, actionState: Int) {
+        super.onActionStateChanged(position, actionState)
+        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+            binding.root.isDragged = true
+        }
+    }
+
     override fun onItemReleased(position: Int) {
         super.onItemReleased(position)
         adapter.categoryItemListener.onItemReleased(position)
+        binding.root.isDragged = false
     }
 }
