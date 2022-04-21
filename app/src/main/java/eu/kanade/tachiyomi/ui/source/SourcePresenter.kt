@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -66,7 +67,7 @@ class SourcePresenter(
                     else -> d1.compareTo(d2)
                 }
             }
-            val byLang = sources.groupByTo(map, { it.lang })
+            val byLang = sources.groupByTo(map) { it.lang }
             sourceItems = byLang.flatMap {
                 val langItem = LangItem(it.key)
                 it.value.map { source ->
@@ -94,6 +95,7 @@ class SourcePresenter(
     private fun loadLastUsedSource() {
         lastUsedJob?.cancel()
         lastUsedJob = preferences.lastUsedCatalogueSource().asFlow()
+            .drop(1)
             .onEach {
                 lastUsedItem = getLastUsedSource(it)
                 withUIContext {

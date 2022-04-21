@@ -67,10 +67,10 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
     }
 
     private fun setItemsPerCategoryMap() {
-        itemsPerCategory = headerItems.map { header ->
+        itemsPerCategory = headerItems.associate { header ->
             (header as LibraryHeaderItem).catId to
                 controller.presenter.getItemCountInCategories(header.catId)
-        }.toMap()
+        }
     }
 
     /**

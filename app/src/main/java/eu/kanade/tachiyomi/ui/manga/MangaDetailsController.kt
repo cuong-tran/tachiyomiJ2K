@@ -58,6 +58,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
+import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
@@ -97,15 +98,16 @@ import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
+import eu.kanade.tachiyomi.util.view.setTextColorAlpha
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.toolbarHeight
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -121,6 +123,7 @@ class MangaDetailsController :
     FlexibleAdapter.OnItemLongClickListener,
     ActionMode.Callback,
     MangaDetailsAdapter.MangaDetailsInterface,
+    SmallToolbarInterface,
     FlexibleAdapter.OnItemMoveListener {
 
     constructor(
@@ -353,7 +356,6 @@ class MangaDetailsController :
         presenter.onDestroy()
         adapter = null
         trackingBottomSheet = null
-        updateToolbarTitleAlpha(1f)
         super.onDestroyView(view)
     }
 
@@ -363,46 +365,39 @@ class MangaDetailsController :
 
         binding.recycler.adapter = adapter
         adapter?.isSwipeEnabled = true
-        binding.recycler.layoutManager = LinearLayoutManager(view.context)
+        binding.recycler.layoutManager = LinearLayoutManagerAccurateOffset(view.context)
         binding.recycler.addItemDecoration(
             MangaDetailsDivider(view.context)
         )
         binding.recycler.setHasFixedSize(true)
-        val attrsArray = intArrayOf(R.attr.mainActionBarSize)
-        val array = view.context.obtainStyledAttributes(attrsArray)
-        val appbarHeight = array.getDimensionPixelSize(0, 0)
-        array.recycle()
+        val appbarHeight = activityBinding?.appBar?.attrToolbarHeight ?: 0
         val offset = 10.dpToPx
         binding.swipeRefresh.setDistanceToTriggerSync(70.dpToPx)
 
         if (isTablet) {
             val tHeight = toolbarHeight.takeIf { it ?: 0 > 0 } ?: appbarHeight
-            headerHeight = tHeight +
-                (view.rootWindowInsetsCompat?.getInsets(systemBars())?.top ?: 0)
+            val insetsCompat = view.rootWindowInsetsCompat ?: activityBinding?.root?.rootWindowInsetsCompat
+            headerHeight = tHeight + (insetsCompat?.getInsets(systemBars())?.top ?: 0)
             binding.recycler.updatePaddingRelative(top = headerHeight + 4.dpToPx)
-            binding.recycler.doOnApplyWindowInsetsCompat { _, insets, _ ->
-                setInsets(insets, appbarHeight, offset)
-            }
-        } else {
-            scrollViewWith(
-                binding.recycler,
-                padBottom = true,
-                customPadding = true,
-                afterInsets = { insets ->
-                    setInsets(insets, appbarHeight, offset)
-                },
-                liftOnScroll = {
-                    colorToolbar(it)
-                }
-            )
         }
-
+        scrollViewWith(
+            binding.recycler,
+            padBottom = true,
+            customPadding = true,
+            swipeRefreshLayout = binding.swipeRefresh,
+            afterInsets = { insets ->
+                setInsets(insets, appbarHeight, offset)
+            },
+            liftOnScroll = {
+                colorToolbar(it)
+            }
+        )
         binding.recycler.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
                     if (!isTablet) {
-                        updateToolbarTitleAlpha(isScrollingDown = dy > 0)
+                        updateToolbarTitleAlpha(isScrollingDown = dy > 0 && !binding.root.context.isTablet())
                         val atTop = !recyclerView.canScrollVertically(-1)
                         val tY = getHeader()?.binding?.backdrop?.translationY ?: 0f
                         getHeader()?.binding?.backdrop?.translationY = max(0f, tY + dy * 0.25f)
@@ -562,6 +557,8 @@ class MangaDetailsController :
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
+            activityBinding?.appBar?.y = 0f
+            activityBinding?.appBar?.updateAppBarAfterY(binding.recycler)
             updateToolbarTitleAlpha(0f)
             setStatusBarAndToolbar()
         } else {
@@ -1118,25 +1115,20 @@ class MangaDetailsController :
         ) return
         val scrolledList = binding.recycler
         val toolbarTextView = activityBinding?.toolbar?.toolbarTitle ?: return
-        toolbarTextView.setTextColor(
-            ColorUtils.setAlphaComponent(
-                toolbarTextView.currentTextColor,
-                (
-                    when {
-                        // Specific alpha provided
-                        alpha != null -> alpha
+        val tbAlpha = when {
+            isTablet -> 0f
+            // Specific alpha provided
+            alpha != null -> alpha
 
-                        // First item isn't in view, full opacity
-                        ((scrolledList.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition() > 0) -> 1f
-                        ((scrolledList.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0) -> 0f
+            // First item isn't in view, full opacity
+            ((scrolledList.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition() > 0) -> 1f
+            ((scrolledList.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0) -> 0f
 
-                        // Based on scroll amount when first item is in view
-                        else -> (scrolledList.computeVerticalScrollOffset() - (20.dpToPx))
-                            .coerceIn(0, 255) / 255f
-                    } * 255
-                    ).roundToInt()
-            )
-        )
+            // Based on scroll amount when first item is in view
+            else -> (scrolledList.computeVerticalScrollOffset() - (20.dpToPx))
+                .coerceIn(0, 255) / 255f
+        }
+        toolbarTextView.setTextColorAlpha((tbAlpha * 255).roundToInt())
     }
 
     private fun downloadChapters(choice: Int) {

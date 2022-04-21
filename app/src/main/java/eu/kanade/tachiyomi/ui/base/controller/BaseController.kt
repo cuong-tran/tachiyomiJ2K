@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.base.controller
 
 import android.app.Activity
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -9,11 +10,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.forEach
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.removeQueryListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -75,12 +80,20 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
         super.onChangeStarted(handler, type)
     }
 
-    val onRoot: Boolean
-        get() = router.backstack.lastOrNull()?.controller == this
-
     open fun getTitle(): String? {
         return null
     }
+
+    open fun getSearchTitle(): String? {
+        return null
+    }
+
+    open fun getBigIcon(): Drawable? {
+        return null
+    }
+
+    open val mainRecycler: RecyclerView?
+        get() = null
 
     override fun onActivityPaused(activity: Activity) {
         super.onActivityPaused(activity)
@@ -96,8 +109,16 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
             parentController = parentController.parentController
         }
 
-        if (router.backstack.lastOrNull()?.controller == this) {
-            (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
+        if (isControllerVisible) {
+            (activity as? AppCompatActivity)?.title = getTitle()
+            (activity as? MainActivity)?.searchTitle = getSearchTitle()
+            val icon = getBigIcon()
+            activityBinding?.bigIcon?.isVisible = icon != null
+            if (icon != null) {
+                activityBinding?.bigIcon?.setImageDrawable(getBigIcon())
+            } else {
+                activityBinding?.bigIcon?.setImageDrawable(getBigIcon())
+            }
         }
     }
 
@@ -132,6 +153,9 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
             expandActionView()
         }
     }
+
+    open fun onActionViewExpand(item: MenuItem?) { }
+    open fun onActionViewCollapse(item: MenuItem?) { }
 
     fun hideItemsIfExpanded(searchItem: MenuItem?, menu: Menu?, isExpanded: Boolean = false) {
         menu ?: return

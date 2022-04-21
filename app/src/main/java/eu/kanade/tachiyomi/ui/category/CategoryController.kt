@@ -10,6 +10,7 @@ import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.CategoriesControllerBinding
+import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.category.CategoryPresenter.Companion.CREATE_CATEGORY_ORDER
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -25,6 +26,7 @@ class CategoryController(bundle: Bundle? = null) :
     BaseController<CategoriesControllerBinding>(bundle),
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemMoveListener,
+    SmallToolbarInterface,
     CategoryAdapter.CategoryItemListener {
 
     /**

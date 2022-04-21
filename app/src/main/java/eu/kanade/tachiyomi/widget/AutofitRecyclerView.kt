@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.pxToDp
 import kotlin.math.max
@@ -14,7 +14,7 @@ import kotlin.math.roundToInt
 class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     androidx.recyclerview.widget.RecyclerView(context, attrs) {
 
-    val manager = GridLayoutManager(context, 1)
+    val manager = GridLayoutManagerAccurateOffset(context, 1)
 
     var lastMeasuredWidth = 0
     var columnWidth = -1f

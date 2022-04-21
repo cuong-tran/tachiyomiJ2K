@@ -3,9 +3,11 @@ package eu.kanade.tachiyomi.ui.base
 import android.content.Context
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -24,6 +26,40 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
     private lateinit var cardIncogImage: ImageView
     private val defStyleRes = com.google.android.material.R.style.Widget_Material3_Toolbar
     private val subtitleTextAppearance: Int
+
+    val isSearchExpanded: Boolean
+        get() {
+            return searchItem?.isActionViewExpanded == true
+        }
+
+    var searchQueryHint: CharSequence?
+        get() {
+            val searchView = searchItem?.actionView as? SearchView ?: return null
+            return searchView.queryHint
+        }
+        set(value) {
+            setQueryHint(value)
+        }
+
+    fun setQueryHint(query: CharSequence?, collapseSearch: Boolean = true) {
+        val searchView = searchItem?.actionView as? SearchView ?: return
+        val oldV = searchView.queryHint
+        searchView.queryHint = query
+        if (oldV != query && collapseSearch) {
+            searchView.setQuery("", false)
+            searchItem?.collapseActionView()
+        }
+    }
+
+    val searchView: SearchView?
+        get() {
+            return searchItem?.actionView as? SearchView
+        }
+
+    val searchItem: MenuItem?
+        get() {
+            return menu.findItem(R.id.action_search)
+        }
 
     init {
         val a = context.obtainStyledAttributes(
@@ -52,6 +88,7 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
         collapseIcon = context.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)?.apply {
             setTint(actionColorAlpha)
         }
+        inflateMenu(R.menu.search)
     }
 
     override fun setSubtitle(resId: Int) {

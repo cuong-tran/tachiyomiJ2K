@@ -25,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -72,7 +73,7 @@ class ExtensionBottomPresenter(
                         extensionManager.availableExtensions
                     )
                 )
-                withContext(Dispatchers.Main) { bottomSheet.setExtensions(extensions) }
+                withContext(Dispatchers.Main) { bottomSheet.setExtensions(extensions, false) }
             }
             val migrationJob = async {
                 val favs = db.getFavoriteMangas().executeOnIO()
@@ -97,6 +98,7 @@ class ExtensionBottomPresenter(
         }
         presenterScope.launch {
             extensionManager.downloadRelay
+                .drop(3)
                 .collect {
                     if (it.first.startsWith("Finished")) {
                         firstLoad = true
@@ -151,7 +153,7 @@ class ExtensionBottomPresenter(
                     extensionManager.availableExtensions
                 )
             )
-            withContext(Dispatchers.Main) { bottomSheet.setExtensions(extensions) }
+            withContext(Dispatchers.Main) { bottomSheet.setExtensions(extensions, false) }
         }
     }
 

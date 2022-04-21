@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.TypedValue
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
@@ -20,8 +21,10 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
 import kotlinx.coroutines.MainScope
 import rx.Observable
 import rx.Subscription
@@ -38,6 +41,11 @@ abstract class SettingsController : PreferenceController() {
 
     var untilDestroySubscriptions = CompositeSubscription()
         private set
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        listView.layoutManager = LinearLayoutManagerAccurateOffset(view?.context)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
         if (untilDestroySubscriptions.isUnsubscribed) {
@@ -80,6 +88,9 @@ abstract class SettingsController : PreferenceController() {
 
     abstract fun setupPreferenceScreen(screen: PreferenceScreen): PreferenceScreen
 
+    open fun onActionViewExpand(item: MenuItem?) { }
+    open fun onActionViewCollapse(item: MenuItem?) { }
+
     private fun getThemedContext(): Context {
         val tv = TypedValue()
         activity!!.theme.resolveAttribute(R.attr.preferenceTheme, tv, true)
@@ -97,11 +108,12 @@ abstract class SettingsController : PreferenceController() {
             }
     }
 
-    open fun getTitle(): String? {
-        if (this is FloatingSearchInterface) {
-            return searchTitle(preferenceScreen?.title?.toString()?.lowercase(Locale.ROOT))
-        }
-        return preferenceScreen?.title?.toString()
+    open fun getTitle(): String? = preferenceScreen?.title?.toString()
+
+    open fun getSearchTitle(): String? {
+        return if (this is FloatingSearchInterface) {
+            searchTitle(preferenceScreen?.title?.toString()?.lowercase(Locale.ROOT))
+        } else null
     }
 
     fun setTitle() {
@@ -113,7 +125,8 @@ abstract class SettingsController : PreferenceController() {
             parentController = parentController.parentController
         }
 
-        (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
+        (activity as? AppCompatActivity)?.title = getTitle()
+        (activity as? MainActivity)?.searchTitle = getSearchTitle()
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {

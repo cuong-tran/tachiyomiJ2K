@@ -135,8 +135,7 @@ class RecentsPresenter(
         }
         val viewType = customViewType ?: viewType
 
-        val showRead = ((preferences.showReadInAllRecents().get() || query.isNotEmpty()) && !limit) ||
-            includeReadAnyway == true
+        val showRead = ((preferences.showReadInAllRecents().get() || query.isNotEmpty()) && !limit) || includeReadAnyway
         val isUngrouped = viewType > VIEW_TYPE_GROUP_ALL || query.isNotEmpty()
         val groupChaptersUpdates = preferences.groupChaptersUpdates().get()
         val groupChaptersHistory = preferences.groupChaptersHistory().get()
@@ -193,6 +192,10 @@ class RecentsPresenter(
                     }
             }
             else -> emptyList()
+        }
+
+        if (cReading.size < ENDLESS_LIMIT) {
+            finished = true
         }
 
         if (!isCustom &&
@@ -284,7 +287,7 @@ class RecentsPresenter(
                             .compareTo(d1)
                     }
                 val byDay =
-                    pairs.groupByTo(map, { getMapKey(it.first.history.last_read) })
+                    pairs.groupByTo(map) { getMapKey(it.first.history.last_read) }
                 byDay.flatMap {
                     val dateItem = DateItem(it.key, true)
                     it.value

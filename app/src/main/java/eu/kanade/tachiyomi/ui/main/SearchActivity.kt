@@ -9,8 +9,10 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -38,9 +40,17 @@ class SearchActivity : MainActivity() {
     }
 
     override fun onBackPressed() {
+        if (binding.cardToolbar.isSearchExpanded && binding.cardFrame.isVisible) {
+            binding.cardToolbar.searchItem?.collapseActionView()
+            return
+        }
+        backPress()
+    }
+
+    override fun backPress() {
         if (router.backstack.size <= 1 || !router.handleBack()) {
             SecureActivityDelegate.locked = true
-            super.onBackPressed()
+            super.backPress()
         }
     }
 
@@ -56,9 +66,19 @@ class SearchActivity : MainActivity() {
         }
     }
 
-    override fun setFloatingToolbar(show: Boolean, solidBG: Boolean, changeBG: Boolean) {
-        super.setFloatingToolbar(show, solidBG, changeBG)
-        currentToolbar?.setNavigationOnClickListener { popToRoot() }
+    override fun setFloatingToolbar(show: Boolean, solidBG: Boolean, changeBG: Boolean, showSearchAnyway: Boolean) {
+        super.setFloatingToolbar(show, solidBG, changeBG, showSearchAnyway)
+        binding.toolbar.setNavigationOnClickListener { popToRoot() }
+        binding.cardToolbar.setNavigationOnClickListener {
+            val rootSearchController = router.backstack.lastOrNull()?.controller
+            if ((
+                rootSearchController is RootSearchInterface ||
+                    (currentToolbar != binding.cardToolbar && binding.appBar.useLargeToolbar)
+                ) && rootSearchController !is SmallToolbarInterface
+            ) {
+                binding.cardToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+            } else popToRoot()
+        }
     }
 
     private fun intentShouldGoBack() =
@@ -74,7 +94,7 @@ class SearchActivity : MainActivity() {
             return
         }
         setFloatingToolbar(canShowFloatingToolbar(to))
-        binding.cardToolbar.navigationIcon = backDrawable
+        binding.cardToolbar.navigationIcon = if (binding.appBar.useLargeToolbar) searchDrawable else backDrawable
         binding.toolbar.navigationIcon = backDrawable
 
         nav.isVisible = false

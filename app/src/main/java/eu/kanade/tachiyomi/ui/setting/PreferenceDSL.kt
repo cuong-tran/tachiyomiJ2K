@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.isAuthenticationSupport
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.startAuthentication
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.widget.preference.AdaptiveTitlePreferenceCategory
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
@@ -103,12 +104,7 @@ inline fun PreferenceGroup.triStateListPreference(
 }
 
 inline fun PreferenceScreen.preferenceCategory(block: (@DSL PreferenceCategory).() -> Unit): PreferenceCategory {
-    return addThenInit(
-        PreferenceCategory(context).apply {
-            isIconSpaceReserved = false
-        },
-        block
-    )
+    return addThenInit(AdaptiveTitlePreferenceCategory(context), block)
 }
 
 inline fun PreferenceScreen.switchPreference(block: (@DSL SwitchPreferenceCompat).() -> Unit): SwitchPreferenceCompat {

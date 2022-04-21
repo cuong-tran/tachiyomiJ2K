@@ -6,16 +6,17 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.widget.SearchView
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updatePaddingRelative
+import com.bluelinelabs.conductor.ControllerChangeHandler
+import com.bluelinelabs.conductor.ControllerChangeType
 import com.google.android.material.snackbar.Snackbar
-import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.SourceGlobalSearchControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -26,6 +27,7 @@ import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.toolbarHeight
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -42,6 +44,7 @@ open class GlobalSearchController(
     bundle: Bundle? = null
 ) : NucleusController<SourceGlobalSearchControllerBinding, GlobalSearchPresenter>(bundle),
     FloatingSearchInterface,
+    SmallToolbarInterface,
     GlobalSearchAdapter.OnTitleClickListener,
     GlobalSearchCardAdapter.OnMangaClickListener {
 
@@ -148,31 +151,38 @@ open class GlobalSearchController(
         inflater.inflate(R.menu.catalogue_new_list, menu)
 
         // Initialize search menu
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
+        activityBinding?.cardToolbar?.setQueryHint(view?.context?.getString(R.string.global_search), false)
+        activityBinding?.cardToolbar?.searchItem?.expandActionView()
+        activityBinding?.cardToolbar?.searchView?.setQuery(presenter.query, false)
 
-        searchItem.isVisible = customTitle == null
-        searchItem.setOnActionExpandListener(
-            object : MenuItem.OnActionExpandListener {
-                override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-                    searchView.onActionViewExpanded() // Required to show the query in the view
-                    searchView.setQuery(presenter.query, false)
-                    return true
-                }
+        setOnQueryTextChangeListener(activityBinding?.cardToolbar?.searchView, onlyOnSubmit = true, hideKbOnSubmit = true) {
+            presenter.search(it ?: "")
+            setTitle() // Update toolbar title
+            true
+        }
+    }
 
-                override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-                    return true
-                }
-            }
-        )
+    override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
+        super.onChangeStarted(handler, type)
+        if (type.isEnter) {
+            val searchView = activityBinding?.cardToolbar?.searchView ?: return
+            val searchItem = activityBinding?.cardToolbar?.searchItem ?: return
+            searchItem.expandActionView()
+            searchView.setQuery(presenter.query, false)
+        }
+    }
 
-        searchView.queryTextChangeEvents()
-            .filter { it.isSubmitted }
-            .subscribeUntilDestroy {
-                presenter.search(it.queryText().toString())
-                searchItem.collapseActionView()
-                setTitle() // Update toolbar title
-            }
+    override fun onActionViewExpand(item: MenuItem?) {
+        val searchView = activityBinding?.cardToolbar?.searchView ?: return
+        searchView.setQuery(presenter.query, false)
+    }
+
+    override fun onActionViewCollapse(item: MenuItem?) {
+        if (activity is SearchActivity && extensionFilter != null) {
+            (activity as? SearchActivity)?.backPress()
+        } else if (customTitle == null) {
+            router.popCurrentController()
+        }
     }
 
     /**
@@ -253,6 +263,7 @@ open class GlobalSearchController(
                 customTitle = null
                 setTitle()
                 activity?.invalidateOptionsMenu()
+                activityBinding?.appBar?.updateAppBarAfterY(binding.recycler)
             }
         }
         adapter?.updateDataSet(searchResult)

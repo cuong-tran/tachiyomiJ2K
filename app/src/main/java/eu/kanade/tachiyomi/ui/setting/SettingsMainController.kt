@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.setting
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import androidx.appcompat.widget.SearchView
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
@@ -11,6 +10,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 
 class SettingsMainController : SettingsController(), FloatingSearchInterface {
@@ -88,29 +88,14 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
     }
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.settings_main, menu)
-
-        // Initialize search option.
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
-        searchView.maxWidth = Int.MAX_VALUE
-
         // Change hint to show global search.
-        searchView.queryHint = applicationContext?.getString(R.string.search_settings)
+        activityBinding?.cardToolbar?.searchQueryHint = applicationContext?.getString(R.string.search_settings)
+    }
 
-        searchItem.setOnActionExpandListener(
-            object : MenuItem.OnActionExpandListener {
-                override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-                    SettingsSearchController.lastSearch = "" // reset saved search query
-                    router.pushController(
-                        RouterTransaction.with(SettingsSearchController())
-                    )
-                    return true
-                }
-
-                override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-                    return true
-                }
-            }
+    override fun onActionViewExpand(item: MenuItem?) {
+        SettingsSearchController.lastSearch = "" // reset saved search query
+        router.pushController(
+            RouterTransaction.with(SettingsSearchController())
         )
     }
 

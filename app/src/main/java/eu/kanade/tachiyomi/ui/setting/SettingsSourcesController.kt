@@ -15,13 +15,18 @@ import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.isControllerVisible
+import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.widget.preference.SwitchPreferenceCategory
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.TreeMap
 
-class SettingsSourcesController : SettingsController() {
+class SettingsSourcesController : SettingsController(), FloatingSearchInterface {
     init {
         setHasOptionsMenu(true)
     }
@@ -35,6 +40,10 @@ class SettingsSourcesController : SettingsController() {
     private var sourcesByLang: TreeMap<String, MutableList<HttpSource>> = TreeMap()
     private var sorting = SourcesSort.Alpha
 
+    override fun getSearchTitle(): String? {
+        return view?.context?.getString(R.string.search)
+    }
+
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.filter
         sorting = SourcesSort.from(preferences.sourceSorting().get()) ?: SourcesSort.Alpha
@@ -43,7 +52,7 @@ class SettingsSourcesController : SettingsController() {
         val activeLangsCodes = preferences.enabledLanguages().get()
 
         // Get a map of sources grouped by language.
-        sourcesByLang = onlineSources.groupByTo(TreeMap(), { it.lang })
+        sourcesByLang = onlineSources.groupByTo(TreeMap()) { it.lang }
 
         // Order first by active languages, then inactive ones
         orderedLangs = sourcesByLang.keys.filter { it in activeLangsCodes } + sourcesByLang.keys
@@ -163,25 +172,42 @@ class SettingsSourcesController : SettingsController() {
         if (sorting == SourcesSort.Alpha) menu.findItem(R.id.action_sort_alpha).isChecked = true
         else menu.findItem(R.id.action_sort_enabled).isChecked = true
 
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
-        searchView.maxWidth = Int.MAX_VALUE
-
-        if (query.isNotEmpty()) {
-            searchItem.expandActionView()
-            searchView.setQuery(query, true)
-            searchView.clearFocus()
+        val useSearchTB = showFloatingBar()
+        val searchItem = if (useSearchTB) activityBinding?.cardToolbar?.searchItem
+        else (menu.findItem(R.id.action_search))
+        val searchView = if (useSearchTB) activityBinding?.cardToolbar?.searchView
+        else searchItem?.actionView as? SearchView
+        if (!useSearchTB) {
+            searchView?.maxWidth = Int.MAX_VALUE
         }
 
-        searchView.queryTextChanges().filter { router.backstack.lastOrNull()?.controller == this }
-            .subscribeUntilDestroy {
+        activityBinding?.cardToolbar?.setQueryHint(getSearchTitle(), query.isEmpty())
+
+        if (query.isNotEmpty()) {
+            searchItem?.expandActionView()
+            searchView?.setQuery(query, true)
+            searchView?.clearFocus()
+        }
+
+        setOnQueryTextChangeListener(activityBinding?.cardToolbar?.searchView) {
+            query = it ?: ""
+            drawSources()
+            true
+        }
+
+        searchView?.queryTextChanges()?.filter { isControllerVisible }
+            ?.subscribeUntilDestroy {
                 query = it.toString()
                 drawSources()
             }
 
-        // Fixes problem with the overflow icon showing up in lieu of search
-        searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
+        if (useSearchTB) {
+            // Fixes problem with the overflow icon showing up in lieu of search
+            searchItem?.fixExpand(onExpand = { invalidateMenuOnExpand() })
+        }
     }
+
+    override fun showFloatingBar() = activityBinding?.appBar?.useLargeToolbar == true
 
     var expandActionViewFromInteraction = false
     private fun MenuItem.fixExpand(onExpand: ((MenuItem) -> Boolean)? = null, onCollapse: ((MenuItem) -> Boolean)? = null) {
@@ -248,6 +274,14 @@ class SettingsSourcesController : SettingsController() {
             else -> return super.onOptionsItemSelected(item)
         }
         item.isChecked = true
+        (activity as? MainActivity)?.let {
+            val otherTB = if (it.currentToolbar == it.binding.cardToolbar) {
+                it.binding.toolbar
+            } else {
+                it.binding.cardToolbar
+            }
+            otherTB.menu.findItem(item.itemId).isChecked = true
+        }
         preferences.sourceSorting().set(sorting.value)
         drawSources()
         return true

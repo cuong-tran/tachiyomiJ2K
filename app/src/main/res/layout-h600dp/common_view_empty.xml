@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical">
+
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view"
-        android:layout_width="128dp"
-        android:layout_height="128dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintDimensionRatio="W,1:1"
-        app:layout_constraintVertical_bias="0.0"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toTopOf="@id/text_label"
+        app:layout_constraintDimensionRatio="h,1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_max="128dp"
-        app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintHeight_min="24dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/text_label"
+        app:layout_constraintVertical_chainStyle="packed"
         app:layout_constraintWidth_max="128dp"
         app:layout_constraintWidth_min="24dp"
         tools:src="@drawable/ic_file_download_24dp" />
@@ -29,26 +29,23 @@
         style="?textAppearanceLabelMedium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:paddingStart="4dp"
-        android:paddingEnd="0dp"
-        app:layout_constrainedWidth="true"
-        android:textAlignment="textStart"
+        android:layout_margin="16dp"
+        android:gravity="center"
         app:layout_constraintBottom_toTopOf="@id/actions_container"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@id/image_view"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:text="Label Label Label Label Label Label Label Label Label Label" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/image_view"
+        tools:text="Label" />
 
     <LinearLayout
         android:id="@+id/actions_container"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="start"
+        android:gravity="center"
         android:orientation="vertical"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintStart_toEndOf="@id/image_view"
-        app:layout_constraintTop_toBottomOf="@id/text_label"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_label" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

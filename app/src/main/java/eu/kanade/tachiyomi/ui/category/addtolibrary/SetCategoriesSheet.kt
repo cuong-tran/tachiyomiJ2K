@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.databinding.SetCategoriesSheetBinding
 import eu.kanade.tachiyomi.ui.category.ManageCategoryDialog
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.checkHeightThen
@@ -218,9 +219,7 @@ class SetCategoriesSheet(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val attrsArray = intArrayOf(R.attr.mainActionBarSize)
-        val array = context.obtainStyledAttributes(attrsArray)
-        val headerHeight = array.getDimensionPixelSize(0, 0)
+        val headerHeight = (activity as? MainActivity)?.toolbarHeight ?: 0
         binding.buttonLayout.updatePaddingRelative(
             bottom = activity.window.decorView.rootWindowInsetsCompat
                 ?.getInsets(systemBars())?.bottom ?: 0
@@ -229,7 +228,6 @@ class SetCategoriesSheet(
         binding.buttonLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
             height = headerHeight + binding.buttonLayout.paddingBottom
         }
-        array.recycle()
 
         binding.cancelButton.setOnClickListener { dismiss() }
         binding.newCategoryButton.setOnClickListener {

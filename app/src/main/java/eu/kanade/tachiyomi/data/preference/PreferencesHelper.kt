@@ -337,8 +337,6 @@ class PreferencesHelper(val context: Context) {
 
     fun refreshCoversToo() = flowPrefs.getBoolean(Keys.refreshCoversToo, true)
 
-    fun updateOnRefresh() = flowPrefs.getInt(Keys.updateOnRefresh, -1)
-
     fun extensionUpdatesCount() = flowPrefs.getInt("ext_updates_count", 0)
 
     fun recentsViewType() = flowPrefs.getInt("recents_view_type", 0)
@@ -409,6 +407,8 @@ class PreferencesHelper(val context: Context) {
     fun showNsfwSources() = flowPrefs.getBoolean(Keys.showNsfwSource, true)
 
     fun themeMangaDetails() = prefs.getBoolean(Keys.themeMangaDetails, true)
+
+    fun useLargeToolbar() = prefs.getBoolean(Keys.useLargeToolbar, true)
 
     fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
 

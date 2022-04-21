@@ -90,11 +90,7 @@
     <string name="category_is_empty">Category is empty</string>
     <string name="show_categories_while_filtering">Show empty categories while filtering</string>
     <string name="no_matches_for_filters_short">No matches for your filters</string>
-    <string name="top_category">Top category (%1$s)</string>
     <string name="default_category">Default category</string>
-    <string name="first_category">First category</string>
-    <string name="categories_on_manual">Categories to update when manually refreshing</string>
-    <string name="categories_in_global_update">All categories in global update</string>
     <string name="confirm_category_deletion">Delete category?</string>
     <string name="confirm_category_deletion_message">Manga in this category will moved into the
         default category.</string>
@@ -116,7 +112,6 @@
 
     <!-- Updates -->
     <string name="update">Update</string>
-    <string name="what_should_update">What should update?</string>
     <string name="updating_">Updating %1$s</string>
     <string name="update_available">Update available</string>
     <string name="new_version_available">New version available!</string>
@@ -696,6 +691,8 @@
     <string name="pure_black_dark_mode">Pure black dark mode</string>
     <string name="details_page">Details page</string>
     <string name="theme_buttons_based_on_cover">Theme buttons based on cover</string>
+    <string name="expanded_toolbar">Expanded toolbar</string>
+    <string name="show_larger_toolbar">Show a larger, expanded toolbar at the top of most pages (does not show on smaller devices regardless of setting)</string>
     <string name="hides_on_scroll">Hides when scrolling</string>
     <string name="hide_app_block_screenshots">Hide app contents when switching apps and block screenshots</string>
     <string name="hide_notification_content">Hide notification content</string>

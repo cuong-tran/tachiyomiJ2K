@@ -1160,10 +1160,10 @@ class LibraryPresenter(
                             sourceManager.get(
                                 distinctSources.randomOrNull(random)?.source ?: 0L
                             )?.name
-                        randomSource?.chopByWords(15)
+                        randomSource?.chopByWords(30)
                     }
                     randomTitle -> {
-                        libraryManga.randomOrNull(random)?.title?.chopByWords(15)
+                        libraryManga.randomOrNull(random)?.title?.chopByWords(30)
                     }
                     in randomTags -> {
                         val tags = recentManga.map {

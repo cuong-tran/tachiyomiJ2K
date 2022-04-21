@@ -42,6 +42,7 @@ import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.view.openInBrowser
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
 import eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText.Companion.setIncognito
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -109,8 +110,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
         manager.setPreferences(screen)
 
-        binding.extensionPrefsRecycler.layoutManager =
-            androidx.recyclerview.widget.LinearLayoutManager(context)
+        binding.extensionPrefsRecycler.layoutManager = LinearLayoutManagerAccurateOffset(context)
         val concatAdapterConfig = ConcatAdapter.Config.Builder()
             .setStableIdMode(ConcatAdapter.Config.StableIdMode.ISOLATED_STABLE_IDS)
             .build()

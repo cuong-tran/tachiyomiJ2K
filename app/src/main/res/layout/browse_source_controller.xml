@@ -18,9 +18,10 @@
             android:id="@+id/progress"
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|center_horizontal"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
     </FrameLayout>
     
@@ -32,9 +33,11 @@
 
     <eu.kanade.tachiyomi.widget.EmptyView
         android:id="@+id/empty_view"
+        tools:paddingTop="300dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
+        tools:visibility="visible"
         android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

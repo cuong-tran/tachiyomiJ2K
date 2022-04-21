@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.PreMigrationControllerBinding
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
@@ -33,8 +34,8 @@ import uy.kohesive.injekt.injectLazy
 
 class PreMigrationController(bundle: Bundle? = null) :
     BaseController<PreMigrationControllerBinding>(bundle),
-    FlexibleAdapter
-    .OnItemClickListener,
+    FlexibleAdapter.OnItemClickListener,
+    SmallToolbarInterface,
     StartMigrationListener {
     private val sourceManager: SourceManager by injectLazy()
     private val prefs: PreferencesHelper by injectLazy()

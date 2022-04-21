@@ -17,6 +17,7 @@ import android.graphics.Point
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.PowerManager
 import android.view.Gravity
@@ -44,6 +45,7 @@ import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.Type.ime
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.children
 import androidx.core.view.descendants
 import androidx.core.view.forEach
 import androidx.core.view.marginBottom
@@ -74,6 +76,7 @@ import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -194,13 +197,10 @@ fun View.applyBottomAnimatedInsets(
     )
 }
 
-object ControllerViewWindowInsetsListener : OnApplyWindowInsetsListener {
+class ControllerViewWindowInsetsListener(private val topHeight: Int) : OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsetsCompat): WindowInsetsCompat {
         v.updateLayoutParams<FrameLayout.LayoutParams> {
-            val attrsArray = intArrayOf(R.attr.mainActionBarSize)
-            val array = v.context.obtainStyledAttributes(attrsArray)
-            topMargin = insets.getInsets(systemBars()).top + array.getDimensionPixelSize(0, 0)
-            array.recycle()
+            topMargin = insets.getInsets(systemBars()).top + topHeight
         }
         return insets
     }
@@ -226,8 +226,8 @@ fun View.doOnApplyWindowInsetsCompat(f: (View, WindowInsetsCompat, ViewPaddingSt
     requestApplyInsetsWhenAttached()
 }
 
-fun View.applyWindowInsetsForController() {
-    ViewCompat.setOnApplyWindowInsetsListener(this, ControllerViewWindowInsetsListener)
+fun View.applyWindowInsetsForController(topHeight: Int) {
+    ViewCompat.setOnApplyWindowInsetsListener(this, ControllerViewWindowInsetsListener(topHeight))
     requestApplyInsetsWhenAttached()
 }
 
@@ -422,8 +422,18 @@ fun setCards(
     mainCard.strokeWidth = if (showOutline) 1.dpToPx else 0
 }
 
-val View.backgroundColor
+var View.backgroundColor: Int?
     get() = (background as? ColorDrawable)?.color
+    set(value) {
+        if (value != null) setBackgroundColor(value) else background = null
+    }
+
+/**
+ * Returns this ViewGroup's first descendant of specified class
+ */
+inline fun <reified T> ViewGroup.findChild(): T? {
+    return children.find { it is T } as? T
+}
 
 /**
  * Returns this ViewGroup's first descendant of specified class
@@ -489,6 +499,23 @@ fun Dialog.blurBehindWindow(
         unregister()
         if (!supportsBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             window?.decorView?.animateBlur(blurAmount, 1f, 50, true)?.start()
+        }
+    }
+}
+
+fun TextView.setTextColorAlpha(alpha: Int) {
+    setTextColor(ColorUtils.setAlphaComponent(currentTextColor, alpha))
+}
+
+fun View.updateGradiantBGRadius(ogRadius: Float, deviceRadius: Float, progress: Float, vararg updateOtherViews: View) {
+    (background as? GradientDrawable)?.let { drawable ->
+        val lerp = min(ogRadius, deviceRadius) * (1 - progress) +
+            max(ogRadius, deviceRadius) * progress
+        drawable.shape = GradientDrawable.RECTANGLE
+        drawable.cornerRadii = floatArrayOf(lerp, lerp, lerp, lerp, 0f, 0f, 0f, 0f)
+        background = drawable
+        updateOtherViews.forEach {
+            it.background = drawable
         }
     }
 }

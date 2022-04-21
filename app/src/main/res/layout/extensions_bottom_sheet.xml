@@ -12,7 +12,7 @@
     app:behavior_peekHeight="60sp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/sheet_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -37,6 +37,40 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <eu.kanade.tachiyomi.ui.base.CenteredToolbar
+            android:id="@+id/sheet_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@android:color/transparent"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            app:collapseIcon="@drawable/ic_arrow_back_24dp"
+            app:layout_constraintBottom_toTopOf="@id/tabs"
+            app:layout_constraintHeight_max="?mainActionBarSize"
+            app:layout_constraintTop_toBottomOf="@id/pill"
+            app:layout_constraintVertical_bias="1.0"
+            app:navigationIcon="@drawable/ic_close_24dp"
+            app:navigationIconTint="?actionBarTintColor"
+            app:titleTextColor="?actionBarTintColor"
+            tools:visibility="visible">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/toolbar_title"
+                style="?textAppearanceTitleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:drawableTint="?actionBarTintColor"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/extensions"
+                android:textColor="?actionBarTintColor"
+                android:textSize="20sp"
+                tools:drawableEnd="@drawable/ic_arrow_drop_down_24dp"
+                tools:drawableStart="@drawable/ic_blank_24dp"
+                tools:text="Title Text" />
+        </eu.kanade.tachiyomi.ui.base.CenteredToolbar>
+
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
             style="@style/Theme.Widget.Tabs"
@@ -44,15 +78,14 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/menu"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/pill"
             app:tabTextColor="@color/tabs_selector_background"
             app:tabIndicatorColor="?attr/colorSecondary"
             app:tabMaxWidth="0dp"
             app:tabGravity="fill"
             app:tabMode="fixed" />
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/pager"

@@ -37,6 +37,6 @@ class LatestUpdatesController(bundle: Bundle) : BrowseSourceController(bundle) {
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        menu.findItem(R.id.action_search).isVisible = false
+        menu.findItem(R.id.action_search)?.isVisible = false
     }
 }

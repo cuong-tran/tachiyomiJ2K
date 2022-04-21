@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.migration
 
 import android.view.LayoutInflater
 import android.view.View
+import androidx.core.view.doOnNextLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -13,7 +14,9 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.util.system.await
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import rx.schedulers.Schedulers
@@ -45,8 +48,7 @@ class MigrationController :
         scrollViewWith(binding.migrationRecycler, padBottom = true)
 
         adapter = FlexibleAdapter(null, this)
-        binding.migrationRecycler.layoutManager =
-            androidx.recyclerview.widget.LinearLayoutManager(view.context)
+        binding.migrationRecycler.layoutManager = LinearLayoutManagerAccurateOffset(view.context)
         binding.migrationRecycler.adapter = adapter
     }
 
@@ -83,10 +85,9 @@ class MigrationController :
                 binding.migrationRecycler.adapter = adapter
             }
             adapter?.updateDataSet(state.mangaForSource, true)
-            /*if (switching) launchUI {
-                binding.migrationRecycler.alpha = 0f
-                binding.migrationRecycler.animate().alpha(1f).setStartDelay(100).setDuration(200).start()
-            }*/
+            activityBinding?.appBar?.doOnNextLayout {
+                binding.migrationRecycler.requestApplyInsets()
+            }
         }
     }
 

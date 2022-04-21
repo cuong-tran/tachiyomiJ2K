@@ -3,10 +3,13 @@ package eu.kanade.tachiyomi.widget
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.RelativeLayout
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import com.google.android.material.button.MaterialButton
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.CommonViewEmptyBinding
@@ -43,6 +46,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         binding.textLabel.text = message
 
         binding.actionsContainer.removeAllViews()
+        binding.actionsContainer.isVisible = !actions.isNullOrEmpty()
         if (!actions.isNullOrEmpty()) {
             actions.forEach {
                 val button =
@@ -51,8 +55,14 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                             setText(it.resId)
                             setOnClickListener(it.listener)
                         }
-
                 binding.actionsContainer.addView(button)
+                if (context.resources.configuration.screenHeightDp < 600) {
+                    button.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
+                    button.updateLayoutParams<MarginLayoutParams> {
+                        width = ViewGroup.LayoutParams.WRAP_CONTENT
+                        height = ViewGroup.LayoutParams.WRAP_CONTENT
+                    }
+                }
             }
         }
 

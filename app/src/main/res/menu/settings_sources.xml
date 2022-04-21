@@ -14,7 +14,8 @@
         android:icon="@drawable/ic_sort_24dp"
         app:showAsAction="ifRoom">
         <menu>
-            <group android:checkableBehavior="single">
+            <group android:checkableBehavior="single"
+                android:id="@+id/action_sort_group">
             <item
                 android:id="@+id/action_sort_alpha"
                 android:title="@string/alphabetically"/>

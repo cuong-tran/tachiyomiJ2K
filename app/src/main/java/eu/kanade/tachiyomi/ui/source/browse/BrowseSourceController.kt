@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
 import android.app.Activity
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,11 +10,11 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.SearchView
 import androidx.core.view.WindowInsetsCompat.Type.ime
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -27,6 +28,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.BrowseSourceControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.LocalSource
+import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -41,8 +43,11 @@ import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.applyBottomAnimatedInsets
+import eu.kanade.tachiyomi.util.view.fullAppBarHeight
 import eu.kanade.tachiyomi.util.view.inflate
+import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
@@ -50,8 +55,10 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.EmptyView
+import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.roundToInt
 
 /**
  * Controller to manage the catalogues available in the app.
@@ -115,12 +122,26 @@ open class BrowseSourceController(bundle: Bundle) :
     /** Current filter sheet */
     var filterSheet: SourceFilterSheet? = null
 
+    private val isBehindGlobalSearch: Boolean
+        get() = router.backstackSize >= 2 && router.backstack[router.backstackSize - 2].controller is GlobalSearchController
+
     init {
         setHasOptionsMenu(true)
     }
 
+    override val mainRecycler: RecyclerView?
+        get() = recycler
+
     override fun getTitle(): String? {
+        return presenter.source.name
+    }
+
+    override fun getSearchTitle(): String? {
         return searchTitle(presenter.source.name)
+    }
+
+    override fun getBigIcon(): Drawable? {
+        return presenter.source.icon()
     }
 
     override fun createPresenter(): BrowseSourcePresenter {
@@ -139,6 +160,9 @@ open class BrowseSourceController(bundle: Bundle) :
         binding.fab.isVisible = presenter.sourceFilters.isNotEmpty()
         binding.fab.setOnClickListener { showFilters() }
         binding.progress.isVisible = true
+        activityBinding?.appBar?.y = 0f
+        activityBinding?.appBar?.updateAppBarAfterY(recycler)
+        activityBinding?.appBar?.lockYPos = true
         requestFilePermissionsSafe(301, preferences, presenter.source is LocalSource)
     }
 
@@ -151,9 +175,13 @@ open class BrowseSourceController(bundle: Bundle) :
 
     private fun setupRecycler(view: View) {
         var oldPosition = RecyclerView.NO_POSITION
+        var oldOffset = 0f
         val oldRecycler = binding.catalogueView.getChildAt(1)
         if (oldRecycler is RecyclerView) {
-            oldPosition = (oldRecycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            oldPosition = (oldRecycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+                .takeIf { it != RecyclerView.NO_POSITION }
+                ?: (oldRecycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            oldOffset = oldRecycler.layoutManager?.findViewByPosition(oldPosition)?.y?.minus(oldRecycler.paddingTop) ?: 0f
             oldRecycler.adapter = null
 
             binding.catalogueView.removeView(oldRecycler)
@@ -162,7 +190,7 @@ open class BrowseSourceController(bundle: Bundle) :
         val recycler = if (presenter.isListMode) {
             RecyclerView(view.context).apply {
                 id = R.id.recycler
-                layoutManager = LinearLayoutManager(context)
+                layoutManager = LinearLayoutManagerAccurateOffset(context)
                 layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
                 addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             }
@@ -184,6 +212,7 @@ open class BrowseSourceController(bundle: Bundle) :
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
 
+        binding.catalogueView.addView(recycler, 1)
         scrollViewWith(
             recycler,
             true,
@@ -193,6 +222,14 @@ open class BrowseSourceController(bundle: Bundle) :
                         bottomMargin = insets.getInsets(systemBars() or ime()).bottom + 16.dpToPx
                     }
                 }
+                val bigToolbarHeight = fullAppBarHeight ?: 0
+                binding.progress.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = (bigToolbarHeight + insets.getInsets(systemBars()).top) / 2
+                }
+                binding.emptyView.updatePadding(
+                    top = (bigToolbarHeight + insets.getInsets(systemBars()).top),
+                    bottom = insets.getInsets(systemBars()).bottom
+                )
             }
         )
         binding.fab.applyBottomAnimatedInsets(16.dpToPx)
@@ -209,9 +246,11 @@ open class BrowseSourceController(bundle: Bundle) :
             }
         )
 
-        binding.catalogueView.addView(recycler, 1)
         if (oldPosition != RecyclerView.NO_POSITION) {
-            recycler.layoutManager?.scrollToPosition(oldPosition)
+            (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(oldPosition, oldOffset.roundToInt())
+            if (oldPosition > 0 && (activity as? MainActivity)?.currentToolbar != activityBinding?.cardToolbar) {
+                activityBinding?.appBar?.useSearchToolbarForMenu(true)
+            }
         }
         this.recycler = recycler
     }
@@ -220,58 +259,45 @@ open class BrowseSourceController(bundle: Bundle) :
         inflater.inflate(R.menu.browse_source, menu)
 
         // Initialize search menu
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
+        val searchItem = activityBinding?.cardToolbar?.searchItem
+        val searchView = activityBinding?.cardToolbar?.searchView
 
+        activityBinding?.cardToolbar?.setQueryHint("", !isBehindGlobalSearch && presenter.query.isBlank())
         val query = presenter.query
         if (query.isNotBlank()) {
-            searchItem.expandActionView()
-            searchView.setQuery(query, true)
-            searchView.clearFocus()
+            searchItem?.expandActionView()
+            searchView?.setQuery(query, true)
+            searchView?.clearFocus()
+        } else if (activityBinding?.cardToolbar?.isSearchExpanded == true) {
+            searchItem?.collapseActionView()
+            searchView?.setQuery("", true)
         }
-
-//        val searchEventsObservable = searchView.queryTextChangeEvents()
-//            .skip(1)
-//            .filter { router.backstack.lastOrNull()?.controller == this@BrowseSourceController }
-//            .share()
-//        val writingObservable = searchEventsObservable
-//            .filter { !it.isSubmitted }
-//            .debounce(1250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-//        val submitObservable = searchEventsObservable
-//            .filter { it.isSubmitted }
-//
-//        searchViewSubscription?.unsubscribe()
-//        searchViewSubscription = Observable.merge(writingObservable, submitObservable)
-//            .map { it.queryText().toString() }
-//            .subscribeUntilDestroy { searchWithQuery(it) }
 
         setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = true) {
             searchWithQuery(it ?: "")
             true
         }
-
-        searchItem.fixExpand(
-            onExpand = { invalidateMenuOnExpand() },
-            onCollapse = {
-                if (router.backstackSize >= 2 && router.backstack[router.backstackSize - 2].controller is GlobalSearchController) {
-                    router.popController(this)
-                } else {
-                    searchWithQuery("")
-                }
-                true
-            }
-        )
-
         // Show next display mode
-        menu.findItem(R.id.action_display_mode).apply {
-            val icon = if (presenter.isListMode) {
+        updateDisplayMenuItem(menu)
+    }
+
+    private fun updateDisplayMenuItem(menu: Menu?, isListMode: Boolean? = null) {
+        menu?.findItem(R.id.action_display_mode)?.apply {
+            val icon = if (isListMode ?: presenter.isListMode) {
                 R.drawable.ic_view_module_24dp
             } else {
                 R.drawable.ic_view_list_24dp
             }
             setIcon(icon)
         }
-        hideItemsIfExpanded(searchItem, menu)
+    }
+
+    override fun onActionViewCollapse(item: MenuItem?) {
+        if (isBehindGlobalSearch) {
+            router.popController(this)
+        } else {
+            searchWithQuery("")
+        }
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
@@ -463,15 +489,16 @@ open class BrowseSourceController(bundle: Bundle) :
             resetProgressItem()
         }
         adapter.onLoadMoreComplete(mangas)
+        if (isControllerVisible) {
+            activityBinding?.appBar?.lockYPos = false
+        }
     }
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
 
-        if (BuildConfig.DEBUG && presenter.query.isBlank()) {
-            val searchItem =
-                (activity as? MainActivity)?.binding?.cardToolbar?.menu?.findItem(R.id.action_search)
-            val searchView = searchItem?.actionView as? SearchView ?: return
+        if (BuildConfig.DEBUG && isControllerVisible) {
+            val searchView = activityBinding?.cardToolbar?.searchView
             setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = true) {
                 searchWithQuery(it ?: "")
                 true
@@ -531,6 +558,9 @@ open class BrowseSourceController(bundle: Bundle) :
                 setAction(R.string.retry, retryAction)
             }
         }
+        if (isControllerVisible) {
+            activityBinding?.appBar?.lockYPos = false
+        }
     }
 
     private fun getErrorMessage(error: Throwable): String {
@@ -581,13 +611,14 @@ open class BrowseSourceController(bundle: Bundle) :
     /**
      * Swaps the current display mode.
      */
-    fun swapDisplayMode() {
+    private fun swapDisplayMode() {
         val view = view ?: return
         val adapter = adapter ?: return
 
         presenter.swapDisplayMode()
         val isListMode = presenter.isListMode
-        activity?.invalidateOptionsMenu()
+        updateDisplayMenuItem(activityBinding?.toolbar?.menu, isListMode)
+        updateDisplayMenuItem(activityBinding?.cardToolbar?.menu, isListMode)
         setupRecycler(view)
         if (!isListMode || !view.context.connectivityManager.isActiveNetworkMetered) {
             // Initialize mangas if going to grid view or if over wifi when going to list view
