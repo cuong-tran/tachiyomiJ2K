@@ -110,6 +110,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         ) {
             true -> preferences.downloadNew().set(true)
             false -> preferences.downloadNew().set(false)
+            else -> {}
         }
         if (preferences.libraryUpdateInterval().get() > 0 &&
             updatePref(

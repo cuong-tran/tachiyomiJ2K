@@ -147,7 +147,6 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
     var toolbarColorAnim: ValueAnimator? = null
     var isToolbarColored = false
 
-    val preferences: PreferencesHelper by injectLazy()
     val colorToolbar: (Boolean) -> Unit = f@{ isColored ->
         isToolbarColored = isColored
         toolbarColorAnim?.cancel()

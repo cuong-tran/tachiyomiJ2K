@@ -723,6 +723,7 @@ class MangaDetailsController :
                 startingRangeChapterPos = position
                 actionMode?.invalidate()
             } else {
+                val rangeMode = rangeMode ?: return false
                 val startingPosition = startingRangeChapterPos ?: return false
                 var chapterList = listOf<ChapterItem>()
                 when {
@@ -741,7 +742,7 @@ class MangaDetailsController :
                 (binding.recycler.findViewHolderForAdapterPosition(startingPosition) as? BaseFlexibleViewHolder)
                     ?.toggleActivation()
                 startingRangeChapterPos = null
-                rangeMode = null
+                this.rangeMode = null
                 destroyActionModeIfNeeded()
             }
             return false
