@@ -378,7 +378,7 @@ class RecentsPresenter(
             setDownloadedChapters(recentItems)
             withContext(Dispatchers.Main) {
                 controller?.showLists(recentItems, true)
-                controller?.updateDownloadStatus()
+                controller?.updateDownloadStatus(!downloadManager.isPaused())
             }
         }
     }
@@ -386,7 +386,7 @@ class RecentsPresenter(
     override fun downloadStatusChanged(downloading: Boolean) {
         presenterScope.launch {
             withContext(Dispatchers.Main) {
-                controller?.updateDownloadStatus()
+                controller?.updateDownloadStatus(downloading)
             }
         }
     }
