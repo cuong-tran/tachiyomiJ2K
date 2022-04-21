@@ -1119,6 +1119,9 @@ class LibraryController(
     private fun showCategories(show: Boolean, closeSearch: Boolean = false) {
         binding.recyclerCover.isClickable = show
         binding.recyclerCover.isFocusable = show
+        if (show) {
+            moveRecyclerViewUp()
+        }
         if (closeSearch) {
             activityBinding?.cardToolbar?.searchItem?.collapseActionView()
         }
@@ -1133,6 +1136,7 @@ class LibraryController(
         binding.recyclerCover.animate().translationY(translateY).start()
         binding.recyclerCover.animate().alpha(if (show) 0.75f else 0f).start()
         binding.libraryGridRecycler.recycler.suppressLayout(show)
+        activityBinding?.appBar?.updateAppBarAfterY(binding.libraryGridRecycler.recycler)
         binding.swipeRefresh.isEnabled = !show
         setSubtitle()
         if (show) {
@@ -1232,7 +1236,6 @@ class LibraryController(
         viewScope.launchUI {
             adapter.performFilterAsync()
         }
-        moveRecyclerViewUp()
         return true
     }
 

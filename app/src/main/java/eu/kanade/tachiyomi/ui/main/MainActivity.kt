@@ -97,7 +97,7 @@ import eu.kanade.tachiyomi.util.view.blurBehindWindow
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.findChild
 import eu.kanade.tachiyomi.util.view.getItemView
-import eu.kanade.tachiyomi.util.view.moveRecyclerViewUp
+import eu.kanade.tachiyomi.util.view.mainRecyclerView
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeInTransaction
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -348,7 +348,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding.cardToolbar.searchItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 val controller = router.backstack.lastOrNull()?.controller
-                controller?.moveRecyclerViewUp()
+                binding.appBar.compactSearchMode = binding.appBar.useLargeToolbar && resources.configuration.screenHeightDp < 600
+                if (binding.appBar.compactSearchMode) {
+                    setFloatingToolbar(true)
+                    controller?.mainRecyclerView?.requestApplyInsets()
+                    binding.appBar.y = 0f
+                    binding.appBar.updateAppBarAfterY(controller?.mainRecyclerView)
+                }
                 (controller as? BaseController<*>)?.onActionViewExpand(item)
                 (controller as? SettingsController)?.onActionViewExpand(item)
                 binding.cardToolbar.menu.forEach { it.isVisible = false }
@@ -357,6 +363,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
                 val controller = router.backstack.lastOrNull()?.controller
+                binding.appBar.compactSearchMode = false
+                controller?.mainRecyclerView?.requestApplyInsets()
                 setupSearchTBMenu(binding.toolbar.menu, true)
                 (controller as? BaseController<*>)?.onActionViewCollapse(item)
                 (controller as? SettingsController)?.onActionViewCollapse(item)

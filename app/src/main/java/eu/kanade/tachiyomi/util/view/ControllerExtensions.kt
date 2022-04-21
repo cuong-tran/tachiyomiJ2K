@@ -600,7 +600,9 @@ fun Controller.setAppBarBG(value: Float, includeTabView: Boolean = false) {
     if (!isControllerVisible) return
     if (floatingBar) {
         (activityBinding?.cardView as? CardView)?.setCardBackgroundColor(context.getResourceColor(R.attr.colorPrimaryVariant))
-        if (this !is SmallToolbarInterface && activityBinding?.appBar?.useLargeToolbar == true) {
+        if (this !is SmallToolbarInterface && activityBinding?.appBar?.useLargeToolbar == true &&
+            activityBinding?.appBar?.compactSearchMode != true
+        ) {
             val colorSurface = context.getResourceColor(R.attr.colorSurface)
             val color = ColorUtils.blendARGB(
                 colorSurface,
