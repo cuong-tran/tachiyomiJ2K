@@ -6,11 +6,13 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup.LayoutParams
+import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.viewpager.widget.ViewPager
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
+import eu.kanade.tachiyomi.ui.reader.model.InsertPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -149,20 +151,44 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     }
 
     /**
+     * Returns the PagerPageHolder for the provided page
+     */
+    private fun getPageHolder(page: ReaderPage): PagerPageHolder? =
+        pager.children
+            .filterIsInstance(PagerPageHolder::class.java)
+            .firstOrNull { it.item.first.index == page.index || it.item.second?.index == page.index }
+
+    /**
      * Called when a new page (either a [ReaderPage] or [ChapterTransition]) is marked as active
      */
     fun onPageChange(position: Int) {
         val page = adapter.joinedItems.getOrNull(position)
         if (page != null && currentPage != page) {
-            val allowPreload = checkAllowPreload(page.first as? ReaderPage)
-            currentPage = page.first
-            when (val aPage = page.first) {
-                is ReaderPage -> onReaderPageSelected(
-                    aPage,
-                    allowPreload,
-                    page.second is ReaderPage
-                )
-                is ChapterTransition -> onTransitionSelected(aPage)
+            val pageF = page.first
+            val allowPreload = checkAllowPreload(pageF as? ReaderPage)
+            val forward =
+                // if both pages have the same number, it's a split page with an InsertPage
+                when {
+                    // Use case happens on new chapter load
+                    currentPage == pageF -> null
+                    currentPage is ReaderPage && pageF is ReaderPage -> if (pageF.number == (currentPage as ReaderPage).number) {
+                        // the InsertPage is always the second in the reading direction
+                        pageF is InsertPage
+                    } else {
+                        pageF.number > (currentPage as ReaderPage).number
+                    }
+                    currentPage is ChapterTransition.Prev && pageF is ReaderPage ->
+                        (currentPage as ChapterTransition).from == pageF.chapter
+                    currentPage is ChapterTransition.Next && pageF is ReaderPage ->
+                        (currentPage as ChapterTransition).to == pageF.chapter
+                    else -> (pageF as? ReaderPage)?.index != 0
+                }
+            currentPage = pageF
+            when (pageF) {
+                is ReaderPage -> {
+                    onReaderPageSelected(pageF, allowPreload, page.second is ReaderPage, forward)
+                }
+                is ChapterTransition -> onTransitionSelected(pageF)
             }
         }
     }
@@ -190,8 +216,11 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      * Called when a [ReaderPage] is marked as active. It notifies the
      * activity of the change and requests the preload of the next chapter if this is the last page.
      */
-    private fun onReaderPageSelected(page: ReaderPage, allowPreload: Boolean, hasExtraPage: Boolean) {
+    private fun onReaderPageSelected(page: ReaderPage, allowPreload: Boolean, hasExtraPage: Boolean, forward: Boolean?) {
         activity.onPageSelected(page, hasExtraPage)
+
+        // Notify holder of page change
+        getPageHolder(page)?.onPageSelected(forward)
 
         val offset = if (hasExtraPage) 1 else 0
         val pages = page.chapter.pages ?: return
@@ -333,7 +362,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      */
     protected open fun moveRight() {
         if (pager.currentItem != adapter.count - 1) {
-            pager.setCurrentItem(pager.currentItem + 1, config.usePageTransitions)
+            val holder = (currentPage as? ReaderPage)?.let { getPageHolder(it) }
+            if (holder != null && config.navigateToPan && holder.canPanRight()) {
+                holder.panRight()
+            } else {
+                pager.setCurrentItem(pager.currentItem + 1, config.usePageTransitions)
+            }
         }
     }
 
@@ -342,7 +376,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      */
     protected open fun moveLeft() {
         if (pager.currentItem != 0) {
-            pager.setCurrentItem(pager.currentItem - 1, config.usePageTransitions)
+            val holder = (currentPage as? ReaderPage)?.let { getPageHolder(it) }
+            if (holder != null && config.navigateToPan && holder.canPanLeft()) {
+                holder.panLeft()
+            } else {
+                pager.setCurrentItem(pager.currentItem - 1, config.usePageTransitions)
+            }
         }
     }
 

@@ -7,6 +7,7 @@ import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.PointF
+import android.graphics.RectF
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.view.GestureDetector
@@ -44,6 +45,7 @@ import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.topCutoutInset
 import eu.kanade.tachiyomi.util.view.backgroundColor
+import eu.kanade.tachiyomi.util.view.isVisibleOnScreen
 import eu.kanade.tachiyomi.widget.GifViewTarget
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -60,6 +62,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
@@ -168,6 +171,143 @@ class PagerPageHolder(
         scope?.cancel()
         scope = null
         subsamplingImageView?.setOnImageEventListener(null)
+    }
+
+    fun onPageSelected(forward: Boolean?) {
+        subsamplingImageView?.apply {
+            if (isReady) {
+                landscapeZoom(forward)
+            } else {
+                setOnImageEventListener(
+                    object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
+                        override fun onReady() {
+                            setupZoom()
+                            landscapeZoom(forward)
+                            onImageDecoded()
+                        }
+
+                        override fun onImageLoadError(e: Exception) {
+                            onImageDecodeError()
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+    /**
+     * Check if the image can be panned to the left
+     */
+    fun canPanLeft(): Boolean = canPan { it.left }
+
+    /**
+     * Check if the image can be panned to the right
+     */
+    fun canPanRight(): Boolean = canPan { it.right }
+
+    /**
+     * Check whether the image can be panned.
+     * @param fn a function that returns the direction to check for
+     */
+    private fun canPan(fn: (RectF) -> Float): Boolean {
+        subsamplingImageView?.let { view ->
+            RectF().let {
+                view.getPanRemaining(it)
+                return fn(it) > 0.01f
+            }
+        }
+        return false
+    }
+
+    /**
+     * Pans the image to the left by a screen's width worth.
+     */
+    fun panLeft() {
+        pan { center, view -> center.also { it.x -= view.width / view.scale } }
+    }
+
+    /**
+     * Pans the image to the right by a screen's width worth.
+     */
+    fun panRight() {
+        pan { center, view -> center.also { it.x += view.width / view.scale } }
+    }
+
+    /**
+     * Pans the image.
+     * @param fn a function that computes the new center of the image
+     */
+    private fun pan(fn: (PointF, SubsamplingScaleImageView) -> PointF) {
+        subsamplingImageView?.let { view ->
+            val target = fn(view.center ?: return, view)
+            view.animateCenter(target)!!
+                .withEasing(SubsamplingScaleImageView.EASE_OUT_QUAD)
+                .withDuration(250)
+                .withInterruptible(true)
+                .start()
+        }
+    }
+
+    private fun SubsamplingScaleImageView.landscapeZoom(forward: Boolean?) {
+        forward ?: return
+        if (viewer.config.landscapeZoom && viewer.config.imageScaleType == SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE && sWidth > sHeight && scale == minScale) {
+            handler.postDelayed(
+                {
+                    val point = when (viewer.config.imageZoomType) {
+                        ZoomType.Left -> if (forward) PointF(0F, 0F) else PointF(sWidth.toFloat(), 0F)
+                        ZoomType.Right -> if (forward) PointF(sWidth.toFloat(), 0F) else PointF(0F, 0F)
+                        ZoomType.Center -> center.also { it?.y = 0F }
+                    }
+
+                    val topInsets = if (viewer.activity.isSplitScreen) 0f else {
+                        viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat()
+                    }
+                    val bottomInsets = if (viewer.activity.isSplitScreen) 0f else {
+                        viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat()
+                    }
+                    val targetScale = (height.toFloat() - topInsets - bottomInsets) / sHeight.toFloat()
+                    animateScaleAndCenter(min(targetScale, scale * 2), point)!!
+                        .withDuration(500)
+                        .withEasing(SubsamplingScaleImageView.EASE_IN_OUT_QUAD)
+                        .withInterruptible(true)
+                        .start()
+                },
+                500
+            )
+        }
+    }
+
+    private fun SubsamplingScaleImageView.setupZoom() {
+        // 5x zoom
+        maxScale = scale * MAX_ZOOM_SCALE
+        setDoubleTapZoomScale(scale * 2)
+
+        var centerV = 0f
+        val config = viewer.config
+        when (config.imageZoomType) {
+            ZoomType.Left -> {
+                setScaleAndCenter(scale, PointF(0f, 0f))
+            }
+            ZoomType.Right -> {
+                setScaleAndCenter(scale, PointF(sWidth.toFloat(), 0f))
+                centerV = sWidth.toFloat()
+            }
+            ZoomType.Center -> {
+                setScaleAndCenter(scale, center.also { it?.y = 0f })
+                centerV = center?.x ?: 0f
+            }
+        }
+        val topInsets = viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat()
+        val bottomInsets = viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat()
+        if (config.cutoutBehavior == CUTOUT_START_EXTENDED &&
+            topInsets + bottomInsets > 0 &&
+            config.scaleTypeIsFullFit()
+        ) {
+            setScaleAndCenter(
+                scale,
+                PointF(centerV, (center?.y?.plus(topInsets)?.minus(bottomInsets) ?: 0f))
+            )
+        }
     }
 
     /**
@@ -491,13 +631,12 @@ class PagerPageHolder(
         val config = viewer.config
 
         subsamplingImageView = SubsamplingScaleImageView(context).apply {
-            layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
             setMaxTileSize(viewer.activity.maxBitmapSize)
             setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_CENTER)
             setDoubleTapZoomDuration(config.doubleTapAnimDuration)
             setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
             setMinimumScaleType(config.imageScaleType)
-            setMinimumDpi(90)
+            setMinimumDpi(1)
             setMinimumTileDpi(180)
             setCropBorders(config.imageCropBorders)
             val topInsets = viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat()
@@ -528,29 +667,8 @@ class PagerPageHolder(
                         }
                     }
                     override fun onReady() {
-                        var centerV = 0f
-                        when (config.imageZoomType) {
-                            ZoomType.Left -> {
-                                setScaleAndCenter(scale, PointF(0f, 0f))
-                            }
-                            ZoomType.Right -> {
-                                setScaleAndCenter(scale, PointF(sWidth.toFloat(), 0f))
-                                centerV = sWidth.toFloat()
-                            }
-                            ZoomType.Center -> {
-                                setScaleAndCenter(scale, center.also { it?.y = 0f })
-                                centerV = center?.x ?: 0f
-                            }
-                        }
-                        if (config.cutoutBehavior == CUTOUT_START_EXTENDED &&
-                            topInsets + bottomInsets > 0 &&
-                            config.scaleTypeIsFullFit()
-                        ) {
-                            setScaleAndCenter(
-                                scale,
-                                PointF(centerV, (center?.y?.plus(topInsets)?.minus(bottomInsets) ?: 0f))
-                            )
-                        }
+                        setupZoom()
+                        if (isVisibleOnScreen()) landscapeZoom(true)
                         onImageDecoded()
                     }
 
@@ -560,7 +678,7 @@ class PagerPageHolder(
                 }
             )
         }
-        addView(subsamplingImageView)
+        addView(subsamplingImageView, MATCH_PARENT, MATCH_PARENT)
         return subsamplingImageView!!
     }
 
@@ -835,3 +953,5 @@ class PagerPageHolder(
         }
     }
 }
+
+private const val MAX_ZOOM_SCALE = 5F

@@ -9,6 +9,7 @@ import androidx.preference.CheckBoxPreference
 import androidx.preference.DialogPreference
 import androidx.preference.DropDownPreference
 import androidx.preference.EditTextPreference
+import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceGroup
@@ -166,6 +167,17 @@ inline fun Preference.onClick(crossinline block: () -> Unit) {
 
 inline fun Preference.onChange(crossinline block: (Any?) -> Boolean) {
     setOnPreferenceChangeListener { _, newValue -> block(newValue) }
+}
+
+inline fun <T> Preference.bindTo(preference: com.tfcporciuncula.flow.Preference<T>) {
+    key = preference.key
+    defaultValue = preference.defaultValue
+}
+
+inline fun <T> ListPreference.bindTo(preference: com.tfcporciuncula.flow.Preference<T>) {
+    key = preference.key
+    // ListPreferences persist values as strings, even when we're using our IntListPreference
+    defaultValue = preference.defaultValue.toString()
 }
 
 fun SwitchPreferenceCompat.requireAuthentication(

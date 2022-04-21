@@ -47,6 +47,8 @@ open class ReaderPageImageView @JvmOverloads constructor(
 
     private var pageView: View? = null
 
+    private var config: Config? = null
+
     var onImageLoaded: (() -> Unit)? = null
     var onImageLoadError: (() -> Unit)? = null
     var onScaleChanged: ((newScale: Float) -> Unit)? = null
@@ -73,6 +75,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
     }
 
     fun setImage(drawable: Drawable, config: Config) {
+        this.config = config
         if (drawable is Animatable) {
             prepareAnimatedImageView()
             setAnimatedImage(drawable, config)
@@ -129,6 +132,19 @@ open class ReaderPageImageView @JvmOverloads constructor(
         addView(pageView, MATCH_PARENT, MATCH_PARENT)
     }
 
+    private fun SubsamplingScaleImageView.setupZoom(config: Config?) {
+        // 5x zoom
+        maxScale = scale * MAX_ZOOM_SCALE
+        setDoubleTapZoomScale(scale * 2)
+
+        config ?: return
+        when (config.zoomStartPosition) {
+            ZoomStartPosition.LEFT -> setScaleAndCenter(scale, PointF(0F, 0F))
+            ZoomStartPosition.RIGHT -> setScaleAndCenter(scale, PointF(sWidth.toFloat(), 0F))
+            ZoomStartPosition.CENTER -> setScaleAndCenter(scale, center.also { it?.y = 0F })
+        }
+    }
+
     private fun setNonAnimatedImage(
         image: Any,
         config: Config
@@ -141,14 +157,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
             object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
                 override fun onReady() {
                     // 5x zoom
-                    maxScale = scale * MAX_ZOOM_SCALE
-                    setDoubleTapZoomScale(scale * 2)
-
-                    when (config.zoomStartPosition) {
-                        ZoomStartPosition.LEFT -> setScaleAndCenter(scale, PointF(0F, 0F))
-                        ZoomStartPosition.RIGHT -> setScaleAndCenter(scale, PointF(sWidth.toFloat(), 0F))
-                        ZoomStartPosition.CENTER -> setScaleAndCenter(scale, center.also { it?.y = 0F })
-                    }
+                    setupZoom(config)
                     this@ReaderPageImageView.onImageLoaded()
                 }
 
@@ -252,7 +261,8 @@ open class ReaderPageImageView @JvmOverloads constructor(
         val zoomDuration: Int,
         val minimumScaleType: Int = SCALE_TYPE_CENTER_INSIDE,
         val cropBorders: Boolean = false,
-        val zoomStartPosition: ZoomStartPosition = ZoomStartPosition.CENTER
+        val zoomStartPosition: ZoomStartPosition = ZoomStartPosition.CENTER,
+        val landscapeZoom: Boolean = false,
     )
 
     enum class ZoomStartPosition {

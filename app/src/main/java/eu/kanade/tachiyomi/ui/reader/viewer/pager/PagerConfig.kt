@@ -38,6 +38,12 @@ class PagerConfig(
     var imageCropBorders = false
         private set
 
+    var navigateToPan = false
+        private set
+
+    var landscapeZoom = false
+        private set
+
     var readerTheme = 0
         private set
 
@@ -98,6 +104,12 @@ class PagerConfig(
 
         preferences.cropBorders()
             .register({ imageCropBorders = it }, { imagePropertyChangedListener?.invoke() })
+
+        preferences.navigateToPan()
+            .register({ navigateToPan = it })
+
+        preferences.landscapeZoom()
+            .register({ landscapeZoom = it }, { imagePropertyChangedListener?.invoke() })
 
         preferences.readerTheme()
             .register({ readerTheme = it }, { imagePropertyChangedListener?.invoke() })
