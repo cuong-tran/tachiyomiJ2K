@@ -20,7 +20,7 @@ object Versions {
     const val gson = "2.8.6"
     const val injekt = "65b0440"
     const val junit = "4.13"
-    const val kotlin = "1.5.21"
+    const val kotlin = "1.6.10"
     const val kotson = "2.5.0"
     const val mockito = "1.10.19"
     const val moshi = "1.9.3"
@@ -56,7 +56,7 @@ object AndroidVersions {
     const val targetSdk = 30
     const val versionCode = 87
     const val versionName = "1.4.5"
-    const val ndk = "22.0.7026061"
+    const val ndk = "23.1.7779620"
 }
 
 object Plugins {
