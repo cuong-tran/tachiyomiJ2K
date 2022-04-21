@@ -7,7 +7,6 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.MigrationControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
@@ -26,8 +25,7 @@ import uy.kohesive.injekt.api.get
 class MigrationController :
     NucleusController<MigrationControllerBinding, MigrationPresenter>(),
     FlexibleAdapter.OnItemClickListener,
-    SourceAdapter.OnAllClickListener,
-    MigrationInterface {
+    SourceAdapter.OnAllClickListener {
 
     private var adapter: FlexibleAdapter<IFlexible<*>>? = null
 
@@ -124,13 +122,4 @@ class MigrationController :
             }
         }
     }
-
-    override fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean): Manga? {
-        presenter.migrateManga(prevManga, manga, replace)
-        return null
-    }
-}
-
-interface MigrationInterface {
-    fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean): Manga?
 }

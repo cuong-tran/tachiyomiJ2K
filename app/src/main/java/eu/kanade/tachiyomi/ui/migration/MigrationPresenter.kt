@@ -4,23 +4,16 @@ import android.os.Bundle
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.track.EnhancedTrackService
-import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
-import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.combineLatest
-import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Date
 
 class MigrationPresenter(
     private val sourceManager: SourceManager = Injekt.get(),
@@ -35,8 +28,6 @@ class MigrationPresenter(
         }
 
     private val stateRelay = BehaviorRelay.create(state)
-
-    private val enhancedServices by lazy { Injekt.get<TrackManager>().services.filterIsInstance<EnhancedTrackService>() }
 
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
@@ -68,106 +59,13 @@ class MigrationPresenter(
 
     private fun findSourcesWithManga(library: List<Manga>): List<SourceItem> {
         val header = SelectionHeader()
-        return library.map { it.source }.toSet()
+        return library.asSequence().map { it.source }.toSet()
             .mapNotNull { if (it != LocalSource.ID) sourceManager.getOrStub(it) else null }
             .sortedBy { it.name }
-            .map { SourceItem(it, header) }
+            .map { SourceItem(it, header) }.toList()
     }
 
     private fun libraryToMigrationItem(library: List<Manga>, sourceId: Long): List<MangaItem> {
         return library.filter { it.source == sourceId }.map(::MangaItem)
-    }
-
-    fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean) {
-        val source = sourceManager.get(manga.source) ?: return
-        val prevSource = sourceManager.get(prevManga.source)
-
-        state = state.copy(isReplacingManga = true)
-
-        Observable.defer { source.fetchChapterList(manga) }.onErrorReturn { emptyList() }
-            .doOnNext { migrateMangaInternal(prevSource, source, it, prevManga, manga, replace) }
-            .onErrorReturn { emptyList() }.subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnUnsubscribe { state = state.copy(isReplacingManga = false) }.subscribe()
-    }
-
-    private fun migrateMangaInternal(
-        prevSource: Source?,
-        source: Source,
-        sourceChapters: List<SChapter>,
-        prevManga: Manga,
-        manga: Manga,
-        replace: Boolean
-    ) {
-        val flags = preferences.migrateFlags().get()
-        val migrateChapters = MigrationFlags.hasChapters(flags)
-        val migrateCategories = MigrationFlags.hasCategories(flags)
-        val migrateTracks = MigrationFlags.hasTracks(flags)
-
-        db.inTransaction {
-            // Update chapters read
-            if (migrateChapters) {
-                try {
-                    syncChaptersWithSource(db, sourceChapters, manga, source)
-                } catch (e: Exception) {
-                    // Worst case, chapters won't be synced
-                }
-
-                val prevMangaChapters = db.getChapters(prevManga).executeAsBlocking()
-                val maxChapterRead =
-                    prevMangaChapters.filter { it.read }.maxOfOrNull { it.chapter_number }
-                if (maxChapterRead != null) {
-                    val dbChapters = db.getChapters(manga).executeAsBlocking()
-                    for (chapter in dbChapters) {
-                        if (chapter.isRecognizedNumber && chapter.chapter_number <= maxChapterRead) {
-                            chapter.read = true
-                        }
-                    }
-                    db.insertChapters(dbChapters).executeAsBlocking()
-                }
-            }
-            // Update categories
-            if (migrateCategories) {
-                val categories = db.getCategoriesForManga(prevManga).executeAsBlocking()
-                val mangaCategories = categories.map { MangaCategory.create(manga, it) }
-                db.setMangaCategories(mangaCategories, listOf(manga))
-            }
-            // Update track
-            if (migrateTracks) {
-                val tracksToUpdate = db.getTracks(prevManga).executeAsBlocking().mapNotNull { track ->
-                    track.id = null
-                    track.manga_id = manga.id!!
-
-                    val service = enhancedServices
-                        .firstOrNull { it.isTrackFrom(track, prevManga, prevSource) }
-                    if (service != null) service.migrateTrack(track, manga, source)
-                    else track
-                }
-                db.insertTracks(tracksToUpdate).executeAsBlocking()
-            }
-            // Update favorite status
-            if (replace) {
-                prevManga.favorite = false
-                db.updateMangaFavorite(prevManga).executeAsBlocking()
-            }
-            manga.favorite = true
-            db.updateMangaFavorite(manga).executeAsBlocking()
-
-            manga.chapter_flags = prevManga.chapter_flags
-            db.updateChapterFlags(manga).executeAsBlocking()
-            manga.viewer_flags = prevManga.viewer_flags
-            db.updateViewerFlags(manga).executeAsBlocking()
-
-            // Update date added
-            if (replace) {
-                manga.date_added = prevManga.date_added
-                prevManga.date_added = 0
-            } else {
-                manga.date_added = Date().time
-            }
-
-            // SearchPresenter#networkToLocalManga may have updated the manga title, so ensure db gets updated title
-            db.updateMangaTitle(manga).executeAsBlocking()
-        }
     }
 }
