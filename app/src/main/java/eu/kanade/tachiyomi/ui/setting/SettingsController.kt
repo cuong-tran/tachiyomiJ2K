@@ -44,7 +44,7 @@ abstract class SettingsController : PreferenceController() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        listView.layoutManager = LinearLayoutManagerAccurateOffset(view?.context)
+        listView.layoutManager = LinearLayoutManagerAccurateOffset(view.context)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
