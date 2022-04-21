@@ -4,6 +4,7 @@ import android.os.Bundle
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.ExtensionManager
@@ -12,8 +13,10 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourcePresenter
+import eu.kanade.tachiyomi.util.system.runAsObservable
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -66,7 +69,7 @@ open class GlobalSearchPresenter(
      */
     private var fetchImageSubscription: Subscription? = null
 
-    private val extensionManager by injectLazy<ExtensionManager>()
+    private val extensionManager: ExtensionManager by injectLazy()
 
     private var extensionFilter: String? = null
 
@@ -228,7 +231,8 @@ open class GlobalSearchPresenter(
             // Update current state
             .doOnNext { items = it }
             // Deliver initial state
-            .startWith(initialItems).subscribeLatestCache(
+            .startWith(initialItems)
+            .subscribeLatestCache(
                 { view, manga ->
                     view.setItems(manga)
                 },
@@ -252,36 +256,39 @@ open class GlobalSearchPresenter(
      */
     private fun initializeFetchImageSubscription() {
         fetchImageSubscription?.unsubscribe()
-        fetchImageSubscription = fetchImageSubject.observeOn(Schedulers.io()).flatMap {
-            val source = it.second
-            Observable.from(it.first).filter { it.thumbnail_url == null && !it.initialized }
-                .map { Pair(it, source) }
-                .concatMap { getMangaDetailsObservable(it.first, it.second) }
-                .map { Pair(source as CatalogueSource, it) }
-        }.onBackpressureBuffer().observeOn(AndroidSchedulers.mainThread())
+        fetchImageSubscription = fetchImageSubject.observeOn(Schedulers.io())
+            .flatMap { (mangaList, source) ->
+                Observable.from(mangaList)
+                    .filter { it.thumbnail_url == null && !it.initialized }
+                    .map { Pair(it, source) }
+                    .concatMap { runAsObservable { getMangaDetails(it.first, it.second) } }
+                    .map { Pair(source as CatalogueSource, it) }
+            }
+            .onBackpressureBuffer()
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { (source, manga) ->
-                    @Suppress("DEPRECATION") view?.onMangaInitialized(source, manga)
+                    @Suppress("DEPRECATION")
+                    view?.onMangaInitialized(source, manga)
                 },
                 { error ->
                     Timber.e(error)
-                }
+                },
             )
     }
 
     /**
-     * Returns an observable of manga that initializes the given manga.
+     * Initializes the given manga.
      *
      * @param manga the manga to initialize.
-     * @return an observable of the manga to initialize
+     * @return The initialized manga.
      */
-    private fun getMangaDetailsObservable(manga: Manga, source: Source): Observable<Manga> {
-        return source.fetchMangaDetails(manga).flatMap { networkManga ->
-            manga.copyFrom(networkManga)
-            manga.initialized = true
-            db.insertManga(manga).executeAsBlocking()
-            Observable.just(manga)
-        }.onErrorResumeNext { Observable.just(manga) }
+    private suspend fun getMangaDetails(manga: Manga, source: Source): Manga {
+        val networkManga = source.getMangaDetails(manga.toMangaInfo())
+        manga.copyFrom(networkManga.toSManga())
+        manga.initialized = true
+        db.insertManga(manga).executeAsBlocking()
+        return manga
     }
 
     /**
@@ -299,6 +306,10 @@ open class GlobalSearchPresenter(
             val result = db.insertManga(newManga).executeAsBlocking()
             newManga.id = result.insertedId()
             localManga = newManga
+        } else if (!localManga.favorite) {
+            // if the manga isn't a favorite, set its display title from source
+            // if it later becomes a favorite, updated title will go to db
+            localManga.title = sManga.title
         }
         return localManga
     }
