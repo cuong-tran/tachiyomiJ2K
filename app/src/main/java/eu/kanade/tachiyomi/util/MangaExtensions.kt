@@ -1,7 +1,11 @@
 package eu.kanade.tachiyomi.util
 
 import android.app.Activity
+import android.content.DialogInterface
 import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import com.bluelinelabs.conductor.Controller
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
@@ -16,10 +20,18 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.migration.MigrationFlags
+import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcessAdapter
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithTrackServiceTwoWay
+import eu.kanade.tachiyomi.util.lang.asButton
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
+import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
@@ -104,11 +116,46 @@ fun Manga.addOrRemoveToFavorites(
     preferences: PreferencesHelper,
     view: View,
     activity: Activity,
-    onMangaAdded: () -> Unit,
+    sourceManager: SourceManager,
+    controller: Controller,
+    checkForDupes: Boolean = true,
+    onMangaAdded: (Pair<Long, Boolean>?) -> Unit,
     onMangaMoved: () -> Unit,
-    onMangaDeleted: () -> Unit
+    onMangaDeleted: () -> Unit,
 ): Snackbar? {
     if (!favorite) {
+        if (checkForDupes) {
+            val duplicateManga = db.getDuplicateLibraryManga(this).executeAsBlocking()
+            if (duplicateManga != null) {
+                showAddDuplicateDialog(
+                    this,
+                    duplicateManga,
+                    activity,
+                    db,
+                    sourceManager,
+                    controller,
+                    addManga = {
+                        addOrRemoveToFavorites(
+                            db,
+                            preferences,
+                            view,
+                            activity,
+                            sourceManager,
+                            controller,
+                            false,
+                            onMangaAdded,
+                            onMangaMoved,
+                            onMangaDeleted
+                        )
+                    },
+                    migrateManga = { source, faved ->
+                        onMangaAdded(source to faved)
+                    }
+                )
+                return null
+            }
+        }
+
         val categories = db.getCategories().executeAsBlocking()
         val defaultCategoryId = preferences.defaultCategory()
         val defaultCategory = categories.find { it.id == defaultCategoryId }
@@ -155,7 +202,7 @@ fun Manga.addOrRemoveToFavorites(
                     ids,
                     true
                 ) {
-                    onMangaAdded()
+                    onMangaAdded(null)
                     autoAddTrack(db, onMangaMoved)
                 }.show()
             }
@@ -186,6 +233,102 @@ fun Manga.addOrRemoveToFavorites(
         }
     }
     return null
+}
+
+private fun showAddDuplicateDialog(
+    newManga: Manga,
+    libraryManga: Manga,
+    activity: Activity,
+    db: DatabaseHelper,
+    sourceManager: SourceManager,
+    controller: Controller,
+    addManga: () -> Unit,
+    migrateManga: (Long, Boolean) -> Unit,
+) {
+    val source = sourceManager.getOrStub(libraryManga.source)
+
+    fun migrateManga(mDialog: DialogInterface, replace: Boolean) {
+        val listView = (mDialog as AlertDialog).listView
+        var flags = 0
+        if (listView.isItemChecked(0)) flags = flags or MigrationFlags.CHAPTERS
+        if (listView.isItemChecked(1)) flags = flags or MigrationFlags.CATEGORIES
+        if (listView.isItemChecked(2)) flags = flags or MigrationFlags.TRACK
+        val enhancedServices by lazy { Injekt.get<TrackManager>().services.filterIsInstance<EnhancedTrackService>() }
+        MigrationProcessAdapter.migrateMangaInternal(
+            flags,
+            db,
+            enhancedServices,
+            source,
+            sourceManager.getOrStub(newManga.source),
+            libraryManga,
+            newManga,
+            replace
+        )
+        migrateManga(libraryManga.source, !replace)
+    }
+
+    activity.materialAlertDialog().apply {
+        setCustomTitleAndMessage(0, activity.getString(R.string.confirm_manga_add_duplicate, source.name))
+        setItems(
+            arrayOf(
+                activity.getString(R.string.show_, libraryManga.seriesType(activity, sourceManager)).asButton(activity),
+                activity.getString(R.string.add_to_library).asButton(activity),
+                activity.getString(R.string.migrate).asButton(activity, !newManga.initialized),
+            )
+        ) { dialog, i ->
+            when (i) {
+                0 -> controller.router.pushController(
+                    MangaDetailsController(libraryManga)
+                        .withFadeTransaction()
+                )
+                1 -> addManga()
+                2 -> {
+                    if (!newManga.initialized) {
+                        activity.toast(R.string.must_view_details_before_migration, Toast.LENGTH_LONG)
+                        return@setItems
+                    }
+                    activity.materialAlertDialog().apply {
+                        setTitle(R.string.migration)
+                        setMultiChoiceItems(
+                            arrayOf(
+                                activity.getString(R.string.chapters),
+                                activity.getString(R.string.categories),
+                                activity.getString(R.string.tracking),
+                            ),
+                            booleanArrayOf(true, true, true), null
+                        )
+                        setPositiveButton(R.string.migrate) { mDialog, _ ->
+                            migrateManga(mDialog, true)
+                        }
+                        setNegativeButton(R.string.copy) { mDialog, _ ->
+                            migrateManga(mDialog, false)
+                        }
+                        setNeutralButton(android.R.string.cancel, null)
+                        setCancelable(true)
+                    }.show()
+                }
+                else -> {}
+            }
+            dialog.dismiss()
+        }
+        setNegativeButton(activity.getString(android.R.string.cancel)) { _, _ -> }
+        setCancelable(true)
+    }.create().apply {
+        setOnShowListener {
+            if (!newManga.initialized) {
+                val listView = (it as AlertDialog).listView
+                val view = listView.getChildAt(2)
+                view?.setOnClickListener {
+                    if (!newManga.initialized) {
+                        activity.toast(
+                            R.string.must_view_details_before_migration,
+                            Toast.LENGTH_LONG
+                        )
+                    }
+                }
+            }
+        }
+    }.show()
 }
 
 fun Manga.autoAddTrack(db: DatabaseHelper, onMangaMoved: () -> Unit) {

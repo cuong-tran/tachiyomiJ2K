@@ -700,6 +700,8 @@ open class BrowseSourceController(bundle: Bundle) :
             preferences,
             view,
             activity,
+            presenter.sourceManager,
+            this,
             onMangaAdded = {
                 adapter?.notifyItemChanged(position)
                 snack = view.snack(R.string.added_to_library)

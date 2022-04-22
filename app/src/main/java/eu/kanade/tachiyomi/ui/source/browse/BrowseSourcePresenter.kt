@@ -53,7 +53,7 @@ import uy.kohesive.injekt.api.get
 open class BrowseSourcePresenter(
     private val sourceId: Long,
     searchQuery: String? = null,
-    private val sourceManager: SourceManager = Injekt.get(),
+    val sourceManager: SourceManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     val prefs: PreferencesHelper = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),

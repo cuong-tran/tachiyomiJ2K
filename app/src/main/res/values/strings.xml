@@ -504,6 +504,9 @@
     <string name="added_to_library">Added to library</string>
     <string name="add_to_library">Add to Library</string>
     <string name="removed_from_library">Removed from library</string>
+    <string name="show_">Show %1$s</string>
+    <string name="must_view_details_before_migration">This entry\'s details page must be viewed before being able to migrate</string>
+    <string name="confirm_manga_add_duplicate">You have an entry in your library with the same name but from a different source (%1$s).\n\nDo you still wish to continue?</string>
     <string name="_copied_to_clipboard">%1$s copied to clipboard</string>
     <string name="source_not_installed_">Source not installed: %1$s</string>
     <string name="no_description">No description</string>

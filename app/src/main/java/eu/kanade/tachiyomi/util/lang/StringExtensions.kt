@@ -6,13 +6,18 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
+import android.text.SpannedString
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import android.text.style.SuperscriptSpan
+import android.text.style.TextAppearanceSpan
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
+import androidx.core.text.buildSpannedString
+import androidx.core.text.color
+import androidx.core.text.inSpans
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import net.greypanther.natsort.CaseInsensitiveSimpleNaturalComparator
@@ -109,6 +114,19 @@ fun String.highlightText(highlight: String, @ColorInt color: Int): Spanned {
         wordToSpan.setSpan(BackgroundColorSpan(color), it, it + highlight.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
     return wordToSpan
+}
+
+fun String.asButton(context: Context, disabled: Boolean = false): SpannedString {
+    return buildSpannedString {
+        val buttonSpan: SpannableStringBuilder.() -> Unit = {
+            inSpans(
+                TextAppearanceSpan(context, R.style.TextAppearance_Tachiyomi_Button)
+            ) { append(this@asButton) }
+        }
+        if (disabled) {
+            color(context.getColor(R.color.material_on_surface_disabled), buttonSpan)
+        } else buttonSpan()
+    }
 }
 
 fun String.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int> {

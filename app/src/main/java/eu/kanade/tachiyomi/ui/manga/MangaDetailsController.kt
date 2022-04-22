@@ -1367,6 +1367,8 @@ class MangaDetailsController :
             presenter.preferences,
             view,
             activity,
+            presenter.sourceManager,
+            this,
             onMangaAdded = {
                 updateHeader()
                 showAddedSnack()

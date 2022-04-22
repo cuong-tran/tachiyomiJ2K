@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.SourceNotFoundException
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.toSChapter
@@ -82,6 +83,7 @@ class MangaDetailsPresenter(
 
     private val customMangaManager: CustomMangaManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
+    val sourceManager: SourceManager by injectLazy()
 
     private val chapterSort = ChapterSort(manga, chapterFilter, preferences)
     val extension by lazy { (source as? HttpSource)?.getExtension() }

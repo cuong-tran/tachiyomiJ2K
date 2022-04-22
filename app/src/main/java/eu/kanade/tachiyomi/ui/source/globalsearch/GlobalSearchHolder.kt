@@ -81,6 +81,8 @@ class GlobalSearchHolder(view: View, val adapter: GlobalSearchAdapter) :
         }
     }
 
+    fun updateManga(position: Int) = mangaAdapter.notifyItemChanged(position)
+
     /**
      * Called from the presenter when a manga is initialized.
      *

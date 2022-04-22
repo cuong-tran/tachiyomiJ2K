@@ -44,6 +44,21 @@ interface MangaQueries : DbProvider {
         .withGetResolver(LibraryMangaGetResolver.INSTANCE)
         .prepare()
 
+    fun getDuplicateLibraryManga(manga: Manga) = db.get()
+        .`object`(Manga::class.java)
+        .withQuery(
+            Query.builder()
+                .table(MangaTable.TABLE)
+                .where("${MangaTable.COL_FAVORITE} = 1 AND LOWER(${MangaTable.COL_TITLE}) = ? AND ${MangaTable.COL_SOURCE} != ?")
+                .whereArgs(
+                    manga.title.lowercase(),
+                    manga.source,
+                )
+                .limit(1)
+                .build(),
+        )
+        .prepare()
+
     fun getFavoriteMangas() = db.get()
         .listOfObjects(Manga::class.java)
         .withQuery(
