@@ -12,6 +12,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.DownloadBottomSheetBinding
 import eu.kanade.tachiyomi.ui.extension.ExtensionDividerItemDecoration
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -24,6 +25,7 @@ import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.toolbarHeight
+import uy.kohesive.injekt.injectLazy
 
 class DownloadBottomSheet @JvmOverloads constructor(
     context: Context,
@@ -40,6 +42,8 @@ class DownloadBottomSheet @JvmOverloads constructor(
     private var adapter: DownloadAdapter? = null
 
     private val presenter = DownloadBottomPresenter()
+
+    val preferences: PreferencesHelper by injectLazy()
 
     /**
      * Whether the download queue is running or not.
@@ -146,6 +150,9 @@ class DownloadBottomSheet @JvmOverloads constructor(
         prepareMenu()
         setInformationView()
         adapter?.updateDataSet(downloads)
+        if (!preferences.shownDownloadSwipeTutorial().get() && downloads.isNotEmpty()) {
+            adapter?.addItem(DownloadSwipeTutorialItem())
+        }
         setBottomSheet()
     }
 
@@ -277,7 +284,13 @@ class DownloadBottomSheet @JvmOverloads constructor(
     }
 
     override fun onItemRemoved(position: Int) {
-        val download = (adapter?.getItem(position) as? DownloadItem)?.download ?: return
+        val item = adapter?.getItem(position)
+        if (item is DownloadSwipeTutorialItem) {
+            preferences.shownDownloadSwipeTutorial().set(true)
+            adapter?.removeItem(position)
+            return
+        }
+        val download = (item as? DownloadItem)?.download ?: return
         presenter.cancelDownload(download)
 
         adapter?.removeItem(position)
