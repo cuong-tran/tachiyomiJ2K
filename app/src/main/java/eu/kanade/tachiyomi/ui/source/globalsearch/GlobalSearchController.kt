@@ -104,7 +104,10 @@ open class GlobalSearchController(
      */
     override fun onMangaClick(manga: Manga) {
         // Open MangaController.
-        router.pushController(MangaDetailsController(manga, true).withFadeTransaction())
+        router.pushController(
+            MangaDetailsController(manga, true, shouldLockIfNeeded = activity is SearchActivity)
+                .withFadeTransaction()
+        )
     }
 
     /**
@@ -269,7 +272,7 @@ open class GlobalSearchController(
             if (results != null && searchResult.size == 1 && results.size == 1) {
                 val manga = results.first().manga
                 router.replaceTopController(
-                    MangaDetailsController(manga, true)
+                    MangaDetailsController(manga, true, shouldLockIfNeeded = true)
                         .withFadeTransaction()
                 )
                 return

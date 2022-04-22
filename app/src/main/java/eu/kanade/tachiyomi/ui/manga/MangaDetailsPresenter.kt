@@ -115,7 +115,7 @@ class MangaDetailsPresenter(
             tabletChapterHeaderItem = MangaHeaderItem(manga, false)
             tabletChapterHeaderItem?.isChapterHeader = true
         }
-        isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
+        isLockedFromSearch = controller.shouldLockIfNeeded && SecureActivityDelegate.shouldBeLocked()
         headerItem.isLocked = isLockedFromSearch
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
