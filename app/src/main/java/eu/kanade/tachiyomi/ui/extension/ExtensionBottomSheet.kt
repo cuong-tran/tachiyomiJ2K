@@ -61,7 +61,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     val adapters
         get() = listOf(extAdapter, migAdapter)
 
-    val presenter = ExtensionBottomPresenter(this)
+    val presenter = ExtensionBottomPresenter()
 
     private var extensions: List<ExtensionItem> = emptyList()
     var canExpand = false
@@ -84,6 +84,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     fun onCreate(controller: BrowseController) {
         // Initialize adapter, scroll listener and recycler views
+        presenter.attachView(this)
         extAdapter = ExtensionAdapter(this)
         extAdapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         if (migAdapter == null) {
@@ -386,6 +387,13 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         presenter.uninstallExtension(pkgName)
     }
 
+    /**
+     * Called when the view of this adapter is being destroyed.
+     */
+    fun onDestroy() {
+        presenter.onDestroy()
+    }
+
     private inner class TabbedSheetAdapter : RecyclerViewPagerAdapter() {
 
         override fun getCount(): Int {
@@ -450,17 +458,6 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             val view = (obj as? RecyclerWithScrollerView) ?: return POSITION_NONE
             val index = adapters.indexOfFirst { it == view.binding?.recycler?.adapter }
             return if (index == -1) POSITION_NONE else index
-        }
-
-        /**
-         * Called when the view of this adapter is being destroyed.
-         */
-        fun onDestroy() {
-            /*for (view in boundViews) {
-                if (view is LibraryCategoryView) {
-                    view.onDestroy()
-                }
-            }*/
         }
     }
 }

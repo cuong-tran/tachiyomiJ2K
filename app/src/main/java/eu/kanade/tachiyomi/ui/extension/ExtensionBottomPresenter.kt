@@ -40,10 +40,9 @@ typealias ExtensionIntallInfo = Pair<InstallStep, PackageInstaller.SessionInfo?>
  * Presenter of [ExtensionBottomSheet].
  */
 class ExtensionBottomPresenter(
-    private val bottomSheet: ExtensionBottomSheet,
     private val extensionManager: ExtensionManager = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get()
-) : BaseCoroutinePresenter() {
+) : BaseCoroutinePresenter<ExtensionBottomSheet>() {
 
     private var extensions = emptyList<ExtensionItem>()
 
@@ -73,7 +72,7 @@ class ExtensionBottomPresenter(
                         extensionManager.availableExtensions
                     )
                 )
-                withContext(Dispatchers.Main) { bottomSheet.setExtensions(extensions, false) }
+                withContext(Dispatchers.Main) { controller?.setExtensions(extensions, false) }
             }
             val migrationJob = async {
                 val favs = db.getFavoriteMangas().executeOnIO()
@@ -88,9 +87,9 @@ class ExtensionBottomPresenter(
                 )
                 withContext(Dispatchers.Main) {
                     if (selectedSource != null) {
-                        bottomSheet.setMigrationManga(mangaItems[selectedSource])
+                        controller?.setMigrationManga(mangaItems[selectedSource])
                     } else {
-                        bottomSheet.setMigrationSources(sourceItems)
+                        controller?.setMigrationSources(sourceItems)
                     }
                 }
             }
@@ -110,7 +109,7 @@ class ExtensionBottomPresenter(
                                 extensionManager.availableExtensions
                             )
                         )
-                        withUIContext { bottomSheet.setExtensions(extensions) }
+                        withUIContext { controller?.setExtensions(extensions) }
                         return@collect
                     }
                     val extension = extensions.find { item ->
@@ -126,7 +125,7 @@ class ExtensionBottomPresenter(
                     }
                     val item = updateInstallStep(extension.extension, it.second.first, it.second.second)
                     if (item != null) {
-                        withUIContext { bottomSheet.downloadUpdate(item) }
+                        withUIContext { controller?.downloadUpdate(item) }
                     }
                 }
         }
@@ -153,7 +152,7 @@ class ExtensionBottomPresenter(
                     extensionManager.availableExtensions
                 )
             )
-            withContext(Dispatchers.Main) { bottomSheet.setExtensions(extensions, false) }
+            withContext(Dispatchers.Main) { controller?.setExtensions(extensions, false) }
         }
     }
 
@@ -168,9 +167,9 @@ class ExtensionBottomPresenter(
             )
             withContext(Dispatchers.Main) {
                 if (selectedSource != null) {
-                    bottomSheet.setMigrationManga(mangaItems[selectedSource])
+                    controller?.setMigrationManga(mangaItems[selectedSource])
                 } else {
-                    bottomSheet.setMigrationSources(sourceItems)
+                    controller?.setMigrationSources(sourceItems)
                 }
             }
         }
@@ -178,7 +177,7 @@ class ExtensionBottomPresenter(
 
     @Synchronized
     private fun toItems(tuple: ExtensionTuple): List<ExtensionItem> {
-        val context = bottomSheet.context
+        val context = controller?.context ?: return emptyList()
         val activeLangs = preferences.enabledLanguages().get()
         val showNsfwSources = preferences.showNsfwSources().get()
 
@@ -266,7 +265,7 @@ class ExtensionBottomPresenter(
     }
 
     private fun extensionInstallDate(pkgName: String): Long {
-        val context = bottomSheet.context
+        val context = controller?.context ?: return 0
         return try {
             context.packageManager.getPackageInfo(pkgName, 0).firstInstallTime
         } catch (e: java.lang.Exception) {
@@ -275,7 +274,7 @@ class ExtensionBottomPresenter(
     }
 
     private fun extensionUpdateDate(pkgName: String): Long {
-        val context = bottomSheet.context
+        val context = controller?.context ?: return 0
         return try {
             context.packageManager.getPackageInfo(pkgName, 0).lastUpdateTime
         } catch (e: java.lang.Exception) {
@@ -331,15 +330,15 @@ class ExtensionBottomPresenter(
 
     fun updateExtensions(extensions: List<Extension.Installed>) {
         if (extensions.isEmpty()) return
-        val context = bottomSheet.context
+        val context = controller?.context ?: return
         extensions.forEach {
             val pkgName = it.pkgName
             currentDownloads[pkgName] = InstallStep.Pending to null
             val item = updateInstallStep(it, InstallStep.Pending, null) ?: return@forEach
-            bottomSheet.downloadUpdate(item)
+            controller?.downloadUpdate(item)
         }
         val intent = ExtensionInstallService.jobIntent(
-            bottomSheet.context,
+            context,
             extensions.mapNotNull { extension ->
                 extensionManager.availableExtensions.find { it.pkgName == extension.pkgName }
             }
@@ -362,14 +361,14 @@ class ExtensionBottomPresenter(
     fun setSelectedSource(source: Source) {
         selectedSource = source.id
         presenterScope.launch {
-            withContext(Dispatchers.Main) { bottomSheet.setMigrationManga(mangaItems[source.id]) }
+            withContext(Dispatchers.Main) { controller?.setMigrationManga(mangaItems[source.id]) }
         }
     }
 
     fun deselectSource() {
         selectedSource = null
         presenterScope.launch {
-            withContext(Dispatchers.Main) { bottomSheet.setMigrationSources(sourceItems) }
+            withContext(Dispatchers.Main) { controller?.setMigrationSources(sourceItems) }
         }
     }
 }

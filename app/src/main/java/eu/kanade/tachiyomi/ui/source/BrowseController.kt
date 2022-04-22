@@ -419,6 +419,7 @@ class BrowseController :
 
     override fun onDestroyView(view: View) {
         adapter = null
+        binding.bottomSheet.root.onDestroy()
         super.onDestroyView(view)
     }
 
