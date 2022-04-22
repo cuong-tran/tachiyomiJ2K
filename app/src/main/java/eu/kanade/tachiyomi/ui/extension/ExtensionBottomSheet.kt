@@ -387,9 +387,6 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         presenter.uninstallExtension(pkgName)
     }
 
-    /**
-     * Called when the view of this adapter is being destroyed.
-     */
     fun onDestroy() {
         presenter.onDestroy()
     }

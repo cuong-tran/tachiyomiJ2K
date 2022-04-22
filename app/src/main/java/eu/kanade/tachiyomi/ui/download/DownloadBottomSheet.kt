@@ -39,7 +39,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
      */
     private var adapter: DownloadAdapter? = null
 
-    private val presenter = DownloadBottomPresenter(this)
+    private val presenter = DownloadBottomPresenter()
 
     /**
      * Whether the download queue is running or not.
@@ -55,6 +55,8 @@ class DownloadBottomSheet @JvmOverloads constructor(
 
     fun onCreate(controller: RecentsController) {
         // Initialize adapter, scroll listener and recycler views
+        presenter.attachView(this)
+        presenter.onCreate()
         adapter = DownloadAdapter(this)
         sheetBehavior = BottomSheetBehavior.from(this)
         activity = controller.activity
@@ -335,5 +337,9 @@ class DownloadBottomSheet @JvmOverloads constructor(
                 }
             }
         }
+    }
+
+    fun onDestroy() {
+        presenter.onDestroy()
     }
 }

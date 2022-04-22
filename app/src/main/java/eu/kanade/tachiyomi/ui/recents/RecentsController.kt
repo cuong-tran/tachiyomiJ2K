@@ -500,6 +500,7 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun onDestroyView(view: View) {
         super.onDestroyView(view)
+        binding.downloadBottomSheet.root.onDestroy()
         displaySheet?.dismiss()
         displaySheet = null
     }
