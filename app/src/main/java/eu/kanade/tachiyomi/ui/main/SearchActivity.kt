@@ -32,9 +32,17 @@ class SearchActivity : MainActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding.toolbar.navigationIcon = backDrawable
-        binding.searchToolbar.navigationIcon = backDrawable
         binding.toolbar.setNavigationOnClickListener { popToRoot() }
-        binding.searchToolbar.setNavigationOnClickListener { popToRoot() }
+        binding.searchToolbar.setNavigationOnClickListener {
+            val rootSearchController = router.backstack.lastOrNull()?.controller
+            if ((
+                rootSearchController is RootSearchInterface ||
+                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
+                ) && rootSearchController !is SmallToolbarInterface
+            ) {
+                binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+            } else popToRoot()
+        }
         (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
         (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
     }
@@ -68,16 +76,12 @@ class SearchActivity : MainActivity() {
 
     override fun setFloatingToolbar(show: Boolean, solidBG: Boolean, changeBG: Boolean, showSearchAnyway: Boolean) {
         super.setFloatingToolbar(show, solidBG, changeBG, showSearchAnyway)
-        binding.toolbar.setNavigationOnClickListener { popToRoot() }
-        binding.searchToolbar.setNavigationOnClickListener {
-            val rootSearchController = router.backstack.lastOrNull()?.controller
-            if ((
-                rootSearchController is RootSearchInterface ||
-                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
-                ) && rootSearchController !is SmallToolbarInterface
-            ) {
-                binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
-            } else popToRoot()
+        val useLargeTB = binding.appBar.useLargeToolbar
+        if (!useLargeTB) {
+            binding.searchToolbar.navigationIcon = backDrawable
+        } else if (showSearchAnyway) {
+            binding.searchToolbar.navigationIcon =
+                if (!show) searchDrawable else backDrawable
         }
     }
 
@@ -93,10 +97,6 @@ class SearchActivity : MainActivity() {
         if (from is DialogController || to is DialogController) {
             return
         }
-        setFloatingToolbar(canShowFloatingToolbar(to))
-        binding.searchToolbar.navigationIcon = if (binding.appBar.useLargeToolbar) searchDrawable else backDrawable
-        binding.toolbar.navigationIcon = backDrawable
-
         nav.isVisible = false
         binding.bottomView?.isVisible = false
     }
