@@ -69,7 +69,7 @@ class CoverCache(val context: Context) {
     suspend fun deleteOldCovers() {
         val db = Injekt.get<DatabaseHelper>()
         var deletedSize = 0L
-        val urls = db.getLibraryMangas().executeOnIO().mapNotNull {
+        val urls = db.getFavoriteMangas().executeOnIO().mapNotNull {
             it.thumbnail_url?.let { url -> return@mapNotNull DiskUtil.hashKeyForDisk(url) }
             null
         }
