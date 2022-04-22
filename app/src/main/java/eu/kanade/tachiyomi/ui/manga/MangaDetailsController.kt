@@ -59,7 +59,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
-import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.library.LibraryController
@@ -118,7 +118,7 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 
 class MangaDetailsController :
-    BaseController<MangaDetailsControllerBinding>,
+    BaseCoroutineController<MangaDetailsControllerBinding, MangaDetailsPresenter>,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     ActionMode.Callback,
@@ -143,7 +143,7 @@ class MangaDetailsController :
         if (manga != null) {
             source = Injekt.get<SourceManager>().getOrStub(manga.source)
         }
-        presenter = MangaDetailsPresenter(this, manga!!, source!!)
+        presenter = MangaDetailsPresenter(manga!!, source!!)
     }
 
     constructor(mangaId: Long) : this(
@@ -163,7 +163,7 @@ class MangaDetailsController :
     private var manga: Manga? = null
     private var source: Source? = null
     private var colorAnimator: ValueAnimator? = null
-    val presenter: MangaDetailsPresenter
+    override val presenter: MangaDetailsPresenter
     private var coverColor: Int? = null
     private var accentColor: Int? = null
     private var headerColor: Int? = null
@@ -211,7 +211,7 @@ class MangaDetailsController :
             activityBinding?.appBar?.y = 0f
         }
 
-        presenter.onCreate()
+        presenter.onFirstLoad()
         binding.swipeRefresh.isRefreshing = presenter.isLoading
         binding.swipeRefresh.setOnRefreshListener { presenter.refreshAll() }
         updateToolbarTitleAlpha()
@@ -353,7 +353,6 @@ class MangaDetailsController :
 
     override fun onDestroyView(view: View) {
         snack?.dismiss()
-        presenter.onDestroy()
         adapter = null
         trackingBottomSheet = null
         super.onDestroyView(view)
@@ -564,9 +563,6 @@ class MangaDetailsController :
         } else {
             if (router.backstack.lastOrNull()?.controller is DialogController) {
                 return
-            }
-            if (type == ControllerChangeType.POP_EXIT) {
-                presenter.cancelScope()
             }
             colorAnimator?.cancel()
 
