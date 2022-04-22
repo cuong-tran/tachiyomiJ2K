@@ -822,6 +822,8 @@
     <string name="clear_cached_covers_non_library">Clear cached covers not in library</string>
     <string name="delete_all_covers__not_in_library_used_">Delete all covers cached that are
         not in your library \nCurrently using: %1$s</string>
+    <string name="most_entries">Most entries</string>
+    <string name="select_uninstalled_sources">Select uninstalled sources</string>
 
     <!-- Browse Settings -->
     <string name="pref_global_search">Global search</string>

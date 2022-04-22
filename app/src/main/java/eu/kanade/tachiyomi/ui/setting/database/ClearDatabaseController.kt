@@ -24,8 +24,8 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.Payload
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ClearDatabaseControllerBinding
+import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.fullAppBarHeight
@@ -35,7 +35,7 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 
 class ClearDatabaseController :
-    NucleusController<ClearDatabaseControllerBinding, ClearDatabasePresenter>(),
+    BaseCoroutineController<ClearDatabaseControllerBinding, ClearDatabasePresenter>(),
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnUpdateListener {
 
@@ -46,9 +46,7 @@ class ClearDatabaseController :
         return ClearDatabaseControllerBinding.inflate(inflater)
     }
 
-    override fun createPresenter(): ClearDatabasePresenter {
-        return ClearDatabasePresenter()
-    }
+    override val presenter = ClearDatabasePresenter()
 
     override fun getTitle(): String? {
         return activity?.getString(R.string.clear_database)
@@ -130,9 +128,20 @@ class ClearDatabaseController :
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.generic_selection, menu)
+        inflater.inflate(R.menu.clear_database, menu)
         this.menu = menu
+        val id = when (presenter.sortBy) {
+            ClearDatabasePresenter.SortSources.ALPHA -> R.id.action_sort_alpha
+            ClearDatabasePresenter.SortSources.MOST_ENTRIES -> R.id.action_sort_largest
+        }
+        menu.findItem(id).isChecked = true
         menu.forEach { menuItem -> menuItem.isVisible = (adapter?.itemCount ?: 0) > 0 }
+        setUninstalledMenuItem()
+    }
+
+    private fun setUninstalledMenuItem() {
+        menu?.findItem(R.id.action_select_uninstalled)?.isVisible =
+            presenter.hasStubSources && adapter?.itemCount ?: 0 > 0
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -140,11 +149,26 @@ class ClearDatabaseController :
         when (item.itemId) {
             R.id.action_select_all -> adapter.selectAll()
             R.id.action_select_inverse -> {
+                adapter.currentItems.forEachIndexed { index, _ ->
+                    adapter.toggleSelection(index)
+                }
+            }
+            R.id.action_sort_alpha, R.id.action_sort_largest -> {
+                val sortBy = when (item.itemId) {
+                    R.id.action_sort_alpha -> ClearDatabasePresenter.SortSources.ALPHA
+                    R.id.action_sort_largest -> ClearDatabasePresenter.SortSources.MOST_ENTRIES
+                    else -> return false
+                }
+                presenter.reorder(sortBy)
+                item.isChecked = true
+                adapter.clearSelection()
+            }
+            R.id.action_select_uninstalled -> {
                 val currentSelection = adapter.selectedPositionsAsSet
-                val invertedSelection = (0..adapter.itemCount)
-                    .filterNot { currentSelection.contains(it) }
+                val uninstalledSelection = (0 until adapter.itemCount)
+                    .filter { adapter.getItem(it)?.isStub == true }
                 currentSelection.clear()
-                currentSelection.addAll(invertedSelection)
+                currentSelection.addAll(uninstalledSelection)
             }
         }
         adapter.notifyItemRangeChanged(0, adapter.itemCount, Payload.SELECTION)
@@ -162,6 +186,7 @@ class ClearDatabaseController :
             )
         }
         menu?.forEach { menuItem -> menuItem.isVisible = size > 0 }
+        setUninstalledMenuItem()
     }
 
     override fun onItemClick(view: View?, position: Int): Boolean {
@@ -176,10 +201,12 @@ class ClearDatabaseController :
         super.onPrepareOptionsMenu(menu)
         val size = adapter?.itemCount ?: 0
         menu.forEach { menuItem -> menuItem.isVisible = size > 0 }
+        setUninstalledMenuItem()
     }
 
     fun setItems(items: List<ClearDatabaseSourceItem>) {
         adapter?.updateDataSet(items)
+        menu?.findItem(R.id.action_select_uninstalled)?.isVisible = presenter.hasStubSources
     }
 
     private fun updateFab() {
