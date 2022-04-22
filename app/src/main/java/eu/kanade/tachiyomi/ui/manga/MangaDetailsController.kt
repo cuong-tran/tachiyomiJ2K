@@ -620,6 +620,7 @@ class MangaDetailsController :
             }
             1 -> return
             else -> {
+                val chapterNames = deletedChapters.map { it.name }
                 context.materialAlertDialog()
                     .setCustomTitleAndMessage(
                         R.string.chapters_removed,
@@ -627,7 +628,14 @@ class MangaDetailsController :
                             R.plurals.deleted_chapters,
                             deletedChapters.size,
                             deletedChapters.size,
-                            deletedChapters.joinToString("\n") { it.name }
+                            if (deletedChapters.size > 5) {
+                                "${chapterNames.take(5 - 1).joinToString(", ")}, " +
+                                    context.resources.getQuantityString(
+                                        R.plurals.notification_and_n_more,
+                                        (chapterNames.size - (4 - 1)),
+                                        (chapterNames.size - (4 - 1))
+                                    )
+                            } else chapterNames.joinToString(", ")
                         )
                     )
                     .setPositiveButton(R.string.delete) { dialog, _ ->
