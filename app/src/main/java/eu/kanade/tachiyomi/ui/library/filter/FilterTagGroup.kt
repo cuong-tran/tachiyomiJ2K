@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.isVisible
-import com.tfcporciuncula.flow.Preference
+import com.fredporciuncula.flow.preferences.Preference
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.FilterTagGroupBinding
 import eu.kanade.tachiyomi.util.system.dpToPx

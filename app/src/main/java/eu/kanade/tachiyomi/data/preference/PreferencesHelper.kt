@@ -5,9 +5,9 @@ import android.net.Uri
 import android.os.Environment
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
+import com.fredporciuncula.flow.preferences.FlowSharedPreferences
+import com.fredporciuncula.flow.preferences.Preference
 import com.google.android.material.color.DynamicColors
-import com.tfcporciuncula.flow.FlowSharedPreferences
-import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService

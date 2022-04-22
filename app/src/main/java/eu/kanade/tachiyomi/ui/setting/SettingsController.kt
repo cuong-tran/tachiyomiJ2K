@@ -147,7 +147,7 @@ abstract class SettingsController : PreferenceController() {
         return subscribe(onNext).also { untilDestroySubscriptions.add(it) }
     }
 
-    inline fun <T> Preference.visibleIf(preference: com.tfcporciuncula.flow.Preference<T>, crossinline block: (T) -> Boolean) {
+    inline fun <T> Preference.visibleIf(preference: com.fredporciuncula.flow.preferences.Preference<T>, crossinline block: (T) -> Boolean) {
         preference.asImmediateFlowIn(viewScope) { isVisible = block(it) }
     }
 }

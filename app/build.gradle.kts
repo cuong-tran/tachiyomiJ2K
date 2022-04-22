@@ -117,14 +117,14 @@ dependencies {
     implementation("com.google.android.material:material:1.5.0")
     implementation("androidx.webkit:webkit:1.4.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
-    implementation("androidx.preference:preference:1.1.1")
+    implementation("androidx.preference:preference:1.2.0")
     implementation("androidx.annotation:annotation:1.3.0")
     implementation("androidx.browser:browser:1.4.0")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.core:core-ktx:1.7.0")
 
-    implementation("androidx.constraintlayout:constraintlayout:2.1.2")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
 
     implementation("androidx.multidex:multidex:2.0.1")
 
@@ -142,7 +142,7 @@ dependencies {
     implementation("com.github.pwittchen:reactivenetwork:0.13.0")
 
     // Coroutines
-    implementation("com.github.tfcporciuncula:flow-preferences:1.3.4")
+    implementation("com.fredporciuncula:flow-preferences:1.6.0")
 
     // Network client
     implementation("com.squareup.okhttp3:okhttp:${Versions.okhttp}")

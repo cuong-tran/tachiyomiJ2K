@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Activity
 import androidx.annotation.StringRes
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.biometric.BiometricPrompt
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.preference.CheckBoxPreference
 import androidx.preference.DialogPreference
@@ -16,7 +16,6 @@ import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.isAuthenticationSupported
@@ -169,12 +168,12 @@ inline fun Preference.onChange(crossinline block: (Any?) -> Boolean) {
     setOnPreferenceChangeListener { _, newValue -> block(newValue) }
 }
 
-inline fun <T> Preference.bindTo(preference: com.tfcporciuncula.flow.Preference<T>) {
+inline fun <T> Preference.bindTo(preference: com.fredporciuncula.flow.preferences.Preference<T>) {
     key = preference.key
     defaultValue = preference.defaultValue
 }
 
-inline fun <T> ListPreference.bindTo(preference: com.tfcporciuncula.flow.Preference<T>) {
+inline fun <T> ListPreference.bindTo(preference: com.fredporciuncula.flow.preferences.Preference<T>) {
     key = preference.key
     // ListPreferences persist values as strings, even when we're using our IntListPreference
     defaultValue = preference.defaultValue.toString()
@@ -220,7 +219,7 @@ var Preference.titleRes: Int
 
 var Preference.iconRes: Int
     get() = 0 // set only
-    set(value) { icon = VectorDrawableCompat.create(context.resources, value, context.theme) }
+    set(value) { icon = AppCompatResources.getDrawable(context, value) }
 
 var Preference.summaryRes: Int
     get() = 0 // set only
@@ -228,4 +227,4 @@ var Preference.summaryRes: Int
 
 var Preference.iconTint: Int
     get() = 0 // set only
-    set(value) { DrawableCompat.setTint(icon, value) }
+    set(value) { icon?.setTint(value) }
