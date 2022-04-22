@@ -19,13 +19,13 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.Payload
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ClearDatabaseControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.fullAppBarHeight
@@ -228,7 +228,7 @@ class ClearDatabaseController :
 
     class ClearDatabaseSourcesDialog : DialogController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            return MaterialAlertDialogBuilder(activity!!)
+            return activity!!.materialAlertDialog()
                 .setMessage(R.string.clear_database_confirmation)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     (targetController as? ClearDatabaseController)?.clearDatabaseForSelectedSources()
