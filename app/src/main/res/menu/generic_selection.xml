@@ -11,8 +11,8 @@
 
     <item
         android:id="@+id/action_select_inverse"
-        android:icon="@drawable/ic_select_none_24dp"
-        android:title="@string/select_none"
+        android:icon="@drawable/ic_flip_to_back_24dp"
+        android:title="@string/select_inverse"
         app:iconTint="?colorOnSurface"
         app:showAsAction="ifRoom" />
 
