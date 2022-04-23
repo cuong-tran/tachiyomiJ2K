@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
 import android.app.Activity
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -140,9 +139,10 @@ open class BrowseSourceController(bundle: Bundle) :
         return searchTitle(presenter.source.name)
     }
 
-    override fun getBigIcon(): Drawable? {
-        return presenter.source.icon()
-    }
+    // disabling for now, one day maybe it will source icons will good
+//    override fun getBigIcon(): Drawable? {
+//        return presenter.source.icon()
+//    }
 
     override fun createPresenter(): BrowseSourcePresenter {
         return BrowseSourcePresenter(args.getLong(SOURCE_ID_KEY), args.getString(SEARCH_QUERY_KEY))
