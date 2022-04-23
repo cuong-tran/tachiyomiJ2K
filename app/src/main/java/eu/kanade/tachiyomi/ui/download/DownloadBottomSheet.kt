@@ -8,7 +8,10 @@ import android.widget.LinearLayout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isInvisible
 import androidx.core.view.updateLayoutParams
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -32,8 +35,9 @@ class DownloadBottomSheet @JvmOverloads constructor(
     attrs: AttributeSet? =
         null
 ) : LinearLayout(context, attrs),
-    DownloadAdapter.DownloadItemListener {
-    lateinit var controller: RecentsController
+    DownloadAdapter.DownloadItemListener,
+    FlexibleAdapter.OnActionStateListener {
+    var controller: RecentsController? = null
     var sheetBehavior: BottomSheetBehavior<*>? = null
 
     /**
@@ -69,7 +73,9 @@ class DownloadBottomSheet @JvmOverloads constructor(
         binding.dlRecycler.adapter = adapter
         adapter?.isHandleDragEnabled = true
         adapter?.isSwipeEnabled = true
+        adapter?.isSwipeEnabled = true
         adapter?.fastScroller = binding.fastScroller
+        binding.fastScroller.controller = controller
         binding.dlRecycler.setHasFixedSize(true)
         binding.dlRecycler.addItemDecoration(ExtensionDividerItemDecoration(context))
         this.controller = controller
@@ -154,6 +160,12 @@ class DownloadBottomSheet @JvmOverloads constructor(
             adapter?.addItem(DownloadSwipeTutorialItem())
         }
         setBottomSheet()
+    }
+
+    override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+            controller?.isDragging = true
+        }
     }
 
     /**
@@ -265,7 +277,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
             sheetBehavior?.skipCollapsed = !hasQueue
             if (sheetBehavior.isCollapsed()) sheetBehavior?.hide()
         }
-        controller.setPadding(!hasQueue)
+        controller?.setPadding(!hasQueue)
     }
 
     /**
@@ -274,6 +286,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
      * @param position The position of the released item.
      */
     override fun onItemReleased(position: Int) {
+        controller?.isDragging = false
         val adapter = adapter ?: return
         val downloads = adapter.headerItems.flatMap { header ->
             adapter.getSectionItems(header).map { item ->
@@ -301,7 +314,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
             }
         }
         presenter.reorder(downloads)
-        controller.updateChapterDownload(download, false)
+        controller?.updateChapterDownload(download, false)
     }
 
     /**
@@ -354,5 +367,6 @@ class DownloadBottomSheet @JvmOverloads constructor(
 
     fun onDestroy() {
         presenter.onDestroy()
+        binding.fastScroller.controller = null
     }
 }

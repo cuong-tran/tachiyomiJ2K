@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import eu.davidea.fastscroller.FastScroller
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.isLTR
@@ -20,6 +21,7 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
     var canScroll = false
     var startY = -1f
     var scrollOffset = 0
+    var controller: BaseController<*>? = null
     init {
         setViewsToUse(
             R.layout.material_fastscroll,
@@ -36,8 +38,10 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
 
     // Overriding to force a distance moved before scrolling
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (recyclerView.computeVerticalScrollRange() <= recyclerView.computeVerticalScrollExtent()) {
-            return if (startY > -1f) {
+        if (controller?.isDragging == true ||
+            recyclerView.computeVerticalScrollRange() <= recyclerView.computeVerticalScrollExtent()
+        ) {
+            return if (startY > -1f || controller?.isDragging == true) {
                 dispatchTouchToRecycler(event)
                 false
             } else {
