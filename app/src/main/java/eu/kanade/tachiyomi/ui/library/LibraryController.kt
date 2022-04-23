@@ -405,7 +405,8 @@ class LibraryController(
 
     private fun setSubtitle() {
         if (isBindingInitialized && !singleCategory && presenter.showAllCategories &&
-            !binding.headerTitle.text.isNullOrBlank() && !binding.recyclerCover.isClickable
+            !binding.headerTitle.text.isNullOrBlank() && !binding.recyclerCover.isClickable &&
+            isControllerVisible
         ) {
             activityBinding?.searchToolbar?.subtitle = binding.headerTitle.text.toString()
         } else {
