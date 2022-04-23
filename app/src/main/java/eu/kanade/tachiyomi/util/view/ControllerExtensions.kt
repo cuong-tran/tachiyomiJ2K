@@ -379,8 +379,10 @@ fun Controller.scrollViewWith(
     colorToolbar(!atTopOfRecyclerView())
 
     recycler.post {
-        activityBinding!!.appBar.updateAppBarAfterY(recycler)
-        colorToolbar(!atTopOfRecyclerView())
+        if (isControllerVisible) {
+            activityBinding!!.appBar.updateAppBarAfterY(recycler)
+            colorToolbar(!atTopOfRecyclerView())
+        }
     }
     recycler.addOnScrollListener(
         object : RecyclerView.OnScrollListener() {
@@ -455,8 +457,7 @@ fun Controller.scrollViewWith(
                 if (newState == RecyclerView.SCROLL_STATE_IDLE &&
                     (this@scrollViewWith as? BaseController<*>)?.isDragging != true
                 ) {
-                    if (router?.backstack?.lastOrNull()
-                        ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
+                    if (isControllerVisible && statusBarHeight > -1 &&
                         activity != null && activityBinding!!.appBar.height > 0 &&
                         recycler.translationY == 0f
                     ) {
@@ -512,7 +513,7 @@ fun Controller.setItemAnimatorForAppBar(recycler: RecyclerView) {
     var itemAppBarAnimator: Animator? = null
 
     fun animateAppBar() {
-        if (this !is SmallToolbarInterface) {
+        if (this !is SmallToolbarInterface && isControllerVisible) {
             itemAppBarAnimator?.cancel()
             val duration = (recycler.itemAnimator?.changeDuration ?: 250) * 2
             itemAppBarAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
@@ -538,7 +539,9 @@ fun Controller.setItemAnimatorForAppBar(recycler: RecyclerView) {
         }
 
         override fun onAnimationFinished(viewHolder: RecyclerView.ViewHolder) {
-            activityBinding?.appBar?.updateAppBarAfterY(recycler)
+            if (isControllerVisible) {
+                activityBinding?.appBar?.updateAppBarAfterY(recycler)
+            }
             super.onAnimationFinished(viewHolder)
         }
 
