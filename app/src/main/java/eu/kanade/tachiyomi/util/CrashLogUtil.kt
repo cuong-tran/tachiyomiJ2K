@@ -56,7 +56,7 @@ class CrashLogUtil(private val context: Context) {
             addAction(
                 R.drawable.ic_bug_report_24dp,
                 context.getString(R.string.open_log),
-                NotificationReceiver.openErrorLogPendingActivity(context, uri)
+                NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
             )
 
             addAction(

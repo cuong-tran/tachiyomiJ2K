@@ -52,4 +52,9 @@ object NotificationHandler {
         }
         return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
     }
+
+    fun openUrl(context: Context, url: String): PendingIntent {
+        val notificationIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        return PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+    }
 }

@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
+import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -88,30 +89,53 @@ class LibraryUpdateNotifier(private val context: Context) {
     /**
      * Shows notification containing update entries that failed with action to open full log.
      *
-     * @param errors List of entry titles that failed to update.
+     * @param errorCount Count of entry titles that failed to update.
      * @param uri Uri for error log file containing all titles that failed.
      */
-    fun showUpdateErrorNotification(errors: List<String>, uri: Uri) {
-        if (errors.isEmpty()) {
+    fun showUpdateErrorNotification(errorCount: Int, uri: Uri) {
+        if (errorCount == 0) {
             return
         }
 
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_ERROR,
             context.notificationBuilder(Notifications.CHANNEL_LIBRARY_ERROR) {
-                setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed, errors.size, errors.size))
-                setStyle(
-                    NotificationCompat.BigTextStyle().bigText(
-                        errors.joinToString("\n") {
-                            it.chop(TITLE_MAX_LEN)
-                        }
-                    )
-                )
+                setContentTitle(context.getString(R.string.notification_update_error, errorCount))
+                setContentText(context.getString(R.string.tap_to_see_details))
                 setSmallIcon(R.drawable.ic_tachij2k_notification)
                 addAction(
                     R.drawable.nnf_ic_file_folder,
-                    context.getString(R.string.view_all_errors),
-                    NotificationReceiver.openErrorLogPendingActivity(context, uri)
+                    context.getString(R.string.view_all),
+                    NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
+                )
+            }
+                .build()
+        )
+    }
+
+    /**
+     * Shows notification containing update entries that were skipped with actions to open full log and learn more.
+     *
+     * @param skippedCount Count of entry titles that were skipped to update.
+     * @param uri Uri for error log file containing all titles that were skipped.
+     */
+    fun showUpdateSkippedNotification(skippedCount: Int, uri: Uri) {
+        if (skippedCount == 0) {
+            return
+        }
+
+        context.notificationManager.notify(
+            Notifications.ID_LIBRARY_SKIPPED,
+            context.notificationBuilder(Notifications.CHANNEL_LIBRARY_SKIPPED) {
+                setContentTitle(context.getString(R.string.notification_update_skipped, skippedCount))
+                setContentText(context.getString(R.string.tap_to_learn_more))
+                setContentIntent(NotificationHandler.openUrl(context, HELP_SKIPPED_URL))
+                setSmallIcon(R.drawable.ic_tachij2k_notification)
+                addAction(
+                    R.drawable.ic_help_24dp,
+                    context.getString(R.string.view_all),
+                    NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
+
                 )
             }
                 .build()
@@ -284,5 +308,6 @@ class LibraryUpdateNotifier(private val context: Context) {
         private const val MAX_CHAPTERS = 5
         private const val TITLE_MAX_LEN = 45
         private const val ICON_SIZE = 192
+        const val HELP_SKIPPED_URL = "https://tachiyomi.org/help/faq/#why-does-global-update-skip-some-entries"
     }
 }

@@ -5,7 +5,12 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.preference.DEVICE_CHARGING
+import eu.kanade.tachiyomi.data.preference.DEVICE_ONLY_ON_WIFI
 import eu.kanade.tachiyomi.data.preference.DelayedLibrarySuggestionsJob
+import eu.kanade.tachiyomi.data.preference.MANGA_HAS_UNREAD
+import eu.kanade.tachiyomi.data.preference.MANGA_NON_COMPLETED
+import eu.kanade.tachiyomi.data.preference.MANGA_NON_READ
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
@@ -125,10 +130,10 @@ class SettingsLibraryController : SettingsController() {
                 }
             }
             multiSelectListPreferenceMat(activity) {
-                key = Keys.libraryUpdateRestriction
+                bindTo(preferences.libraryUpdateDeviceRestriction())
                 titleRes = R.string.library_update_restriction
                 entriesRes = arrayOf(R.string.wifi, R.string.charging)
-                entryValues = listOf("wifi", "ac")
+                entryValues = listOf(DEVICE_ONLY_ON_WIFI, DEVICE_CHARGING)
                 preSummaryRes = R.string.restrictions_
                 noSelectionRes = R.string.none
 
@@ -142,10 +147,17 @@ class SettingsLibraryController : SettingsController() {
                     true
                 }
             }
-            switchPreference {
-                key = Keys.updateOnlyNonCompleted
-                titleRes = R.string.only_update_ongoing
-                defaultValue = false
+
+            multiSelectListPreferenceMat(activity) {
+                bindTo(preferences.libraryUpdateMangaRestriction())
+                titleRes = R.string.pref_library_update_manga_restriction
+                entriesRes = arrayOf(
+                    R.string.pref_update_only_completely_read,
+                    R.string.pref_update_only_started,
+                    R.string.pref_update_only_non_completed
+                )
+                entryValues = listOf(MANGA_HAS_UNREAD, MANGA_NON_READ, MANGA_NON_COMPLETED)
+                noSelectionRes = R.string.none
             }
 
             intListPreference(activity) {

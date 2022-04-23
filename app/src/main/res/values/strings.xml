@@ -205,19 +205,25 @@
         <item quantity="one">and %1$d more chapter</item>
         <item quantity="other">and %1$d more chapters</item>
     </plurals>
-    <plurals name="notification_update_failed">
-        <item quantity="one">1 update failed</item>
-        <item quantity="other">%1$d updates failed</item>
-    </plurals>
+    <string name="notification_update_error">%1$d update(s) failed</string>
+    <string name="notification_update_skipped">%1$d update(s) skipped</string>
+    <string name="skipped_reason_completed">Skipped because series is complete</string>
+    <string name="skipped_reason_not_caught_up">Skipped because there are unread chapters</string>
+    <string name="skipped_reason_not_started">Skipped because no chapters are read</string>
     <string name="channel_errors">Errors</string>
+    <string name="channel_skipped">Skipped</string>
 
     <!-- Library settings -->
     <string name="library_update_frequency">Library update frequency</string>
     <string name="library_update_order">Library update order</string>
-    <string name="library_update_restriction">Library update restrictions</string>
+    <string name="pref_library_update_manga_restriction">Skip updating titles</string>
+    <string name="pref_update_only_completely_read">With unread chapter(s)</string>
+    <string name="pref_update_only_non_completed">With \"Completed\" status</string>
+    <string name="pref_update_only_started">That haven\'t been started</string>
+    <string name="pref_update_only_completely_read_summary">Only update manga if there is no unread chapter (completely read)</string>
+    <string name="library_update_restriction">Device restrictions</string>
     <string name="library_update_restriction_summary">Update only when the conditions are met</string>
     <string name="restrictions_">Restrictions: %1$s</string>
-    <string name="only_update_ongoing">Only update ongoing manga</string>
     <string name="sort_by_ignoring_articles">Sort by ignoring articles</string>
     <string name="when_sorting_ignore_articles">When sorting alphabetically, sort ignoring
         articles (a, an, the) at the start of manga titles</string>
@@ -1001,6 +1007,7 @@
     <string name="install">Install</string>
     <string name="keep">Keep</string>
     <string name="keep_in_">Keep in %1$s</string>
+    <string name="learn_more_at_">Learn more at: %1$s</string>
     <string name="left">Left</string>
     <string name="less">Less</string>
     <string name="loading">Loading…</string>
@@ -1063,12 +1070,14 @@
     <string name="start">Start</string>
     <string name="stop">Stop</string>
     <string name="tag">Tag</string>
+    <string name="tap_to_see_details">Tap to see details</string>
+    <string name="tap_to_learn_more">Tap to learn more</string>
     <string name="top">Top</string>
     <string name="undo">Undo</string>
     <string name="unknown_error">Unknown error</string>
     <string name="unpin">Unpin</string>
     <string name="use_default">Use default</string>
-    <string name="view_all_errors">View all errors</string>
+    <string name="view_all">View all</string>
     <string name="view_chapters">View chapters</string>
     <string name="warning">Warning</string>
     <string name="wifi">Wi-Fi</string>

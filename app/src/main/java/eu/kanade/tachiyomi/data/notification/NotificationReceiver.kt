@@ -473,13 +473,13 @@ class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that opens the error log file in an external viewer
+         * Returns [PendingIntent] that opens the error or skipped log file in an external viewer
          *
          * @param context context of application
-         * @param uri uri of error log file
+         * @param uri uri of error or skipped log file
          * @return [PendingIntent]
          */
-        internal fun openErrorLogPendingActivity(context: Context, uri: Uri): PendingIntent {
+        internal fun openErrorOrSkippedLogPendingActivity(context: Context, uri: Uri): PendingIntent {
             val intent = Intent().apply {
                 action = Intent.ACTION_VIEW
                 setDataAndType(uri, "text/plain")

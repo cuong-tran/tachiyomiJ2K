@@ -48,6 +48,8 @@ object Notifications {
     const val CHANNEL_LIBRARY_ERROR = "library_errors_channel"
     const val ID_LIBRARY_ERROR = -102
     const val ID_LIBRARY_SIZE_WARNING = -103
+    const val CHANNEL_LIBRARY_SKIPPED = "library_skipped_channel"
+    const val ID_LIBRARY_SKIPPED = -104
 
     /**
      * Notification channel and ids used by the library updater.
@@ -126,6 +128,14 @@ object Notifications {
             NotificationChannel(
                 CHANNEL_LIBRARY_ERROR,
                 context.getString(R.string.channel_errors),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                group = GROUP_LIBRARY
+                setShowBadge(false)
+            },
+            NotificationChannel(
+                CHANNEL_LIBRARY_SKIPPED,
+                context.getString(R.string.channel_skipped),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 group = GROUP_LIBRARY

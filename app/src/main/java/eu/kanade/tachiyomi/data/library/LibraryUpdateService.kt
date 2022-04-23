@@ -11,6 +11,7 @@ import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.request.Parameters
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -24,6 +25,9 @@ import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
 import eu.kanade.tachiyomi.data.library.LibraryUpdateRanker.rankingScheme
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.preference.MANGA_HAS_UNREAD
+import eu.kanade.tachiyomi.data.preference.MANGA_NON_COMPLETED
+import eu.kanade.tachiyomi.data.preference.MANGA_NON_READ
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.EnhancedTrackService
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -99,6 +103,9 @@ class LibraryUpdateService(
     // List containing failed updates
     private val failedUpdates = mutableMapOf<Manga, String?>()
 
+    // List containing skipped updates
+    private val skippedUpdates = mutableMapOf<Manga, String?>()
+
     val count = AtomicInteger(0)
     val jobCount = AtomicInteger(0)
 
@@ -153,7 +160,7 @@ class LibraryUpdateService(
                 if (categoryId > -1) categoryIds.add(categoryId)
                 mangas
             } else {
-                getMangaToUpdate(intent, target)
+                getMangaToUpdate(intent)
             }
             ).sortedWith(rankingScheme[selectedScheme])
         // Update favorite manga. Destroy service when completed or in case of an error.
@@ -187,9 +194,9 @@ class LibraryUpdateService(
         super.onDestroy()
     }
 
-    private fun getMangaToUpdate(intent: Intent, target: Target): List<LibraryManga> {
+    private fun getMangaToUpdate(intent: Intent): List<LibraryManga> {
         val categoryId = intent.getIntExtra(KEY_CATEGORY, -1)
-        return getMangaToUpdate(categoryId, target)
+        return getMangaToUpdate(categoryId)
     }
 
     /**
@@ -199,10 +206,10 @@ class LibraryUpdateService(
      * @param target the target to update.
      * @return a list of manga to update
      */
-    private fun getMangaToUpdate(categoryId: Int, target: Target): List<LibraryManga> {
+    private fun getMangaToUpdate(categoryId: Int): List<LibraryManga> {
         val libraryManga = db.getLibraryMangas().executeAsBlocking()
 
-        var listToUpdate = if (categoryId != -1) {
+        val listToUpdate = if (categoryId != -1) {
             categoryIds.add(categoryId)
             libraryManga.filter { it.category == categoryId }
         } else {
@@ -215,9 +222,6 @@ class LibraryUpdateService(
                 categoryIds.addAll(db.getCategories().executeAsBlocking().mapNotNull { it.id } + 0)
                 libraryManga.distinctBy { it.id }
             }
-        }
-        if (target == Target.CHAPTERS && preferences.updateOnlyNonCompleted()) {
-            listToUpdate = listToUpdate.filter { it.status != SManga.COMPLETED }
         }
 
         val categoriesToExclude =
@@ -241,7 +245,7 @@ class LibraryUpdateService(
         }
         job = GlobalScope.launch(handler) {
             when (target) {
-                Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
+                Target.CHAPTERS -> updateChaptersJob(filterMangaToUpdate(mangaToAdd))
                 Target.DETAILS -> updateDetails(mangaToAdd)
                 else -> updateTrackings(mangaToAdd)
             }
@@ -282,17 +286,16 @@ class LibraryUpdateService(
 
     private fun addMangaToQueue(categoryId: Int, manga: List<LibraryManga>) {
         val selectedScheme = preferences.libraryUpdatePrioritization().get()
-        val mangas = manga.sortedWith(rankingScheme[selectedScheme])
+        val mangas = filterMangaToUpdate(manga).sortedWith(rankingScheme[selectedScheme])
         categoryIds.add(categoryId)
         addManga(mangas)
     }
 
     private fun addCategory(categoryId: Int) {
         val selectedScheme = preferences.libraryUpdatePrioritization().get()
-        val mangas =
-            getMangaToUpdate(categoryId, Target.CHAPTERS).sortedWith(
-                rankingScheme[selectedScheme]
-            )
+        val mangas = filterMangaToUpdate(getMangaToUpdate(categoryId)).sortedWith(
+            rankingScheme[selectedScheme]
+        )
         categoryIds.add(categoryId)
         addManga(mangas)
     }
@@ -302,6 +305,22 @@ class LibraryUpdateService(
      */
     override fun onBind(intent: Intent): IBinder? {
         return null
+    }
+
+    private fun filterMangaToUpdate(mangaToAdd: List<LibraryManga>): List<LibraryManga> {
+        val restrictions = preferences.libraryUpdateMangaRestriction().get()
+        return mangaToAdd.filter { manga ->
+            return@filter if (MANGA_NON_COMPLETED in restrictions && manga.status == SManga.COMPLETED) {
+                skippedUpdates[manga] = getString(R.string.skipped_reason_completed)
+                false
+            } else if (MANGA_HAS_UNREAD in restrictions && manga.unread != 0) {
+                skippedUpdates[manga] = getString(R.string.skipped_reason_not_caught_up)
+                false
+            } else if (MANGA_NON_READ in restrictions && manga.totalChapters > 0 && !manga.hasRead) {
+                skippedUpdates[manga] = getString(R.string.skipped_reason_not_started)
+                false
+            } else true
+        }
     }
 
     private fun checkIfMassiveUpdate() {
@@ -357,12 +376,17 @@ class LibraryUpdateService(
             }
             newUpdates.clear()
         }
+        if (skippedUpdates.isNotEmpty()) {
+            val skippedFile = writeErrorFile(
+                skippedUpdates,
+                "skipped",
+                getString(R.string.learn_more_at_, LibraryUpdateNotifier.HELP_SKIPPED_URL)
+            ).getUriCompat(this)
+            notifier.showUpdateSkippedNotification(skippedUpdates.size, skippedFile)
+        }
         if (failedUpdates.isNotEmpty()) {
-            val errorFile = writeErrorFile(failedUpdates)
-            notifier.showUpdateErrorNotification(
-                failedUpdates.map { it.key.title },
-                errorFile.getUriCompat(this)
-            )
+            val errorFile = writeErrorFile(failedUpdates).getUriCompat(this)
+            notifier.showUpdateErrorNotification(failedUpdates.size, errorFile)
         }
         mangaShortcutManager.updateShortcuts()
         failedUpdates.clear()
@@ -539,10 +563,10 @@ class LibraryUpdateService(
     /**
      * Writes basic file of update errors to cache dir.
      */
-    private fun writeErrorFile(errors: Map<Manga, String?>): File {
+    private fun writeErrorFile(errors: Map<Manga, String?>, fileName: String = "errors", additionalInfo: String? = null): File {
         try {
             if (errors.isNotEmpty()) {
-                val file = createFileInCacheDir("tachiyomi_update_errors.txt")
+                val file = createFileInCacheDir("tachiyomi_update_$fileName.txt")
                 file.bufferedWriter().use { out ->
                     // Error file format:
                     // ! Error
@@ -558,6 +582,7 @@ class LibraryUpdateService(
                             }
                         }
                     }
+                    additionalInfo?.let { out.write("\n$it") }
                 }
                 return file
             }

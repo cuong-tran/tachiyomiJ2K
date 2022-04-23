@@ -91,8 +91,6 @@ object PreferenceKeys {
 
     const val webtoonEnableZoomOut = "webtoon_enable_zoom_out"
 
-    const val updateOnlyNonCompleted = "pref_update_only_non_completed_key"
-
     const val autoUpdateTrack = "pref_auto_update_manga_sync_key"
 
     const val trackMarkedAsRead = "track_marked_as_read"
@@ -132,8 +130,6 @@ object PreferenceKeys {
     const val removeAfterMarkedAsRead = "pref_remove_after_marked_as_read_key"
 
     const val libraryUpdateInterval = "pref_library_update_interval_key"
-
-    const val libraryUpdateRestriction = "library_update_restriction"
 
     const val libraryUpdateCategories = "library_update_categories"
     const val libraryUpdateCategoriesExclude = "library_update_categories_exclude"

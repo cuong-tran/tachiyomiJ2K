@@ -142,7 +142,7 @@ class BackupNotifier(private val context: Context) {
                 addAction(
                     R.drawable.ic_eye_24dp,
                     context.getString(R.string.open_log),
-                    NotificationReceiver.openErrorLogPendingActivity(context, uri)
+                    NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
                 )
             }
 
