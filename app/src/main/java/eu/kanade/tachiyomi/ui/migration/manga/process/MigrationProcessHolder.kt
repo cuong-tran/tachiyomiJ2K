@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.databinding.MigrationProcessItemBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.ui.library.setFreeformCoverRatio
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.setCards
@@ -50,6 +51,9 @@ class MigrationProcessHolder(
     fun bind(item: MigrationProcessItem) {
         this.item = item
         launchUI {
+            binding.migrationMangaCardFrom.setFreeformCoverRatio(item.manga.manga())
+            binding.migrationMangaCardTo.setFreeformCoverRatio(null)
+
             val manga = item.manga.manga()
             val source = item.manga.mangaSource()
 

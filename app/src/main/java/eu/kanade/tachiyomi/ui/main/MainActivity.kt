@@ -80,6 +80,7 @@ import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.ui.source.BrowseController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
+import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -385,6 +386,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
 
         nav.isVisible = !hideBottomNav
+        updateControllersWithSideNavChanges()
         binding.bottomView?.visibility = if (hideBottomNav) View.GONE else binding.bottomView?.visibility ?: View.GONE
         nav.alpha = if (hideBottomNav) 0f else 1f
         router.addChangeListener(
@@ -438,7 +440,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             preferences.incognitoMode().set(false)
 
             // Show changelog if needed
-            if (Migrations.upgrade(preferences)) {
+            if (Migrations.upgrade(preferences, lifecycleScope)) {
                 if (!BuildConfig.DEBUG) {
                     content.post {
                         whatsNewSheet().show()
@@ -642,7 +644,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         super.onPause()
         snackBar?.dismiss()
         setStartingTab()
+        saveExtras()
+    }
+
+    fun saveExtras() {
         mangaShortcutManager.updateShortcuts()
+        MangaCoverMetadata.savePrefs()
     }
 
     private fun checkForAppUpdates() {
@@ -816,7 +823,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     setStartingTab()
                 }
                 SecureActivityDelegate.locked = this !is SearchActivity
-                mangaShortcutManager.updateShortcuts()
+                saveExtras()
                 super.onBackPressed()
             }
         }
@@ -1051,6 +1058,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         nav.visibility = if (!hideBottomNav) View.VISIBLE else nav.visibility
         if (nav == binding.sideNav) {
             nav.isVisible = !hideBottomNav
+            updateControllersWithSideNavChanges(from)
             nav.alpha = 1f
         } else {
             animationSet?.cancel()
@@ -1074,6 +1082,27 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             alphaAnimation.startDelay = 50
             animationSet?.playTogether(alphaAnimation)
             animationSet?.start()
+        }
+    }
+
+    private fun updateControllersWithSideNavChanges(extraController: Controller? = null) {
+        if (!isBindingInitialized || !this::router.isInitialized) return
+        binding.sideNav?.let { sideNav ->
+            val controllers = (router.backstack.map { it?.controller } + extraController)
+                .filterNotNull()
+                .distinct()
+            val navWidth = sideNav.width.takeIf { it != 0 } ?: 80.dpToPx
+            controllers.forEach { controller ->
+                val isRootController = controller is RootSearchInterface
+                if (controller.view?.layoutParams !is ViewGroup.MarginLayoutParams) return@forEach
+                controller.view?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    marginStart = if (sideNav.isVisible) {
+                        if (isRootController) 0 else -navWidth
+                    } else {
+                        if (isRootController) navWidth else 0
+                    }
+                }
+            }
         }
     }
 

@@ -77,6 +77,7 @@ import eu.kanade.tachiyomi.util.system.powerManager
 import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
+import eu.kanade.tachiyomi.widget.StaggeredGridLayoutManagerAccurateOffset
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
@@ -310,21 +311,25 @@ fun NavigationBarView.getItemView(@IdRes id: Int): NavigationBarItemView? {
 
 fun RecyclerView.smoothScrollToTop() {
     val linearLayoutManager = layoutManager as? LinearLayoutManager
-    if (linearLayoutManager != null) {
+    val staggeredLayoutManager = layoutManager as? StaggeredGridLayoutManagerAccurateOffset
+    if (linearLayoutManager != null || staggeredLayoutManager != null) {
         val smoothScroller: SmoothScroller = object : LinearSmoothScroller(context) {
             override fun getVerticalSnapPreference(): Int {
                 return SNAP_TO_START
             }
         }
         smoothScroller.targetPosition = 0
-        val firstItemPos = linearLayoutManager.findFirstVisibleItemPosition()
+        val firstItemPos = linearLayoutManager?.findFirstVisibleItemPosition()
+            ?: staggeredLayoutManager?.findFirstVisibleItemPosition() ?: 0
         if (firstItemPos > 15) {
             scrollToPosition(15)
             post {
-                linearLayoutManager.startSmoothScroll(smoothScroller)
+                linearLayoutManager?.startSmoothScroll(smoothScroller)
+                staggeredLayoutManager?.startSmoothScroll(smoothScroller)
             }
         } else {
-            linearLayoutManager.startSmoothScroll(smoothScroller)
+            linearLayoutManager?.startSmoothScroll(smoothScroller)
+            staggeredLayoutManager?.startSmoothScroll(smoothScroller)
         }
     } else {
         scrollToPosition(0)

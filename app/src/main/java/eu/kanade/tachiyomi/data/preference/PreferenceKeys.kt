@@ -253,6 +253,10 @@ object PreferenceKeys {
 
     const val defaultChapterSortByAscendingOrDescending = "default_chapter_sort_by_ascending_or_descending"
 
+    const val coverRatios = "cover_ratio"
+
+    const val coverColors = "cover_colors"
+
     const val hideChapterTitles = "hide_chapter_titles"
 
     const val chaptersDescAsDefault = "chapters_desc_as_default"

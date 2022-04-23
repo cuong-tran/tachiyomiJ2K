@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
+import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import tachiyomi.source.model.MangaInfo
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -273,6 +274,13 @@ interface Manga : SManga {
         get() = vibrantCoverColorMap[id]
         set(value) {
             id?.let { vibrantCoverColorMap[it] = value }
+        }
+
+    var dominantCoverColors: Pair<Int, Int>?
+        get() = MangaCoverMetadata.getColors(this)
+        set(value) {
+            value ?: return
+            MangaCoverMetadata.addCoverColor(this, value.first, value.second)
         }
 
     companion object {

@@ -34,6 +34,7 @@ import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -579,6 +580,7 @@ fun Controller.moveRecyclerViewUp(allTheWayUp: Boolean = false, scrollUpAnyway: 
     val appBarOffset = activityBinding.appBar.toolbarDistanceToTop
     if (allTheWayUp && recycler.computeVerticalScrollOffset() - recycler.paddingTop <= fullAppBarHeight ?: activityBinding.appBar.preLayoutHeight) {
         (recycler.layoutManager as? LinearLayoutManager)?.scrollToPosition(0)
+        (recycler.layoutManager as? StaggeredGridLayoutManager)?.scrollToPosition(0)
         recycler.post {
             activityBinding.appBar.updateAppBarAfterY(recycler)
             activityBinding.appBar.useSearchToolbarForMenu(false)
@@ -587,6 +589,8 @@ fun Controller.moveRecyclerViewUp(allTheWayUp: Boolean = false, scrollUpAnyway: 
     }
     if (scrollUpAnyway || recycler.computeVerticalScrollOffset() - recycler.paddingTop <= 0 - appBarOffset) {
         (recycler.layoutManager as? LinearLayoutManager)
+            ?.scrollToPositionWithOffset(0, activityBinding.appBar.yNeededForSmallToolbar)
+        (recycler.layoutManager as? StaggeredGridLayoutManager)
             ?.scrollToPositionWithOffset(0, activityBinding.appBar.yNeededForSmallToolbar)
         recycler.post {
             activityBinding.appBar.updateAppBarAfterY(recycler)
