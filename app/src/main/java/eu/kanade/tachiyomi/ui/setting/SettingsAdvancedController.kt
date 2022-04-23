@@ -53,6 +53,10 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
+import android.webkit.WebStorage
+import android.webkit.WebView
+import eu.kanade.tachiyomi.util.system.setDefaultSettings
+import timber.log.Timber
 
 class SettingsAdvancedController : SettingsController() {
 
@@ -211,6 +215,12 @@ class SettingsAdvancedController : SettingsController() {
                     ctrl.targetController = this@SettingsAdvancedController
                     ctrl.showDialog(router)
                 }
+            }
+            preference {
+                key = "pref_clear_webview_data"
+                titleRes = R.string.pref_clear_webview_data
+
+                onClick { clearWebViewData() }
             }
             preference {
                 key = "clear_database"
@@ -405,6 +415,23 @@ class SettingsAdvancedController : SettingsController() {
                         resources?.getString(R.string.used_, chapterCache.readableSize)
                 }
             )
+    }
+
+    private fun clearWebViewData() {
+        if (activity == null) return
+        try {
+            val webview = WebView(activity!!)
+            webview.setDefaultSettings()
+            webview.clearCache(true)
+            webview.clearFormData()
+            webview.clearHistory()
+            webview.clearSslPreferences()
+            WebStorage.getInstance().deleteAllData()
+            activity?.toast(R.string.webview_data_deleted)
+        } catch (e: Throwable) {
+            Timber.e(e)
+            activity?.toast(R.string.cache_delete_error)
+        }
     }
 
     private companion object {
