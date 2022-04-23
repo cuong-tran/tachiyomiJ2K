@@ -43,6 +43,7 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
     val preferences: PreferencesHelper by injectLazy()
     var bigView: View? = null
     var imageView: ImageView? = null
+    var imageLayout: FrameLayout? = null
     private var tabsFrameLayout: FrameLayout? = null
     var mainActivity: MainActivity? = null
     private var isExtraSmall = false
@@ -183,6 +184,7 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
         cardFrame = findViewById(R.id.card_frame)
         tabsFrameLayout = findViewById(R.id.tabs_frame_layout)
         imageView = findViewById(R.id.big_icon)
+        imageLayout = findViewById(R.id.big_icon_layout)
         shrinkAppBarIfNeeded(resources.configuration)
     }
 
@@ -243,6 +245,9 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
             imageView?.updateLayoutParams<MarginLayoutParams> {
                 height = 48.dpToPx
                 width = 48.dpToPx
+            }
+            imageLayout?.updateLayoutParams<MarginLayoutParams> {
+                height = 48.dpToPx
             }
         }
     }

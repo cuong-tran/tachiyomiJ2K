@@ -113,7 +113,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
             (activity as? AppCompatActivity)?.title = getTitle()
             (activity as? MainActivity)?.searchTitle = getSearchTitle()
             val icon = getBigIcon()
-            activityBinding?.bigIcon?.isVisible = icon != null
+            activityBinding?.bigIconLayout?.isVisible = icon != null
             if (icon != null) {
                 activityBinding?.bigIcon?.setImageDrawable(getBigIcon())
             } else {
