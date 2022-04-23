@@ -157,8 +157,6 @@ class SettingsReaderController : SettingsController() {
                     entryRange = 0..values.size
                 }.toList()
                 defaultValue = "0"
-
-                preferences.readWithTapping().asImmediateFlow { isVisible = it }.launchIn(viewScope)
             }
             listPreference(activity) {
                 key = Keys.pagerNavInverted
@@ -176,8 +174,6 @@ class SettingsReaderController : SettingsController() {
                     ViewerNavigation.TappingInvertMode.BOTH.name
                 )
                 defaultValue = ViewerNavigation.TappingInvertMode.NONE.name
-
-                preferences.readWithTapping().asImmediateFlow { isVisible = it }.launchIn(viewScope)
             }
 
             intListPreference(activity) {
@@ -286,8 +282,6 @@ class SettingsReaderController : SettingsController() {
                     entryRange = 0..values.size
                 }.toList()
                 defaultValue = "0"
-
-                preferences.readWithTapping().asImmediateFlow { isVisible = it }.launchIn(viewScope)
             }
             listPreference(activity) {
                 key = Keys.webtoonNavInverted
@@ -305,8 +299,6 @@ class SettingsReaderController : SettingsController() {
                     ViewerNavigation.TappingInvertMode.BOTH.name
                 )
                 defaultValue = ViewerNavigation.TappingInvertMode.NONE.name
-
-                preferences.readWithTapping().asImmediateFlow { isVisible = it }.launchIn(viewScope)
             }
 
             switchPreference {
@@ -354,11 +346,6 @@ class SettingsReaderController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.navigation
 
-            switchPreference {
-                key = Keys.readWithTapping
-                titleRes = R.string.tapping
-                defaultValue = true
-            }
             switchPreference {
                 key = Keys.readWithVolumeKeys
                 titleRes = R.string.volume_keys

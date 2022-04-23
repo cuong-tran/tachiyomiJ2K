@@ -183,6 +183,13 @@ object Migrations {
                     LibraryUpdateJob.setupTask(context, 12)
                 }
             }
+            if (oldVersion < 88) {
+                val oldReaderTap = prefs.getBoolean("reader_tap", false)
+                if (!oldReaderTap) {
+                    preferences.navigationModePager().set(5)
+                    preferences.navigationModeWebtoon().set(5)
+                }
+            }
 
             return true
         }

@@ -1603,10 +1603,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 .launchIn(scope)
 
             preferences.readerBottomButtons().asImmediateFlowIn(scope) { updateBottomShortcuts() }
-
-            preferences.readWithTapping().asImmediateFlowIn(scope) {
-                binding.navigationOverlay.tappingEnabled = it
-            }
         }
 
         /**
