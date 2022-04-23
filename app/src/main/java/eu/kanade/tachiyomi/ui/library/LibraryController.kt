@@ -1181,8 +1181,10 @@ class LibraryController(
             activeCategory = pos
             preferences.lastUsedCategory().set(pos)
             binding.libraryGridRecycler.recycler.post {
-                activityBinding.appBar.y = 0f
-                activityBinding.appBar.updateAppBarAfterY(binding.libraryGridRecycler.recycler)
+                if (isControllerVisible) {
+                    activityBinding.appBar.y = 0f
+                    activityBinding.appBar.updateAppBarAfterY(binding.libraryGridRecycler.recycler)
+                }
             }
         }
     }
