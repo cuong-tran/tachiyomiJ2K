@@ -54,6 +54,7 @@ import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
@@ -174,23 +175,25 @@ class RecentsController(bundle: Bundle? = null) :
         scrollViewWith(
             binding.recycler,
             swipeRefreshLayout = binding.swipeRefresh,
+            ignoreInsetVisibility = true,
             afterInsets = {
                 val appBarHeight = activityBinding?.appBar?.attrToolbarHeight ?: 0
-                headerHeight = it.getInsets(systemBars()).top + appBarHeight + 48.dpToPx
+                val systemInsets = it.ignoredSystemInsets
+                headerHeight = systemInsets.top + appBarHeight + 48.dpToPx
                 binding.recycler.updatePaddingRelative(
-                    bottom = activityBinding?.bottomNav?.height ?: it.getInsets(systemBars()).bottom
+                    bottom = activityBinding?.bottomNav?.height ?: systemInsets.bottom
                 )
                 binding.downloadBottomSheet.sheetLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    height = appBarHeight + it.getInsets(systemBars()).top
+                    height = appBarHeight + systemInsets.top
                 }
                 val bigToolbarHeight = fullAppBarHeight ?: 0
 
                 binding.recentsEmptyView.updatePadding(
-                    top = bigToolbarHeight + it.getInsets(systemBars()).top,
-                    bottom = activityBinding?.bottomNav?.height ?: it.getInsets(systemBars()).bottom
+                    top = bigToolbarHeight + systemInsets.top,
+                    bottom = activityBinding?.bottomNav?.height ?: systemInsets.bottom
                 )
                 binding.progress.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    topMargin = (bigToolbarHeight + it.getInsets(systemBars()).top) / 2
+                    topMargin = (bigToolbarHeight + systemInsets.top) / 2
                 }
                 if (activityBinding?.bottomNav == null) {
                     setBottomPadding()
@@ -641,8 +644,17 @@ class RecentsController(bundle: Bundle? = null) :
                 )
             } else {
                 val activity = activity ?: return false
-                val intent = ReaderActivity.newIntent(activity, item.mch.manga, item.chapter)
-                startActivity(intent)
+                activity.apply {
+                    val (manga, chapter) = item.mch.manga to item.chapter
+                    if (view != null) {
+                        val (intent, bundle) = ReaderActivity
+                            .newIntentWithTransitionOptions(activity, manga, chapter, view)
+                        startActivity(intent, bundle)
+                    } else {
+                        val intent = ReaderActivity.newIntent(activity, manga, chapter)
+                        startActivity(intent)
+                    }
+                }
             }
         } else if (item is RecentMangaHeaderItem) return false
         return true

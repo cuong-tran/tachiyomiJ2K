@@ -55,6 +55,7 @@ import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toInt
@@ -200,6 +201,7 @@ fun Controller.scrollViewWith(
     recycler: RecyclerView,
     padBottom: Boolean = false,
     customPadding: Boolean = false,
+    ignoreInsetVisibility: Boolean = false,
     swipeRefreshLayout: SwipeRefreshLayout? = null,
     afterInsets: ((WindowInsetsCompat) -> Unit)? = null,
     liftOnScroll: ((Boolean) -> Unit)? = null,
@@ -259,17 +261,18 @@ fun Controller.scrollViewWith(
     }
     recycler.doOnApplyWindowInsetsCompat { view, insets, _ ->
         appBarHeight = fullAppBarHeight!!
-        val headerHeight = insets.getInsets(systemBars()).top + appBarHeight
+        val systemInsets = if (ignoreInsetVisibility) insets.ignoredSystemInsets else insets.getInsets(systemBars())
+        val headerHeight = systemInsets.top + appBarHeight
         if (!customPadding) view.updatePaddingRelative(
             top = headerHeight,
-            bottom = if (padBottom) insets.getInsets(systemBars()).bottom else view.paddingBottom
+            bottom = if (padBottom) systemInsets.bottom else view.paddingBottom
         )
         swipeRefreshLayout?.setProgressViewOffset(
             true,
             headerHeight + (-60).dpToPx,
             headerHeight + 10.dpToPx
         )
-        statusBarHeight = insets.getInsets(systemBars()).top
+        statusBarHeight = systemInsets.top
         afterInsets?.invoke(insets)
     }
 

@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.assist.AssistContent
 import android.content.ClipData
 import android.content.Context
@@ -27,6 +28,7 @@ import android.view.Window
 import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.transition.addListener
@@ -88,6 +90,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
+import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
@@ -212,6 +215,15 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             intent.putExtra("chapter", chapter.id)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             return intent
+        }
+
+        fun newIntentWithTransitionOptions(activity: Activity, manga: Manga, chapter: Chapter, sharedElement: View): Pair<Intent, Bundle?> {
+            val intent = newIntent(activity, manga, chapter)
+            intent.putExtra(TRANSITION_NAME, sharedElement.transitionName)
+            val activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                activity, sharedElement, sharedElement.transitionName
+            )
+            return intent to activityOptions.toBundle()
         }
     }
 
@@ -797,12 +809,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         var firstPass = true
         binding.readerLayout.doOnApplyWindowInsetsCompat { _, insets, _ ->
             setNavColor(insets)
-            val systemInsets =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    insets.getInsetsIgnoringVisibility(systemBars())
-                } else {
-                    insets.getInsets(systemBars())
-                }
+            val systemInsets = insets.ignoredSystemInsets
             val vis = insets.isVisible(statusBars())
             val fullscreen = preferences.fullscreen().get() && !isSplitScreen
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

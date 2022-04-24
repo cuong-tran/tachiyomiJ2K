@@ -24,7 +24,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
@@ -89,6 +88,7 @@ import eu.kanade.tachiyomi.util.system.addCheckBoxPrompt
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLandscape
 import eu.kanade.tachiyomi.util.system.isOnline
@@ -421,12 +421,7 @@ class MangaDetailsController :
     }
 
     private fun setInsets(insets: WindowInsetsCompat, appbarHeight: Int, offset: Int) {
-        val systemInsets =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                insets.getInsetsIgnoringVisibility(systemBars())
-            } else {
-                insets.getInsets(systemBars())
-            }
+        val systemInsets = insets.ignoredSystemInsets
         binding.recycler.updatePaddingRelative(bottom = systemInsets.bottom)
         binding.tabletRecycler.updatePaddingRelative(bottom = systemInsets.bottom)
         val tHeight = toolbarHeight.takeIf { it ?: 0 > 0 } ?: appbarHeight
@@ -935,12 +930,9 @@ class MangaDetailsController :
     private fun openChapter(chapter: Chapter, sharedElement: View? = null) {
         MainActivity.chapterIdToExitTo = 0L
         (activity as? AppCompatActivity)?.apply {
-            val intent = ReaderActivity.newIntent(this, manga!!, chapter)
             if (sharedElement != null) {
-                val activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                    this, sharedElement, sharedElement.transitionName
-                )
-
+                val (intent, bundle) = ReaderActivity
+                    .newIntentWithTransitionOptions(this, manga!!, chapter, sharedElement)
                 val firstPos = (binding.recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
                 val lastPos = (binding.recycler.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
                 val chapterRange = if (firstPos > -1 && lastPos > -1) {
@@ -948,15 +940,10 @@ class MangaDetailsController :
                         (adapter?.getItem(it) as? ChapterItem)?.chapter?.id
                     }.toLongArray()
                 } else longArrayOf()
-                startActivity(
-                    intent.apply {
-                        putExtra(ReaderActivity.TRANSITION_NAME, sharedElement.transitionName)
-                        putExtra(ReaderActivity.VISIBLE_CHAPTERS, chapterRange)
-                    },
-                    activityOptions.toBundle(),
-                )
+                intent.putExtra(ReaderActivity.VISIBLE_CHAPTERS, chapterRange)
+                startActivity(intent, bundle)
             } else {
-                startActivity(intent)
+                startActivity(ReaderActivity.newIntent(this, manga!!, chapter))
             }
         }
     }

@@ -87,6 +87,7 @@ import eu.kanade.tachiyomi.ui.source.globalsearch.GlobalSearchController
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
 import eu.kanade.tachiyomi.util.system.isImeVisible
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
@@ -568,13 +569,15 @@ class LibraryController(
             scrollViewWith(
                 binding.libraryGridRecycler.recycler,
                 swipeRefreshLayout = binding.swipeRefresh,
+                ignoreInsetVisibility = true,
                 afterInsets = { insets ->
+                    val systemInsets = insets.ignoredSystemInsets
                     binding.categoryRecycler.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        topMargin = insets.getInsets(systemBars()).top + (activityBinding?.searchToolbar?.height ?: 0) + 12.dpToPx
+                        topMargin = systemInsets.top + (activityBinding?.searchToolbar?.height ?: 0) + 12.dpToPx
                     }
                     updateSmallerViewsTopMargins()
                     binding.headerCard.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        topMargin = insets.getInsets(systemBars()).top + 4.dpToPx
+                        topMargin = systemInsets.top + 4.dpToPx
                     }
                     updateFilterSheetY()
                 },
@@ -1339,7 +1342,7 @@ class LibraryController(
         }
     }
 
-    override fun startReading(position: Int) {
+    override fun startReading(position: Int, view: View?) {
         if (adapter.mode == SelectableAdapter.Mode.MULTI) {
             toggleSelection(position)
             return
@@ -1347,9 +1350,16 @@ class LibraryController(
         val manga = (adapter.getItem(position) as? LibraryItem)?.manga ?: return
         val activity = activity ?: return
         val chapter = presenter.getFirstUnread(manga) ?: return
-        val intent = ReaderActivity.newIntent(activity, manga, chapter)
+        activity.apply {
+            if (view != null) {
+                val (intent, bundle) = ReaderActivity
+                    .newIntentWithTransitionOptions(activity, manga, chapter, view)
+                startActivity(intent, bundle)
+            } else {
+                startActivity(ReaderActivity.newIntent(activity, manga, chapter))
+            }
+        }
         destroyActionModeIfNeeded()
-        startActivity(intent)
     }
 
     private fun toggleSelection(position: Int) {
