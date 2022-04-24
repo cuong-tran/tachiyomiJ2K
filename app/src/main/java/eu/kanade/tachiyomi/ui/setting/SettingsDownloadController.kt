@@ -48,9 +48,8 @@ class SettingsDownloadController : SettingsController() {
             defaultValue = true
         }
         switchPreference {
-            key = Keys.saveChaptersAsCBZ
+            bindTo(preferences.saveChaptersAsCBZ())
             titleRes = R.string.save_chapters_as_cbz
-            defaultValue = false
         }
         preferenceCategory {
             titleRes = R.string.remove_after_read
