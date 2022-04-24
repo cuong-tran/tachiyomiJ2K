@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.recents
 
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
@@ -21,6 +22,8 @@ import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -498,6 +501,16 @@ class RecentsPresenter(
         if (!isLoading) {
             isLoading = true
             getRecents(true)
+        }
+    }
+
+    fun deleteAllHistory() {
+        presenterScope.launchIO {
+            db.deleteHistory().executeAsBlocking()
+            withUIContext {
+                controller?.activity?.toast(R.string.clear_history_completed)
+                getRecents()
+            }
         }
     }
 

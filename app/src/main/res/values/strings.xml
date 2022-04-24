@@ -271,6 +271,9 @@
     <string name="only_unread">Only unread</string>
     <string name="only_downloaded">Only downloaded</string>
     <string name="unread_or_downloaded">Unread or downloaded</string>
+    <string name="clear_history">Clear history</string>
+    <string name="clear_history_completed">History deleted</string>
+    <string name="clear_history_confirmation">Are you sure? All history will be lost.</string>
 
     <!-- Recents Settings -->
     <string name="show_reset_history_button">Show reset history button</string>
