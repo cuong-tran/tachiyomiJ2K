@@ -72,6 +72,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             }
         }
 
+    /**
+     * Variable used to hold the forward pos for reader activity shared transitions
+     * Without this var landscapezoom wont work with activity transitions
+     * */
+    var heldForwardZoom: Pair<Int, Boolean>? = null
+
     private var pagerListener = object : ViewPager.SimpleOnPageChangeListener() {
         override fun onPageSelected(position: Int) {
             onPageChange(position)
@@ -176,7 +182,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                         (currentPage as ChapterTransition).from == pageF.chapter
                     currentPage is ChapterTransition.Next && pageF is ReaderPage ->
                         (currentPage as ChapterTransition).to == pageF.chapter
-                    else -> (pageF as? ReaderPage)?.index != 0
+                    else -> true
                 }
             currentPage = pageF
             when (pageF) {
@@ -215,8 +221,12 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         activity.onPageSelected(page, hasExtraPage)
 
         // Notify holder of page change
-        getPageHolder(page)?.onPageSelected(forward)
-
+        val holder = getPageHolder(page)
+        if (holder == null && forward != null && heldForwardZoom == null) {
+            heldForwardZoom = page.index to forward
+        } else {
+            holder?.onPageSelected(forward)
+        }
         val offset = if (hasExtraPage) 1 else 0
         val pages = page.chapter.pages ?: return
         if (hasExtraPage) {

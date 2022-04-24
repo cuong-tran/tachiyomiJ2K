@@ -179,6 +179,7 @@ class PagerPageHolder(
             if (isReady) {
                 landscapeZoom(forward)
             } else {
+                forward ?: return@apply
                 setOnImageEventListener(
                     object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
                         override fun onReady() {
@@ -669,7 +670,12 @@ class PagerPageHolder(
                     }
                     override fun onReady() {
                         setupZoom()
-                        if (isVisibleOnScreen()) landscapeZoom(true)
+                        if (viewer.heldForwardZoom?.first == page.index) {
+                            landscapeZoom(viewer.heldForwardZoom?.second)
+                            viewer.heldForwardZoom = null
+                        } else if (isVisibleOnScreen()) {
+                            landscapeZoom(true)
+                        }
                         onImageDecoded()
                     }
 
