@@ -182,6 +182,15 @@ class PagerPageHolder(
                 forward ?: return@apply
                 setOnImageEventListener(
                     object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
+                        override fun onImageLoaded() {
+                            if (this@PagerPageHolder.extraPage == null &&
+                                this@PagerPageHolder.page.longPage == null &&
+                                sHeight < sWidth
+                            ) {
+                                this@PagerPageHolder.page.longPage = true
+                            }
+                        }
+
                         override fun onReady() {
                             setupZoom()
                             landscapeZoom(forward)
