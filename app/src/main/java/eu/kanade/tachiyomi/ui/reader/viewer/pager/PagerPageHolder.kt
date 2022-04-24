@@ -36,6 +36,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.Companion.CUTOUT_IGNORE
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.Companion.CUTOUT_START_EXTENDED
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.ZoomType
+import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.bottomCutoutInset
@@ -631,13 +632,13 @@ class PagerPageHolder(
         val config = viewer.config
 
         subsamplingImageView = SubsamplingScaleImageView(context).apply {
-            setMaxTileSize(viewer.activity.maxBitmapSize)
+            setMaxTileSize(GLUtil.maxTextureSize)
             setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_CENTER)
             setDoubleTapZoomDuration(config.doubleTapAnimDuration)
             setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
             setMinimumScaleType(config.imageScaleType)
-            setMinimumDpi(1)
             setMinimumTileDpi(180)
+            setMinimumDpi(1)
             setCropBorders(config.imageCropBorders)
             val topInsets = viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat()
             val bottomInsets = viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat()
