@@ -23,11 +23,13 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.transition.addListener
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -47,6 +49,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.slider.Slider
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.transition.platform.MaterialContainerTransform
+import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -189,11 +194,17 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     val isSplitScreen: Boolean
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode
 
+    var didTransistionFromChapter = false
+    var visibleChapterRange = longArrayOf()
+
     companion object {
 
         const val SHIFT_DOUBLE_PAGES = "shiftingDoublePages"
         const val SHIFTED_PAGE_INDEX = "shiftedPageIndex"
         const val SHIFTED_CHAP_INDEX = "shiftedChapterIndex"
+
+        const val TRANSITION_NAME = "${BuildConfig.APPLICATION_ID}.TRANSITION_NAME"
+        const val VISIBLE_CHAPTERS = "${BuildConfig.APPLICATION_ID}.VISIBLE_CHAPTERS"
 
         fun newIntent(context: Context, manga: Manga, chapter: Chapter): Intent {
             val intent = Intent(context, ReaderActivity::class.java)
@@ -208,6 +219,22 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * Called when the activity is created. Initializes the presenter and configuration.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Setup shared element transitions
+        if (intent.extras?.getString(TRANSITION_NAME) != null) {
+            window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
+            findViewById<View>(android.R.id.content)?.let { contentView ->
+                MainActivity.chapterIdToExitTo = 0L
+                contentView.transitionName = intent.extras?.getString(TRANSITION_NAME)
+                visibleChapterRange = intent.extras?.getLongArray(VISIBLE_CHAPTERS) ?: longArrayOf()
+                didTransistionFromChapter = !contentView.transitionName.contains("start")
+                setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
+                window.sharedElementEnterTransition = buildContainerTransform(true)
+                window.sharedElementReturnTransition = buildContainerTransform(false)
+                // Postpone custom transition until manga ready
+                postponeEnterTransition()
+            }
+        }
+
         super.onCreate(savedInstanceState)
         binding = ReaderActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -459,7 +486,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             return
         }
         presenter.onBackPressed()
-        finish()
+        if (didTransistionFromChapter && visibleChapterRange.isNotEmpty() && MainActivity.chapterIdToExitTo !in visibleChapterRange) {
+            finish()
+        } else {
+            super.onBackPressed()
+        }
     }
 
     /**
@@ -515,6 +546,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
         val handled = viewer?.handleGenericMotionEvent(event) ?: false
         return handled || super.dispatchGenericMotionEvent(event)
+    }
+
+    private fun buildContainerTransform(entering: Boolean): MaterialContainerTransform {
+        return MaterialContainerTransform(this, entering).apply {
+            duration = 350 // ms
+            addTarget(android.R.id.content)
+        }
     }
 
     /**
@@ -983,7 +1021,16 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             }
         }
 
-        setOrientation(presenter.getMangaOrientationType())
+        if (window.sharedElementEnterTransition is MaterialContainerTransform &&
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+        ) {
+            // Wait until transition is complete to avoid crash on API 26
+            window.sharedElementEnterTransition.addListener(
+                onEnd = { setOrientation(presenter.getMangaOrientationType()) },
+            )
+        } else {
+            setOrientation(presenter.getMangaOrientationType())
+        }
 
         // Destroy previous viewer if there was one
         if (prevViewer != null) {
@@ -1030,6 +1077,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         updateBottomShortcuts()
         val viewerMode = ReadingModeType.fromPreference(presenter?.manga?.readingModeType ?: 0)
         binding.chaptersSheet.readingMode.setImageResource(viewerMode.iconRes)
+        startPostponedEnterTransition()
     }
 
     override fun onPause() {
@@ -1070,6 +1118,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * method to the current viewer, but also set the subtitle on the binding.toolbar.
      */
     fun setChapters(viewerChapters: ViewerChapters) {
+        binding.pleaseWait.clearAnimation()
         binding.pleaseWait.isVisible = false
         if (indexChapterToShift != null && indexPageToShift != null) {
             viewerChapters.currChapter.pages?.find { it.index == indexPageToShift && it.chapter.chapter.id == indexChapterToShift }?.let {
@@ -1107,6 +1156,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         } else {
             binding.readerNav.rightChapter.alpha = if (viewerChapters.nextChapter != null) 1f else 0.5f
             binding.readerNav.leftChapter.alpha = if (viewerChapters.prevChapter != null) 1f else 0.5f
+        }
+        if (didTransistionFromChapter) {
+            MainActivity.chapterIdToExitTo = viewerChapters.currChapter.chapter.id ?: 0L
         }
     }
 
