@@ -22,7 +22,6 @@ import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
-import eu.kanade.tachiyomi.data.library.LibraryUpdateRanker.rankingScheme
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.MANGA_HAS_UNREAD
@@ -148,7 +147,6 @@ class LibraryUpdateService(
 
         instance = this
 
-        val selectedScheme = preferences.libraryUpdatePrioritization().get()
         val savedMangasList = intent.getLongArrayExtra(KEY_MANGAS)?.asList()
 
         val mangaList = (
@@ -162,7 +160,7 @@ class LibraryUpdateService(
             } else {
                 getMangaToUpdate(intent)
             }
-            ).sortedWith(rankingScheme[selectedScheme])
+            ).sortedBy { it.title }
         // Update favorite manga. Destroy service when completed or in case of an error.
         launchTarget(target, mangaList, startId)
         return START_REDELIVER_INTENT
@@ -285,17 +283,13 @@ class LibraryUpdateService(
     }
 
     private fun addMangaToQueue(categoryId: Int, manga: List<LibraryManga>) {
-        val selectedScheme = preferences.libraryUpdatePrioritization().get()
-        val mangas = filterMangaToUpdate(manga).sortedWith(rankingScheme[selectedScheme])
+        val mangas = filterMangaToUpdate(manga).sortedBy { it.title }
         categoryIds.add(categoryId)
         addManga(mangas)
     }
 
     private fun addCategory(categoryId: Int) {
-        val selectedScheme = preferences.libraryUpdatePrioritization().get()
-        val mangas = filterMangaToUpdate(getMangaToUpdate(categoryId)).sortedWith(
-            rankingScheme[selectedScheme]
-        )
+        val mangas = filterMangaToUpdate(getMangaToUpdate(categoryId)).sortedBy { it.title }
         categoryIds.add(categoryId)
         addManga(mangas)
     }

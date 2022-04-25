@@ -160,20 +160,6 @@ class SettingsLibraryController : SettingsController() {
                 noSelectionRes = R.string.none
             }
 
-            intListPreference(activity) {
-                key = Keys.libraryUpdatePrioritization
-                titleRes = R.string.library_update_order
-
-                // The following array lines up with the list rankingScheme in:
-                // ../../data/library/LibraryUpdateRanker.kt
-                entriesRes = arrayOf(
-                    R.string.alphabetically,
-                    R.string.last_updated
-                )
-                entryRange = 0..1
-                defaultValue = 0
-            }
-
             triStateListPreference(activity) {
                 key = Keys.libraryUpdateCategories
                 excludeKey = Keys.libraryUpdateCategoriesExclude

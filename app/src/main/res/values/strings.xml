@@ -165,7 +165,6 @@
     <string name="date_added">Date added</string>
     <string name="last_read">Last read</string>
     <string name="date_fetched">Date fetched</string>
-    <string name="last_updated">Last updated</string>
     <string name="latest_chapter">Latest chapter</string>
     <string name="drag_and_drop">Drag &amp; Drop</string>
 
@@ -217,7 +216,6 @@
 
     <!-- Library settings -->
     <string name="library_update_frequency">Library update frequency</string>
-    <string name="library_update_order">Library update order</string>
     <string name="pref_library_update_manga_restriction">Skip updating titles</string>
     <string name="pref_update_only_completely_read">With unread chapter(s)</string>
     <string name="pref_update_only_non_completed">With \"Completed\" status</string>
