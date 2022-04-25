@@ -40,7 +40,7 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
                     "user_id" to user_id,
                     "target_id" to track.media_id,
                     "target_type" to "Manga",
-                    "chapters" to track.last_chapter_read,
+                    "chapters" to track.last_chapter_read.toInt(),
                     "score" to track.score.toInt(),
                     "status" to track.toShikimoriStatus()
                 )
@@ -106,7 +106,7 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
             title = mangas["name"].asString
             media_id = obj["id"].asInt
             total_chapters = mangas["chapters"].asInt
-            last_chapter_read = obj["chapters"].asInt
+            last_chapter_read = obj["chapters"].asFloat
             score = (obj["score"].asInt).toFloat()
             status = toTrackStatus(obj["status"].asString)
             tracking_url = baseUrl + mangas["url"].asString

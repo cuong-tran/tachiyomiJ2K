@@ -38,6 +38,8 @@ abstract class TrackService(val id: Int) {
     abstract fun isCompletedStatus(index: Int): Boolean
 
     abstract fun completedStatus(): Int
+    abstract fun readingStatus(): Int
+    abstract fun planningStatus(): Int
 
     abstract fun getStatus(status: Int): String
 
@@ -53,7 +55,7 @@ abstract class TrackService(val id: Int) {
 
     abstract suspend fun add(track: Track): Track
 
-    abstract suspend fun update(track: Track, setToReadStatus: Boolean = false): Track
+    abstract suspend fun update(track: Track, setToRead: Boolean = false): Track
 
     abstract suspend fun bind(track: Track): Track
 
@@ -64,6 +66,24 @@ abstract class TrackService(val id: Int) {
     abstract suspend fun login(username: String, password: String): Boolean
 
     open suspend fun removeFromService(track: Track): Boolean = false
+
+    open fun updateTrackStatus(
+        track: Track,
+        setToReadStatus: Boolean,
+        setToComplete: Boolean = false,
+        mustReadToComplete: Boolean = false,
+    ) {
+        if (setToReadStatus && track.status == planningStatus() && track.last_chapter_read != 0f) {
+            track.status = readingStatus()
+        }
+        if (setToComplete &&
+            (!mustReadToComplete || track.status == readingStatus()) &&
+            track.total_chapters != 0 &&
+            track.last_chapter_read.toInt() == track.total_chapters
+        ) {
+            track.status = completedStatus()
+        }
+    }
 
     @CallSuper
     open fun logout() {
@@ -92,9 +112,9 @@ suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
         track.finished_reading_date = getCompletedDate(track, allRead)
     }
     track.last_chapter_read = getLastChapterRead(track).takeUnless {
-        it == 0 && allRead
-    } ?: 1
-    if (track.last_chapter_read == 0) {
+        it == 0f && allRead
+    } ?: 1f
+    if (track.last_chapter_read == 0f) {
         track.status = planningStatus
     }
     if (allRead) {
@@ -120,8 +140,8 @@ suspend fun TrackService.getCompletedDate(track: Track, allRead: Boolean): Long 
     return 0L
 }
 
-suspend fun TrackService.getLastChapterRead(track: Track): Int {
+suspend fun TrackService.getLastChapterRead(track: Track): Float {
     val chapters = db.getChapters(track.manga_id).executeOnIO()
     val lastChapterRead = chapters.filter { it.read }.minByOrNull { it.source_order }
-    return lastChapterRead?.takeIf { it.isRecognizedNumber }?.chapter_number?.toInt() ?: 0
+    return lastChapterRead?.takeIf { it.isRecognizedNumber }?.chapter_number ?: 0f
 }

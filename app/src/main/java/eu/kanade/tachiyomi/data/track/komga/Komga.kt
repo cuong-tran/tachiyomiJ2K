@@ -62,6 +62,8 @@ class Komga(private val context: Context, id: Int) : TrackService(id), EnhancedT
     }
 
     override fun completedStatus(): Int = COMPLETED
+    override fun readingStatus() = READING
+    override fun planningStatus() = UNREAD
 
     override fun getScoreList(): List<String> = emptyList()
 
@@ -72,10 +74,8 @@ class Komga(private val context: Context, id: Int) : TrackService(id), EnhancedT
         return api.updateProgress(track)
     }
 
-    override suspend fun update(track: Track, setToReadStatus: Boolean): Track {
-        if (setToReadStatus && track.status == UNREAD && track.last_chapter_read != 0) {
-            track.status = READING
-        }
+    override suspend fun update(track: Track, setToRead: Boolean): Track {
+        updateTrackStatus(track, setToRead)
         return api.updateProgress(track)
     }
 

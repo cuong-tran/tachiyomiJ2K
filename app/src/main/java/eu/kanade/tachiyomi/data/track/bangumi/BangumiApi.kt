@@ -38,7 +38,7 @@ class BangumiApi(private val client: OkHttpClient, interceptor: BangumiIntercept
         // chapter update
         return withContext(Dispatchers.IO) {
             val body =
-                FormBody.Builder().add("watched_eps", track.last_chapter_read.toString()).build()
+                FormBody.Builder().add("watched_eps", track.last_chapter_read.toInt().toString()).build()
             val request =
                 Request.Builder().url("$apiUrl/subject/${track.media_id}/update/watched_eps")
                     .post(body).build()
@@ -120,7 +120,7 @@ class BangumiApi(private val client: OkHttpClient, interceptor: BangumiIntercept
         val resp = response.body?.toString()
         val coll = gson.fromJson(resp, Collection::class.java)
         track.status = coll.status?.id!!
-        track.last_chapter_read = coll.ep_status!!
+        track.last_chapter_read = coll.ep_status!!.toFloat()
         return track
     }
 
