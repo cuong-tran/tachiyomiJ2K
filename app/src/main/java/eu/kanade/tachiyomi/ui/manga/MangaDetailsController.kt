@@ -330,6 +330,10 @@ class MangaDetailsController :
     private fun setItemColors() {
         getHeader()?.updateColors()
         if (adapter?.itemCount ?: 0 > 1) {
+            if (isTablet) {
+                val chapterHolder = binding.recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+                chapterHolder?.updateColors()
+            }
             (presenter.chapters).forEach { chapter ->
                 val chapterHolder =
                     binding.recycler.findViewHolderForItemId(chapter.id!!) as? ChapterHolder
