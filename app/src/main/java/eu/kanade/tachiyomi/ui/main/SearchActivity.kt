@@ -29,6 +29,8 @@ import uy.kohesive.injekt.api.get
 
 class SearchActivity : MainActivity() {
 
+    var backToMain = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding.toolbar.navigationIcon = backDrawable
@@ -55,6 +57,15 @@ class SearchActivity : MainActivity() {
         backPress()
     }
 
+    // Override finishAfterTransition since the animation gets weird when launching this from other apps
+    override fun finishAfterTransition() {
+        if (backToMain) {
+            super.finishAfterTransition()
+        } else {
+            finish()
+        }
+    }
+
     override fun backPress() {
         if (router.backstack.size <= 1 || !router.handleBack()) {
             SecureActivityDelegate.locked = true
@@ -69,6 +80,7 @@ class SearchActivity : MainActivity() {
             val intent = Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
+            backToMain = true
             startActivity(intent)
             finishAfterTransition()
         }
