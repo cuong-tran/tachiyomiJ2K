@@ -76,6 +76,7 @@ class MangaHeaderHolder(
         }
         with(binding) {
             this ?: return@with
+            startReadingButton.transitionName = "details start reading transition"
             chapterLayout.setOnClickListener { adapter.delegate.showChapterFilter() }
             startReadingButton.setOnClickListener { adapter.delegate.readNextChapter(it) }
             topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
