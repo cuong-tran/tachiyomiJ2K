@@ -107,13 +107,15 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
             toolbarMode == ToolbarState.EXPANDED
         )
 
-    val preLayoutHeightWhileSearching: Int
+    private val preLayoutHeightWhileSearching: Int
         get() = getEstimatedLayout(
             cardFrame?.isVisible == true && toolbarMode == ToolbarState.EXPANDED,
             useTabsInPreLayout,
             toolbarMode == ToolbarState.EXPANDED,
             true
         )
+
+    private var dontFullyHideToolbar = false
 
     /** Small toolbar height + top system insets, same size as a collapsed appbar */
     private val compactAppBarHeight: Float
@@ -198,11 +200,15 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
     override fun setTranslationY(translationY: Float) {
         if (lockYPos) return
         val realHeight = (preLayoutHeightWhileSearching + paddingTop).toFloat()
-        val newY = MathUtils.clamp(
-            translationY,
-            -realHeight + (if (context.isTablet()) minTabletHeight else 0),
-            if (compactSearchMode && toolbarMode == ToolbarState.EXPANDED) -realHeight + top + minTabletHeight else 0f
-        )
+        val newY = if (dontFullyHideToolbar && !useLargeToolbar) {
+            0f
+        } else {
+            MathUtils.clamp(
+                translationY,
+                -realHeight + (if (context.isTablet()) minTabletHeight else 0),
+                if (compactSearchMode && toolbarMode == ToolbarState.EXPANDED) -realHeight + top + minTabletHeight else 0f
+            )
+        }
         super.setTranslationY(newY)
     }
 
@@ -225,6 +231,7 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
 
     private fun shrinkAppBarIfNeeded(config: Configuration?) {
         config ?: return
+        dontFullyHideToolbar = config.smallestScreenWidthDp > 600
         isExtraSmall = false
         if (config.screenHeightDp < 600) {
             val bigTitleView = bigTitleView ?: return
