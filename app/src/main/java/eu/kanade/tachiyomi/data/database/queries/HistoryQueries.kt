@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.database.DbProvider
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.resolvers.HistoryLastReadPutResolver
+import eu.kanade.tachiyomi.data.database.resolvers.HistoryUpsertResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterHistoryGetResolver
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 import eu.kanade.tachiyomi.util.lang.sqLite
@@ -124,6 +125,16 @@ interface HistoryQueries : DbProvider {
     fun updateHistoryLastRead(history: History) = db.put()
         .`object`(history)
         .withPutResolver(HistoryLastReadPutResolver())
+        .prepare()
+
+    /**
+     * Updates the history last read.
+     * Inserts history object if not yet in database
+     * @param historyList history object list
+     */
+    fun upsertHistoryLastRead(historyList: List<History>) = db.put()
+        .objects(historyList)
+        .withPutResolver(HistoryUpsertResolver())
         .prepare()
 
     /**
