@@ -556,14 +556,12 @@ class MangaDetailsController :
         presenter.isLockedFromSearch = shouldLockIfNeeded && SecureActivityDelegate.shouldBeLocked()
         presenter.headerItem.isLocked = presenter.isLockedFromSearch
         manga!!.thumbnail_url = presenter.refreshMangaFromDb().thumbnail_url
-//        presenter.fetchChapters(refreshTracker == null)
+        presenter.fetchChapters(refreshTracker == null)
         if (refreshTracker != null) {
             trackingBottomSheet?.refreshItem(refreshTracker ?: 0)
             presenter.refreshTracking()
             refreshTracker = null
         }
-//        activity.postponeEnterTransition()
-//        listenForChange()
         // fetch cover again in case the user set a new cover while reading
         setPaletteColor()
         val isCurrentController = router?.backstack?.lastOrNull()?.controller ==
