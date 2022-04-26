@@ -155,17 +155,12 @@ dependencies {
     debugImplementation("com.github.ChuckerTeam.Chucker:library:$chuckerVersion")
     releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
 
-    // REST
-    implementation("com.squareup.retrofit2:retrofit:${Versions.RETROFIT}")
-    implementation("com.squareup.retrofit2:converter-gson:${Versions.RETROFIT}")
-
     implementation(kotlin("reflect", version = Versions.kotlin))
 
     // JSON
     val kotlinSerialization =  "1.3.2"
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinSerialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${kotlinSerialization}")
-    implementation("com.google.code.gson:gson:2.8.7")
     implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
 
     // JavaScript engine

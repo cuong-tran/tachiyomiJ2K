@@ -1,7 +1,6 @@
 object Versions {
     const val NUCLEUS = "3.0.0"
     const val OSS_LICENSE = "17.0.0"
-    const val RETROFIT = "2.7.2"
     const val ROBO_ELECTRIC = "3.1.4"
     const val RX_BINDING = "1.0.1"
     const val androidAppCompat = "1.1.0"
@@ -17,7 +16,6 @@ object Versions {
     const val firebaseCrashlytics = "17.2.1"
     const val googleServices = "4.3.3"
     const val gradleVersions = "0.29.0"
-    const val gson = "2.8.6"
     const val injekt = "65b0440"
     const val junit = "4.13"
     const val kotlin = "1.6.10"
@@ -29,7 +27,6 @@ object Versions {
     const val okio = "2.10.0"
     const val photoView = "2.3.0"
     const val reactiveNetwork = "0.13.0"
-    const val retrofit = "2.7.2"
     const val rxAndroid = "1.2.1"
     const val rxBinding = "1.0.1"
     const val rxJava = "1.3.8"

@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi
 
 import android.app.Application
 import androidx.core.content.ContextCompat
-import com.google.gson.Gson
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -46,8 +45,6 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { CustomMangaManager(app) }
 
         addSingletonFactory { TrackManager(app) }
-
-        addSingletonFactory { Gson() }
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
 
