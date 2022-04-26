@@ -1029,7 +1029,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        gestureDetector?.onTouchEvent(ev)
+        ev?.let { gestureDetector?.onTouchEvent(it) }
         if (ev?.action == MotionEvent.ACTION_DOWN) {
             if (snackBar != null && snackBar!!.isShown) {
                 val sRect = Rect()

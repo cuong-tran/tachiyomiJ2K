@@ -18,7 +18,7 @@ object Versions {
     const val gradleVersions = "0.29.0"
     const val injekt = "65b0440"
     const val junit = "4.13"
-    const val kotlin = "1.6.10"
+    const val kotlin = "1.6.20"
     const val kotson = "2.5.0"
     const val mockito = "1.10.19"
     const val moshi = "1.9.3"
@@ -48,7 +48,7 @@ object LegacyPluginClassPath {
 }
 
 object AndroidVersions {
-    const val compileSdk = 31
+    const val compileSdk = 32
     const val minSdk = 23
     const val targetSdk = 30
     const val versionCode = 87

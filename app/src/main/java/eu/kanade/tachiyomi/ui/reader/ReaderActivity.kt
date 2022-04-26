@@ -341,8 +341,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         return true
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        val splitItem = menu?.findItem(R.id.action_shift_double_page)
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val splitItem = menu.findItem(R.id.action_shift_double_page)
         splitItem?.isVisible = ((viewer as? PagerViewer)?.config?.doublePages ?: false) && !canShowSplitAtBottom()
         binding.chaptersSheet.shiftPageButton.isVisible = ((viewer as? PagerViewer)?.config?.doublePages ?: false) && canShowSplitAtBottom()
         (viewer as? PagerViewer)?.config?.let { config ->

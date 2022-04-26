@@ -38,7 +38,7 @@ object LocaleHelper {
             LocaleListCompat.getAdjustedDefault()[0]
         } else {
             getLocale(lang)
-        }
+        } ?: Locale.getDefault()
         return locale.getDisplayName(locale).replaceFirstChar { it.uppercase(locale) }
     }
 

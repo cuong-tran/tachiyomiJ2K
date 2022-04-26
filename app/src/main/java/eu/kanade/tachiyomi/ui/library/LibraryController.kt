@@ -741,7 +741,7 @@ class LibraryController(
         }
         hopperGravity = gravityPref
 
-        val gestureDetector = GestureDetectorCompat(activity, LibraryGestureDetector(this))
+        val gestureDetector = GestureDetectorCompat(binding.root.context, LibraryGestureDetector(this))
         with(binding.roundedCategoryHopper) {
             listOf(categoryHopperLayout, upCategory, downCategory, categoryButton).forEach {
                 it.setOnTouchListener { _, event ->
