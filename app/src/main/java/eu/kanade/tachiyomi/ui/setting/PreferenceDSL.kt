@@ -168,12 +168,12 @@ inline fun Preference.onChange(crossinline block: (Any?) -> Boolean) {
     setOnPreferenceChangeListener { _, newValue -> block(newValue) }
 }
 
-inline fun <T> Preference.bindTo(preference: com.fredporciuncula.flow.preferences.Preference<T>) {
+fun <T> Preference.bindTo(preference: com.fredporciuncula.flow.preferences.Preference<T>) {
     key = preference.key
     defaultValue = preference.defaultValue
 }
 
-inline fun <T> ListPreference.bindTo(preference: com.fredporciuncula.flow.preferences.Preference<T>) {
+fun <T> ListPreference.bindTo(preference: com.fredporciuncula.flow.preferences.Preference<T>) {
     key = preference.key
     defaultValue = preference.defaultValue.toString()
 }
