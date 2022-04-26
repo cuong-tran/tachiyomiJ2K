@@ -23,7 +23,7 @@ abstract class AbstractBackupManager(protected val context: Context) {
     protected val preferences: PreferencesHelper by injectLazy()
     protected val customMangaManager: CustomMangaManager by injectLazy()
 
-    abstract fun createBackup(uri: Uri, flags: Int, isJob: Boolean): String?
+    abstract fun createBackup(uri: Uri, flags: Int, isAutoBackup: Boolean): String?
 
     /**
      * Returns manga
