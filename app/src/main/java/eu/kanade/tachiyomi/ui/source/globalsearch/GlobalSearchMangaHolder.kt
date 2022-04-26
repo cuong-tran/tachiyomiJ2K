@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.globalsearch
 
+import android.graphics.drawable.RippleDrawable
 import android.view.View
 import androidx.core.view.isVisible
 import coil.Coil
@@ -10,6 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import eu.kanade.tachiyomi.databinding.SourceGlobalSearchControllerCardItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.makeShapeCorners
 import eu.kanade.tachiyomi.util.view.setCards
 
@@ -18,11 +20,18 @@ class GlobalSearchMangaHolder(view: View, adapter: GlobalSearchCardAdapter) :
 
     private val binding = SourceGlobalSearchControllerCardItemBinding.bind(view)
     init {
-        // Call onMangaClickListener when item is pressed.
         itemView.setOnClickListener {
             val item = adapter.getItem(flexibleAdapterPosition)
             if (item != null) {
                 adapter.mangaClickListener.onMangaClick(item.manga)
+            }
+        }
+        val bottom = 2.dpToPx
+        val others = 5.dpToPx
+        (binding.constraintLayout.foreground as? RippleDrawable)?.apply {
+            setLayerSize(1, 0, 0)
+            for (i in 0 until numberOfLayers) {
+                setLayerInset(i, others, others, others, bottom)
             }
         }
         binding.favoriteButton.shapeAppearanceModel =
