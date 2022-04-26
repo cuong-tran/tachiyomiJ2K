@@ -1,10 +1,6 @@
 package eu.kanade.tachiyomi.source.online.all
 
 import android.net.Uri
-import com.github.salomonbrys.kotson.nullInt
-import com.github.salomonbrys.kotson.nullString
-import com.github.salomonbrys.kotson.obj
-import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -17,6 +13,9 @@ import eu.kanade.tachiyomi.source.online.DelegatedHttpSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import okhttp3.CacheControl
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -53,12 +52,10 @@ class MangaDex : DelegatedHttpSource() {
             throw Exception("Null Response")
         }
 
-        val jsonObject = JsonParser.parseString(body).obj
-        val dataObject = jsonObject["data"].asJsonObject ?: throw Exception("Chapter not found")
-        val mangaId = dataObject["mangaId"]?.nullInt ?: throw Exception(
-            "No manga associated with chapter"
-        )
-        val langCode = getRealLangCode(dataObject["language"]?.nullString ?: "en").uppercase(Locale.getDefault())
+        val jsonObject = Json.decodeFromString<MangaDexChapterData>(body)
+        val dataObject = jsonObject.data ?: throw Exception("Chapter not found")
+        val mangaId = dataObject.mangaId ?: throw Exception("No manga associated with chapter")
+        val langCode = getRealLangCode(dataObject.language ?: "en").uppercase(Locale.getDefault())
         // Use the correct MangaDex source based on the language code, or the api will not return
         // the correct chapter list
         delegate = sourceManager.getOnlineSources().find { it.toString() == "MangaDex ($langCode)" }
@@ -81,7 +78,19 @@ class MangaDex : DelegatedHttpSource() {
         }
     }
 
-    fun getRealLangCode(langCode: String): String {
+    @Serializable
+    private data class MangaDexChapterData(
+        val data: MangaDexChapterInfo? = null,
+    )
+
+
+    @Serializable
+    private data class MangaDexChapterInfo(
+        val mangaId: Int? = null,
+        val language: String? = null,
+    )
+
+    private fun getRealLangCode(langCode: String): String {
         return when (langCode.lowercase(Locale.getDefault())) {
             "gb" -> "en"
             "vn" -> "vi"
