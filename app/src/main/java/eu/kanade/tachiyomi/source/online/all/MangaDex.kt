@@ -83,7 +83,6 @@ class MangaDex : DelegatedHttpSource() {
         val data: MangaDexChapterInfo? = null,
     )
 
-
     @Serializable
     private data class MangaDexChapterInfo(
         val mangaId: Int? = null,
