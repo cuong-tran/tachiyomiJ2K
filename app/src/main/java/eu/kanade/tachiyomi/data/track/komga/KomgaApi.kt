@@ -38,20 +38,22 @@ class KomgaApi(private val client: OkHttpClient) {
                 }
 
                 val progress = client
-                    .newCall(GET("$url/read-progress/tachiyomi"))
-                    .await()
-                    .parseAs<ReadProgressDto>()
+                    .newCall(GET("${url.replace("/api/v1/series/", "/api/v2/series/")}/read-progress/tachiyomi"))
+                    .await().let {
+                        if (url.contains("/api/v1/series/")) it.parseAs<ReadProgressV2Dto>()
+                        else it.parseAs<ReadProgressDto>().toV2()
+                    }
 
                 track.apply {
                     cover_url = "$url/thumbnail"
                     tracking_url = url
-                    total_chapters = progress.booksCount
+                    total_chapters = progress.maxNumberSort.toInt()
                     status = when (progress.booksCount) {
                         progress.booksUnreadCount -> Komga.UNREAD
                         progress.booksReadCount -> Komga.COMPLETED
                         else -> Komga.READING
                     }
-                    last_chapter_read = progress.lastReadContinuousIndex.toFloat()
+                    last_chapter_read = progress.lastReadContinuousNumberSort
                 }
             } catch (e: Exception) {
                 Timber.w(e, "Could not get item: $url")
@@ -60,13 +62,16 @@ class KomgaApi(private val client: OkHttpClient) {
         }
 
     suspend fun updateProgress(track: Track): Track {
-        val progress = ReadProgressUpdateDto(track.last_chapter_read.toInt())
-        val payload = json.encodeToString(progress)
+        val payload = if (track.tracking_url.contains("/api/v1/series/")) {
+            json.encodeToString(ReadProgressUpdateV2Dto(track.last_chapter_read))
+        } else {
+            json.encodeToString(ReadProgressUpdateDto(track.last_chapter_read.toInt()))
+        }
         client.newCall(
             Request.Builder()
-                .url("${track.tracking_url}/read-progress/tachiyomi")
+                .url("${track.tracking_url.replace("/api/v1/series/", "/api/v2/series/")}/read-progress/tachiyomi")
                 .put(payload.toRequestBody("application/json".toMediaType()))
-                .build()
+                .build(),
         )
             .await()
         return getTrackSearch(track.tracking_url)
