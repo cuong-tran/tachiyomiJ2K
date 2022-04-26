@@ -1,25 +1,20 @@
 package eu.kanade.tachiyomi.data.track.bangumi
 
-import com.google.gson.Gson
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import okhttp3.FormBody
 import okhttp3.Interceptor
 import okhttp3.Response
+import uy.kohesive.injekt.injectLazy
 
-class BangumiInterceptor(val bangumi: Bangumi, val gson: Gson) : Interceptor {
+class BangumiInterceptor(val bangumi: Bangumi) : Interceptor {
+
+    private val json: Json by injectLazy()
 
     /**
      * OAuth object used for authenticated requests.
      */
     private var oauth: OAuth? = bangumi.restoreToken()
-
-    fun addTocken(tocken: String, oidFormBody: FormBody): FormBody {
-        val newFormBody = FormBody.Builder()
-        for (i in 0 until oidFormBody.size) {
-            newFormBody.add(oidFormBody.name(i), oidFormBody.value(i))
-        }
-        newFormBody.add("access_token", tocken)
-        return newFormBody.build()
-    }
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
@@ -29,7 +24,7 @@ class BangumiInterceptor(val bangumi: Bangumi, val gson: Gson) : Interceptor {
         if (currAuth.isExpired()) {
             val response = chain.proceed(BangumiApi.refreshTokenRequest(currAuth.refresh_token!!))
             if (response.isSuccessful) {
-                newAuth(gson.fromJson(response.body!!.string(), OAuth::class.java))
+                newAuth(json.decodeFromString<OAuth>(response.body!!.string()))
             } else {
                 response.close()
             }
@@ -39,30 +34,35 @@ class BangumiInterceptor(val bangumi: Bangumi, val gson: Gson) : Interceptor {
             .header("User-Agent", "Tachiyomi")
             .url(
                 originalRequest.url.newBuilder()
-                    .addQueryParameter("access_token", currAuth.access_token).build()
+                    .addQueryParameter("access_token", currAuth.access_token).build(),
             )
             .build() else originalRequest.newBuilder()
-            .post(addTocken(currAuth.access_token, originalRequest.body as FormBody))
+            .post(addToken(currAuth.access_token, originalRequest.body as FormBody))
             .header("User-Agent", "Tachiyomi")
             .build()
 
         return chain.proceed(authRequest)
     }
 
-    fun newAuth(oauth: OAuth) {
-        this.oauth = OAuth(
+    fun newAuth(oauth: OAuth?) {
+        this.oauth = if (oauth == null) null else OAuth(
             oauth.access_token,
             oauth.token_type,
             System.currentTimeMillis() / 1000,
             oauth.expires_in,
             oauth.refresh_token,
-            this.oauth?.user_id
+            this.oauth?.user_id,
         )
 
         bangumi.saveToken(oauth)
     }
 
-    fun clearOauth() {
-        bangumi.saveToken(null)
+    private fun addToken(token: String, oidFormBody: FormBody): FormBody {
+        val newFormBody = FormBody.Builder()
+        for (i in 0 until oidFormBody.size) {
+            newFormBody.add(oidFormBody.name(i), oidFormBody.value(i))
+        }
+        newFormBody.add("access_token", token)
+        return newFormBody.build()
     }
 }
