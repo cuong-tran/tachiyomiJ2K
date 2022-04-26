@@ -707,16 +707,14 @@ class MangaDetailsController :
         else binding.recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun updateHeader() {
         binding.swipeRefresh.isRefreshing = presenter.isLoading
         adapter?.setChapters(presenter.chapters)
-        tabletAdapter?.notifyDataSetChanged()
+        tabletAdapter?.notifyItemChanged(0)
         addMangaHeader()
         activity?.invalidateOptionsMenu()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun updateChapters(chapters: List<ChapterItem>) {
         view ?: return
         binding.swipeRefresh.isRefreshing = presenter.isLoading
@@ -724,7 +722,7 @@ class MangaDetailsController :
             launchUI { binding.swipeRefresh.isRefreshing = true }
             presenter.fetchChaptersFromSource()
         }
-        tabletAdapter?.notifyDataSetChanged()
+        tabletAdapter?.notifyItemChanged(0)
         adapter?.setChapters(chapters)
         addMangaHeader()
         colorToolbar(binding.recycler.canScrollVertically(-1))
