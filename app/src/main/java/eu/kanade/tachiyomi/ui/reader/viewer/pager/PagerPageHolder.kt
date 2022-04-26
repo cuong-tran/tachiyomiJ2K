@@ -277,7 +277,7 @@ class PagerPageHolder(
                         viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat()
                     }
                     val targetScale = (height.toFloat() - topInsets - bottomInsets) / sHeight.toFloat()
-                    animateScaleAndCenter(min(targetScale, scale * 2), point)!!
+                    animateScaleAndCenter(min(targetScale, minScale * 2), point)!!
                         .withDuration(500)
                         .withEasing(SubsamplingScaleImageView.EASE_IN_OUT_QUAD)
                         .withInterruptible(true)
