@@ -1,12 +1,16 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
-import com.google.gson.Gson
+import androidx.core.content.edit
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -16,7 +20,7 @@ import uy.kohesive.injekt.injectLazy
  */
 class DownloadStore(
     context: Context,
-    private val sourceManager: SourceManager
+    private val sourceManager: SourceManager,
 ) {
 
     /**
@@ -24,14 +28,7 @@ class DownloadStore(
      */
     private val preferences = context.getSharedPreferences("active_downloads", Context.MODE_PRIVATE)
 
-    /**
-     * Gson instance to serialize/deserialize downloads.
-     */
-    private val gson: Gson by injectLazy()
-
-    /**
-     * Database helper.
-     */
+    private val json: Json by injectLazy()
     private val db: DatabaseHelper by injectLazy()
 
     /**
@@ -45,9 +42,9 @@ class DownloadStore(
      * @param downloads the list of downloads to add.
      */
     fun addAll(downloads: List<Download>) {
-        val editor = preferences.edit()
-        downloads.forEach { editor.putString(getKey(it), serialize(it)) }
-        editor.apply()
+        preferences.edit {
+            downloads.forEach { putString(getKey(it), serialize(it)) }
+        }
     }
 
     /**
@@ -56,14 +53,18 @@ class DownloadStore(
      * @param download the download to remove.
      */
     fun remove(download: Download) {
-        preferences.edit().remove(getKey(download)).apply()
+        preferences.edit {
+            remove(getKey(download))
+        }
     }
 
     /**
      * Removes all the downloads from the store.
      */
     fun clear() {
-        preferences.edit().clear().apply()
+        preferences.edit {
+            clear()
+        }
     }
 
     /**
@@ -109,7 +110,7 @@ class DownloadStore(
      */
     private fun serialize(download: Download): String {
         val obj = DownloadObject(download.manga.id!!, download.chapter.id!!, counter++)
-        return gson.toJson(obj)
+        return json.encodeToString(obj)
     }
 
     /**
@@ -119,7 +120,7 @@ class DownloadStore(
      */
     private fun deserialize(string: String): DownloadObject? {
         return try {
-            gson.fromJson(string, DownloadObject::class.java)
+            json.decodeFromString<DownloadObject>(string)
         } catch (e: Exception) {
             null
         }
@@ -132,5 +133,6 @@ class DownloadStore(
      * @param chapterId the id of the chapter.
      * @param order the order of the download in the queue.
      */
+    @Serializable
     data class DownloadObject(val mangaId: Long, val chapterId: Long, val order: Int)
 }
