@@ -72,6 +72,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.util.Date
+import java.util.Locale
 
 class MangaDetailsPresenter(
     val manga: Manga,
@@ -737,10 +738,18 @@ class MangaDetailsPresenter(
             manga.author = author?.trimOrNull()
             manga.artist = artist?.trimOrNull()
             manga.description = description?.trimOrNull()
-            val tagsString = tags?.joinToString(", ") { it.capitalize() }
+            val tagsString = tags?.joinToString(", ") { tag ->
+                tag.replaceFirstChar {
+                    it.uppercase(Locale.getDefault())
+                }
+            }
             manga.genre = if (tags.isNullOrEmpty()) null else tagsString?.trim()
             if (seriesType != null) {
-                manga.genre = setSeriesType(seriesType, manga.genre).joinToString(", ") { it.capitalize() }
+                manga.genre = setSeriesType(seriesType, manga.genre).joinToString(", ") {
+                    it.replaceFirstChar { genre ->
+                        genre.titlecase(Locale.getDefault())
+                    }
+                }
                 manga.viewer_flags = -1
                 db.updateViewerFlags(manga).executeAsBlocking()
             }
@@ -749,7 +758,8 @@ class MangaDetailsPresenter(
             db.updateMangaInfo(manga).executeAsBlocking()
         } else {
             var genre = if (!tags.isNullOrEmpty() && tags.joinToString(", ") != manga.originalGenre) {
-                tags.map { it.capitalize() }.toTypedArray()
+                tags.map { tag -> tag.replaceFirstChar { it.titlecase(Locale.getDefault()) } }
+                    .toTypedArray()
             } else {
                 null
             }

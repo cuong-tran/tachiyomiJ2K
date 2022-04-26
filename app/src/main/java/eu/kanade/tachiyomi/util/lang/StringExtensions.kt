@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import net.greypanther.natsort.CaseInsensitiveSimpleNaturalComparator
 import java.net.URI
 import java.net.URISyntaxException
+import java.util.Locale
 import kotlin.math.floor
 
 /**
@@ -89,8 +90,16 @@ fun String.truncateCenter(count: Int, replacement: String = "..."): String {
 }
 
 fun String.capitalizeWords(): String {
-    val firstReplace = split(" ").joinToString(" ") { it.capitalize() }
-    return firstReplace.split("-").joinToString("-") { it.capitalize() }
+    val firstReplace = split(" ").joinToString(" ") {
+        it.replaceFirstChar { text ->
+            text.titlecase(Locale.getDefault())
+        }
+    }
+    return firstReplace.split("-").joinToString("-") {
+        it.replaceFirstChar { text ->
+            text.titlecase(Locale.getDefault())
+        }
+    }
 }
 
 /**

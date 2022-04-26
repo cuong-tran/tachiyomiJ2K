@@ -4,6 +4,7 @@ import android.view.View
 import eu.kanade.tachiyomi.databinding.MigrationCardItemBinding
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import java.util.Locale
 
 class SourceHolder(view: View, val adapter: SourceAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
@@ -20,7 +21,9 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
 
         // Set source name
         val sourceName =
-            if (adapter.isMultiLanguage) source.toString() else source.name.capitalize()
+            if (adapter.isMultiLanguage) source.toString() else source.name.replaceFirstChar {
+                it.titlecase(Locale.getDefault())
+            }
         binding.title.text = sourceName
 
         // Set circle letter image.
