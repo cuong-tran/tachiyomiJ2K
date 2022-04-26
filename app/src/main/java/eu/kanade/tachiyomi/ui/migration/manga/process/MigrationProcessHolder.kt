@@ -155,13 +155,7 @@ class MigrationProcessHolder(
         }
 
         gradient.isVisible = true
-        title.text = /*if (source.id == MERGED_SOURCE_ID) {
-            MergedSource.MangaConfig.readFromUrl(gson, manga.url).children.map {
-                sourceManager.getOrStub(it.source).toString()
-            }.distinct().joinToString()
-        } else {*/
-            source.toString()
-        // }
+        title.text = source.toString()
 
         val mangaChapters = db.getChapters(manga).executeAsBlocking()
         unreadDownloadBadge.badgeView.setChapters(mangaChapters.size)
