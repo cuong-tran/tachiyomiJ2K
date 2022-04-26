@@ -175,8 +175,12 @@ inline fun <T> Preference.bindTo(preference: com.fredporciuncula.flow.preference
 
 inline fun <T> ListPreference.bindTo(preference: com.fredporciuncula.flow.preferences.Preference<T>) {
     key = preference.key
-    // ListPreferences persist values as strings, even when we're using our IntListPreference
     defaultValue = preference.defaultValue.toString()
+}
+
+inline fun <T> IntListMatPreference.bindTo(preference: com.fredporciuncula.flow.preferences.Preference<T>) {
+    key = preference.key
+    defaultValue = preference.defaultValue
 }
 
 fun SwitchPreferenceCompat.requireAuthentication(
