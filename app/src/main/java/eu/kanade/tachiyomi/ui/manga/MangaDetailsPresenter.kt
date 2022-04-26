@@ -151,6 +151,11 @@ class MangaDetailsPresenter(
         }
     }
 
+    suspend fun getChaptersNow(): List<ChapterItem> {
+        getChapters()
+        return chapters
+    }
+
     private suspend fun getChapters() {
         val chapters = db.getChapters(manga).executeOnIO().map { it.toModel() }
 

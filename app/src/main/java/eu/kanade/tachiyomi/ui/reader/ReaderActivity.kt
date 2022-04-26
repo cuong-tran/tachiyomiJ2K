@@ -210,6 +210,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         const val VISIBLE_CHAPTERS = "${BuildConfig.APPLICATION_ID}.VISIBLE_CHAPTERS"
 
         fun newIntent(context: Context, manga: Manga, chapter: Chapter): Intent {
+            MainActivity.chapterIdToExitTo = 0L
             val intent = Intent(context, ReaderActivity::class.java)
             intent.putExtra("manga", manga.id)
             intent.putExtra("chapter", chapter.id)
@@ -218,6 +219,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
 
         fun newIntentWithTransitionOptions(activity: Activity, manga: Manga, chapter: Chapter, sharedElement: View): Pair<Intent, Bundle?> {
+            MainActivity.chapterIdToExitTo = 0L
             val intent = newIntent(activity, manga, chapter)
             intent.putExtra(TRANSITION_NAME, sharedElement.transitionName)
             val activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(

@@ -110,6 +110,7 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.toolbarHeight
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -193,6 +194,7 @@ class MangaDetailsController :
 
     private var headerHeight = 0
     private var fullCoverActive = false
+    var returningFromReader = false
 
     override fun getTitle(): String? {
         return manga?.title
@@ -571,6 +573,18 @@ class MangaDetailsController :
         }
     }
 
+    override fun onAttach(view: View) {
+        super.onAttach(view)
+        if (!returningFromReader) return
+        returningFromReader = false
+        runBlocking {
+            val chapters = presenter.getChaptersNow()
+            tabletAdapter?.notifyItemChanged(0)
+            adapter?.setChapters(chapters)
+            addMangaHeader()
+        }
+    }
+
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
@@ -930,7 +944,6 @@ class MangaDetailsController :
     }
 
     private fun openChapter(chapter: Chapter, sharedElement: View? = null) {
-        MainActivity.chapterIdToExitTo = 0L
         (activity as? AppCompatActivity)?.apply {
             if (sharedElement != null) {
                 val (intent, bundle) = ReaderActivity
@@ -942,6 +955,7 @@ class MangaDetailsController :
                         (adapter?.getItem(it) as? ChapterItem)?.chapter?.id
                     }.toLongArray()
                 } else longArrayOf()
+                returningFromReader = true
                 intent.putExtra(ReaderActivity.VISIBLE_CHAPTERS, chapterRange)
                 startActivity(intent, bundle)
             } else {
