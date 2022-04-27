@@ -117,6 +117,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToLong
 
 open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceListener {
 
@@ -140,6 +141,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     private val updateChecker by lazy { AppUpdateChecker() }
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
     private var tabAnimation: ValueAnimator? = null
+    private var searchBarAnimation: ValueAnimator? = null
     private var overflowDialog: Dialog? = null
     var currentToolbar: Toolbar? = null
     var ogWidth: Int = Int.MAX_VALUE
@@ -520,7 +522,26 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             binding.toolbar
         }
         binding.toolbar.isVisible = !(onSmallerController && onSearchController)
-        binding.cardFrame.isVisible = (show || showSearchAnyway) && onSearchController
+        val showSearchBar = (show || showSearchAnyway) && onSearchController
+        val needsAnim = if (showSearchBar) !binding.cardFrame.isVisible || binding.cardFrame.alpha < 1f
+        else binding.cardFrame.isVisible || binding.cardFrame.alpha > 0f
+        if (needsAnim && binding.appBar.useLargeToolbar) {
+            searchBarAnimation?.cancel()
+            if (showSearchBar && !binding.cardFrame.isVisible) {
+                binding.cardFrame.alpha = 0f
+                binding.cardFrame.isVisible = true
+            }
+            val endValue = if (showSearchBar) 1f else 0f
+            val tA = ValueAnimator.ofFloat(binding.cardFrame.alpha, endValue)
+            tA.addUpdateListener { binding.cardFrame.alpha = it.animatedValue as Float }
+            tA.addListener(EndAnimatorListener { binding.cardFrame.isVisible = showSearchBar })
+            tA.duration = (abs(binding.cardFrame.alpha - endValue) * 150).roundToLong()
+            searchBarAnimation = tA
+            tA.start()
+        } else if (!binding.appBar.useLargeToolbar) {
+            binding.cardFrame.alpha = 1f
+            binding.cardFrame.isVisible = showSearchBar
+        }
         val bgColor = binding.appBar.backgroundColor ?: Color.TRANSPARENT
         if (changeBG && (if (solidBG) bgColor == Color.TRANSPARENT else false)) {
             binding.appBar.setBackgroundColor(
