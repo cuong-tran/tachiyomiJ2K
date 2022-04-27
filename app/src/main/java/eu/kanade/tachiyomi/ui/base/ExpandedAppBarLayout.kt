@@ -283,7 +283,7 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
         val smallHeight = -realHeight + shortH + tabHeight
         val newY = when {
             // for smaller devices, when search is active, we want to shrink the app bar and never
-                // extend it pass the compact state
+            // extend it pass the compact state
             toolbarMode == ToolbarState.EXPANDED && compactSearchMode -> {
                 MathUtils.clamp(
                     translationY,
