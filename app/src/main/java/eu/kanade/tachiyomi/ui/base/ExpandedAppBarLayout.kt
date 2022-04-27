@@ -229,6 +229,10 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
         shrinkAppBarIfNeeded(newConfig)
     }
 
+    /**
+     * For smaller devices, update the big view (with the large title) to be a smaller font and
+     * less padding
+     */
     private fun shrinkAppBarIfNeeded(config: Configuration?) {
         config ?: return
         dontFullyHideToolbar = config.smallestScreenWidthDp > 600
@@ -259,6 +263,13 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
         }
     }
 
+    /**
+     * Update the views in appbar based on its current Y position
+     *
+     * @param recyclerView used to determine how far it has scrolled down, if it has not scrolled
+     * past the app bar's height, match the Y to the recyclerView's offset
+     * @param cancelAnim if true, cancel the current snap animation
+     */
     fun updateAppBarAfterY(recyclerView: RecyclerView?, cancelAnim: Boolean = true) {
         if (cancelAnim) {
             yAnimator?.cancel()
@@ -271,6 +282,8 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
         val shortH = if (toolbarMode != ToolbarState.EXPANDED || compactSearchMode) 0f else compactAppBarHeight
         val smallHeight = -realHeight + shortH + tabHeight
         val newY = when {
+            // for smaller devices, when search is active, we want to shrink the app bar and never
+                // extend it pass the compact state
             toolbarMode == ToolbarState.EXPANDED && compactSearchMode -> {
                 MathUtils.clamp(
                     translationY,
@@ -278,9 +291,11 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
                     -realHeight.toFloat() + top + minTabletHeight
                 )
             }
+            // for regular compact modes, no need to clamp, setTranslationY will take care of it
             toolbarMode != ToolbarState.EXPANDED -> {
                 translationY
             }
+            // if the recycler hasn't scrolled past the app bars height...
             offset < realHeight - shortH - tabHeight -> {
                 -offset.toFloat()
             }
@@ -318,6 +333,7 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
             useSearchToolbarForMenu(compactSearchMode || offset > realHeight - shortH - tabHeight)
             return
         }
+        // If toolbar is expanded, we want to fade out the big view, then later the main toolbar
         val alpha =
             (bigHeight + newY * 2) / (bigHeight) + 0.45f // (realHeight.toFloat() + newY * 5) / realHeight.toFloat() + .33f
         bigView?.alpha = MathUtils.clamp(if (alpha.isNaN()) 1f else alpha, 0f, 1f)
@@ -345,6 +361,13 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
         }
     }
 
+    /**
+     * Snap Appbar to hide the entire appbar or show the smaller toolbar
+     *
+     * Only snaps if the [recyclerView] has scrolled farther than the current app bar's height
+     * @param callback closure updates along with snapping the appbar, use if something needs to
+     * update alongside the appbar
+     */
     fun snapAppBarY(recyclerView: RecyclerView, callback: (() -> Unit)?): Float {
         yAnimator?.cancel()
         val halfWay = compactAppBarHeight / 2
