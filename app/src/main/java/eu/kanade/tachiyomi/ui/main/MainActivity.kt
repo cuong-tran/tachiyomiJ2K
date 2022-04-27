@@ -1170,7 +1170,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     }
                 }
             )
-            tA.duration = 200
+            tA.duration = 100
             tabAnimation = tA
             tA.start()
         } else {

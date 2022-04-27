@@ -39,6 +39,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.databinding.RecentsControllerBinding
+import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
@@ -782,8 +783,9 @@ class RecentsController(bundle: Bundle? = null) :
             }
         } else {
             if (type == ControllerChangeType.POP_EXIT) presenter.onDestroy()
-            if (router.backstack.lastOrNull()?.controller !is DialogController) {
-                (activity as? MainActivity)?.showTabBar(false)
+            val lastController = router.backstack.lastOrNull()?.controller
+            if (lastController !is DialogController) {
+                (activity as? MainActivity)?.showTabBar(show = false, animate = lastController !is SmallToolbarInterface)
             }
             snack?.dismiss()
         }
