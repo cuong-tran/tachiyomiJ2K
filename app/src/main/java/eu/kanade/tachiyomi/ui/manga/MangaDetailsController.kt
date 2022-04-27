@@ -111,6 +111,7 @@ import eu.kanade.tachiyomi.util.view.toolbarHeight
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -578,7 +579,8 @@ class MangaDetailsController :
         if (!returningFromReader) return
         returningFromReader = false
         runBlocking {
-            val chapters = presenter.getChaptersNow()
+            val chapters =
+                withTimeoutOrNull(1000) { presenter.getChaptersNow() } ?: return@runBlocking
             tabletAdapter?.notifyItemChanged(0)
             adapter?.setChapters(chapters)
             addMangaHeader()
