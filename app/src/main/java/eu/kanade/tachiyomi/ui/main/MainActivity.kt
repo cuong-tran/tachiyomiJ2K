@@ -525,7 +525,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val showSearchBar = (show || showSearchAnyway) && onSearchController
         val needsAnim = if (showSearchBar) !binding.cardFrame.isVisible || binding.cardFrame.alpha < 1f
         else binding.cardFrame.isVisible || binding.cardFrame.alpha > 0f
-        if (needsAnim && binding.appBar.useLargeToolbar) {
+        if (needsAnim && binding.appBar.useLargeToolbar && !onSmallerController) {
+            binding.appBar.background = null
             searchBarAnimation?.cancel()
             if (showSearchBar && !binding.cardFrame.isVisible) {
                 binding.cardFrame.alpha = 0f
@@ -538,7 +539,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             tA.duration = (abs(binding.cardFrame.alpha - endValue) * 150).roundToLong()
             searchBarAnimation = tA
             tA.start()
-        } else if (!binding.appBar.useLargeToolbar) {
+        } else if (!binding.appBar.useLargeToolbar || onSmallerController) {
             binding.cardFrame.alpha = 1f
             binding.cardFrame.isVisible = showSearchBar
         }

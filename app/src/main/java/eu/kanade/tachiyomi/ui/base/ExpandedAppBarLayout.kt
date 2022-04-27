@@ -2,8 +2,6 @@ package eu.kanade.tachiyomi.ui.base
 
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewPropertyAnimator
@@ -357,7 +355,8 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
         val realHeight = preLayoutHeightWhileSearching + paddingTop
         val closerToTop = abs(y) > realHeight - halfWay
         val atTop = !recyclerView.canScrollVertically(-1)
-        val shortH = if (toolbarMode != ToolbarState.EXPANDED || compactSearchMode) 0f else compactAppBarHeight
+        val shortH =
+            if (toolbarMode != ToolbarState.EXPANDED || compactSearchMode) 0f else compactAppBarHeight
         val lastY = if (closerToTop && !atTop) {
             -height.toFloat()
         } else {
@@ -380,26 +379,6 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
             useSearchToolbarForMenu(mainToolbar?.alpha ?: 0f <= 0f)
             y
         }
-    }
-
-    override fun setBackgroundColor(color: Int) {
-        if (color != context.getResourceColor(R.attr.colorSurface)) {
-            super.setBackgroundColor(color)
-        }
-        mainToolbar?.setBackgroundColor(color)
-        bigView?.setBackgroundColor(color)
-        cardFrame?.setBackgroundColor(color)
-        tabsFrameLayout?.setBackgroundColor(color)
-    }
-
-    override fun setBackground(background: Drawable?) {
-        if (background == null || background is ColorDrawable) {
-            super.setBackground(background)
-        }
-        mainToolbar?.background = background
-        bigView?.background = background
-        cardFrame?.background = background
-        tabsFrameLayout?.background = background
     }
 
     fun useSearchToolbarForMenu(showCardTB: Boolean) {
