@@ -290,6 +290,7 @@ class LibraryUpdateNotifier(private val context: Context) {
             setContentTitle(context.getString(R.string.warning))
             setSmallIcon(R.drawable.ic_warning_white_24dp)
             setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.notification_size_warning)))
+            setContentIntent(NotificationHandler.openUrl(context, HELP_BULK_UPDATES_URL))
             setTimeoutAfter(30000)
         }
             .build()
@@ -323,5 +324,6 @@ class LibraryUpdateNotifier(private val context: Context) {
         private const val TITLE_MAX_LEN = 45
         private const val ICON_SIZE = 192
         const val HELP_SKIPPED_URL = "https://tachiyomi.org/help/faq/#why-does-global-update-skip-some-entries"
+        const val HELP_BULK_UPDATES_URL = "https://tachiyomi.org/help/faq/#why-does-the-app-warn-about-large-bulk-updates-and-downloads"
     }
 }

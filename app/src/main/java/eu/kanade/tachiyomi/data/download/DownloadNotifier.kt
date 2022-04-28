@@ -8,6 +8,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.data.library.LibraryUpdateNotifier
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -225,7 +226,16 @@ internal class DownloadNotifier(private val context: Context) {
         val notification = context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER) {
             setContentTitle(context.getString(R.string.warning))
             setSmallIcon(R.drawable.ic_warning_white_24dp)
-            setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.download_queue_size_warning)))
+            setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(context.getString(R.string.download_queue_size_warning))
+            )
+            setContentIntent(
+                NotificationHandler.openUrl(
+                    context,
+                    LibraryUpdateNotifier.HELP_BULK_UPDATES_URL
+                )
+            )
             setTimeoutAfter(30000)
         }
             .build()
