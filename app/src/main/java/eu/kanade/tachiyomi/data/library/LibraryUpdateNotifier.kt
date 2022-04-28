@@ -102,12 +102,8 @@ class LibraryUpdateNotifier(private val context: Context) {
             context.notificationBuilder(Notifications.CHANNEL_LIBRARY_ERROR) {
                 setContentTitle(context.getString(R.string.notification_update_error, errorCount))
                 setContentText(context.getString(R.string.tap_to_see_details))
+                setContentIntent(NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri))
                 setSmallIcon(R.drawable.ic_tachij2k_notification)
-                addAction(
-                    R.drawable.nnf_ic_file_folder,
-                    context.getString(R.string.view_all),
-                    NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
-                )
             }
                 .build()
         )
@@ -133,7 +129,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                 setSmallIcon(R.drawable.ic_tachij2k_notification)
                 addAction(
                     R.drawable.ic_help_24dp,
-                    context.getString(R.string.view_all),
+                    context.getString(R.string.open_log),
                     NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
 
                 )
