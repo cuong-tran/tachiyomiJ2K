@@ -57,6 +57,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
+import java.io.File
 
 class SettingsAdvancedController : SettingsController() {
 
@@ -427,6 +428,7 @@ class SettingsAdvancedController : SettingsController() {
             webview.clearHistory()
             webview.clearSslPreferences()
             WebStorage.getInstance().deleteAllData()
+            activity?.applicationInfo?.dataDir?.let { File("$it/app_webview/").deleteRecursively() }
             activity?.toast(R.string.webview_data_deleted)
         } catch (e: Throwable) {
             Timber.e(e)
