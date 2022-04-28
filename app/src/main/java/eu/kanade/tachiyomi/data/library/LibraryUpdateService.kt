@@ -109,7 +109,7 @@ class LibraryUpdateService(
     val jobCount = AtomicInteger(0)
 
     // Boolean to determine if user wants to automatically download new chapters.
-    private val downloadNew: Boolean = preferences.downloadNew().get()
+    private val downloadNew: Boolean = preferences.downloadNewChapters().get()
 
     // Boolean to determine if DownloadManager has downloads
     private var hasDownloads = false

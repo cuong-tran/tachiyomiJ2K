@@ -304,12 +304,12 @@ class PreferencesHelper(val context: Context) {
 
     fun pinnedCatalogues() = flowPrefs.getStringSet("pinned_catalogues", mutableSetOf())
 
-    fun downloadNew() = flowPrefs.getBoolean(Keys.downloadNew, false)
+    fun downloadNewChapters() = flowPrefs.getBoolean(Keys.downloadNew, false)
 
     fun saveChaptersAsCBZ() = flowPrefs.getBoolean("save_chapter_as_cbz", true)
 
-    fun downloadNewCategories() = flowPrefs.getStringSet(Keys.downloadNewCategories, emptySet())
-    fun downloadNewCategoriesExclude() = flowPrefs.getStringSet(Keys.downloadNewCategoriesExclude, emptySet())
+    fun downloadNewChaptersInCategories() = flowPrefs.getStringSet(Keys.downloadNewCategories, emptySet())
+    fun excludeCategoriesInDownloadNew() = flowPrefs.getStringSet(Keys.downloadNewCategoriesExclude, emptySet())
 
     fun defaultCategory() = prefs.getInt(Keys.defaultCategory, -1)
 

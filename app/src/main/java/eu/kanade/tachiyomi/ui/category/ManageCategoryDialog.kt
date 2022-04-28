@@ -103,13 +103,13 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         }
         when (
             updatePref(
-                preferences.downloadNewCategories(),
-                preferences.downloadNewCategoriesExclude(),
+                preferences.downloadNewChaptersInCategories(),
+                preferences.excludeCategoriesInDownloadNew(),
                 binding.downloadNew
             )
         ) {
-            true -> preferences.downloadNew().set(true)
-            false -> preferences.downloadNew().set(false)
+            true -> preferences.downloadNewChapters().set(true)
+            false -> preferences.downloadNewChapters().set(false)
             else -> {}
         }
         if (preferences.libraryUpdateInterval().get() > 0 &&
@@ -150,14 +150,14 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         binding.title.hint =
             category?.name ?: binding.editCategories.context.getString(R.string.category)
         binding.title.append(category?.name ?: "")
-        val downloadNew = preferences.downloadNew().get()
+        val downloadNew = preferences.downloadNewChapters().get()
         setCheckbox(
             binding.downloadNew,
-            preferences.downloadNewCategories(),
-            preferences.downloadNewCategoriesExclude(),
+            preferences.downloadNewChaptersInCategories(),
+            preferences.excludeCategoriesInDownloadNew(),
             true
         )
-        if (downloadNew && preferences.downloadNewCategories().get().isEmpty()) {
+        if (downloadNew && preferences.downloadNewChaptersInCategories().get().isEmpty()) {
             binding.downloadNew.isVisible = false
         } else if (!downloadNew) {
             binding.downloadNew.isVisible = true
