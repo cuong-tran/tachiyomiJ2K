@@ -1178,6 +1178,7 @@ class LibraryController(
         val translateY = if (show) full else 0f
         binding.libraryGridRecycler.recycler.animate().translationY(translateY).apply {
             setUpdateListener {
+                activityBinding?.appBar?.updateAppBarAfterY(binding.libraryGridRecycler.recycler)
                 updateHopperY()
             }
         }.start()
