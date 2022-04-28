@@ -370,17 +370,17 @@ class LibraryUpdateService(
             }
             newUpdates.clear()
         }
-        if (skippedUpdates.isNotEmpty()) {
+        if (skippedUpdates.isNotEmpty() && Notifications.isNotificationChannelEnabled(this, Notifications.CHANNEL_LIBRARY_SKIPPED)) {
             val skippedFile = writeErrorFile(
                 skippedUpdates,
                 "skipped",
                 getString(R.string.learn_more_at_, LibraryUpdateNotifier.HELP_SKIPPED_URL)
             ).getUriCompat(this)
-            notifier.showUpdateSkippedNotification(skippedUpdates.size, skippedFile)
+            notifier.showUpdateSkippedNotification(skippedUpdates.map { it.key.title }, skippedFile)
         }
-        if (failedUpdates.isNotEmpty()) {
+        if (failedUpdates.isNotEmpty() && Notifications.isNotificationChannelEnabled(this, Notifications.CHANNEL_LIBRARY_ERROR)) {
             val errorFile = writeErrorFile(failedUpdates).getUriCompat(this)
-            notifier.showUpdateErrorNotification(failedUpdates.size, errorFile)
+            notifier.showUpdateErrorNotification(failedUpdates.map { it.key.title }, errorFile)
         }
         mangaShortcutManager.updateShortcuts()
         failedUpdates.clear()
