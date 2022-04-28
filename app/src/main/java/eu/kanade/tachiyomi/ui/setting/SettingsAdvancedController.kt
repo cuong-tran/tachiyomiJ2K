@@ -56,8 +56,8 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import java.io.File
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsAdvancedController : SettingsController() {
 
