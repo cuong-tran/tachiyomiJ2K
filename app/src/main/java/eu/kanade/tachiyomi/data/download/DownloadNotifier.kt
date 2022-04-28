@@ -233,7 +233,7 @@ internal class DownloadNotifier(private val context: Context) {
             setContentIntent(
                 NotificationHandler.openUrl(
                     context,
-                    LibraryUpdateNotifier.HELP_BULK_UPDATES_URL
+                    LibraryUpdateNotifier.HELP_WARNING_URL
                 )
             )
             setTimeoutAfter(30000)
