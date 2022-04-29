@@ -172,7 +172,9 @@ class LibraryController(
      */
     private val selectedMangas = mutableSetOf<Manga>()
 
-    private lateinit var adapter: LibraryCategoryAdapter
+    private var mAdapter: LibraryCategoryAdapter? = null
+    private val adapter: LibraryCategoryAdapter
+        get() = mAdapter!!
 
     private var lastClickPosition = -1
 
@@ -531,7 +533,7 @@ class LibraryController(
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        adapter = LibraryCategoryAdapter(this)
+        mAdapter = LibraryCategoryAdapter(this)
         adapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         setRecyclerLayout()
         binding.libraryGridRecycler.recycler.setHasFixedSize(true)
@@ -1024,6 +1026,7 @@ class LibraryController(
         }
         displaySheet?.dismiss()
         displaySheet = null
+        mAdapter = null
         saveStaggeredState()
         super.onDestroyView(view)
     }
