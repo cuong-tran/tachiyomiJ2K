@@ -73,7 +73,6 @@ class DownloadBottomSheet @JvmOverloads constructor(
         binding.dlRecycler.adapter = adapter
         adapter?.isHandleDragEnabled = true
         adapter?.isSwipeEnabled = true
-        adapter?.isSwipeEnabled = true
         adapter?.fastScroller = binding.fastScroller
         binding.fastScroller.controller = controller
         binding.dlRecycler.setHasFixedSize(true)
