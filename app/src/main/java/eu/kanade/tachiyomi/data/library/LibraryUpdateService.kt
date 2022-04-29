@@ -239,7 +239,7 @@ class LibraryUpdateService(
             stopSelf(startId)
         }
         if (target == Target.CHAPTERS) {
-            listener?.onUpdateManga()
+            listener?.onUpdateManga(Manga.create(STARTING_UPDATE_SOURCE))
         }
         job = GlobalScope.launch(handler) {
             when (target) {
@@ -592,6 +592,7 @@ class LibraryUpdateService(
          * Key for category to update.
          */
         const val KEY_CATEGORY = "category"
+        const val STARTING_UPDATE_SOURCE = -5L
 
         fun categoryInQueue(id: Int?) = instance?.categoryIds?.contains(id) ?: false
         private var instance: LibraryUpdateService? = null
