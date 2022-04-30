@@ -104,9 +104,11 @@ fun RecyclerView.LayoutManager.getFirstPos(recyclerView: RecyclerView?, toolbarH
         .mapNotNull { getChildAt(it) }
         .filter {
             val isLibraryHeader = getItemViewType(it) == R.layout.library_category_header_item
-            val bottom = (if (isLibraryHeader) {
-                it.findViewById<TextView>(R.id.category_title)?.bottom?.plus(it.y)?.roundToInt()
-            } else it.bottom) ?: it.bottom
+            val bottom = (
+                if (isLibraryHeader) {
+                    it.findViewById<TextView>(R.id.category_title)?.bottom?.plus(it.y)?.roundToInt()
+                } else it.bottom
+                ) ?: it.bottom
             bottom >= inset + toolbarHeight && it.height > 0
         }
         .mapNotNull { pos -> getPosition(pos).takeIf { it != RecyclerView.NO_POSITION } }
