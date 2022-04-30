@@ -213,7 +213,11 @@ class ReaderPresenter(
         chapterItems = withContext(Dispatchers.IO) {
             val chapterSort = ChapterSort(manga, chapterFilter, preferences)
             val dbChapters = db.getChapters(manga).executeAsBlocking()
-            chapterSort.getChaptersSorted(dbChapters, filterForReader = true, currentChapter = getCurrentChapter()?.chapter).map {
+            chapterSort.getChaptersSorted(
+                dbChapters,
+                filterForReader = true,
+                currentChapter = getCurrentChapter()?.chapter
+            ).map {
                 ReaderChapterItem(
                     it,
                     manga,
@@ -350,7 +354,8 @@ class ReaderPresenter(
             val id = db.insertManga(manga).executeOnIO().insertedId()
             manga.id = id ?: manga.id
             chapter.manga_id = manga.id
-            val matchingChapterId = db.getChapters(manga).executeOnIO().find { it.url == chapter.url }?.id
+            val matchingChapterId =
+                db.getChapters(manga).executeOnIO().find { it.url == chapter.url }?.id
             if (matchingChapterId != null) {
                 withContext(Dispatchers.Main) {
                     this@ReaderPresenter.init(manga, matchingChapterId)
