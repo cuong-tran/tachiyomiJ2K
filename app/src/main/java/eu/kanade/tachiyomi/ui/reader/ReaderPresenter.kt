@@ -571,14 +571,38 @@ class ReaderPresenter(
 
     fun getChapterUrl(): String? {
         val source = getSource() ?: return null
-        val chapterUrl = getCurrentChapter()?.chapter?.url?.getUrlWithoutDomain()
+        val chapter = getCurrentChapter()?.chapter ?: return null
+        val chapterUrl = chapter.url.getUrlWithoutDomain()
 
-        return if (chapterUrl.isNullOrBlank()) try {
-            val manga = manga ?: return null
-            source.mangaDetailsRequest(manga).url.toString()
-        } catch (e: Exception) {
-            null
-        } else source.baseUrl + chapterUrl
+        val manga = manga ?: return null
+        val mangaUrl = source.mangaDetailsRequest(manga).url.toString()
+        return if (chapterUrl.isBlank()) {
+            mangaUrl
+        } else {
+            source.fullChapterUrl(mangaUrl, chapterUrl, chapter)
+        }
+    }
+
+    /** Helper method to handle guya-like sources */
+    private fun HttpSource.fullChapterUrl(mangaUrl: String, chapterUrl: String, chapter: Chapter): String {
+        val lowerUrl = baseUrl.lowercase()
+        return when {
+            lowerUrl.contains("guya") || lowerUrl.contains("danke") ||
+                lowerUrl.contains("hachirumi") || lowerUrl.contains("mahoushoujobu") ||
+                (lowerUrl.contains("cubari") && !mangaUrl.contains("imgur")) -> {
+                // cubari links would have double / without the trim end
+                mangaUrl.trimEnd('/') + "/" + chapter.chapter_number.fmt().replace(".", "-")
+            }
+            else -> baseUrl + chapterUrl
+        }
+    }
+
+    private fun Float.fmt(): String {
+        return if (this == toLong().toFloat()) {
+            String.format("%d", toLong())
+        } else {
+            String.format("%s", this)
+        }
     }
 
     fun getSource() = sourceManager.getOrStub(manga!!.source) as? HttpSource
