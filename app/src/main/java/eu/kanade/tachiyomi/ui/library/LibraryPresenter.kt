@@ -1223,7 +1223,7 @@ class LibraryPresenter(
         suspend fun updateRatiosAndColors() {
             val db: DatabaseHelper = Injekt.get()
             val mangaFetcher = MangaFetcher()
-            val libraryManga = db.getLibraryMangas().executeOnIO()
+            val libraryManga = db.getFavoriteMangas().executeOnIO()
             libraryManga.forEach { manga ->
                 mangaFetcher.setRatioAndColors(manga)
             }
