@@ -6,7 +6,7 @@
 # ![app icon](./.github/readme-images/app-icon.png)TachiyomiJ2K
 TachiyomiJ2K is a free and open source manga reader for Android 6.0 and above. Based on the original [Tachiyomi](https://github.com/tachiyomiorg/tachiyomi)
 
-![screenshots of app](./.github/readme-images/screens.png)
+![screenshots of app](./.github/readme-images/screens.gif)
 
 ## Features
 
@@ -21,10 +21,12 @@ Features of Tachiyomi include:
 * Create backups locally to read offline or to your desired cloud service 
 
 Plus some new features in this fork such as:
-* New Manga details screens
-* Combine 2 pages into a single one for a better tablet experince
+* New Manga details screens, themed by their manga covers
+* Combine 2 pages while reading into a single one for a better tablet experince
+* Option for an expanded toolbar for easier one handed use
 * Floating searchbar to easily start a search in youre library or while browsing
 * Library redesigned as a single list view: See categories listed in a vertical view, that can be collasped or expanded with a tap
+* Staggered Library grid
 * Drag & Drop Sorting in Library
 * Dynamic Categories: Group your library automatically by the tags, tracking status, source, and more
 * New Recents page: Providing quick access to newly added manga, new chapters, and to continue where you left on in a series
@@ -35,7 +37,7 @@ Plus some new features in this fork such as:
 * [Share sheets upgrade for Android 10](.github/readme-images/share%20menu.png)
 * View all chapters right in the reader
 * A lot more Material Design You additions
-* Android 12 (Beta) features
+* Android 12 features such as automatic extension and app updates
 
 ## Issues, Feature Requests and Contributing
 
