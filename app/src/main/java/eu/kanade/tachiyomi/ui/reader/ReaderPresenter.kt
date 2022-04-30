@@ -587,6 +587,9 @@ class ReaderPresenter(
     private fun HttpSource.fullChapterUrl(mangaUrl: String, chapterUrl: String, chapter: Chapter): String {
         val lowerUrl = baseUrl.lowercase()
         return when {
+            chapter.url.startsWith("http") -> {
+                chapter.url
+            }
             lowerUrl.contains("guya") || lowerUrl.contains("danke") ||
                 lowerUrl.contains("hachirumi") || lowerUrl.contains("mahoushoujobu") ||
                 (lowerUrl.contains("cubari") && !mangaUrl.contains("imgur")) -> {
