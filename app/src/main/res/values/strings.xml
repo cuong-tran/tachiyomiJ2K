@@ -524,10 +524,10 @@
     <string name="select_starting_chapter">Select starting chapter</string>
     <string name="select_ending_chapter">Select ending chapter</string>
     <string name="search_chapters">Search chapters</string>
-    <string name="next_unread_chapter">Next unread chapter</string>
-    <string name="next_2_unread">Next 2 unread</string>
-    <string name="next_3_unread">Next 3 unread</string>
-    <string name="next_5_unread">Next 5 unread</string>
+    <plurals name="next_unread_chapters">
+        <item quantity="one">Next unread chapter</item>
+        <item quantity="other">Next %d unread</item>
+    </plurals>
     <string name="custom_range">Custom range</string>
     <string name="all_chapters">All chapters</string>
     <string name="all_unread_chapters">All unread chapters</string>

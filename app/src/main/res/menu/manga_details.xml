@@ -17,10 +17,10 @@
         <menu>
             <item
                 android:id="@+id/download_next"
-                android:title="@string/next_unread_chapter" />
+                android:title="@string/unread" />
             <item
                 android:id="@+id/download_next_5"
-                android:title="@string/next_5_unread" />
+                android:title="@string/unread" />
             <item
                 android:id="@+id/download_custom"
                 android:title="@string/custom_range" />

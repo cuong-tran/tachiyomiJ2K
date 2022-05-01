@@ -987,6 +987,10 @@ class MangaDetailsController :
             R.string.migrate_,
             presenter.manga.seriesType(view!!.context)
         )
+        menu.findItem(R.id.download_next).title =
+            view?.resources?.getQuantityString(R.plurals.next_unread_chapters, 1, 1)
+        menu.findItem(R.id.download_next_5).title =
+            view?.resources?.getQuantityString(R.plurals.next_unread_chapters, 5, 5)
 
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
