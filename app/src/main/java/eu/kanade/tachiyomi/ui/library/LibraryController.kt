@@ -102,7 +102,6 @@ import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
-import eu.kanade.tachiyomi.util.view.moveRecyclerViewUp
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
@@ -549,8 +548,8 @@ class LibraryController(
             showCategories(false)
         }
         binding.categoryRecycler.onCategoryClicked = {
+            showCategories(show = false, closeSearch = true, category = it)
             scrollToHeader(it)
-            showCategories(show = false, closeSearch = true)
         }
         binding.categoryRecycler.setOnTouchListener { _, _ ->
             val searchView = activityBinding?.searchToolbar?.menu?.findItem(R.id.action_search)?.actionView
@@ -1168,11 +1167,24 @@ class LibraryController(
             .setDuration(duration)
     }
 
-    private fun showCategories(show: Boolean, closeSearch: Boolean = false) {
+    private fun showCategories(show: Boolean, closeSearch: Boolean = false, category: Int = -1) {
         binding.recyclerCover.isClickable = show
         binding.recyclerCover.isFocusable = show
-        if (show) {
-            moveRecyclerViewUp()
+        (activity as? MainActivity)?.apply {
+            if (show && !binding.appBar.compactSearchMode && binding.appBar.useLargeToolbar) {
+                binding.appBar.compactSearchMode = binding.appBar.useLargeToolbar && show
+                if (binding.appBar.compactSearchMode) {
+                    setFloatingToolbar(true)
+                    mainRecycler.requestApplyInsets()
+                    binding.appBar.y = 0f
+                    binding.appBar.updateAppBarAfterY(mainRecycler)
+                }
+            } else if (!show && binding.appBar.compactSearchMode && binding.appBar.useLargeToolbar &&
+                resources.configuration.screenHeightDp >= 600
+            ) {
+                binding.appBar.compactSearchMode = false
+                mainRecycler.requestApplyInsets()
+            }
         }
         if (closeSearch) {
             activityBinding?.searchToolbar?.searchItem?.collapseActionView()
@@ -1200,7 +1212,7 @@ class LibraryController(
             binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.hide()
         } else {
             val notAtTop = binding.libraryGridRecycler.recycler.canScrollVertically(-1)
-            elevateAppBar(notAtTop)
+            elevateAppBar((notAtTop || category > 0) && category != 0)
         }
     }
 
