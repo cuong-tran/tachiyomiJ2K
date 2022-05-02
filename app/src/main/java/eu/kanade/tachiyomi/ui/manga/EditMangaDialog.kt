@@ -13,14 +13,14 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.children
 import androidx.core.view.isVisible
-import coil.loadAny
+import coil.load
 import coil.request.Parameters
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
+import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.EditMangaDialogBinding
 import eu.kanade.tachiyomi.source.LocalSource
@@ -176,10 +176,10 @@ class EditMangaDialog : DialogController {
 
         binding.resetCover.isVisible = !isLocal
         binding.resetCover.setOnClickListener {
-            binding.mangaCover.loadAny(
+            binding.mangaCover.load(
                 manga,
                 builder = {
-                    parameters(Parameters.Builder().set(MangaFetcher.realCover, true).build())
+                    parameters(Parameters.Builder().set(MangaCoverFetcher.useCustomCover, false).build())
                 },
             )
             customCoverUri = null
@@ -288,7 +288,7 @@ class EditMangaDialog : DialogController {
 
     fun updateCover(uri: Uri) {
         willResetCover = false
-        binding.mangaCover.loadAny(uri)
+        binding.mangaCover.load(uri)
         customCoverUri = uri
     }
 

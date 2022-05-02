@@ -23,7 +23,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
-import coil.loadAny
+import coil.load
 import coil.request.CachePolicy
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
@@ -954,7 +954,7 @@ class PagerPageHolder(
      * Extension method to set a [stream] into this ImageView.
      */
     private fun ImageView.setImage(stream: InputStream) {
-        this.loadAny(stream.readBytes()) {
+        this.load(stream.readBytes()) {
             memoryCachePolicy(CachePolicy.DISABLED)
             diskCachePolicy(CachePolicy.DISABLED)
             target(GifViewTarget(this@setImage, progressBar, decodeErrorLayout))

@@ -10,7 +10,6 @@ import androidx.work.NetworkType
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import coil.request.Parameters
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -21,7 +20,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
-import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.MANGA_HAS_UNREAD
@@ -505,7 +503,7 @@ class LibraryUpdateService(
                                 val request =
                                     ImageRequest.Builder(this@LibraryUpdateService).data(manga)
                                         .memoryCachePolicy(CachePolicy.DISABLED)
-                                        .parameters(Parameters.Builder().set(MangaFetcher.onlyFetchRemotely, true).build())
+                                        .diskCachePolicy(CachePolicy.WRITE_ONLY)
                                         .build()
                                 Coil.imageLoader(this@LibraryUpdateService).execute(request)
                             }

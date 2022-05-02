@@ -9,7 +9,6 @@ import coil.imageLoader
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import coil.request.Parameters
 import coil.request.SuccessResult
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -22,7 +21,6 @@ import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
-import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
 import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
@@ -354,14 +352,11 @@ class MangaDetailsPresenter(
                     val request =
                         ImageRequest.Builder(preferences.context).data(manga)
                             .memoryCachePolicy(CachePolicy.DISABLED)
-                            .parameters(
-                                Parameters.Builder().set(MangaFetcher.onlyFetchRemotely, true)
-                                    .build(),
-                            )
+                            .diskCachePolicy(CachePolicy.WRITE_ONLY)
                             .build()
 
                     if (Coil.imageLoader(preferences.context).execute(request) is SuccessResult) {
-                        preferences.context.imageLoader.memoryCache.remove(MemoryCache.Key(manga.key()))
+                        preferences.context.imageLoader.memoryCache?.remove(MemoryCache.Key(manga.key()))
                         withContext(Dispatchers.Main) {
                             controller?.setPaletteColor()
                         }

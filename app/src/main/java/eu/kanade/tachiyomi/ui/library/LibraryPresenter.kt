@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
 import eu.kanade.tachiyomi.data.preference.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.minusAssign
@@ -1222,10 +1221,9 @@ class LibraryPresenter(
 
         suspend fun updateRatiosAndColors() {
             val db: DatabaseHelper = Injekt.get()
-            val mangaFetcher = MangaFetcher()
             val libraryManga = db.getFavoriteMangas().executeOnIO()
             libraryManga.forEach { manga ->
-                try { withUIContext { mangaFetcher.setRatioAndColors(manga) } } catch (_: Exception) { }
+                try { withUIContext { MangaCoverMetadata.setRatioAndColors(manga) } } catch (_: Exception) { }
             }
             MangaCoverMetadata.savePrefs()
         }

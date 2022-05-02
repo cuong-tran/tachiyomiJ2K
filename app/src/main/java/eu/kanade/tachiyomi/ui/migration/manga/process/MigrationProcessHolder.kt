@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
+import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.databinding.MigrationProcessItemBinding
 import eu.kanade.tachiyomi.source.Source
@@ -143,7 +144,9 @@ class MigrationProcessHolder(
         progress.isVisible = false
 
         val request = ImageRequest.Builder(view.context).data(manga)
-            .target(CoverViewTarget(coverThumbnail, progress)).build()
+            .target(CoverViewTarget(coverThumbnail, progress))
+            .setParameter(MangaCoverFetcher.useCustomCover, false)
+            .build()
         Coil.imageLoader(view.context).enqueue(request)
 
         compactTitle.isVisible = true

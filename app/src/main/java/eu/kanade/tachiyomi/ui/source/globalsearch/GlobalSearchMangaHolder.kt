@@ -4,11 +4,12 @@ import android.graphics.drawable.RippleDrawable
 import android.view.View
 import androidx.core.view.isVisible
 import coil.Coil
-import coil.clear
+import coil.dispose
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
+import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.databinding.SourceGlobalSearchControllerCardItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -50,12 +51,14 @@ class GlobalSearchMangaHolder(view: View, adapter: GlobalSearchCardAdapter) :
     }
 
     fun setImage(manga: Manga) {
-        binding.itemImage.clear()
+        binding.itemImage.dispose()
         if (!manga.thumbnail_url.isNullOrEmpty()) {
             val request = ImageRequest.Builder(itemView.context).data(manga)
                 .placeholder(android.R.color.transparent)
                 .memoryCachePolicy(CachePolicy.DISABLED)
-                .target(CoverViewTarget(binding.itemImage, binding.progress)).build()
+                .target(CoverViewTarget(binding.itemImage, binding.progress))
+                .setParameter(MangaCoverFetcher.useCustomCover, false)
+                .build()
             Coil.imageLoader(itemView.context).enqueue(request)
         }
     }
