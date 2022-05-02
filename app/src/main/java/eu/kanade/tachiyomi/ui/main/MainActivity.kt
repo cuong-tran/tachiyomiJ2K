@@ -27,6 +27,7 @@ import androidx.appcompat.view.menu.ActionMenuItemView
 import androidx.appcompat.view.menu.MenuItemImpl
 import androidx.appcompat.widget.ActionMenuView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.animation.doOnEnd
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.GestureDetectorCompat
@@ -105,7 +106,6 @@ import eu.kanade.tachiyomi.util.view.mainRecyclerView
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeInTransaction
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -540,7 +540,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val endValue = if (showSearchBar) 1f else 0f
             val tA = ValueAnimator.ofFloat(binding.cardFrame.alpha, endValue)
             tA.addUpdateListener { binding.cardFrame.alpha = it.animatedValue as Float }
-            tA.addListener(EndAnimatorListener { binding.cardFrame.isVisible = showSearchBar })
+            tA.doOnEnd { binding.cardFrame.isVisible = showSearchBar }
             tA.duration = (abs(binding.cardFrame.alpha - endValue) * 150).roundToLong()
             searchBarAnimation = tA
             tA.start()
@@ -1118,14 +1118,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             alphaAnimation.addUpdateListener { valueAnimator ->
                 nav.alpha = valueAnimator.animatedValue as Float
             }
-            alphaAnimation.addListener(
-                EndAnimatorListener {
-                    nav.isVisible = !hideBottomNav
-                    binding.bottomView?.visibility =
-                        if (hideBottomNav) View.GONE else binding.bottomView?.visibility
-                            ?: View.GONE
-                },
-            )
+            alphaAnimation.doOnEnd {
+                nav.isVisible = !hideBottomNav
+                binding.bottomView?.visibility =
+                    if (hideBottomNav) View.GONE else binding.bottomView?.visibility
+                        ?: View.GONE
+            }
             alphaAnimation.duration = 200
             alphaAnimation.startDelay = 50
             animationSet?.playTogether(alphaAnimation)
@@ -1168,15 +1166,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             tA.addUpdateListener { valueAnimator ->
                 binding.tabsFrameLayout.alpha = valueAnimator.animatedValue as Float
             }
-            tA.addListener(
-                EndAnimatorListener {
-                    binding.tabsFrameLayout.isVisible = show
-                    if (!show) {
-                        binding.mainTabs.clearOnTabSelectedListeners()
-                        binding.mainTabs.removeAllTabs()
-                    }
-                },
-            )
+            tA.doOnEnd {
+                binding.tabsFrameLayout.isVisible = show
+                if (!show) {
+                    binding.mainTabs.clearOnTabSelectedListeners()
+                    binding.mainTabs.removeAllTabs()
+                }
+            }
             tA.duration = 100
             tabAnimation = tA
             tA.start()

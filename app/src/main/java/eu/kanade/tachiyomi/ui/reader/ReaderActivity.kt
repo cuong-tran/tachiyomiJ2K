@@ -26,7 +26,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
-import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
@@ -110,7 +109,8 @@ import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.popupMenu
 import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.widget.SimpleAnimationListener
+import eu.kanade.tachiyomi.widget.doOnEnd
+import eu.kanade.tachiyomi.widget.doOnStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -961,13 +961,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             if (animate && oldVisibility != menuVisible) {
                 if (!menuStickyVisible) {
                     val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
-                    toolbarAnimation.setAnimationListener(
-                        object : SimpleAnimationListener() {
-                            override fun onAnimationStart(animation: Animation) {
-                                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-                            }
-                        },
-                    )
+                    toolbarAnimation.doOnStart {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                    }
                     binding.appBar.startAnimation(toolbarAnimation)
                 }
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.collapse()
@@ -980,13 +976,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
             if (animate && binding.readerMenu.isVisible) {
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top)
-                toolbarAnimation.setAnimationListener(
-                    object : SimpleAnimationListener() {
-                        override fun onAnimationEnd(animation: Animation) {
-                            binding.readerMenu.isVisible = false
-                        }
-                    },
-                )
+                toolbarAnimation.doOnEnd { binding.readerMenu.isVisible = false }
                 binding.appBar.startAnimation(toolbarAnimation)
                 BottomSheetBehavior.from(binding.chaptersSheet.chaptersBottomSheet).isHideable = true
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
@@ -1517,13 +1507,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 }
                 binding.readerMenu.isVisible = true
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
-                toolbarAnimation.setAnimationListener(
-                    object : SimpleAnimationListener() {
-                        override fun onAnimationStart(animation: Animation) {
-                            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-                        }
-                    },
-                )
+                toolbarAnimation.doOnStart {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                }
                 binding.appBar.startAnimation(toolbarAnimation)
             }
         } else if (!visible && (menuStickyVisible || menuVisible)) {

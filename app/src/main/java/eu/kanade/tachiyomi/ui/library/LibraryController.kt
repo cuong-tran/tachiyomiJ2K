@@ -25,6 +25,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.animation.doOnEnd
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsAnimationCompat
@@ -109,7 +110,6 @@ import eu.kanade.tachiyomi.util.view.smoothScrollToTop
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EmptyView
-import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
@@ -387,12 +387,10 @@ class LibraryController(
                 hopperOffset = valueAnimator.animatedValue as Float
                 updateHopperY()
             }
-            alphaAnimation.addListener(
-                EndAnimatorListener {
-                    hopperOffset = end
-                    updateHopperY()
-                },
-            )
+            alphaAnimation.doOnEnd {
+                hopperOffset = end
+                updateHopperY()
+            }
             alphaAnimation.duration = shortAnimationDuration.toLong()
             alphaAnimation.start()
         }
@@ -1152,13 +1150,11 @@ class LibraryController(
         )
         animatorSet.playSequentially(animations)
         animatorSet.startDelay = 1250
-        animatorSet.addListener(
-            EndAnimatorListener {
-                binding.categoryHopperFrame.translationX = 0f
-                isAnimatingHopper = false
-                this.animatorSet = null
-            },
-        )
+        animatorSet.doOnEnd {
+            binding.categoryHopperFrame.translationX = 0f
+            isAnimatingHopper = false
+            this.animatorSet = null
+        }
         animatorSet.start()
     }
 
