@@ -1473,10 +1473,9 @@ class LibraryController(
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onUpdateManga(manga: Manga?) {
         if (manga?.source == LibraryUpdateService.STARTING_UPDATE_SOURCE) return
-        if (manga == null) adapter.notifyDataSetChanged()
+        if (manga == null) adapter.getHeaderPositions().forEach { adapter.notifyItemChanged(it) }
         else presenter.updateManga()
     }
 
