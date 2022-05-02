@@ -918,7 +918,7 @@ class LibraryController(
             (manager as? GridLayoutManager)?.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
                     if (libraryLayout == LibraryItem.LAYOUT_LIST) return managerSpanCount
-                    val item = this@LibraryController.adapter.getItem(position)
+                    val item = this@LibraryController.mAdapter?.getItem(position)
                     return if (item is LibraryHeaderItem || item is SearchGlobalItem || (item is LibraryItem && item.manga.isBlank())) {
                         managerSpanCount
                     } else {
