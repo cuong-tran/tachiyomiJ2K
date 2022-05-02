@@ -128,7 +128,7 @@ dependencies {
 
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("com.google.firebase:firebase-core:19.0.1")
+    implementation("com.google.firebase:firebase-core:20.1.2")
 
     val lifecycleVersion = "2.4.0-rc01"
     kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
@@ -172,13 +172,14 @@ dependencies {
     // Disk
     implementation("com.jakewharton:disklrucache:2.0.2")
     implementation("com.github.tachiyomiorg:unifile:17bec43")
-    implementation("com.github.junrar:junrar:7.4.0")
+    implementation("com.github.junrar:junrar:7.5.0")
 
     // HTML parser
     implementation("org.jsoup:jsoup:1.14.3")
 
     // Job scheduling
     implementation("androidx.work:work-runtime-ktx:2.6.0")
+    implementation("com.google.guava:guava:31.1-android")
 
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
@@ -238,15 +239,6 @@ dependencies {
     implementation("dev.rikka.shizuku:api:$shizukuVersion")
     implementation("dev.rikka.shizuku:provider:$shizukuVersion")
 
-    // Tests
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.assertj:assertj-core:3.16.1")
-    testImplementation("org.mockito:mockito-core:1.10.19")
-
-    testImplementation("org.robolectric:robolectric:${Versions.ROBO_ELECTRIC}")
-    testImplementation("org.robolectric:shadows-multidex:${Versions.ROBO_ELECTRIC}")
-    testImplementation("org.robolectric:shadows-play-services:${Versions.ROBO_ELECTRIC}")
-
     implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
 
     val coroutines = "1.5.1"
@@ -254,10 +246,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines")
 
     // Crash reports
-    implementation("ch.acra:acra-http:5.8.1")
+    implementation("ch.acra:acra-http:5.9.3")
 
     // Text distance
-    implementation("info.debatty:java-string-similarity:1.2.1")
+    implementation("info.debatty:java-string-similarity:2.0.0")
 
     implementation("com.google.android.gms:play-services-oss-licenses:${Versions.OSS_LICENSE}")
 

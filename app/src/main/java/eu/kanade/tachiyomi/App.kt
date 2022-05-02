@@ -136,7 +136,7 @@ open class App : Application(), DefaultLifecycleObserver {
         initAcra {
             reportFormat = StringFormat.JSON
             buildConfigClass = BuildConfig::class.java
-            excludeMatchingSharedPreferencesKeys = arrayOf(".*username.*", ".*password.*", ".*token.*")
+            excludeMatchingSharedPreferencesKeys = listOf(".*username.*", ".*password.*", ".*token.*")
             httpSender {
                 uri = "https://collector.tracepot.com/e90773ff"
                 httpMethod = org.acra.sender.HttpSender.Method.PUT
