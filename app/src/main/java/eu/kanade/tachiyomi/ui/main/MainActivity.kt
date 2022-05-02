@@ -469,9 +469,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     }
                 }
             }
-            lifecycleScope.launchIO {
-                LibraryPresenter.updateRatiosAndColors()
-            }
         }
         getExtensionUpdates(true)
 
