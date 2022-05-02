@@ -478,9 +478,10 @@ fun Controller.scrollViewWith(
                                 preferences.hideBottomNavOnScroll().get()
                             ) closerToBottom else closerToTop
                         lastY = activityBinding!!.appBar.snapAppBarY(recycler) {
+                            val activityBinding = activityBinding ?: return@snapAppBarY
                             swipeCircle?.translationY = max(
-                                activityBinding!!.appBar.y,
-                                -activityBinding!!.appBar.height + activityBinding!!.appBar.paddingTop.toFloat()
+                                activityBinding.appBar.y,
+                                -activityBinding.appBar.height + activityBinding.appBar.paddingTop.toFloat()
                             )
                         }
                         if (activityBinding!!.bottomNav?.isVisible == true &&

@@ -556,17 +556,20 @@ class MangaDetailsController :
     //region Lifecycle methods
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        presenter.isLockedFromSearch = shouldLockIfNeeded && SecureActivityDelegate.shouldBeLocked()
-        presenter.headerItem.isLocked = presenter.isLockedFromSearch
-        manga!!.thumbnail_url = presenter.refreshMangaFromDb().thumbnail_url
-        presenter.fetchChapters(refreshTracker == null)
-        if (refreshTracker != null) {
-            trackingBottomSheet?.refreshItem(refreshTracker ?: 0)
-            presenter.refreshTracking()
-            refreshTracker = null
+        if (presenter.isScopeInitialized) {
+            presenter.isLockedFromSearch =
+                shouldLockIfNeeded && SecureActivityDelegate.shouldBeLocked()
+            presenter.headerItem.isLocked = presenter.isLockedFromSearch
+            manga!!.thumbnail_url = presenter.refreshMangaFromDb().thumbnail_url
+            presenter.fetchChapters(refreshTracker == null)
+            if (refreshTracker != null) {
+                trackingBottomSheet?.refreshItem(refreshTracker ?: 0)
+                presenter.refreshTracking()
+                refreshTracker = null
+            }
+            // fetch cover again in case the user set a new cover while reading
+            setPaletteColor()
         }
-        // fetch cover again in case the user set a new cover while reading
-        setPaletteColor()
         val isCurrentController = router?.backstack?.lastOrNull()?.controller ==
             this
         if (isCurrentController) {
