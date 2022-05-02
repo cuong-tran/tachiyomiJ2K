@@ -560,7 +560,7 @@ class LibraryUpdateService(
             if (errors.isNotEmpty()) {
                 val file = createFileInCacheDir("tachiyomi_update_$fileName.txt")
                 file.bufferedWriter().use { out ->
-                    additionalInfo?.let { out.write("$it\n") }
+                    additionalInfo?.let { out.write("$it\n\n") }
                     // Error file format:
                     // ! Error
                     //   # Source
