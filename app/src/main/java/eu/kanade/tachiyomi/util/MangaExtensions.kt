@@ -68,7 +68,7 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
 fun Manga.moveCategories(
     db: DatabaseHelper,
     activity: Activity,
-    onMangaMoved: () -> Unit
+    onMangaMoved: () -> Unit,
 ) {
     val categories = db.getCategories().executeAsBlocking()
     val categoriesForManga = db.getCategoriesForManga(this).executeAsBlocking()
@@ -78,7 +78,7 @@ fun Manga.moveCategories(
         this,
         categories.toMutableList(),
         ids,
-        false
+        false,
     ) {
         onMangaMoved()
     }.show()
@@ -87,7 +87,7 @@ fun Manga.moveCategories(
 fun List<Manga>.moveCategories(
     db: DatabaseHelper,
     activity: Activity,
-    onMangaMoved: () -> Unit
+    onMangaMoved: () -> Unit,
 ) {
     if (this.isEmpty()) return
     val categories = db.getCategories().executeAsBlocking()
@@ -108,7 +108,7 @@ fun List<Manga>.moveCategories(
                 else -> TriStateCheckBox.State.UNCHECKED
             }
         }.toTypedArray(),
-        false
+        false,
     ) {
         onMangaMoved()
     }.show()
@@ -148,12 +148,12 @@ fun Manga.addOrRemoveToFavorites(
                             false,
                             onMangaAdded,
                             onMangaMoved,
-                            onMangaDeleted
+                            onMangaDeleted,
                         )
                     },
                     migrateManga = { source, faved ->
                         onMangaAdded(source to faved)
-                    }
+                    },
                 )
                 return null
             }
@@ -203,7 +203,7 @@ fun Manga.addOrRemoveToFavorites(
                     this,
                     categories.toMutableList(),
                     ids,
-                    true
+                    true,
                 ) {
                     onMangaAdded(null)
                     autoAddTrack(db, onMangaMoved)
@@ -231,7 +231,7 @@ fun Manga.addOrRemoveToFavorites(
                             onMangaDeleted()
                         }
                     }
-                }
+                },
             )
         }
     }
@@ -265,7 +265,7 @@ private fun showAddDuplicateDialog(
             sourceManager.getOrStub(newManga.source),
             libraryManga,
             newManga,
-            replace
+            replace,
         )
         migrateManga(libraryManga.source, !replace)
     }
@@ -277,12 +277,12 @@ private fun showAddDuplicateDialog(
                 activity.getString(R.string.show_, libraryManga.seriesType(activity, sourceManager)).asButton(activity),
                 activity.getString(R.string.add_to_library).asButton(activity),
                 activity.getString(R.string.migrate).asButton(activity, !newManga.initialized),
-            )
+            ),
         ) { dialog, i ->
             when (i) {
                 0 -> controller.router.pushController(
                     MangaDetailsController(libraryManga)
-                        .withFadeTransaction()
+                        .withFadeTransaction(),
                 )
                 1 -> addManga()
                 2 -> {
@@ -298,7 +298,7 @@ private fun showAddDuplicateDialog(
                                 activity.getString(R.string.categories),
                                 activity.getString(R.string.tracking),
                             ),
-                            booleanArrayOf(true, true, true), null
+                            booleanArrayOf(true, true, true), null,
                         )
                         setPositiveButton(R.string.migrate) { mDialog, _ ->
                             migrateManga(mDialog, true)
@@ -325,7 +325,7 @@ private fun showAddDuplicateDialog(
                     if (!newManga.initialized) {
                         activity.toast(
                             R.string.must_view_details_before_migration,
-                            Toast.LENGTH_LONG
+                            Toast.LENGTH_LONG,
                         )
                     }
                 }

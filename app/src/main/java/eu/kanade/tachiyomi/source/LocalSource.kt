@@ -99,7 +99,7 @@ class LocalSource(private val context: Context) : CatalogueSource, UnmeteredSour
     override fun fetchSearchManga(
         page: Int,
         query: String,
-        filters: FilterList
+        filters: FilterList,
     ): Observable<MangasPage> {
         val baseDirs = getBaseDirectories(context)
 

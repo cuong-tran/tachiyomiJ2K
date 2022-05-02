@@ -41,7 +41,7 @@ import uy.kohesive.injekt.injectLazy
 open class GlobalSearchController(
     protected val initialQuery: String? = null,
     val extensionFilter: String? = null,
-    bundle: Bundle? = null
+    bundle: Bundle? = null,
 ) : NucleusController<SourceGlobalSearchControllerBinding, GlobalSearchPresenter>(bundle),
     FloatingSearchInterface,
     SmallToolbarInterface,
@@ -106,7 +106,7 @@ open class GlobalSearchController(
         // Open MangaController.
         router.pushController(
             MangaDetailsController(manga, true, shouldLockIfNeeded = activity is SearchActivity)
-                .withFadeTransaction()
+                .withFadeTransaction(),
         )
     }
 
@@ -145,7 +145,7 @@ open class GlobalSearchController(
                 snack = view.snack(R.string.added_to_library)
             },
             onMangaMoved = { adapter.notifyItemChanged(position) },
-            onMangaDeleted = { presenter.confirmDeletion(manga) }
+            onMangaDeleted = { presenter.confirmDeletion(manga) },
         )
         if (snack?.duration == Snackbar.LENGTH_INDEFINITE) {
             (activity as? MainActivity)?.setUndoSnackBar(snack)
@@ -214,7 +214,7 @@ open class GlobalSearchController(
 
         binding.recycler.updatePaddingRelative(
             top = (toolbarHeight ?: 0) +
-                (activityBinding?.root?.rootWindowInsetsCompat?.getInsets(systemBars())?.top ?: 0)
+                (activityBinding?.root?.rootWindowInsetsCompat?.getInsets(systemBars())?.top ?: 0),
         )
 
         // Create recycler and set adapter.
@@ -273,7 +273,7 @@ open class GlobalSearchController(
                 val manga = results.first().manga
                 router.replaceTopController(
                     MangaDetailsController(manga, true, shouldLockIfNeeded = true)
-                        .withFadeTransaction()
+                        .withFadeTransaction(),
                 )
                 return
             } else if (results != null) {

@@ -14,7 +14,7 @@ object EstimatedItemHeight {
         childTypeMap: HashMap<Int, Int>,
         childTypeHeightMap: HashMap<Int, HashMap<Int, Int>>,
         childTypeEstimateMap: HashMap<Int, Int>,
-        childAvgHeightMap: HashMap<Int, Int>
+        childAvgHeightMap: HashMap<Int, Int>,
     ): Int {
         return if (childSizesMap[pos] != null) {
             childSizesMap[pos] ?: 0

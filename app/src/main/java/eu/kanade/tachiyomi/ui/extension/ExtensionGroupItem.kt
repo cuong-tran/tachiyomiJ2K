@@ -36,7 +36,7 @@ data class ExtensionGroupItem(val name: String, val size: Int, var canUpdate: Bo
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: ExtensionGroupHolder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
         holder.bind(this)
     }

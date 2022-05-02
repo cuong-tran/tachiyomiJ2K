@@ -33,7 +33,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         downloads: Int,
         showTotalChapters: Boolean,
         lang: String?,
-        changeShape: Boolean
+        changeShape: Boolean,
     ) {
         // Update the unread count and its visibility.
 
@@ -53,7 +53,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                     unread == -1 && !showTotalChapters -> unreadBadgeBackground
                     showTotalChapters -> context.contextCompatColor(R.color.total_badge_text)
                     else -> context.getResourceColor(R.attr.colorOnSecondary)
-                }
+                },
             )
             setBackgroundColor(unreadBadgeBackground)
         }
@@ -80,13 +80,13 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                 val flagId = resources.getIdentifier(
                     "ic_flag_${lang.replace("-", "_")}",
                     "drawable",
-                    context.packageName
+                    context.packageName,
                 ).takeIf { it != 0 } ?: (
                     if (lang.contains("-")) {
                         resources.getIdentifier(
                             "ic_flag_${lang.split("-").first()}",
                             "drawable",
-                            context.packageName
+                            context.packageName,
                         ).takeIf { it != 0 }
                     } else null
                     )
@@ -123,7 +123,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                             makeShapeCorners(topStart = startRadius, bottomEnd = endRadius)
                     } else {
                         view.background = MaterialShapeDrawable(
-                            makeShapeCorners(topStart = startRadius, bottomEnd = endRadius)
+                            makeShapeCorners(topStart = startRadius, bottomEnd = endRadius),
                         ).apply {
                             this.fillColor = ColorStateList.valueOf(bgColor)
                         }
@@ -154,7 +154,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                 2.dpToPx
             } else {
                 5.dpToPx
-            }
+            },
         )
     }
 

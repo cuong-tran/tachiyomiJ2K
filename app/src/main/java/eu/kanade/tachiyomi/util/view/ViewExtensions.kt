@@ -101,7 +101,7 @@ fun View.getCoordinates() = Point((left + right) / 2, (top + bottom) / 2)
 fun View.snack(
     message: String,
     length: Int = Snackbar.LENGTH_SHORT,
-    f: (Snackbar.() -> Unit)? = null
+    f: (Snackbar.() -> Unit)? = null,
 ): Snackbar {
     val snack = Snackbar.make(this, message, length)
     if (f != null) {
@@ -123,7 +123,7 @@ fun View.snack(
 fun View.snack(
     resource: Int,
     length: Int = Snackbar.LENGTH_SHORT,
-    f: (Snackbar.() -> Unit)? = null
+    f: (Snackbar.() -> Unit)? = null,
 ): Snackbar {
     return snack(context.getString(resource), length, f)
 }
@@ -137,7 +137,7 @@ object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
         v.updatePaddingRelative(
             bottom = WindowInsetsCompat.toWindowInsetsCompat(insets)
-                .getInsets(systemBars()).bottom
+                .getInsets(systemBars()).bottom,
         )
         return insets
     }
@@ -146,7 +146,7 @@ object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
 fun View.applyBottomAnimatedInsets(
     bottomMargin: Int = 0,
     setPadding: Boolean = false,
-    onApplyInsets: ((View, WindowInsetsCompat) -> Unit)? = null
+    onApplyInsets: ((View, WindowInsetsCompat) -> Unit)? = null,
 ) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
     val setInsets: ((WindowInsetsCompat) -> Unit) = { insets ->
@@ -178,7 +178,7 @@ fun View.applyBottomAnimatedInsets(
 
             override fun onStart(
                 animation: WindowInsetsAnimationCompat,
-                bounds: WindowInsetsAnimationCompat.BoundsCompat
+                bounds: WindowInsetsAnimationCompat.BoundsCompat,
             ): WindowInsetsAnimationCompat.BoundsCompat {
                 handleInsets = false
                 rootWindowInsetsCompat?.let { insets -> setInsets(insets) }
@@ -186,7 +186,7 @@ fun View.applyBottomAnimatedInsets(
             }
             override fun onProgress(
                 insets: WindowInsetsCompat,
-                runningAnimations: List<WindowInsetsAnimationCompat>
+                runningAnimations: List<WindowInsetsAnimationCompat>,
             ): WindowInsetsCompat {
                 setInsets(insets)
                 return insets
@@ -196,7 +196,7 @@ fun View.applyBottomAnimatedInsets(
                 handleInsets = true
                 rootWindowInsetsCompat?.let { insets -> setInsets(insets) }
             }
-        }
+        },
     )
 }
 
@@ -243,7 +243,7 @@ fun View.checkHeightThen(f: () -> Unit) {
                     f()
                 }
             }
-        }
+        },
     )
 }
 
@@ -258,7 +258,7 @@ fun View.requestApplyInsetsWhenAttached() {
                 }
 
                 override fun onViewDetachedFromWindow(v: View) = Unit
-            }
+            },
         )
     }
 }
@@ -269,7 +269,7 @@ private fun createStateForView(view: View) = ViewPaddingState(
     view.paddingRight,
     view.paddingBottom,
     view.paddingStart,
-    view.paddingEnd
+    view.paddingEnd,
 )
 
 data class ViewPaddingState(
@@ -278,7 +278,7 @@ data class ViewPaddingState(
     val right: Int,
     val bottom: Int,
     val start: Int,
-    val end: Int
+    val end: Int,
 )
 
 fun setBottomEdge(view: View, activity: Activity) {
@@ -299,7 +299,7 @@ fun SwipeRefreshLayout.setStyle() {
 
 fun MaterialButton.resetStrokeColor() {
     strokeColor = ColorStateList.valueOf(
-        ColorUtils.setAlphaComponent(context.getResourceColor(R.attr.colorOnSurface), 31)
+        ColorUtils.setAlphaComponent(context.getResourceColor(R.attr.colorOnSurface), 31),
     )
 }
 
@@ -361,7 +361,7 @@ var View.compatToolTipText: CharSequence?
 inline fun View.popupMenu(
     items: List<Pair<Int, Int>>,
     selectedItemId: Int? = null,
-    noinline onMenuItemClick: MenuItem.() -> Unit
+    noinline onMenuItemClick: MenuItem.() -> Unit,
 ): PopupMenu {
     val popup = PopupMenu(context, this, Gravity.NO_GRAVITY)
     items.forEach { (id, stringRes) ->
@@ -372,7 +372,7 @@ inline fun View.popupMenu(
         val blendedAccent = ColorUtils.blendARGB(
             context.getResourceColor(R.attr.colorSecondary),
             context.getResourceColor(R.attr.colorOnBackground),
-            0.5f
+            0.5f,
         )
         (popup.menu as? MenuBuilder)?.setOptionalIconsVisible(true)
         val emptyIcon = ContextCompat.getDrawable(context, R.drawable.ic_blank_24dp)
@@ -400,7 +400,7 @@ inline fun View.popupMenu(
 
 fun MaterialCardView.makeShapeCorners(
     @Dimension topStart: Float = 0f,
-    @Dimension bottomEnd: Float = 0f
+    @Dimension bottomEnd: Float = 0f,
 ): ShapeAppearanceModel {
     return shapeAppearanceModel.toBuilder()
         .apply {
@@ -422,7 +422,7 @@ fun MaterialCardView.makeShapeCorners(
 fun setCards(
     showOutline: Boolean,
     mainCard: MaterialCardView,
-    badgeView: MaterialCardView?
+    badgeView: MaterialCardView?,
 ) {
     badgeView?.strokeWidth = if (showOutline) 0.75f.dpToPx.toInt() else 0
     badgeView?.cardElevation = if (showOutline) 0f else 3f.dpToPx
@@ -454,7 +454,7 @@ fun Dialog.blurBehindWindow(
     blurAmount: Float = 20f,
     onShow: DialogInterface.OnShowListener? = null,
     onDismiss: DialogInterface.OnDismissListener? = null,
-    onCancel: DialogInterface.OnCancelListener? = null
+    onCancel: DialogInterface.OnCancelListener? = null,
 ) {
     var supportsBlur = false
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && window?.windowManager?.isCrossWindowBlurEnabled == true) {
@@ -472,7 +472,7 @@ fun Dialog.blurBehindWindow(
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
             if (canBlur) {
                 window?.decorView?.setRenderEffect(
-                    RenderEffect.createBlurEffect(20f, 20f, Shader.TileMode.CLAMP)
+                    RenderEffect.createBlurEffect(20f, 20f, Shader.TileMode.CLAMP),
                 )
             } else {
                 window?.decorView?.setRenderEffect(null)
@@ -532,7 +532,7 @@ fun View.animateBlur(
     @FloatRange(from = 0.1) from: Float,
     @FloatRange(from = 0.1) to: Float,
     duration: Long,
-    removeBlurAtEnd: Boolean = false
+    removeBlurAtEnd: Boolean = false,
 ): ValueAnimator? {
     if (context.powerManager.isPowerSaveMode) {
         if (to <= 0.1f) {
@@ -547,7 +547,7 @@ fun View.animateBlur(
             val amount = animator.animatedValue as Float
             try {
                 setRenderEffect(
-                    RenderEffect.createBlurEffect(amount, amount, Shader.TileMode.CLAMP)
+                    RenderEffect.createBlurEffect(amount, amount, Shader.TileMode.CLAMP),
                 )
             } catch (_: Exception) {}
         }
@@ -555,7 +555,7 @@ fun View.animateBlur(
             addListener(
                 onEnd = {
                     setRenderEffect(null)
-                }
+                },
             )
         }
     }

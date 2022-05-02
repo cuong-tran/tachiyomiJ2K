@@ -180,7 +180,7 @@ val Context.animatorDurationScale: Float
  */
 fun Context.notificationBuilder(
     channelId: String,
-    block: (NotificationCompat.Builder.() -> Unit)? = null
+    block: (NotificationCompat.Builder.() -> Unit)? = null,
 ): NotificationCompat.Builder {
     val builder = NotificationCompat.Builder(this, channelId)
         .setColor(ContextCompat.getColor(this, R.color.secondaryTachiyomi))
@@ -286,7 +286,7 @@ val Context.powerManager: PowerManager
  */
 fun Context.sendLocalBroadcast(intent: Intent) {
     androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(
-        intent
+        intent,
     )
 }
 
@@ -297,7 +297,7 @@ fun Context.sendLocalBroadcast(intent: Intent) {
  */
 fun Context.sendLocalBroadcastSync(intent: Intent) {
     androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcastSync(
-        intent
+        intent,
     )
 }
 
@@ -309,7 +309,7 @@ fun Context.sendLocalBroadcastSync(intent: Intent) {
 fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFilter) {
     androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).registerReceiver(
         receiver,
-        filter
+        filter,
     )
 }
 
@@ -320,7 +320,7 @@ fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFil
  */
 fun Context.unregisterLocalReceiver(receiver: BroadcastReceiver) {
     androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(
-        receiver
+        receiver,
     )
 }
 
@@ -363,7 +363,7 @@ fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
             .setDefaultColorSchemeParams(
                 CustomTabColorSchemeParams.Builder()
                     .setToolbarColor(toolbarColor ?: getResourceColor(R.attr.colorPrimaryVariant))
-                    .build()
+                    .build(),
             )
             .build()
         intent.launchUrl(this, uri)
@@ -382,7 +382,7 @@ fun Context.openInBrowser(url: String, forceBrowser: Boolean): Boolean {
             .setDefaultColorSchemeParams(
                 CustomTabColorSchemeParams.Builder()
                     .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
-                    .build()
+                    .build(),
             )
             .build()
         if (forceBrowser) {

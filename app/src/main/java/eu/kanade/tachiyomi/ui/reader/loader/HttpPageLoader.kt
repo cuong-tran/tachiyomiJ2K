@@ -33,7 +33,7 @@ import kotlin.math.min
 class HttpPageLoader(
     private val chapter: ReaderChapter,
     private val source: HttpSource,
-    private val chapterCache: ChapterCache = Injekt.get()
+    private val chapterCache: ChapterCache = Injekt.get(),
 ) : PageLoader() {
 
     /**
@@ -66,7 +66,7 @@ class HttpPageLoader(
                     if (error !is InterruptedException) {
                         Timber.e(error)
                     }
-                }
+                },
             )
     }
 
@@ -182,7 +182,7 @@ class HttpPageLoader(
      */
     private class PriorityPage(
         val page: ReaderPage,
-        val priority: Int
+        val priority: Int,
     ) : Comparable<PriorityPage> {
 
         companion object {

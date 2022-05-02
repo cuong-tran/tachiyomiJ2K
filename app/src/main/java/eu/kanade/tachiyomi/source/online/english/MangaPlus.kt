@@ -37,7 +37,7 @@ class MangaPlus : DelegatedHttpSource() {
         val request = GET(
             chapterUrlTemplate.replace("##", uri.pathSegments[1]),
             delegate!!.headers,
-            CacheControl.FORCE_NETWORK
+            CacheControl.FORCE_NETWORK,
         )
         return withContext(Dispatchers.IO) {
             val response = network.client.newCall(request).await()
@@ -58,7 +58,7 @@ class MangaPlus : DelegatedHttpSource() {
             val chapters = deferredChapters.await()
             val context = Injekt.get<PreferencesHelper>().context
             val trueChapter = chapters?.find { it.url == url }?.toChapter() ?: error(
-                context.getString(R.string.chapter_not_found)
+                context.getString(R.string.chapter_not_found),
             )
             if (manga != null) {
                 Triple(
@@ -66,7 +66,7 @@ class MangaPlus : DelegatedHttpSource() {
                     manga.apply {
                         this.title = trimmedTitle
                     },
-                    chapters.orEmpty()
+                    chapters.orEmpty(),
                 )
             } else null
         }

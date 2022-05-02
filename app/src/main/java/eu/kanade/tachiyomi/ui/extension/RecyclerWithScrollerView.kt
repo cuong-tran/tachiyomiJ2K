@@ -29,7 +29,8 @@ class RecyclerWithScrollerView @JvmOverloads constructor(context: Context, attrs
                     sheet.sheetBehavior?.isDraggable = !recyclerView.canScrollVertically(-1)
                 }
             }
-        })
+        },
+        )
 
         this.binding = binding
     }

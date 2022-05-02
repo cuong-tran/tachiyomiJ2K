@@ -34,7 +34,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.TABLE
 class MangaTypeMapping : SQLiteTypeMapping<Manga>(
     MangaPutResolver(),
     MangaGetResolver(),
-    MangaDeleteResolver()
+    MangaDeleteResolver(),
 )
 
 class MangaPutResolver : DefaultPutResolver<Manga>() {

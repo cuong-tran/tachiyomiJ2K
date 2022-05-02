@@ -127,7 +127,7 @@ class DownloadService : Service() {
 
         override fun onCapabilitiesChanged(
             network: Network,
-            networkCapabilities: NetworkCapabilities
+            networkCapabilities: NetworkCapabilities,
         ) {
             onNetworkStateChanged()
         }

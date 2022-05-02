@@ -38,7 +38,7 @@ data class SourceItem(val source: Source, val header: SelectionHeader? = null) :
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: SourceHolder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
         holder.bind(this)
     }

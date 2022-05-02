@@ -44,7 +44,7 @@ open class GlobalSearchPresenter(
     val sourceManager: SourceManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
-    private val coverCache: CoverCache = Injekt.get()
+    private val coverCache: CoverCache = Injekt.get(),
 ) : BasePresenter<GlobalSearchController>() {
 
     /**
@@ -81,7 +81,7 @@ open class GlobalSearchPresenter(
 
         // Perform a search with previous or initial state
         search(
-            savedState?.getString(BrowseSourcePresenter::query.name) ?: initialQuery.orEmpty()
+            savedState?.getString(BrowseSourcePresenter::query.name) ?: initialQuery.orEmpty(),
         )
     }
 
@@ -146,7 +146,7 @@ open class GlobalSearchPresenter(
      */
     protected open fun createCatalogueSearchItem(
         source: CatalogueSource,
-        results: List<GlobalSearchMangaItem>?
+        results: List<GlobalSearchMangaItem>?,
     ): GlobalSearchItem {
         return GlobalSearchItem(source, results)
     }
@@ -187,7 +187,7 @@ open class GlobalSearchPresenter(
                     .subscribeOn(Schedulers.io()).onErrorReturn {
                         MangasPage(
                             emptyList(),
-                            false
+                            false,
                         )
                     } // Ignore timeouts or other exceptions
                     .map { it.mangas.take(10) } // Get at most 10 manga from search result.
@@ -195,7 +195,7 @@ open class GlobalSearchPresenter(
                         it.map {
                             networkToLocalManga(
                                 it,
-                                source.id
+                                source.id,
                             )
                         }
                     } // Convert to local manga.
@@ -206,11 +206,11 @@ open class GlobalSearchPresenter(
                         }
                         createCatalogueSearchItem(
                             source,
-                            it.map { GlobalSearchMangaItem(it) }
+                            it.map { GlobalSearchMangaItem(it) },
                         )
                     }
             },
-            5
+            5,
         )
             .observeOn(AndroidSchedulers.mainThread())
             // Update matching source with the obtained results
@@ -224,8 +224,8 @@ open class GlobalSearchPresenter(
                             // Same as initial sort, i.e. pinned first then alphabetically
                             { it.source.id.toString() !in pinnedSourceIds },
                             { loadTime[it.source.id] ?: 0L },
-                            { "${it.source.name.lowercase(Locale.getDefault())} (${it.source.lang})" }
-                        )
+                            { "${it.source.name.lowercase(Locale.getDefault())} (${it.source.lang})" },
+                        ),
                     )
             }
             // Update current state
@@ -238,7 +238,7 @@ open class GlobalSearchPresenter(
                 },
                 { _, error ->
                     Timber.e(error)
-                }
+                },
             )
     }
 

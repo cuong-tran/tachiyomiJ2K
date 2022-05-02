@@ -10,11 +10,11 @@ import uy.kohesive.injekt.injectLazy
 
 class MigrationSourceAdapter(
     var items: List<MigrationSourceItem>,
-    controllerPre: PreMigrationController
+    controllerPre: PreMigrationController,
 ) : FlexibleAdapter<MigrationSourceItem>(
     items,
     controllerPre,
-    true
+    true,
 ) {
 
     val isMultiLanguage =
@@ -28,15 +28,15 @@ class MigrationSourceAdapter(
             ArrayList(
                 currentItems.map {
                     it.asParcelable()
-                }
-            )
+                },
+            ),
         )
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         val sourceManager: SourceManager by injectLazy()
         savedInstanceState.getParcelableArrayList<MigrationSourceItem.ParcelableSI>(
-            SELECTED_SOURCES_KEY
+            SELECTED_SOURCES_KEY,
         )?.let {
             updateDataSet(it.map { MigrationSourceItem.fromParcelable(sourceManager, it) })
         }

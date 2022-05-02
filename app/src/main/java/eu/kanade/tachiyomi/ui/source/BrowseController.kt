@@ -141,7 +141,7 @@ class BrowseController :
             afterInsets = {
                 headerHeight = binding.sourceRecycler.paddingTop
                 binding.sourceRecycler.updatePaddingRelative(
-                    bottom = (activityBinding?.bottomNav?.height ?: it.getBottomGestureInsets()) + 58.spToPx
+                    bottom = (activityBinding?.bottomNav?.height ?: it.getBottomGestureInsets()) + 58.spToPx,
                 )
                 if (activityBinding?.bottomNav == null) {
                     setBottomPadding()
@@ -154,7 +154,7 @@ class BrowseController :
             },
             onBottomNavUpdate = {
                 setBottomPadding()
-            }
+            },
         )
         if (!isReturning) {
             activityBinding?.appBar?.lockYPos = true
@@ -162,7 +162,7 @@ class BrowseController :
         binding.sourceRecycler.post {
             setBottomSheetTabs(if (binding.bottomSheet.root.sheetBehavior.isCollapsed()) 0f else 1f)
             binding.sourceRecycler.updatePaddingRelative(
-                bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
+                bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx,
             )
             updateTitleAndMenu()
         }
@@ -214,7 +214,7 @@ class BrowseController :
                         setBottomSheetTabs(if (state == BottomSheetBehavior.STATE_COLLAPSED) 0f else 1f)
                     }
                 }
-            }
+            },
         )
 
         if (showingExtensions) {
@@ -237,7 +237,7 @@ class BrowseController :
         binding.bottomSheet.sheetToolbar.title =
             view?.context?.getString(
                 if (binding.bottomSheet.tabs.selectedTabPosition == 0) R.string.extensions
-                else R.string.source_migration
+                else R.string.source_migration,
             )
         val onExtensionTab = binding.bottomSheet.tabs.selectedTabPosition == 0
         if (binding.bottomSheet.sheetToolbar.menu.findItem(if (onExtensionTab) R.id.action_search else R.id.action_migration_guide) != null) {
@@ -248,7 +248,7 @@ class BrowseController :
         binding.bottomSheet.sheetToolbar.menu.clear()
         binding.bottomSheet.sheetToolbar.inflateMenu(
             if (binding.bottomSheet.tabs.selectedTabPosition == 0) R.menu.extension_main
-            else R.menu.migration_main
+            else R.menu.migration_main,
         )
 
         // Initialize search option.
@@ -283,7 +283,7 @@ class BrowseController :
                     router.pushController(
                         RouterTransaction.with(controller)
                             .popChangeHandler(SettingsSourcesFadeChangeHandler())
-                            .pushChangeHandler(FadeChangeHandler())
+                            .pushChangeHandler(FadeChangeHandler()),
                     )
                 }
                 R.id.action_migration_guide -> {
@@ -332,16 +332,16 @@ class BrowseController :
             ogRadius,
             deviceRadius,
             progress,
-            binding.bottomSheet.sheetLayout
+            binding.bottomSheet.sheetLayout,
         )
 
         val selectedColor = ColorUtils.setAlphaComponent(
             bottomSheet.context.getResourceColor(R.attr.tabBarIconColor),
-            (progress * 255).toInt()
+            (progress * 255).toInt(),
         )
         val unselectedColor = ColorUtils.setAlphaComponent(
             bottomSheet.context.getResourceColor(R.attr.actionBarTintColor),
-            153
+            153,
         )
         binding.bottomSheet.pager.alpha = progress * 10
         binding.bottomSheet.tabs.setSelectedTabIndicatorColor(selectedColor)
@@ -349,13 +349,13 @@ class BrowseController :
             ColorUtils.blendARGB(
                 bottomSheet.context.getResourceColor(R.attr.actionBarTintColor),
                 unselectedColor,
-                progress
+                progress,
             ),
             ColorUtils.blendARGB(
                 bottomSheet.context.getResourceColor(R.attr.actionBarTintColor),
                 selectedColor,
-                progress
-            )
+                progress,
+            ),
         )
 
         /*binding.bottomSheet.sheetLayout.backgroundTintList = ColorStateList.valueOf(
@@ -372,7 +372,7 @@ class BrowseController :
         val pad = bottomBar?.translationY?.minus(bottomBar.height) ?: 0f
         val padding = max(
             (-pad).toInt(),
-            view?.rootWindowInsetsCompat?.getBottomGestureInsets() ?: 0
+            view?.rootWindowInsetsCompat?.getBottomGestureInsets() ?: 0,
         )
         binding.bottomSheet.root.sheetBehavior?.peekHeight = 56.spToPx + padding
         binding.bottomSheet.root.extensionFrameLayout?.binding?.fastScroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -385,7 +385,7 @@ class BrowseController :
             bottom = (
                 activityBinding?.bottomNav?.height
                     ?: view?.rootWindowInsetsCompat?.getBottomGestureInsets() ?: 0
-                ) + 58.spToPx
+                ) + 58.spToPx,
         )
     }
 
@@ -605,7 +605,7 @@ class BrowseController :
                 router.pushController(
                     RouterTransaction.with(controller)
                         .popChangeHandler(SettingsSourcesFadeChangeHandler())
-                        .pushChangeHandler(FadeChangeHandler())
+                        .pushChangeHandler(FadeChangeHandler()),
                 )
             }
             R.id.action_migration_guide -> {

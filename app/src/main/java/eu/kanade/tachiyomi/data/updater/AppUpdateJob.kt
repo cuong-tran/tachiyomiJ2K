@@ -45,7 +45,7 @@ class AppUpdateJob(private val context: Context, workerParams: WorkerParameters)
                 2,
                 TimeUnit.DAYS,
                 3,
-                TimeUnit.HOURS
+                TimeUnit.HOURS,
             )
                 .addTag(TAG)
                 .setConstraints(constraints)

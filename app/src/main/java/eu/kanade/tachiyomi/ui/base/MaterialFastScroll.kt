@@ -26,7 +26,7 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
         setViewsToUse(
             R.layout.material_fastscroll,
             R.id.fast_scroller_bubble,
-            R.id.fast_scroller_handle
+            R.id.fast_scroller_handle,
         )
         autoHideEnabled = true
         ignoreTouchesOutsideHandle = false
@@ -121,12 +121,12 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
             if (layoutManager is StaggeredGridLayoutManager) {
                 (layoutManager as StaggeredGridLayoutManager).scrollToPositionWithOffset(
                     targetPos,
-                    scrollOffset
+                    scrollOffset,
                 )
             } else {
                 (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                     targetPos,
-                    scrollOffset
+                    scrollOffset,
                 )
             }
             updateBubbleText(targetPos)

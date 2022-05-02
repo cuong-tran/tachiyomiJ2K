@@ -89,7 +89,7 @@ fun SManga.toMangaInfo(): MangaInfo {
         description = this.description ?: "",
         genres = this.genre?.split(", ") ?: emptyList(),
         status = this.status,
-        cover = this.thumbnail_url ?: ""
+        cover = this.thumbnail_url ?: "",
     )
 }
 

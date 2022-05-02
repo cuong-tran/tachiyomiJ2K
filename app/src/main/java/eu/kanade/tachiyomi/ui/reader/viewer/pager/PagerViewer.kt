@@ -311,7 +311,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         Timber.d("setChaptersInternal")
         val forceTransition = config.alwaysShowChapterTransition || adapter.joinedItems.getOrNull(
             pager
-                .currentItem
+                .currentItem,
         )?.first is ChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
@@ -350,7 +350,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                 val joinedItem = adapter.joinedItems.firstOrNull { it.first == page || it.second == page }
                 activity.onPageSelected(
                     joinedItem?.first as? ReaderPage ?: page,
-                    joinedItem?.second is ReaderPage
+                    joinedItem?.second is ReaderPage,
                 )
             }
         } else {

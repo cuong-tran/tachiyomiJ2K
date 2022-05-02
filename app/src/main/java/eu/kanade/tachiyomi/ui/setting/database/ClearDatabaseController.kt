@@ -76,16 +76,16 @@ class ClearDatabaseController :
                         binding.fab.height + binding.fab.marginBottom
                     } else {
                         insets.getInsets(systemBars()).bottom
-                    }
+                    },
                 )
                 binding.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = insets.getInsets(systemBars()).bottom
                 }
                 binding.emptyView.updatePadding(
                     top = (fullAppBarHeight ?: 0) + (activityBinding?.appBar?.paddingTop ?: 0),
-                    bottom = insets.getInsets(systemBars()).bottom
+                    bottom = insets.getInsets(systemBars()).bottom,
                 )
-            }
+            },
         )
         binding.recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             fun updateFastScrollMargins() {
@@ -94,7 +94,7 @@ class ClearDatabaseController :
                 val bigToolbarHeight = fullAppBarHeight ?: return
                 val value = max(
                     0,
-                    bigToolbarHeight + activityBinding.appBar.y.roundToInt()
+                    bigToolbarHeight + activityBinding.appBar.y.roundToInt(),
                 ) + activityBinding.appBar.paddingTop
                 if (value != binding.fastScroller.marginTop) {
                     binding.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -111,7 +111,8 @@ class ClearDatabaseController :
                 super.onScrollStateChanged(recyclerView, newState)
                 updateFastScrollMargins()
             }
-        })
+        },
+        )
         binding.fab.isInvisible = true
         binding.fab.setOnClickListener {
             if (adapter!!.selectedItemCount > 0) {

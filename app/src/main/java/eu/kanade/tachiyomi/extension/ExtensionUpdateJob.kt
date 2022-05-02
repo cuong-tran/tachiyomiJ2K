@@ -92,7 +92,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                             1
                         } else {
                             2
-                        }
+                        },
                     )
                 ContextCompat.startForegroundService(context, intent)
                 if (extensionsInstalledByApp.size == extensions.size) {
@@ -114,8 +114,8 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                         context.resources.getQuantityString(
                             R.plurals.extension_updates_available,
                             extensions.size,
-                            extensions.size
-                        )
+                            extensions.size,
+                        ),
                     )
                     val extNames = extensions.joinToString(", ") { it.name }
                     setContentText(extNames)
@@ -124,8 +124,8 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                     color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
                     setContentIntent(
                         NotificationReceiver.openExtensionsPendingActivity(
-                            context
-                        )
+                            context,
+                        ),
                     )
                     if (ExtensionManager.canAutoInstallUpdates(context, true) &&
                         extensions.size == extensionsList.size
@@ -137,24 +137,24 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                                     context,
                                     0,
                                     intent,
-                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
                                 )
                             } else {
                                 PendingIntent.getService(
                                     context,
                                     0,
                                     intent,
-                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
                                 )
                             }
                         addAction(
                             R.drawable.ic_file_download_24dp,
                             context.getString(R.string.update_all),
-                            pendingIntent
+                            pendingIntent,
                         )
                     }
                     setAutoCancel(true)
-                }
+                },
             )
         }
     }
@@ -194,7 +194,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                     12,
                     TimeUnit.HOURS,
                     1,
-                    TimeUnit.HOURS
+                    TimeUnit.HOURS,
                 )
                     .addTag(TAG)
                     .setConstraints(constraints)

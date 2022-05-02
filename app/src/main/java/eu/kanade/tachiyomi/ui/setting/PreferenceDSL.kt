@@ -64,7 +64,7 @@ inline fun PreferenceGroup.dropDownPreference(block: (@DSL DropDownPreference).(
 inline fun PreferenceGroup.listPreference(
     activity: Activity?,
     block: (@DSL ListMatPreference).()
-    -> Unit
+    -> Unit,
 ):
     ListMatPreference {
     return initThenAdd(ListMatPreference(activity, context), block)
@@ -75,7 +75,7 @@ inline fun PreferenceGroup.intListPreference(
     block: (
         @DSL
         IntListMatPreference
-    ).() -> Unit
+    ).() -> Unit,
 ):
     IntListMatPreference {
     return initThenAdd(IntListMatPreference(activity, context), block)
@@ -87,7 +87,7 @@ inline fun PreferenceGroup.multiSelectListPreferenceMat(
         @DSL
         MultiListMatPreference
     ).()
-    -> Unit
+    -> Unit,
 ): MultiListMatPreference {
     return initThenAdd(MultiListMatPreference(activity, context), block)
 }
@@ -98,7 +98,7 @@ inline fun PreferenceGroup.triStateListPreference(
         @DSL
         TriStateListPreference
     ).()
-    -> Unit
+    -> Unit,
 ): TriStateListPreference {
     return initThenAdd(TriStateListPreference(activity, context), block)
 }
@@ -113,7 +113,7 @@ inline fun PreferenceScreen.switchPreference(block: (@DSL SwitchPreferenceCompat
 
 fun PreferenceGroup.infoPreference(@StringRes infoRes: Int): Preference {
     return initThenAdd(
-        Preference(context)
+        Preference(context),
     ) {
         iconRes = R.drawable.ic_info_outline_24dp
         iconTint = context.getResourceColor(android.R.attr.textColorSecondary)
@@ -186,7 +186,7 @@ inline fun <T> IntListMatPreference.bindTo(preference: com.fredporciuncula.flow.
 fun SwitchPreferenceCompat.requireAuthentication(
     activity: FragmentActivity?,
     title: String,
-    subtitle: String? = null
+    subtitle: String? = null,
 ) {
     onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
         newValue as Boolean
@@ -204,7 +204,7 @@ fun SwitchPreferenceCompat.requireAuthentication(
                         super.onAuthenticationError(errorCode, errString)
                         activity.toast(errString.toString())
                     }
-                }
+                },
             )
             false
         } else {

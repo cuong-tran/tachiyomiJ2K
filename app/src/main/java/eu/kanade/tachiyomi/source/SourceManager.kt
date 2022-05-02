@@ -27,23 +27,23 @@ open class SourceManager(private val context: Context) {
         DelegatedSource(
             "reader.kireicake.com",
             5509224355268673176,
-            KireiCake()
+            KireiCake(),
         ),
         DelegatedSource(
             "mangadex.org",
             2499283573021220255,
-            MangaDex()
+            MangaDex(),
         ),
         DelegatedSource(
             "mangaplus.shueisha.co.jp",
             1998944621602463790,
-            MangaPlus()
+            MangaPlus(),
         ),
         DelegatedSource(
             "cubari.moe",
             6338219619148105941,
-            Cubari()
-        )
+            Cubari(),
+        ),
     ).associateBy { it.sourceId }
 
     init {
@@ -84,7 +84,7 @@ open class SourceManager(private val context: Context) {
     }
 
     private fun createInternalSources(): List<Source> = listOf(
-        LocalSource(context)
+        LocalSource(context),
     )
 
     inner class StubSource(override val id: Long) : Source {
@@ -112,9 +112,9 @@ open class SourceManager(private val context: Context) {
             return SourceNotFoundException(
                 context.getString(
                     R.string.source_not_installed_,
-                    extensionManager.getStubSource(id)?.name ?: id.toString()
+                    extensionManager.getStubSource(id)?.name ?: id.toString(),
                 ),
-                id
+                id,
             )
         }
 
@@ -133,7 +133,7 @@ open class SourceManager(private val context: Context) {
     private data class DelegatedSource(
         val urlName: String,
         val sourceId: Long,
-        val delegatedHttpSource: DelegatedHttpSource
+        val delegatedHttpSource: DelegatedHttpSource,
     )
 }
 

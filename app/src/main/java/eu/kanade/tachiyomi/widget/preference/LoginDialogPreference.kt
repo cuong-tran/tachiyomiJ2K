@@ -19,7 +19,7 @@ import uy.kohesive.injekt.injectLazy
 
 abstract class LoginDialogPreference(
     @StringRes private val usernameLabelRes: Int? = null,
-    bundle: Bundle? = null
+    bundle: Bundle? = null,
 ) :
     DialogController(bundle) {
 

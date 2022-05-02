@@ -114,7 +114,7 @@ class SettingsLibraryController : SettingsController() {
                     R.string.daily,
                     R.string.every_2_days,
                     R.string.every_3_days,
-                    R.string.weekly
+                    R.string.weekly,
                 )
                 entryValues = listOf(0, 12, 24, 48, 72, 168)
                 defaultValue = 24
@@ -155,7 +155,7 @@ class SettingsLibraryController : SettingsController() {
                 entriesRes = arrayOf(
                     R.string.pref_update_only_completely_read,
                     R.string.pref_update_only_started,
-                    R.string.pref_update_only_non_completed
+                    R.string.pref_update_only_non_completed,
                 )
                 entryValues = listOf(MANGA_HAS_UNREAD, MANGA_NON_READ, MANGA_NON_COMPLETED)
                 noSelectionRes = R.string.none

@@ -85,8 +85,8 @@ class CoverCache(val context: Context) {
             context.toast(
                 context.getString(
                     R.string.deleted_,
-                    Formatter.formatFileSize(context, deletedSize)
-                )
+                    Formatter.formatFileSize(context, deletedSize),
+                ),
             )
         }
     }
@@ -108,8 +108,8 @@ class CoverCache(val context: Context) {
             context.toast(
                 context.getString(
                     R.string.deleted_,
-                    Formatter.formatFileSize(context, deletedSize)
-                )
+                    Formatter.formatFileSize(context, deletedSize),
+                ),
             )
         }
         context.imageLoader.memoryCache.clear()
@@ -217,7 +217,7 @@ class CoverCache(val context: Context) {
      */
     fun deleteFromCache(
         manga: Manga,
-        deleteCustom: Boolean = true
+        deleteCustom: Boolean = true,
     ) {
         // Check if url is empty.
         if (manga.thumbnail_url.isNullOrEmpty()) return

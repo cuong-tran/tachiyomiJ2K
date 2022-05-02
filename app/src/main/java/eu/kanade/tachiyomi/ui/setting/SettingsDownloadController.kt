@@ -68,7 +68,7 @@ class SettingsDownloadController : SettingsController() {
                     R.string.second_to_last,
                     R.string.third_to_last,
                     R.string.fourth_to_last,
-                    R.string.fifth_to_last
+                    R.string.fifth_to_last,
                 )
                 entryRange = -1..4
                 defaultValue = -1
@@ -125,7 +125,7 @@ class SettingsDownloadController : SettingsController() {
                 entriesRes = arrayOf(
                     R.string.ask_on_chapters_page,
                     R.string.always_keep,
-                    R.string.always_delete
+                    R.string.always_delete,
                 )
                 entryRange = 0..2
             }

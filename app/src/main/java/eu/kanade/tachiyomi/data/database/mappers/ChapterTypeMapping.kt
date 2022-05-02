@@ -29,7 +29,7 @@ import eu.kanade.tachiyomi.data.database.tables.ChapterTable.TABLE
 class ChapterTypeMapping : SQLiteTypeMapping<Chapter>(
     ChapterPutResolver(),
     ChapterGetResolver(),
-    ChapterDeleteResolver()
+    ChapterDeleteResolver(),
 )
 
 class ChapterPutResolver : DefaultPutResolver<Chapter>() {

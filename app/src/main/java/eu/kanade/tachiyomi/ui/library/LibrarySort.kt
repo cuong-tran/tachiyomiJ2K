@@ -11,7 +11,7 @@ enum class LibrarySort(
     @DrawableRes private val iconRes: Int,
     private val catValue: Int = mainValue,
     @StringRes private val dynamicStringRes: Int = stringRes,
-    @DrawableRes private val dynamicIconRes: Int = iconRes
+    @DrawableRes private val dynamicIconRes: Int = iconRes,
 ) {
 
     Title(0, R.string.title, R.drawable.ic_sort_by_alpha_24dp),
@@ -27,7 +27,7 @@ enum class LibrarySort(
         R.drawable.ic_swap_vert_24dp,
         7,
         R.string.category,
-        R.drawable.ic_label_outline_24dp
+        R.drawable.ic_label_outline_24dp,
     )
     ;
 
@@ -50,7 +50,7 @@ enum class LibrarySort(
         return MaterialMenuSheet.MenuSheetItem(
             mainValue,
             iconRes(isDynamic),
-            stringRes(isDynamic)
+            stringRes(isDynamic),
         )
     }
 

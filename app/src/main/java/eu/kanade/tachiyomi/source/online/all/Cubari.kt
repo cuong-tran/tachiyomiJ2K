@@ -47,7 +47,7 @@ class Cubari : DelegatedHttpSource() {
             val context = Injekt.get<PreferencesHelper>().context
             val trueChapter = findChapter(chapters, cubariType, chapterNumber)?.toChapter()
                 ?: error(
-                    context.getString(R.string.chapter_not_found)
+                    context.getString(R.string.chapter_not_found),
                 )
             if (manga != null) {
                 Triple(trueChapter, manga, chapters.orEmpty())

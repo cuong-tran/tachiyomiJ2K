@@ -142,7 +142,7 @@ class MangaDetailsController :
             putBoolean(FROM_CATALOGUE_EXTRA, fromCatalogue)
             putParcelable(SMART_SEARCH_CONFIG_EXTRA, smartSearchConfig)
             putBoolean(UPDATE_EXTRA, update)
-        }
+        },
     ) {
         this.manga = manga
         if (manga != null) {
@@ -153,7 +153,7 @@ class MangaDetailsController :
     }
 
     constructor(mangaId: Long) : this(
-        Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking()
+        Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking(),
     )
 
     constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA)) {
@@ -162,7 +162,7 @@ class MangaDetailsController :
         if (notificationId > -1) NotificationReceiver.dismissNotification(
             context,
             notificationId,
-            bundle.getInt("groupId", 0)
+            bundle.getInt("groupId", 0),
         )
     }
 
@@ -241,7 +241,7 @@ class MangaDetailsController :
                         it,
                         context.contextCompatColor(R.color.colorOnDownloadBadgeDayNight),
                         (if (!context.isInNightMode()) luminance else -(luminance - 1))
-                            .toFloat() * if (context.isInNightMode()) 0.33f else 0.5f
+                            .toFloat() * if (context.isInNightMode()) 0.33f else 0.5f,
                     )
                 } else {
                     it
@@ -263,7 +263,7 @@ class MangaDetailsController :
                     ColorUtils.blendARGB(
                         context.getResourceColor(R.attr.colorSecondary),
                         colorBack,
-                        0.5f
+                        0.5f,
                     )
                 }
                 )?.let {
@@ -275,7 +275,7 @@ class MangaDetailsController :
                 ColorUtils.blendARGB(
                     it,
                     colorBack,
-                    if (lumWrongForTheme) 0.9f else 0.7f
+                    if (lumWrongForTheme) 0.9f else 0.7f,
                 )
             }
     }
@@ -285,7 +285,7 @@ class MangaDetailsController :
             if (presenter.preferences.themeMangaDetails() && accentColor != null && headerColor != null) {
                 val newColor = makeColorFrom(
                     hueOf = accentColor!!,
-                    satAndLumOf = context.getResourceColor(R.attr.actionBarTintColor)
+                    satAndLumOf = context.getResourceColor(R.attr.actionBarTintColor),
                 )
                 setColorSchemeColors(newColor)
                 setProgressBackgroundColorSchemeColor(headerColor!!)
@@ -304,7 +304,7 @@ class MangaDetailsController :
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 || context.isInNightMode()) {
                     activity?.window?.navigationBarColor = ColorUtils.setAlphaComponent(
                         newColor,
-                        Color.alpha(activity?.window?.navigationBarColor ?: Color.BLACK)
+                        Color.alpha(activity?.window?.navigationBarColor ?: Color.BLACK),
                     )
                 }
                 newColor
@@ -325,8 +325,8 @@ class MangaDetailsController :
             floatArrayOf(
                 hueArray[0],
                 satLumArray[1],
-                satLumArray[2]
-            )
+                satLumArray[2],
+            ),
         )
     }
 
@@ -344,7 +344,7 @@ class MangaDetailsController :
                 chapterHolder.notifyStatus(
                     chapter.status,
                     isLocked(),
-                    chapter.progress
+                    chapter.progress,
                 )
             }
         }
@@ -379,7 +379,7 @@ class MangaDetailsController :
         adapter?.isSwipeEnabled = true
         binding.recycler.layoutManager = LinearLayoutManagerAccurateOffset(view.context)
         binding.recycler.addItemDecoration(
-            MangaDetailsDivider(view.context)
+            MangaDetailsDivider(view.context),
         )
         binding.recycler.setHasFixedSize(true)
         val appbarHeight = activityBinding?.appBar?.attrToolbarHeight ?: 0
@@ -403,7 +403,7 @@ class MangaDetailsController :
             },
             liftOnScroll = {
                 colorToolbar(it)
-            }
+            },
         )
         binding.recycler.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
@@ -423,7 +423,7 @@ class MangaDetailsController :
                     updateToolbarTitleAlpha()
                     if (atTop) getHeader()?.binding?.backdrop?.translationY = 0f
                 }
-            }
+            },
         )
     }
 
@@ -468,7 +468,7 @@ class MangaDetailsController :
         if (animate) {
             val cA = ValueAnimator.ofFloat(
                 if (toolbarIsColored) 0f else 1f,
-                if (toolbarIsColored) 1f else 0f
+                if (toolbarIsColored) 1f else 0f,
             )
             colorAnimator = cA
             colorAnimator?.duration = 250 // milliseconds
@@ -477,14 +477,14 @@ class MangaDetailsController :
                     ColorUtils.blendARGB(
                         topColor,
                         scrollingColor,
-                        animator.animatedValue as Float
-                    )
+                        animator.animatedValue as Float,
+                    ),
                 )
                 activity.window?.statusBarColor = if (toolbarIsColored) {
                     ColorUtils.blendARGB(
                         topColor,
                         scrollingStatusColor,
-                        animator.animatedValue as Float
+                        animator.animatedValue as Float,
                     )
                 } else {
                     Color.TRANSPARENT
@@ -535,7 +535,7 @@ class MangaDetailsController :
                         file.delete()
                         setPaletteColor()
                     }
-                }
+                },
             ).build()
         view.context.imageLoader.enqueue(request)
     }
@@ -547,7 +547,7 @@ class MangaDetailsController :
             ColorUtils.setAlphaComponent(scrollingColor, (0.87f * 255).roundToInt())
         activity?.window?.statusBarColor = if (toolbarIsColored) scrollingStatusColor else topColor
         activityBinding?.appBar?.setBackgroundColor(
-            if (toolbarIsColored) scrollingColor else topColor
+            if (toolbarIsColored) scrollingColor else topColor,
         )
     }
 
@@ -605,7 +605,7 @@ class MangaDetailsController :
 
             getHeader()?.clearDescFocus()
             val colorSurface = activity?.getResourceColor(
-                R.attr.colorSurface
+                R.attr.colorSurface,
             ) ?: Color.BLACK
             if (router.backstackSize > 0 &&
                 router.backstack.last().controller !is MangaDetailsController
@@ -614,7 +614,7 @@ class MangaDetailsController :
                     activityBinding?.appBar?.setBackgroundColor(colorSurface)
                 }
                 activity?.window?.statusBarColor = activity?.getResourceColor(
-                    android.R.attr.statusBarColor
+                    android.R.attr.statusBarColor,
                 ) ?: colorSurface
             }
         }
@@ -622,7 +622,7 @@ class MangaDetailsController :
 
     override fun onChangeEnded(
         changeHandler: ControllerChangeHandler,
-        type: ControllerChangeType
+        type: ControllerChangeType,
     ) {
         super.onChangeEnded(changeHandler, type)
         if (type == ControllerChangeType.PUSH_ENTER) {
@@ -670,10 +670,10 @@ class MangaDetailsController :
                                     context.resources.getQuantityString(
                                         R.plurals.notification_and_n_more,
                                         (chapterNames.size - (4 - 1)),
-                                        (chapterNames.size - (4 - 1))
+                                        (chapterNames.size - (4 - 1)),
                                     )
-                            } else chapterNames.joinToString(", ")
-                        )
+                            } else chapterNames.joinToString(", "),
+                        ),
                     )
                     .setPositiveButton(R.string.delete) { dialog, _ ->
                         presenter.deleteChapters(deletedChapters, false)
@@ -699,7 +699,7 @@ class MangaDetailsController :
             download.status,
             presenter.isLockedFromSearch,
             download.progress,
-            true
+            true,
         )
     }
 
@@ -799,23 +799,23 @@ class MangaDetailsController :
             MaterialMenuSheet.MenuSheetItem(
                 0,
                 if (descending) R.drawable.ic_eye_down_24dp else R.drawable.ic_eye_up_24dp,
-                R.string.mark_previous_as_read
+                R.string.mark_previous_as_read,
             ),
             MaterialMenuSheet.MenuSheetItem(
                 1,
                 if (descending) R.drawable.ic_eye_off_down_24dp else R.drawable.ic_eye_off_up_24dp,
-                R.string.mark_previous_as_unread
+                R.string.mark_previous_as_unread,
             ),
             MaterialMenuSheet.MenuSheetItem(
                 2,
                 R.drawable.ic_eye_range_24dp,
-                R.string.mark_range_as_read
+                R.string.mark_range_as_read,
             ),
             MaterialMenuSheet.MenuSheetItem(
                 3,
                 R.drawable.ic_eye_off_range_24dp,
-                R.string.mark_range_as_unread
-            )
+                R.string.mark_range_as_unread,
+            ),
         )
         val menuSheet = MaterialMenuSheet(activity!!, items, item.name) { _, itemPos ->
             when (itemPos) {
@@ -886,7 +886,7 @@ class MangaDetailsController :
         snack = view?.snack(
             if (bookmarked) R.string.removed_bookmark
             else R.string.bookmarked,
-            Snackbar.LENGTH_INDEFINITE
+            Snackbar.LENGTH_INDEFINITE,
         ) {
             setAction(R.string.undo) {
                 bookmarkChapters(listOf(item), bookmarked)
@@ -908,7 +908,7 @@ class MangaDetailsController :
         snack = view?.snack(
             if (read) R.string.marked_as_unread
             else R.string.marked_as_read,
-            Snackbar.LENGTH_INDEFINITE
+            Snackbar.LENGTH_INDEFINITE,
         ) {
             var undoing = false
             setAction(R.string.undo) {
@@ -928,7 +928,7 @@ class MangaDetailsController :
                             }
                         }
                     }
-                }
+                },
             )
         }
         (activity as? MainActivity)?.setUndoSnackBar(snack)
@@ -988,7 +988,7 @@ class MangaDetailsController :
             manga?.source != LocalSource.ID && presenter.manga.favorite
         menu.findItem(R.id.action_migrate).title = view?.context?.getString(
             R.string.migrate_,
-            presenter.manga.seriesType(view!!.context)
+            presenter.manga.seriesType(view!!.context),
         )
         menu.findItem(R.id.download_next).title =
             view?.resources?.getQuantityString(R.plurals.next_unread_chapters, 1, 1)
@@ -1024,7 +1024,7 @@ class MangaDetailsController :
             R.id.action_edit -> {
                 editMangaDialog = EditMangaDialog(
                     this,
-                    presenter.manga
+                    presenter.manga,
                 )
                 editMangaDialog?.showDialog(router)
             }
@@ -1035,7 +1035,7 @@ class MangaDetailsController :
                     PreMigrationController.navigateToMigration(
                         presenter.preferences.skipPreMigration().get(),
                         router,
-                        listOf(manga!!.id!!)
+                        listOf(manga!!.id!!),
                     )
                 }
             R.id.action_mark_all_as_read -> {
@@ -1058,7 +1058,7 @@ class MangaDetailsController :
                     .show()
             }
             R.id.download_next, R.id.download_next_5, R.id.download_custom, R.id.download_unread, R.id.download_all -> downloadChapters(
-                item.itemId
+                item.itemId,
             )
             else -> return super.onOptionsItemSelected(item)
         }
@@ -1135,7 +1135,7 @@ class MangaDetailsController :
             source.id,
             url,
             presenter.manga
-                .title
+                .title,
         )
         startActivity(intent)
     }
@@ -1163,8 +1163,8 @@ class MangaDetailsController :
                 else context.resources.getQuantityString(
                     R.plurals.remove_n_chapters,
                     chapters.size,
-                    chapters.size
-                )
+                    chapters.size,
+                ),
             )
             .setPositiveButton(R.string.remove) { _, _ ->
                 presenter.deleteChapters(chapters, isEverything = isEverything)
@@ -1255,7 +1255,7 @@ class MangaDetailsController :
         presenter.downloadChapters(chapters)
         val text = view.context.getString(
             R.string.add_x_to_library,
-            presenter.manga.seriesType(view.context).lowercase(Locale.ROOT)
+            presenter.manga.seriesType(view.context).lowercase(Locale.ROOT),
         )
         if (!presenter.manga.favorite && (
             snack == null ||
@@ -1274,7 +1274,7 @@ class MangaDetailsController :
                             super.onDismissed(transientBottomBar, event)
                             if (snack == transientBottomBar) snack = null
                         }
-                    }
+                    },
                 )
             }
             (activity as? MainActivity)?.setUndoSnackBar(snack)
@@ -1311,7 +1311,7 @@ class MangaDetailsController :
                             super.onDismissed(transientBottomBar, event)
                             if (snack == transientBottomBar) snack = null
                         }
-                    }
+                    },
                 )
             }
         }
@@ -1438,7 +1438,7 @@ class MangaDetailsController :
                 updateHeader()
                 presenter.fetchChapters(andTracking = true)
             },
-            onMangaDeleted = { presenter.confirmDeletion() }
+            onMangaDeleted = { presenter.confirmDeletion() },
         )
         if (snack?.duration == Snackbar.LENGTH_INDEFINITE) {
             val favButton = getHeader()?.binding?.favoriteButton
@@ -1556,7 +1556,7 @@ class MangaDetailsController :
         mode?.title = view?.context?.getString(
             if (startingRangeChapterPos == null) {
                 R.string.select_starting_chapter
-            } else R.string.select_ending_chapter
+            } else R.string.select_ending_chapter,
         )
         return false
     }
@@ -1569,7 +1569,7 @@ class MangaDetailsController :
             (binding.recycler.findViewHolderForAdapterPosition(startingRangeChapterPos!!) as? ChapterHolder)?.notifyStatus(
                 item?.status ?: Download.State.NOT_DOWNLOADED,
                 false,
-                0
+                0,
             )
         }
         rangeMode = null
@@ -1587,9 +1587,9 @@ class MangaDetailsController :
             startActivityForResult(
                 Intent.createChooser(
                     intent,
-                    resources?.getString(R.string.select_cover_image)
+                    resources?.getString(R.string.select_cover_image),
                 ),
-                101
+                101,
             )
         } else {
             activity?.toast(R.string.must_be_in_library_to_edit)

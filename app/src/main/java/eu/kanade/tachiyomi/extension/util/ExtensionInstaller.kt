@@ -130,7 +130,7 @@ internal class ExtensionInstaller(private val context: Context) {
             .setDestinationInExternalFilesDir(
                 context,
                 Environment.DIRECTORY_DOWNLOADS,
-                downloadUri.lastPathSegment
+                downloadUri.lastPathSegment,
             )
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
 
@@ -140,7 +140,7 @@ internal class ExtensionInstaller(private val context: Context) {
         scope.launch {
             flowOf(
                 pollStatus(id),
-                pollInstallStatus(pkgName)
+                pollInstallStatus(pkgName),
             ).flattenMerge()
                 .transformWhile {
                     emit(it)
@@ -405,7 +405,7 @@ internal class ExtensionInstaller(private val context: Context) {
             downloadManager.query(query).use { cursor ->
                 if (cursor.moveToFirst()) {
                     val localUri = cursor.getString(
-                        cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
+                        cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI),
                     ).removePrefix(FILE_SCHEME)
 
                     installApk(id, File(localUri).getUriCompat(context))

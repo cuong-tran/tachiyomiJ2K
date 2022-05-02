@@ -17,7 +17,7 @@ open class MatPreference @JvmOverloads constructor(
     context: Context,
     attrs:
         AttributeSet? =
-            null
+            null,
 ) :
     Preference(context, attrs) {
 

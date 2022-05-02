@@ -27,7 +27,7 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             binding.firstButton,
             binding.secondButton,
             binding.thirdButton,
-            binding.fourthButton
+            binding.fourthButton,
         )
     }
 
@@ -35,7 +35,7 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         arrayOf(
             binding.separator1,
             binding.separator2,
-            binding.separator3
+            binding.separator3,
         )
     }
 
@@ -110,7 +110,7 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             transition.duration = 150
             androidx.transition.TransitionManager.beginDelayedTransition(
                 parent.parent as ViewGroup,
-                transition
+                transition,
             )
         }
         if (itemCount == 1) {
@@ -118,13 +118,13 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             binding.firstButton.setTextColor(
                 context.getResourceColor(
                     if (binding.firstButton.isActivated) R.attr.colorOnSecondary
-                    else R.attr.colorOnBackground
-                )
+                    else R.attr.colorOnBackground,
+                ),
             )
             listener?.onFilterClicked(
                 this,
                 if (binding.firstButton.isActivated) index else -1,
-                callBack
+                callBack,
             )
             return
         }
@@ -150,8 +150,8 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         mainButton.setTextColor(
             context.getResourceColor(
                 if (mainButton.isActivated) R.attr.colorOnSecondary
-                else R.attr.colorOnBackground
-            )
+                else R.attr.colorOnBackground,
+            ),
         )
     }
 }

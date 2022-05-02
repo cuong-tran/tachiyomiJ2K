@@ -22,7 +22,7 @@ import uy.kohesive.injekt.injectLazy
 import java.util.Date
 
 class MigrationProcessAdapter(
-    val controller: MigrationListController
+    val controller: MigrationListController,
 ) : FlexibleAdapter<MigrationProcessItem>(null, controller, true) {
 
     private val db: DatabaseHelper by injectLazy()
@@ -82,7 +82,7 @@ class MigrationProcessAdapter(
                             source,
                             prevManga,
                             toMangaObj,
-                            !copy
+                            !copy,
                         )
                     }
                 }
@@ -105,7 +105,7 @@ class MigrationProcessAdapter(
                     source,
                     prevManga,
                     toMangaObj,
-                    !copy
+                    !copy,
                 )
             }
             removeManga(position)
@@ -126,7 +126,7 @@ class MigrationProcessAdapter(
         source: Source,
         prevManga: Manga,
         manga: Manga,
-        replace: Boolean
+        replace: Boolean,
     ) {
         if (controller.config == null) return
         val flags = preferences.migrateFlags().get()
@@ -143,7 +143,7 @@ class MigrationProcessAdapter(
             source: Source,
             prevManga: Manga,
             manga: Manga,
-            replace: Boolean
+            replace: Boolean,
         ) {
             // Update chapters read
             if (MigrationFlags.hasChapters(flags)) {

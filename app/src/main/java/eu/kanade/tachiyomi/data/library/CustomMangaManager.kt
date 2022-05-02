@@ -72,7 +72,7 @@ class CustomMangaManager(val context: Context) {
             artist,
             description,
             genre?.split(", ")?.toTypedArray(),
-            status.takeUnless { it == -1 }
+            status.takeUnless { it == -1 },
         )
     }
 
@@ -89,7 +89,7 @@ class CustomMangaManager(val context: Context) {
         val artist: String? = null,
         val description: String? = null,
         val genre: Array<String>? = null,
-        val status: Int? = null
+        val status: Int? = null,
     ) {
 
         fun toManga() = MangaImpl().apply {

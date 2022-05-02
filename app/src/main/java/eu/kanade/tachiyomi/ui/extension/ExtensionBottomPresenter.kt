@@ -41,7 +41,7 @@ typealias ExtensionIntallInfo = Pair<InstallStep, PackageInstaller.SessionInfo?>
  */
 class ExtensionBottomPresenter(
     private val extensionManager: ExtensionManager = Injekt.get(),
-    val preferences: PreferencesHelper = Injekt.get()
+    val preferences: PreferencesHelper = Injekt.get(),
 ) : BaseCoroutinePresenter<ExtensionBottomSheet>() {
 
     private var extensions = emptyList<ExtensionItem>()
@@ -69,8 +69,8 @@ class ExtensionBottomPresenter(
                     Triple(
                         extensionManager.installedExtensions,
                         extensionManager.untrustedExtensions,
-                        extensionManager.availableExtensions
-                    )
+                        extensionManager.availableExtensions,
+                    ),
                 )
                 withContext(Dispatchers.Main) { controller?.setExtensions(extensions, false) }
             }
@@ -81,9 +81,9 @@ class ExtensionBottomPresenter(
                     sourceItems.associate {
                         it.source.id to this@ExtensionBottomPresenter.libraryToMigrationItem(
                             favs,
-                            it.source.id
+                            it.source.id,
                         )
-                    }
+                    },
                 )
                 withContext(Dispatchers.Main) {
                     if (selectedSource != null) {
@@ -106,8 +106,8 @@ class ExtensionBottomPresenter(
                             Triple(
                                 extensionManager.installedExtensions,
                                 extensionManager.untrustedExtensions,
-                                extensionManager.availableExtensions
-                            )
+                                extensionManager.availableExtensions,
+                            ),
                         )
                         withUIContext { controller?.setExtensions(extensions) }
                         return@collect
@@ -149,8 +149,8 @@ class ExtensionBottomPresenter(
                 Triple(
                     extensionManager.installedExtensions,
                     extensionManager.untrustedExtensions,
-                    extensionManager.availableExtensions
-                )
+                    extensionManager.availableExtensions,
+                ),
             )
             withContext(Dispatchers.Main) { controller?.setExtensions(extensions, false) }
         }
@@ -163,7 +163,7 @@ class ExtensionBottomPresenter(
             mangaItems = HashMap(
                 sourceItems.associate {
                     it.source.id to this@ExtensionBottomPresenter.libraryToMigrationItem(favs, it.source.id)
-                }
+                },
             )
             withContext(Dispatchers.Main) {
                 if (selectedSource != null) {
@@ -209,8 +209,8 @@ class ExtensionBottomPresenter(
                             InstalledExtensionsOrder.Language -> it.lang
                         }
                     },
-                    { it.name }
-                )
+                    { it.name },
+                ),
             )
         val untrustedSorted = untrusted.sortedBy { it.name }
         val availableSorted = available
@@ -228,10 +228,10 @@ class ExtensionBottomPresenter(
                 context.resources.getQuantityString(
                     R.plurals._updates_pending,
                     updatesSorted.size,
-                    updatesSorted.size
+                    updatesSorted.size,
                 ),
                 updatesSorted.size,
-                items.count { it.extension.pkgName in currentDownloads.keys } != updatesSorted.size
+                items.count { it.extension.pkgName in currentDownloads.keys } != updatesSorted.size,
             )
             items += updatesSorted.map { extension ->
                 ExtensionItem(extension, header, currentDownloads[extension.pkgName])
@@ -288,7 +288,7 @@ class ExtensionBottomPresenter(
     private fun updateInstallStep(
         extension: Extension,
         state: InstallStep?,
-        session: PackageInstaller.SessionInfo?
+        session: PackageInstaller.SessionInfo?,
     ): ExtensionItem? {
         val extensions = extensions.toMutableList()
         val position = extensions.indexOfFirst { it.extension.pkgName == extension.pkgName }
@@ -296,7 +296,7 @@ class ExtensionBottomPresenter(
         return if (position != -1) {
             val item = extensions[position].copy(
                 installStep = state,
-                session = session
+                session = session,
             )
             extensions[position] = item
 
@@ -316,7 +316,7 @@ class ExtensionBottomPresenter(
         presenterScope.launch {
             extensionManager.installExtension(
                 ExtensionManager.ExtensionInfo(extension),
-                presenterScope
+                presenterScope,
             )
                 .launchIn(this)
         }
@@ -341,7 +341,7 @@ class ExtensionBottomPresenter(
             context,
             extensions.mapNotNull { extension ->
                 extensionManager.availableExtensions.find { it.pkgName == extension.pkgName }
-            }
+            },
         )
         ContextCompat.startForegroundService(context, intent)
     }

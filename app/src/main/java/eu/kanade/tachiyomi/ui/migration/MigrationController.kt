@@ -96,7 +96,7 @@ class MigrationController :
             PreMigrationController.navigateToMigration(
                 Injekt.get<PreferencesHelper>().skipPreMigration().get(),
                 router,
-                listOf(item.manga.id!!)
+                listOf(item.manga.id!!),
             )
         } else if (item is SourceItem) {
             presenter.setSelectedSource(item.source)
@@ -109,7 +109,7 @@ class MigrationController :
 
         launchUI {
             val manga = Injekt.get<DatabaseHelper>().getFavoriteMangas().asRxSingle().await(
-                Schedulers.io()
+                Schedulers.io(),
             )
             val sourceMangas =
                 manga.asSequence().filter { it.source == item.source.id }.map { it.id!! }.toList()
@@ -117,7 +117,7 @@ class MigrationController :
                 PreMigrationController.navigateToMigration(
                     Injekt.get<PreferencesHelper>().skipPreMigration().get(),
                     router,
-                    sourceMangas
+                    sourceMangas,
                 )
             }
         }

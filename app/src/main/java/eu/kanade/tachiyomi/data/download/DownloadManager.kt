@@ -259,7 +259,7 @@ class DownloadManager(val context: Context) {
                 provider.findChapterDirs(chapters, manga, source) + provider.findTempChapterDirs(
                     chapters,
                     manga,
-                    source
+                    source,
                 )
             chapterDirs.forEach { it.delete() }
             cache.removeChapters(chapters, manga)

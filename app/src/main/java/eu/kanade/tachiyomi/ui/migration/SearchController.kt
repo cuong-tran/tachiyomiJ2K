@@ -22,13 +22,13 @@ import uy.kohesive.injekt.injectLazy
 
 class SearchController(
     private var manga: Manga? = null,
-    private var sources: List<CatalogueSource>? = null
+    private var sources: List<CatalogueSource>? = null,
 ) : GlobalSearchController(
     manga?.originalTitle,
     bundle = bundleOf(
         OLD_MANGA to manga?.id,
-        SOURCES to sources?.map { it.id }?.toLongArray()
-    )
+        SOURCES to sources?.map { it.id }?.toLongArray(),
+    ),
 ),
     BottomNavBarInterface {
 
@@ -42,13 +42,13 @@ class SearchController(
     constructor(mangaId: Long, sources: LongArray) :
         this(
             Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking(),
-            sources.map { Injekt.get<SourceManager>().getOrStub(it) }.filterIsInstance<CatalogueSource>()
+            sources.map { Injekt.get<SourceManager>().getOrStub(it) }.filterIsInstance<CatalogueSource>(),
         )
 
     @Suppress("unused")
     constructor(bundle: Bundle) : this(
         bundle.getLong(OLD_MANGA),
-        bundle.getLongArray(SOURCES) ?: LongArray(0)
+        bundle.getLongArray(SOURCES) ?: LongArray(0),
     )
 
     override fun createPresenter(): GlobalSearchPresenter {

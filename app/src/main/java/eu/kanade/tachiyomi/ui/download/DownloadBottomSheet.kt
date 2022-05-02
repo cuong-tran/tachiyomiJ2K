@@ -33,7 +33,7 @@ import uy.kohesive.injekt.injectLazy
 class DownloadBottomSheet @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? =
-        null
+        null,
 ) : LinearLayout(context, attrs),
     DownloadAdapter.DownloadItemListener,
     FlexibleAdapter.OnActionStateListener {
@@ -123,7 +123,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
         val extCount = presenter.downloadQueue.firstOrNull()
         binding.titleText.text = if (extCount != null) resources.getString(
             R.string.downloading_,
-            extCount.chapter.name
+            extCount.chapter.name,
         )
         else ""
     }
@@ -204,7 +204,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
         if (presenter.downloadQueue.isEmpty()) {
             binding.emptyView.show(
                 R.drawable.ic_download_off_24dp,
-                R.string.nothing_is_downloading
+                R.string.nothing_is_downloading,
             )
         } else {
             binding.emptyView.hide()

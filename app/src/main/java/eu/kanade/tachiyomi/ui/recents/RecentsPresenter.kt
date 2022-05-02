@@ -44,7 +44,7 @@ class RecentsPresenter(
     val preferences: PreferencesHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
-    private val chapterFilter: ChapterFilter = Injekt.get()
+    private val chapterFilter: ChapterFilter = Injekt.get(),
 ) : BaseCoroutinePresenter<RecentsController>(), DownloadQueue.DownloadListener, LibraryServiceListener, DownloadServiceListener {
 
     private var recentsJob: Job? = null
@@ -59,7 +59,7 @@ class RecentsPresenter(
     private val newChaptersHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEW_CHAPTERS)
     private val continueReadingHeader = RecentMangaHeaderItem(
         RecentMangaHeaderItem
-            .CONTINUE_READING
+            .CONTINUE_READING,
     )
     var finished = false
     var heldItems: HashMap<Int, List<RecentMangaItem>> = hashMapOf()
@@ -95,7 +95,7 @@ class RecentsPresenter(
         listOf(
             preferences.groupChaptersHistory(),
             preferences.showReadInAllRecents(),
-            preferences.groupChaptersUpdates()
+            preferences.groupChaptersUpdates(),
         ).forEach {
             it.asFlow()
                 .drop(1)
@@ -122,7 +122,7 @@ class RecentsPresenter(
         itemCount: Int = 0,
         limit: Boolean = false,
         customViewType: Int? = null,
-        includeReadAnyway: Boolean = false
+        includeReadAnyway: Boolean = false,
     ) {
         if (retryCount > 5) {
             finished = true
@@ -151,7 +151,7 @@ class RecentsPresenter(
                     showRead,
                     isEndless,
                     if (isCustom) ENDLESS_LIMIT else pageOffset,
-                    !updatePageCount && !isOnFirstPage
+                    !updatePageCount && !isOnFirstPage,
                 ).executeOnIO()
             }
             viewType == VIEW_TYPE_ONLY_HISTORY -> {
@@ -159,13 +159,13 @@ class RecentsPresenter(
                     db.getRecentMangaLimit(
                         query,
                         if (isCustom) ENDLESS_LIMIT else pageOffset,
-                        !updatePageCount && !isOnFirstPage
+                        !updatePageCount && !isOnFirstPage,
                     )
                 } else {
                     db.getHistoryUngrouped(
                         query,
                         if (isCustom) ENDLESS_LIMIT else pageOffset,
-                        !updatePageCount && !isOnFirstPage
+                        !updatePageCount && !isOnFirstPage,
                     )
                 }.executeOnIO()
             }
@@ -174,13 +174,13 @@ class RecentsPresenter(
                     db.getUpdatedChaptersDistinct(
                         query,
                         if (isCustom) ENDLESS_LIMIT else pageOffset,
-                        !updatePageCount && !isOnFirstPage
+                        !updatePageCount && !isOnFirstPage,
                     )
                 } else {
                     db.getRecentChapters(
                         query,
                         if (isCustom) ENDLESS_LIMIT else pageOffset,
-                        !updatePageCount && !isOnFirstPage
+                        !updatePageCount && !isOnFirstPage,
                     )
                 }.executeOnIO()
                     .map {
@@ -189,7 +189,7 @@ class RecentsPresenter(
                             it.chapter,
                             HistoryImpl().apply {
                                 last_read = it.chapter.date_fetch
-                            }
+                            },
                         )
                     }
             }
@@ -259,7 +259,7 @@ class RecentsPresenter(
                         RecentMangaItem(
                             it.first,
                             it.second,
-                            newChaptersHeader
+                            newChaptersHeader,
                         )
                     }.toMutableList()
             val cReadingItems =
@@ -267,7 +267,7 @@ class RecentsPresenter(
                     RecentMangaItem(
                         it.first,
                         it.second,
-                        continueReadingHeader
+                        continueReadingHeader,
                     )
                 }.toMutableList()
             if (nChaptersItems.isNotEmpty()) {
@@ -464,7 +464,7 @@ class RecentsPresenter(
         chapter: Chapter,
         read: Boolean,
         lastRead: Int? = null,
-        pagesLeft: Int? = null
+        pagesLeft: Int? = null,
     ) {
         presenterScope.launch(Dispatchers.IO) {
             chapter.apply {

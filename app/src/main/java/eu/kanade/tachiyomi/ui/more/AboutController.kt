@@ -71,7 +71,7 @@ class AboutController : SettingsController() {
                         "https://github.com/Jays2Kings/tachiyomiJ2K/commits/master"
                     } else {
                         RELEASE_URL
-                    }.toUri()
+                    }.toUri(),
                 )
                 startActivity(intent)
             }
@@ -186,7 +186,7 @@ class AboutController : SettingsController() {
                 putString(BODY_KEY, body)
                 putString(URL_KEY, url)
                 putBoolean(IS_BETA, isBeta == true)
-            }
+            },
         )
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
@@ -202,7 +202,7 @@ class AboutController : SettingsController() {
                         R.string.new_beta_version_available
                     } else {
                         R.string.new_version_available
-                    }
+                    },
                 )
                 .setMessage(info)
                 .setPositiveButton(if (isOnA12) R.string.update else R.string.download) { _, _ ->

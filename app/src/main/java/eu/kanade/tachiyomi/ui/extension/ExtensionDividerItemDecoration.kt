@@ -43,7 +43,7 @@ class ExtensionDividerItemDecoration(context: Context) : androidx.recyclerview.w
         outRect: Rect,
         view: View,
         parent: androidx.recyclerview.widget.RecyclerView,
-        state: androidx.recyclerview.widget.RecyclerView.State
+        state: androidx.recyclerview.widget.RecyclerView.State,
     ) {
         outRect.set(0, 0, 0, divider.intrinsicHeight)
     }

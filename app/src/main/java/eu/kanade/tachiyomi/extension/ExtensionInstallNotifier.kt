@@ -57,7 +57,7 @@ class ExtensionInstallNotifier(private val context: Context) {
                 .setChannelId(Notifications.CHANNEL_EXT_PROGRESS)
                 .setContentTitle(context.getString(R.string.updating_extensions))
                 .setProgress(max, progress, progress == 0)
-                .build()
+                .build(),
         )
     }
 
@@ -70,8 +70,8 @@ class ExtensionInstallNotifier(private val context: Context) {
                     context.resources.getQuantityString(
                         R.plurals.extensions_updated_plural,
                         extensions.size,
-                        extensions.size
-                    )
+                        extensions.size,
+                    ),
                 )
                 .setSmallIcon(R.drawable.ic_extension_updated_24dp)
                 .setOngoing(false)
@@ -82,7 +82,7 @@ class ExtensionInstallNotifier(private val context: Context) {
                         setContentText(extensions.joinToString(", ") { it.name })
                     }
                 }
-                .build()
+                .build(),
         )
     }
 }

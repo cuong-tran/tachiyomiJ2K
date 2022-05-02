@@ -146,7 +146,8 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
                     }?.binding?.recycler?.smoothScrollToTop()
                 }
             }
-        })
+        },
+        )
         presenter.onCreate()
         updateExtTitle()
 
@@ -228,7 +229,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     override fun onExtSortClicked(view: TextView, position: Int) {
         view.popupMenu(
             InstalledExtensionsOrder.values().map { it.value to it.nameRes },
-            presenter.preferences.installedExtensionsOrder().get()
+            presenter.preferences.installedExtensionsOrder().get(),
         ) {
             presenter.preferences.installedExtensionsOrder().set(itemId)
             extAdapter?.installedSortOrder = itemId
@@ -272,7 +273,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
                     PreMigrationController.navigateToMigration(
                         Injekt.get<PreferencesHelper>().skipPreMigration().get(),
                         controller.router,
-                        listOf(item.manga.id!!)
+                        listOf(item.manga.id!!),
                     )
                 } else if (item is SourceItem) {
                     presenter.setSelectedSource(item.source)
@@ -300,7 +301,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         PreMigrationController.navigateToMigration(
             Injekt.get<PreferencesHelper>().skipPreMigration().get(),
             controller.router,
-            sourceMangas
+            sourceMangas,
         )
     }
 
@@ -345,7 +346,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             extAdapter?.updateDataSet(
                 extensions.filter {
                     it.extension.name.contains(controller.extQuery, ignoreCase = true)
-                }
+                },
             )
         } else {
             extAdapter?.updateDataSet(extensions)
@@ -402,7 +403,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
                 when (position) {
                     0 -> R.string.extensions
                     else -> R.string.migration
-                }
+                },
             )
         }
 
@@ -415,7 +416,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             val binding = RecyclerWithScrollerBinding.inflate(
                 LayoutInflater.from(container.context),
                 container,
-                false
+                false,
             )
             val view: RecyclerWithScrollerView = binding.root
             val height = this@ExtensionBottomSheet.controller.activityBinding?.bottomNav?.height

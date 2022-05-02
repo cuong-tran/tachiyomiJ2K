@@ -35,7 +35,7 @@ class SelectionHeader : AbstractHeaderItem<SelectionHeader.Holder>() {
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: Holder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
         // Intentionally empty
     }

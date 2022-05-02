@@ -85,7 +85,7 @@ class SettingsSearchController :
                     setItems(getResultSet(newText))
                     return false
                 }
-            }
+            },
         )
 
         searchView?.setQuery(lastSearch, true)

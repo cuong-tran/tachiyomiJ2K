@@ -35,8 +35,8 @@ private suspend fun <T> Observable<T>.awaitOne(): T = suspendCancellableCoroutin
                 override fun onCompleted() {
                     if (cont.isActive) cont.resumeWithException(
                         IllegalStateException(
-                            "Should have invoked onNext"
-                        )
+                            "Should have invoked onNext",
+                        ),
                     )
                 }
 
@@ -49,8 +49,8 @@ private suspend fun <T> Observable<T>.awaitOne(): T = suspendCancellableCoroutin
                         cont.completeResume(token)
                     }
                 }
-            }
-        )
+            },
+        ),
     )
 }
 
@@ -78,6 +78,6 @@ fun <T> runAsObservable(
             }
             emitter.setCancellation { job.cancel() }
         },
-        backpressureMode
+        backpressureMode,
     )
 }

@@ -47,7 +47,7 @@ data class BackupManga(
     @ProtoNumber(802) var customAuthor: String? = null,
     // skipping 803 due to using duplicate value in previous builds
     @ProtoNumber(804) var customDescription: String? = null,
-    @ProtoNumber(805) var customGenre: List<String>? = null
+    @ProtoNumber(805) var customGenre: List<String>? = null,
 ) {
     fun getMangaImpl(): MangaImpl {
         return MangaImpl().apply {
@@ -92,7 +92,7 @@ data class BackupManga(
                 artist = customArtist,
                 description = customDescription,
                 genre = customGenre?.toTypedArray(),
-                status = customStatus.takeUnless { it == 0 }
+                status = customStatus.takeUnless { it == 0 },
             )
         }
         return null
@@ -120,7 +120,7 @@ data class BackupManga(
                 dateAdded = manga.date_added,
                 viewer = manga.readingModeType,
                 viewer_flags = manga.viewer_flags.takeIf { it != -1 } ?: 0,
-                chapterFlags = manga.chapter_flags
+                chapterFlags = manga.chapter_flags,
             ).also { backupManga ->
                 customMangaManager?.getManga(manga)?.let {
                     backupManga.customTitle = it.title

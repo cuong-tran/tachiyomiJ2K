@@ -14,7 +14,7 @@ class ExtensionTrustDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
         Bundle().apply {
             putString(SIGNATURE_KEY, signatureHash)
             putString(PKGNAME_KEY, pkgName)
-        }
+        },
     ) {
         listener = target
     }

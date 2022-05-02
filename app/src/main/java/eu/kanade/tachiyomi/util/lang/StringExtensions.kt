@@ -129,7 +129,7 @@ fun String.asButton(context: Context, disabled: Boolean = false): SpannedString 
     return buildSpannedString {
         val buttonSpan: SpannableStringBuilder.() -> Unit = {
             inSpans(
-                TextAppearanceSpan(context, R.style.TextAppearance_Tachiyomi_Button)
+                TextAppearanceSpan(context, R.style.TextAppearance_Tachiyomi_Button),
             ) { append(this@asButton) }
         }
         if (disabled) {
@@ -161,7 +161,7 @@ fun String.withSubtitle(context: Context, subtitle: String): Spanned {
         ForegroundColorSpan(context.getResourceColor(android.R.attr.textColorSecondary)),
         this.length + 1,
         spannable.length,
-        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
     )
     return spannable
 }

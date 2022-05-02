@@ -85,7 +85,7 @@ object Notifications {
 
     private val deprecatedChannels = listOf(
         "backup_restore_channel",
-        "library_channel"
+        "library_channel",
     )
 
     /**
@@ -102,11 +102,11 @@ object Notifications {
         listOf(
             NotificationChannelGroup(
                 GROUP_BACKUP_RESTORE,
-                context.getString(R.string.backup_and_restore)
+                context.getString(R.string.backup_and_restore),
             ),
             NotificationChannelGroup(
                 GROUP_EXTENSION_UPDATES,
-                context.getString(R.string.extension_updates)
+                context.getString(R.string.extension_updates),
             ),
             NotificationChannelGroup(GROUP_LIBRARY, context.getString(R.string.library)),
         ).forEach(context.notificationManager::createNotificationChannelGroup)
@@ -115,12 +115,12 @@ object Notifications {
             NotificationChannel(
                 CHANNEL_COMMON,
                 context.getString(R.string.common),
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_LOW,
             ),
             NotificationChannel(
                 CHANNEL_LIBRARY_PROGRESS,
                 context.getString(R.string.updating_library),
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 group = GROUP_LIBRARY
                 setShowBadge(false)
@@ -128,7 +128,7 @@ object Notifications {
             NotificationChannel(
                 CHANNEL_LIBRARY_ERROR,
                 context.getString(R.string.channel_errors),
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 group = GROUP_LIBRARY
                 setShowBadge(false)
@@ -136,7 +136,7 @@ object Notifications {
             NotificationChannel(
                 CHANNEL_LIBRARY_SKIPPED,
                 context.getString(R.string.channel_skipped),
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 group = GROUP_LIBRARY
                 setShowBadge(false)
@@ -144,28 +144,28 @@ object Notifications {
             NotificationChannel(
                 CHANNEL_DOWNLOADER,
                 context.getString(R.string.downloads),
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 setShowBadge(false)
             },
             NotificationChannel(
                 CHANNEL_UPDATES_TO_EXTS,
                 context.getString(R.string.extension_updates_pending),
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_DEFAULT,
             ).apply {
                 group = GROUP_EXTENSION_UPDATES
             },
             NotificationChannel(
                 CHANNEL_NEW_CHAPTERS,
                 context.getString(R.string.new_chapters),
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_DEFAULT,
             ).apply {
                 group = GROUP_LIBRARY
             },
             NotificationChannel(
                 CHANNEL_BACKUP_RESTORE_PROGRESS,
                 context.getString(R.string.progress),
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 group = GROUP_BACKUP_RESTORE
                 setShowBadge(false)
@@ -173,7 +173,7 @@ object Notifications {
             NotificationChannel(
                 CHANNEL_BACKUP_RESTORE_COMPLETE,
                 context.getString(R.string.complete),
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_HIGH,
             ).apply {
                 group = GROUP_BACKUP_RESTORE
                 setShowBadge(false)
@@ -182,17 +182,17 @@ object Notifications {
             NotificationChannel(
                 CHANNEL_CRASH_LOGS,
                 context.getString(R.string.crash_logs),
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_HIGH,
             ),
             NotificationChannel(
                 CHANNEL_INCOGNITO_MODE,
                 context.getString(R.string.incognito_mode),
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_LOW,
             ),
             NotificationChannel(
                 CHANNEL_EXT_PROGRESS,
                 context.getString(R.string.updating_extensions),
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 group = GROUP_EXTENSION_UPDATES
                 setShowBadge(false)
@@ -201,17 +201,17 @@ object Notifications {
             NotificationChannel(
                 CHANNEL_EXT_UPDATED,
                 context.getString(R.string.extensions_updated),
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_DEFAULT,
             ).apply {
                 group = GROUP_EXTENSION_UPDATES
             },
             NotificationChannel(
                 CHANNEL_UPDATED,
                 context.getString(R.string.update_completed),
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_DEFAULT,
             ).apply {
                 setShowBadge(false)
-            }
+            },
         )
         context.notificationManager.createNotificationChannels(channels)
     }

@@ -73,16 +73,16 @@ class PreferencesHelper(val context: Context) {
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
                 context.getString(R.string.app_name),
-            "downloads"
-        )
+            "downloads",
+        ),
     )
 
     private val defaultBackupDir = Uri.fromFile(
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
                 context.getString(R.string.app_name),
-            "backup"
-        )
+            "backup",
+        ),
     )
 
     fun getInt(key: String, default: Int) = flowPrefs.getInt(key, default)
@@ -182,7 +182,7 @@ class PreferencesHelper(val context: Context) {
 
     fun readerBottomButtons() = flowPrefs.getStringSet(
         Keys.readerBottomButtons,
-        ReaderBottomButton.BUTTONS_DEFAULTS
+        ReaderBottomButton.BUTTONS_DEFAULTS,
     )
 
     fun showNavigationOverlayNewUser() = flowPrefs.getBoolean(Keys.showNavigationOverlayNewUser, true)

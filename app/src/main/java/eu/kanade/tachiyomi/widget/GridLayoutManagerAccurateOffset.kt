@@ -129,7 +129,7 @@ class GridLayoutManagerAccurateOffset(context: Context?, spanCount: Int) : GridL
             childTypeMap,
             childTypeHeightMap,
             childTypeEstimateMap,
-            childAvgHeightMap
+            childAvgHeightMap,
         )
     }
 

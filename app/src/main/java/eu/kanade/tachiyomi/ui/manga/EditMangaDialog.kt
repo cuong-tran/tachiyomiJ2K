@@ -54,7 +54,7 @@ class EditMangaDialog : DialogController {
         Bundle()
             .apply {
                 putLong(KEY_MANGA, manga.id!!)
-            }
+            },
     ) {
         targetController = target
         this.manga = manga
@@ -122,7 +122,7 @@ class EditMangaDialog : DialogController {
                 binding.mangaDescription.hint =
                     "${resources?.getString(R.string.description)}: ${manga.originalDescription?.replace(
                         "\n",
-                        " "
+                        " ",
                     )?.chop(20)}"
             }
         }
@@ -152,7 +152,7 @@ class EditMangaDialog : DialogController {
                 R.string.clear_tags
             } else {
                 R.string.reset_tags
-            }
+            },
         )
         binding.addTagChip.setOnClickListener {
             binding.addTagChip.isVisible = false
@@ -180,7 +180,7 @@ class EditMangaDialog : DialogController {
                 manga,
                 builder = {
                     parameters(Parameters.Builder().set(MangaFetcher.realCover, true).build())
-                }
+                },
             )
             customCoverUri = null
             willResetCover = true
@@ -193,7 +193,7 @@ class EditMangaDialog : DialogController {
         inputMethodManager.showSoftInput(
             binding.addTagEditText,
             WindowManager.LayoutParams
-                .SOFT_INPUT_ADJUST_PAN
+                .SOFT_INPUT_ADJUST_PAN,
         )
     }
 
@@ -227,23 +227,23 @@ class EditMangaDialog : DialogController {
                                 dark -> 0.225f
                                 else -> 0.85f
                             }
-                            )
-                    )
+                            ),
+                    ),
                 ),
-                199
+                199,
             )
             val textColor = ColorUtils.HSLToColor(
                 floatArrayOf(
                     accentArray[0],
                     accentArray[1],
-                    if (dark) 0.945f else 0.175f
-                )
+                    if (dark) 0.945f else 0.175f,
+                ),
             )
             genres.map { genreText ->
                 val chip = LayoutInflater.from(binding.root.context).inflate(
                     R.layout.genre_chip,
                     this,
-                    false
+                    false,
                 ) as Chip
                 val id = View.generateViewId()
                 chip.id = id
@@ -257,9 +257,9 @@ class EditMangaDialog : DialogController {
                     binding.seriesType.setSelection(
                         manga.seriesType(
                             customTags = tags.joinToString(
-                                ", "
-                            )
-                        ) - 1
+                                ", ",
+                            ),
+                        ) - 1,
                     )
                 }
                 this.addView(chip)
@@ -302,7 +302,7 @@ class EditMangaDialog : DialogController {
             binding.mangaGenresTags.tags,
             binding.mangaStatus.selectedPosition,
             if (binding.resetsReadingMode.isVisible) binding.seriesType.selectedPosition + 1 else null,
-            willResetCover
+            willResetCover,
         )
     }
 

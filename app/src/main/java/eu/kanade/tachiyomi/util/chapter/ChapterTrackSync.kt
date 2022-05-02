@@ -58,7 +58,7 @@ fun updateTrackChapterMarkedAsRead(
     newLastChapter: Chapter?,
     mangaId: Long?,
     delay: Long = 3000,
-    fetchTracks: (suspend () -> Unit)? = null
+    fetchTracks: (suspend () -> Unit)? = null,
 ) {
     if (!preferences.trackMarkedAsRead()) return
     mangaId ?: return
@@ -84,7 +84,7 @@ suspend fun updateTrackChapterRead(
     preferences: PreferencesHelper,
     mangaId: Long?,
     newChapterRead: Float,
-    retryWhenOnline: Boolean = false
+    retryWhenOnline: Boolean = false,
 ) {
     val trackManager = Injekt.get<TrackManager>()
     val trackList = db.getTracks(mangaId).executeAsBlocking()

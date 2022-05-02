@@ -26,7 +26,7 @@ import uy.kohesive.injekt.injectLazy
 
 class MigrationBottomSheetDialog(
     activity: Activity,
-    private val listener: StartMigrationListener
+    private val listener: StartMigrationListener,
 ) : E2EBottomSheetDialog<MigrationBottomSheetBinding>(activity) {
 
     /**
@@ -61,7 +61,7 @@ class MigrationBottomSheetDialog(
         setBottomEdge(
             if (activity.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) binding.extraSearchParamText
             else binding.skipStep,
-            activity
+            activity,
         )
     }
 
@@ -80,7 +80,7 @@ class MigrationBottomSheetDialog(
             listener.startMigration(
                 binding.extraSearchParamText.text?.toString()?.takeIf {
                     it.isNotBlank() && binding.extraSearchParam.isChecked
-                }
+                },
             )
             dismiss()
         }
@@ -114,7 +114,7 @@ class MigrationBottomSheetDialog(
         binding.skipStep.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) (listener as? Controller)?.activity?.toast(
                 R.string.to_show_again_setting_sources,
-                Toast.LENGTH_LONG
+                Toast.LENGTH_LONG,
             )
         }
     }

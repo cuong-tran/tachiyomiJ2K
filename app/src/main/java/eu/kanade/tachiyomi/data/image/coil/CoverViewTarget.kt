@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 class CoverViewTarget(
     view: ImageView,
     val progress: View? = null,
-    val scaleType: ImageView.ScaleType = ImageView.ScaleType.CENTER_CROP
+    val scaleType: ImageView.ScaleType = ImageView.ScaleType.CENTER_CROP,
 ) : ImageViewTarget(view) {
 
     override fun onError(error: Drawable?) {
@@ -21,7 +21,7 @@ class CoverViewTarget(
         val vector = VectorDrawableCompat.create(
             view.context.resources,
             R.drawable.ic_broken_image_24dp,
-            null
+            null,
         )
         vector?.setTint(view.context.getResourceColor(android.R.attr.textColorSecondary))
         view.setImageDrawable(vector)

@@ -63,7 +63,7 @@ class SourceFilterSheet(val activity: Activity) :
         array.recycle()
         binding.root.doOnApplyWindowInsetsCompat { _, insets, _ ->
             binding.titleLayout.updatePaddingRelative(
-                bottom = insets.getInsets(systemBars()).bottom
+                bottom = insets.getInsets(systemBars()).bottom,
             )
             binding.titleLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 height = headerHeight + binding.titleLayout.paddingBottom
@@ -78,7 +78,8 @@ class SourceFilterSheet(val activity: Activity) :
                     (binding.root.parent.parent as? View)?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
                 }
             }
-        })
+        },
+        )
 
         binding.filtersRecycler.viewTreeObserver.addOnScrollChangedListener {
             updateBottomButtons()
@@ -102,7 +103,7 @@ class SourceFilterSheet(val activity: Activity) :
                 override fun onStateChanged(p0: View, state: Int) {
                     updateBottomButtons()
                 }
-            }
+            },
         )
     }
 
@@ -133,7 +134,7 @@ class SourceFilterSheet(val activity: Activity) :
         val headerHeight = array.getDimensionPixelSize(0, 0)
         binding.titleLayout.updatePaddingRelative(
             bottom = activity.window.decorView.rootWindowInsetsCompat
-                ?.getInsets(systemBars())?.bottom ?: 0
+                ?.getInsets(systemBars())?.bottom ?: 0,
         )
 
         binding.titleLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {

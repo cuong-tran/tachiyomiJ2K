@@ -156,7 +156,7 @@ open class BrowseSourcePresenter(
                 },
                 { _, error ->
                     Timber.e(error)
-                }
+                },
             )
 
         // Request first page.

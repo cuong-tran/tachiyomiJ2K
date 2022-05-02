@@ -19,7 +19,7 @@ import timber.log.Timber
 class ChapterLoader(
     private val downloadManager: DownloadManager,
     private val manga: Manga,
-    private val source: Source
+    private val source: Source,
 ) {
 
     /**

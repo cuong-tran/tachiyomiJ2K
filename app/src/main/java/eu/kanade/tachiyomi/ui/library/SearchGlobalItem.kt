@@ -23,7 +23,7 @@ class SearchGlobalItem : AbstractFlexibleItem<SearchGlobalItem.Holder>() {
 
     override fun createViewHolder(
         view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): Holder {
         view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             width = MATCH_PARENT
@@ -47,7 +47,7 @@ class SearchGlobalItem : AbstractFlexibleItem<SearchGlobalItem.Holder>() {
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: Holder,
         position: Int,
-        payloads: MutableList<Any>
+        payloads: MutableList<Any>,
     ) {
         holder.bind(string)
         val layoutParams = holder.itemView.layoutParams as? StaggeredGridLayoutManager.LayoutParams

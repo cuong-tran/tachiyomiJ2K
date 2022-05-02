@@ -52,7 +52,7 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
                         binding.date.isVisible = true
                         binding.date.text = itemView.context.getString(
                             R.string.updated_,
-                            it.timeSpanFromNow
+                            it.timeSpanFromNow,
                         )
                         infoText.add("")
                     }
@@ -62,7 +62,7 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
                         binding.date.isVisible = true
                         binding.date.text = itemView.context.getString(
                             R.string.installed_,
-                            it.timeSpanFromNow
+                            it.timeSpanFromNow,
                         )
                         infoText.add("")
                     }
@@ -136,7 +136,7 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
                     InstallStep.Installed -> R.string.installed
                     InstallStep.Error -> R.string.retry
                     else -> return@with
-                }
+                },
             )
             if (installStep != InstallStep.Error) {
                 isEnabled = false

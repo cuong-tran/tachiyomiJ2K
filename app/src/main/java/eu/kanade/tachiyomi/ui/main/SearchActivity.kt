@@ -104,7 +104,7 @@ class SearchActivity : MainActivity() {
         to: Controller?,
         from: Controller?,
         isPush:
-            Boolean
+            Boolean,
     ) {
         if (from is DialogController || to is DialogController) {
             return
@@ -118,7 +118,7 @@ class SearchActivity : MainActivity() {
         if (notificationId > -1) NotificationReceiver.dismissNotification(
             applicationContext,
             notificationId,
-            intent.getIntExtra("groupId", 0)
+            intent.getIntExtra("groupId", 0),
         )
         when (intent.action) {
             Intent.ACTION_SEARCH, Intent.ACTION_SEND, "com.google.android.gms.actions.SEARCH_ACTION" -> {
@@ -168,7 +168,7 @@ class SearchActivity : MainActivity() {
                 router.replaceTopController(
                     RouterTransaction.with(MangaDetailsController(extras))
                         .pushChangeHandler(SimpleSwapChangeHandler())
-                        .popChangeHandler(FadeChangeHandler())
+                        .popChangeHandler(FadeChangeHandler()),
                 )
             }
             SHORTCUT_SOURCE -> {
@@ -177,14 +177,14 @@ class SearchActivity : MainActivity() {
                 router.replaceTopController(
                     RouterTransaction.with(BrowseSourceController(extras))
                         .pushChangeHandler(SimpleSwapChangeHandler())
-                        .popChangeHandler(FadeChangeHandler())
+                        .popChangeHandler(FadeChangeHandler()),
                 )
             }
             SHORTCUT_READER_SETTINGS -> {
                 router.replaceTopController(
                     RouterTransaction.with(SettingsReaderController())
                         .pushChangeHandler(SimpleSwapChangeHandler())
-                        .popChangeHandler(FadeChangeHandler())
+                        .popChangeHandler(FadeChangeHandler()),
                 )
             }
             else -> return false
@@ -196,7 +196,7 @@ class SearchActivity : MainActivity() {
         fun openMangaIntent(context: Context, id: Long?, canReturnToMain: Boolean = false) = Intent(
             context,
             SearchActivity::class
-                .java
+                .java,
         )
             .apply {
                 action = if (canReturnToMain) SHORTCUT_MANGA_BACK else SHORTCUT_MANGA
@@ -206,7 +206,7 @@ class SearchActivity : MainActivity() {
         fun openReaderSettings(context: Context) = Intent(
             context,
             SearchActivity::class
-                .java
+                .java,
         )
             .apply {
                 action = SHORTCUT_READER_SETTINGS

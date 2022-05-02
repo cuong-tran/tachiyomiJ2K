@@ -26,7 +26,7 @@ import java.util.TreeMap
 class SourcePresenter(
     val controller: BrowseController,
     val sourceManager: SourceManager = Injekt.get(),
-    private val preferences: PreferencesHelper = Injekt.get()
+    private val preferences: PreferencesHelper = Injekt.get(),
 ) {
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)

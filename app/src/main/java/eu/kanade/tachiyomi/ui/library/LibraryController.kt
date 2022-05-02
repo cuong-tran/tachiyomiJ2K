@@ -126,7 +126,7 @@ import kotlin.random.nextInt
 
 class LibraryController(
     bundle: Bundle? = null,
-    val preferences: PreferencesHelper = Injekt.get()
+    val preferences: PreferencesHelper = Injekt.get(),
 ) : BaseCoroutineController<LibraryControllerBinding, LibraryPresenter>(bundle),
     ActionMode.Callback,
     FlexibleAdapter.OnItemClickListener,
@@ -248,14 +248,14 @@ class LibraryController(
                 "\"${preferences.librarySearchSuggestion().get()}\""
             } else {
                 view?.context?.getString(R.string.your_library)?.lowercase(Locale.ROOT)
-            }
+            },
         )
     }
 
     val cb = object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_STOP) {
         override fun onStart(
             animation: WindowInsetsAnimationCompat,
-            bounds: WindowInsetsAnimationCompat.BoundsCompat
+            bounds: WindowInsetsAnimationCompat.BoundsCompat,
         ): WindowInsetsAnimationCompat.BoundsCompat {
             hopperOffset = 0f
             updateHopperY()
@@ -264,7 +264,7 @@ class LibraryController(
 
         override fun onProgress(
             insets: WindowInsetsCompat,
-            runningAnimations: List<WindowInsetsAnimationCompat>
+            runningAnimations: List<WindowInsetsAnimationCompat>,
         ): WindowInsetsCompat {
             updateHopperY(insets)
             return insets
@@ -333,7 +333,7 @@ class LibraryController(
     private fun removeStaggeredObserver() {
         if (staggeredObserver != null) {
             binding.libraryGridRecycler.recycler.viewTreeObserver.removeOnGlobalLayoutListener(
-                staggeredObserver
+                staggeredObserver,
             )
             staggeredObserver = null
         }
@@ -367,7 +367,7 @@ class LibraryController(
 
     fun updateHopperPosition() {
         val shortAnimationDuration = resources?.getInteger(
-            android.R.integer.config_shortAnimTime
+            android.R.integer.config_shortAnimTime,
         ) ?: 0
         if (preferences.autohideHopper().get()) {
             // Flow same snap rules as bottom nav
@@ -391,7 +391,7 @@ class LibraryController(
                 EndAnimatorListener {
                     hopperOffset = end
                     updateHopperY()
-                }
+                },
             )
             alphaAnimation.duration = shortAnimationDuration.toLong()
             alphaAnimation.start()
@@ -435,7 +435,7 @@ class LibraryController(
     fun showCategoryText(name: String) {
         textAnim?.cancel()
         textAnim = binding.jumperCategoryText.animate().alpha(0f).setDuration(250L).setStartDelay(
-            2000
+            2000,
         )
         textAnim?.start()
         binding.jumperCategoryText.alpha = 1f
@@ -495,14 +495,14 @@ class LibraryController(
             MaterialMenuSheet.MenuSheetItem(
                 id,
                 LibraryGroup.groupTypeDrawableRes(id),
-                LibraryGroup.groupTypeStringRes(id, presenter.allCategories.size > 1)
+                LibraryGroup.groupTypeStringRes(id, presenter.allCategories.size > 1),
             )
         }
         MaterialMenuSheet(
             activity!!,
             items,
             activity!!.getString(R.string.group_library_by),
-            presenter.groupType
+            presenter.groupType,
         ) { _, item ->
             preferences.groupLibraryBy().set(item)
             presenter.groupType = item
@@ -587,7 +587,7 @@ class LibraryController(
                 },
                 onBottomNavUpdate = {
                     updateFilterSheetY()
-                }
+                },
             )
 
         viewScope.launchUI {
@@ -624,7 +624,7 @@ class LibraryController(
         val bigToolbarHeight = fullAppBarHeight ?: return
         val value = max(
             0,
-            bigToolbarHeight + activityBinding.appBar.y.roundToInt()
+            bigToolbarHeight + activityBinding.appBar.y.roundToInt(),
         ) + activityBinding.appBar.paddingTop
         if (value != binding.fastScroller.marginTop) {
             binding.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -632,7 +632,7 @@ class LibraryController(
             }
             binding.emptyView.updatePadding(
                 top = bigToolbarHeight + activityBinding.appBar.paddingTop,
-                bottom = binding.libraryGridRecycler.recycler.paddingBottom
+                bottom = binding.libraryGridRecycler.recycler.paddingBottom,
             )
             binding.progress.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = (bigToolbarHeight + activityBinding.appBar.paddingTop) / 2
@@ -697,7 +697,7 @@ class LibraryController(
                             " (${adapter.itemsPerCategory[category.id]})"
                         } else {
                             ""
-                        }
+                        },
                 )
             }
             if (items.isEmpty()) return@setOnClickListener
@@ -706,7 +706,7 @@ class LibraryController(
                 items,
                 it.context.getString(R.string.jump_to_category),
                 activeCategory,
-                300.dpToPx
+                300.dpToPx,
             ) { _, item ->
                 scrollToHeader(item)
                 true
@@ -721,7 +721,7 @@ class LibraryController(
                 1 -> if (canCollapseOrExpandCategory() != null) presenter.toggleAllCategoryVisibility()
                 else -> activityBinding?.searchToolbar?.menu?.performIdentifierAction(
                     R.id.action_search,
-                    0
+                    0,
                 )
             }
             true
@@ -769,7 +769,7 @@ class LibraryController(
         val insets = windowInsets ?: view.rootWindowInsetsCompat
         val listOfYs = mutableListOf(
             binding.filterBottomSheet.filterBottomSheet.y,
-            activityBinding?.bottomNav?.y ?: binding.filterBottomSheet.filterBottomSheet.y
+            activityBinding?.bottomNav?.y ?: binding.filterBottomSheet.filterBottomSheet.y,
         )
         val insetBottom = insets?.getInsets(systemBars())?.bottom ?: 0
         if (!preferences.autohideHopper().get() || activityBinding?.bottomNav == null) {
@@ -887,7 +887,7 @@ class LibraryController(
                 viewScope.launchUI {
                     NotificationReceiver.dismissNotification(
                         context,
-                        Notifications.ID_LIBRARY_PROGRESS
+                        Notifications.ID_LIBRARY_PROGRESS,
                     )
                 }
             }
@@ -898,7 +898,7 @@ class LibraryController(
         with(binding.libraryGridRecycler.recycler) {
             viewScope.launchUI {
                 updatePaddingRelative(
-                    bottom = 50.dpToPx + (activityBinding?.bottomNav?.height ?: 0)
+                    bottom = 50.dpToPx + (activityBinding?.bottomNav?.height ?: 0),
                 )
             }
             useStaggered(preferences)
@@ -906,13 +906,13 @@ class LibraryController(
                 spanCount = 1
                 updatePaddingRelative(
                     start = 0,
-                    end = 0
+                    end = 0,
                 )
             } else {
                 setGridSize(preferences)
                 updatePaddingRelative(
                     start = 5.dpToPx,
-                    end = 5.dpToPx
+                    end = 5.dpToPx,
                 )
             }
             (manager as? GridLayoutManager)?.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
@@ -934,7 +934,7 @@ class LibraryController(
             preferences.libraryLayout(),
             preferences.uniformGrid(),
             preferences.gridSize(),
-            preferences.useStaggeredGrid()
+            preferences.useStaggeredGrid(),
         ).forEach {
             it.asFlow()
                 .drop(1)
@@ -1044,9 +1044,9 @@ class LibraryController(
                     listOf(
                         EmptyView.Action(R.string.getting_started_guide) {
                             activity?.openInBrowser("https://tachiyomi.org/help/guides/getting-started/#installing-an-extension")
-                        }
+                        },
                     )
-                } else emptyList()
+                } else emptyList(),
             )
         }
         adapter.setItems(mangaMap)
@@ -1110,7 +1110,7 @@ class LibraryController(
                 adapter.itemsPerCategory
             } else {
                 emptyMap()
-            }
+            },
         )
         with(binding.filterBottomSheet.root) {
             viewScope.launch {
@@ -1148,7 +1148,7 @@ class LibraryController(
             slideAnimation(slide, -slide),
             slideAnimation(-slide, slide),
             slideAnimation(slide, -slide),
-            slideAnimation(-slide, 0f, 233)
+            slideAnimation(-slide, 0f, 233),
         )
         animatorSet.playSequentially(animations)
         animatorSet.startDelay = 1250
@@ -1157,7 +1157,7 @@ class LibraryController(
                 binding.categoryHopperFrame.translationX = 0f
                 isAnimatingHopper = false
                 this.animatorSet = null
-            }
+            },
         )
         animatorSet.start()
     }
@@ -1240,7 +1240,7 @@ class LibraryController(
                         previousHeader?.category?.isHidden == true -> (-3).dpToPx
                         else -> (-30).dpToPx
                     }
-                    ) + appbarOffset
+                    ) + appbarOffset,
             )
             (adapter.getItem(headerPosition) as? LibraryHeaderItem)?.category?.let {
                 saveActiveCategory(it)
@@ -1289,7 +1289,7 @@ class LibraryController(
         } else if (this.query.isNotBlank()) {
             searchItem.string = this.query
             (binding.libraryGridRecycler.recycler.findViewHolderForAdapterPosition(0) as? SearchGlobalItem.Holder)?.bind(
-                this.query
+                this.query,
             )
         } else if (this.query.isBlank() && adapter.scrollableHeaders.isNotEmpty()) {
             adapter.removeAllScrollableHeaders()
@@ -1438,10 +1438,10 @@ class LibraryController(
         when {
             lastClickPosition == -1 -> setSelection(position)
             lastClickPosition > position -> for (i in position until lastClickPosition) setSelection(
-                i
+                i,
             )
             lastClickPosition < position -> for (i in lastClickPosition + 1..position) setSelection(
-                i
+                i,
             )
             else -> setSelection(position)
         }
@@ -1497,7 +1497,7 @@ class LibraryController(
         ) {
             binding.libraryGridRecycler.recycler.scrollBy(
                 0,
-                binding.libraryGridRecycler.recycler.paddingTop
+                binding.libraryGridRecycler.recycler.paddingTop,
             )
         }
         if (lastItemPosition == toPosition) lastItemPosition = null
@@ -1512,7 +1512,7 @@ class LibraryController(
         return (adapter.getItem(toPosition) !is LibraryHeaderItem) && (
             newHeader?.category?.id == item.manga.category || !presenter.mangaIsInCategory(
                 item.manga,
-                newHeader?.category?.id
+                newHeader?.category?.id,
             )
             )
     }
@@ -1547,7 +1547,7 @@ class LibraryController(
             if (newHeader?.category != null) moveMangaToCategory(
                 item.manga,
                 newHeader.category,
-                mangaIds
+                mangaIds,
             )
         }
         lastItemPosition = null
@@ -1567,14 +1567,14 @@ class LibraryController(
     private fun moveMangaToCategory(
         manga: LibraryManga,
         category: Category?,
-        mangaIds: List<Long>
+        mangaIds: List<Long>,
     ) {
         if (category?.id == null) return
         val oldCatId = manga.category
         presenter.moveMangaToCategory(manga, category.id, mangaIds)
         snack?.dismiss()
         snack = view?.snack(
-            resources!!.getString(R.string.moved_to_, category.name)
+            resources!!.getString(R.string.moved_to_, category.name),
         ) {
             anchorView = anchorView()
             view.elevation = 15f.dpToPx
@@ -1596,9 +1596,9 @@ class LibraryController(
                     LibraryUpdateService.isRunning() -> R.string.adding_category_to_queue
                     else -> R.string.updating_
                 },
-                category.name
+                category.name,
             ),
-            Snackbar.LENGTH_LONG
+            Snackbar.LENGTH_LONG,
         ) {
             anchorView = anchorView()
             view.elevation = 15f.dpToPx
@@ -1607,7 +1607,7 @@ class LibraryController(
                 viewScope.launchUI {
                     NotificationReceiver.dismissNotification(
                         context,
-                        Notifications.ID_LIBRARY_PROGRESS
+                        Notifications.ID_LIBRARY_PROGRESS,
                     )
                 }
             }
@@ -1617,7 +1617,7 @@ class LibraryController(
             category,
             mangaToUse = if (category.isDynamic) {
                 presenter.getMangaInCategories(category.id)
-            } else null
+            } else null,
         )
         return true
     }
@@ -1873,7 +1873,7 @@ class LibraryController(
                 PreMigrationController.navigateToMigration(
                     skipPre,
                     router,
-                    selectedMangas.filter { it.id != LocalSource.ID }.mapNotNull { it.id }
+                    selectedMangas.filter { it.id != LocalSource.ID }.mapNotNull { it.id },
                 )
                 destroyActionModeIfNeeded()
             }
@@ -1898,14 +1898,14 @@ class LibraryController(
                 object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                     override fun onDismissed(
                         transientBottomBar: Snackbar?,
-                        event: Int
+                        event: Int,
                     ) {
                         super.onDismissed(transientBottomBar, event)
                         if (!undoing) presenter.confirmMarkReadStatus(
-                            mapMangaChapters, markRead
+                            mapMangaChapters, markRead,
                         )
                     }
-                }
+                },
             )
         }
         (activity as? MainActivity)?.setUndoSnackBar(snack)
@@ -1931,7 +1931,7 @@ class LibraryController(
         snack?.dismiss()
         snack = view?.snack(
             activity?.getString(R.string.removed_from_library) ?: "",
-            Snackbar.LENGTH_INDEFINITE
+            Snackbar.LENGTH_INDEFINITE,
         ) {
             anchorView = anchorView()
             view.elevation = 15f.dpToPx
@@ -1946,7 +1946,7 @@ class LibraryController(
                         super.onDismissed(transientBottomBar, event)
                         if (!undoing) presenter.confirmDeletion(mangas)
                     }
-                }
+                },
             )
         }
         (activity as? MainActivity)?.setUndoSnackBar(snack)

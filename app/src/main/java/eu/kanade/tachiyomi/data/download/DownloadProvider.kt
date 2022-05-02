@@ -164,7 +164,7 @@ class DownloadProvider(private val context: Context) {
     fun findUnmatchedChapterDirs(
         chapters: List<Chapter>,
         manga: Manga,
-        source: Source
+        source: Source,
     ): List<UniFile> {
         val mangaDir = findMangaDir(manga, source) ?: return emptyList()
         val chapterNameHashSet = chapters.map { it.name }.toHashSet()
@@ -231,7 +231,7 @@ class DownloadProvider(private val context: Context) {
     fun getChapterDirName(chapter: Chapter): String {
         return DiskUtil.buildValidFilename(
             if (chapter.scanlator != null) "${chapter.scanlator}_${chapter.name}"
-            else chapter.name
+            else chapter.name,
         )
     }
 
@@ -244,7 +244,7 @@ class DownloadProvider(private val context: Context) {
         return listOf(
             getChapterDirName(chapter),
             // Legacy chapter directory name used in v0.8.4 and before
-            DiskUtil.buildValidFilename(chapter.name)
+            DiskUtil.buildValidFilename(chapter.name),
         )
     }
 }

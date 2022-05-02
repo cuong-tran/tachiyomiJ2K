@@ -21,14 +21,14 @@ data class ExtensionItem(
     val extension: Extension,
     val header: ExtensionGroupItem? = null,
     val installStep: InstallStep? = null,
-    val session: PackageInstaller.SessionInfo? = null
+    val session: PackageInstaller.SessionInfo? = null,
 ) :
     AbstractSectionableItem<ExtensionHolder, ExtensionGroupItem>(header) {
 
     constructor(
         extension: Extension,
         header: ExtensionGroupItem? = null,
-        installInfo: ExtensionIntallInfo?
+        installInfo: ExtensionIntallInfo?,
     ) : this(extension, header, installInfo?.first, installInfo?.second)
 
     val sessionProgress: Int?
@@ -55,7 +55,7 @@ data class ExtensionItem(
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: ExtensionHolder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
         if (payloads.isNullOrEmpty()) {
             holder.bind(this)

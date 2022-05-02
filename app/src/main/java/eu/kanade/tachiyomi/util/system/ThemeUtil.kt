@@ -21,19 +21,19 @@ object ThemeUtil {
                 0, 1 -> AppCompatDelegate.MODE_NIGHT_NO
                 2, 3, 4 -> AppCompatDelegate.MODE_NIGHT_YES
                 else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            }
+            },
         )
         preferences.lightTheme().set(
             when (theme) {
                 1 -> Themes.CLASSIC_BLUE
                 else -> Themes.DEFAULT
-            }
+            },
         )
         preferences.darkTheme().set(
             when (theme) {
                 4 -> Themes.CLASSIC_BLUE
                 else -> Themes.DEFAULT
-            }
+            },
         )
     }
 
@@ -50,7 +50,7 @@ object ThemeUtil {
                     "SPRING" -> Themes.SPRING_AND_DUSK
                     "STRAWBERRY_DAIQUIRI" -> Themes.STRAWBERRIES
                     else -> Themes.DEFAULT
-                }.name
+                }.name,
             )
             putString(
                 PreferenceKeys.darkTheme,
@@ -59,7 +59,7 @@ object ThemeUtil {
                     "CHOCOLATE_STRAWBERRIES" -> Themes.STRAWBERRIES
                     "DARK_BLUE" -> Themes.CLASSIC_BLUE
                     else -> Themes.DEFAULT
-                }.name
+                }.name,
             )
         }
     }

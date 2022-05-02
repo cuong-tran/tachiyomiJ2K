@@ -70,7 +70,7 @@ fun Controller.setOnQueryTextChangeListener(
     searchView: SearchView?,
     onlyOnSubmit: Boolean = false,
     hideKbOnSubmit: Boolean = true,
-    f: (text: String?) -> Boolean
+    f: (text: String?) -> Boolean,
 ) {
     searchView?.setOnQueryTextListener(
         object : SearchView.OnQueryTextListener {
@@ -95,7 +95,7 @@ fun Controller.setOnQueryTextChangeListener(
                 }
                 return true
             }
-        }
+        },
     )
 }
 
@@ -105,11 +105,13 @@ fun Controller.removeQueryListener() {
     searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String?) = true
         override fun onQueryTextChange(newText: String?) = true
-    })
+    },
+    )
     searchView2?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String?) = true
         override fun onQueryTextChange(newText: String?) = true
-    })
+    },
+    )
 }
 
 fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) {
@@ -126,7 +128,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
         }
         recycler.updatePaddingRelative(
             top = activityBinding!!.toolbar.y.toInt() + appBarHeight,
-            bottom = recycler.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom ?: 0
+            bottom = recycler.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom ?: 0,
         )
         recycler.applyBottomAnimatedInsets(setPadding = true) { view, insets ->
             val headerHeight = insets.getInsets(systemBars()).top + appBarHeight
@@ -137,7 +139,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
                 val headerHeight = insets.getInsets(systemBars()).top + appBarHeight
                 view.updatePaddingRelative(
                     top = headerHeight,
-                    bottom = insets.getInsets(ime() or systemBars()).bottom
+                    bottom = insets.getInsets(ime() or systemBars()).bottom,
                 )
             }
         }
@@ -157,7 +159,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
         val percent = ImageUtil.getPercentOfColor(
             activityBinding!!.appBar.backgroundColor ?: Color.TRANSPARENT,
             activity!!.getResourceColor(R.attr.colorSurface),
-            activity!!.getResourceColor(R.attr.colorPrimaryVariant)
+            activity!!.getResourceColor(R.attr.colorPrimaryVariant),
         )
         if (floatingBar) {
             setAppBarBG(0f)
@@ -193,7 +195,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
                     if (notAtTop != isToolbarColored) colorToolbar(notAtTop)
                 }
             }
-        }
+        },
     )
 }
 
@@ -247,7 +249,7 @@ fun Controller.scrollViewWith(
             top = (
                 activity?.window?.decorView?.rootWindowInsetsCompat?.getInsets(systemBars())?.top
                     ?: 0
-                ) + appBarHeight
+                ) + appBarHeight,
         )
     }
     val atTopOfRecyclerView: () -> Boolean = f@{
@@ -265,12 +267,12 @@ fun Controller.scrollViewWith(
         val headerHeight = systemInsets.top + appBarHeight
         if (!customPadding) view.updatePaddingRelative(
             top = headerHeight,
-            bottom = if (padBottom) systemInsets.bottom else view.paddingBottom
+            bottom = if (padBottom) systemInsets.bottom else view.paddingBottom,
         )
         swipeRefreshLayout?.setProgressViewOffset(
             true,
             headerHeight + (-60).dpToPx,
-            headerHeight + 10.dpToPx
+            headerHeight + 10.dpToPx,
         )
         statusBarHeight = systemInsets.top
         afterInsets?.invoke(insets)
@@ -294,7 +296,7 @@ fun Controller.scrollViewWith(
             val percent = ImageUtil.getPercentOfColor(
                 activityBinding!!.appBar.backgroundColor ?: Color.TRANSPARENT,
                 activity!!.getResourceColor(R.attr.colorSurface),
-                activity!!.getResourceColor(R.attr.colorPrimaryVariant)
+                activity!!.getResourceColor(R.attr.colorPrimaryVariant),
             )
             toolbarColorAnim = ValueAnimator.ofFloat(percent, isColored.toInt().toFloat())
             toolbarColorAnim?.addUpdateListener { valueAnimator ->
@@ -311,14 +313,14 @@ fun Controller.scrollViewWith(
             override fun onChangeStart(
                 controller: Controller,
                 changeHandler: ControllerChangeHandler,
-                changeType: ControllerChangeType
+                changeType: ControllerChangeType,
             ) {
                 super.onChangeStart(controller, changeHandler, changeType)
                 isInView = changeType.isEnter
                 if (changeType.isEnter) {
                     activityBinding?.appBar?.hideBigView(
                         this@scrollViewWith is SmallToolbarInterface,
-                        setTitleAlpha = this@scrollViewWith !is MangaDetailsController
+                        setTitleAlpha = this@scrollViewWith !is MangaDetailsController,
                     )
                     activityBinding?.appBar?.setToolbarModeBy(this@scrollViewWith)
                     activityBinding?.appBar?.useTabsInPreLayout = includeTabView
@@ -378,7 +380,7 @@ fun Controller.scrollViewWith(
                     if (activityBinding!!.toolbar.tag == randomTag) activityBinding!!.toolbar.setOnClickListener(null)
                 }
             }
-        }
+        },
     )
     colorToolbar(!atTopOfRecyclerView())
 
@@ -399,7 +401,7 @@ fun Controller.scrollViewWith(
                 ) {
                     if (!recycler.canScrollVertically(-1)) {
                         val shortAnimationDuration = resources?.getInteger(
-                            android.R.integer.config_shortAnimTime
+                            android.R.integer.config_shortAnimTime,
                         ) ?: 0
                         activityBinding!!.appBar.y = 0f
                         activityBinding!!.appBar.updateAppBarAfterY(recycler)
@@ -425,7 +427,7 @@ fun Controller.scrollViewWith(
                                     bottomNav.translationY = MathUtils.clamp(
                                         bottomNav.translationY,
                                         0f,
-                                        bottomNav.height.toFloat()
+                                        bottomNav.height.toFloat(),
                                     )
                                     updateViewsNearBottom()
                                 } else if (bottomNav.translationY != 0f) {
@@ -451,7 +453,7 @@ fun Controller.scrollViewWith(
                     }
                     swipeCircle?.translationY = max(
                         activityBinding!!.appBar.y,
-                        -activityBinding!!.appBar.height + activityBinding!!.appBar.paddingTop.toFloat()
+                        -activityBinding!!.appBar.height + activityBinding!!.appBar.paddingTop.toFloat(),
                     )
                 }
             }
@@ -467,7 +469,7 @@ fun Controller.scrollViewWith(
                     ) {
                         val halfWay = activityBinding!!.appBar.height.toFloat() / 2
                         val shortAnimationDuration = resources?.getInteger(
-                            android.R.integer.config_shortAnimTime
+                            android.R.integer.config_shortAnimTime,
                         ) ?: 0
                         val closerToTop = abs(activityBinding!!.appBar.y) > halfWay
                         val halfWayBottom = (activityBinding!!.bottomNav?.height?.toFloat() ?: 0f) / 2
@@ -481,7 +483,7 @@ fun Controller.scrollViewWith(
                             val activityBinding = activityBinding ?: return@snapAppBarY
                             swipeCircle?.translationY = max(
                                 activityBinding.appBar.y,
-                                -activityBinding.appBar.height + activityBinding.appBar.paddingTop.toFloat()
+                                -activityBinding.appBar.height + activityBinding.appBar.paddingTop.toFloat(),
                             )
                         }
                         if (activityBinding!!.bottomNav?.isVisible == true &&
@@ -509,7 +511,7 @@ fun Controller.scrollViewWith(
                     imm.hideSoftInputFromWindow(view.windowToken, 0)
                 }
             }
-        }
+        },
     )
     return colorToolbar
 }
@@ -537,7 +539,7 @@ fun Controller.setItemAnimatorForAppBar(recycler: RecyclerView) {
             fromX: Int,
             fromY: Int,
             toX: Int,
-            toY: Int
+            toY: Int,
         ): Boolean {
             animateAppBar()
             return super.animateMove(holder, fromX, fromY, toX, toY)
@@ -554,7 +556,7 @@ fun Controller.setItemAnimatorForAppBar(recycler: RecyclerView) {
             oldHolder: RecyclerView.ViewHolder,
             newHolder: RecyclerView.ViewHolder,
             preInfo: ItemHolderInfo,
-            postInfo: ItemHolderInfo
+            postInfo: ItemHolderInfo,
         ): Boolean {
             animateAppBar()
             return super.animateChange(oldHolder, newHolder, preInfo, postInfo)
@@ -566,7 +568,7 @@ fun Controller.setItemAnimatorForAppBar(recycler: RecyclerView) {
             fromX: Int,
             fromY: Int,
             toX: Int,
-            toY: Int
+            toY: Int,
         ): Boolean {
             animateAppBar()
             return super.animateChange(oldHolder, newHolder, fromX, fromY, toX, toY)
@@ -617,7 +619,7 @@ fun Controller.setAppBarBG(value: Float, includeTabView: Boolean = false) {
             val color = ColorUtils.blendARGB(
                 colorSurface,
                 ColorUtils.setAlphaComponent(colorSurface, 0),
-                value
+                value,
             )
             activityBinding?.appBar?.backgroundColor = color
         } else {
@@ -631,7 +633,7 @@ fun Controller.setAppBarBG(value: Float, includeTabView: Boolean = false) {
         val color = ColorUtils.blendARGB(
             context.getResourceColor(R.attr.colorSurface),
             context.getResourceColor(R.attr.colorPrimaryVariant),
-            value
+            value,
         )
         activityBinding?.appBar?.setBackgroundColor(color)
         if (activityBinding?.appBar?.isInvisible != true) {
@@ -642,12 +644,12 @@ fun Controller.setAppBarBG(value: Float, includeTabView: Boolean = false) {
             val invColor = ColorUtils.blendARGB(
                 context.getResourceColor(R.attr.colorSurface),
                 context.getResourceColor(R.attr.colorPrimaryVariant),
-                1 - value
+                1 - value,
             )
             (activityBinding?.cardView as? CardView)?.setCardBackgroundColor(
                 ColorStateList.valueOf(
-                    invColor
-                )
+                    invColor,
+                ),
             )
         }
     }
@@ -656,14 +658,14 @@ fun Controller.setAppBarBG(value: Float, includeTabView: Boolean = false) {
 fun Controller.requestFilePermissionsSafe(
     requestCode: Int,
     preferences: PreferencesHelper,
-    showA11PermissionAnyway: Boolean = false
+    showA11PermissionAnyway: Boolean = false,
 ) {
     val activity = activity ?: return
     val permissions = mutableListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     permissions.forEach { permission ->
         if (ContextCompat.checkSelfPermission(
                 activity,
-                permission
+                permission,
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             requestPermissions(arrayOf(permission), requestCode)
@@ -682,7 +684,7 @@ fun Controller.requestFilePermissionsSafe(
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 val intent = Intent(
                     Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-                    "package:${activity.packageName}".toUri()
+                    "package:${activity.packageName}".toUri(),
                 )
                 try {
                     activity.startActivity(intent)
@@ -728,7 +730,7 @@ val Controller.fullAppBarHeight: Int?
     get() = (activity as? MainActivity)?.bigToolbarHeight(
         (this as? FloatingSearchInterface)?.showFloatingBar() == true,
         this is TabbedInterface,
-        this !is SmallToolbarInterface
+        this !is SmallToolbarInterface,
     )
 
 val Controller.isControllerVisible: Boolean

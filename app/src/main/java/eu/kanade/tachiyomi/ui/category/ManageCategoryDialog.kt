@@ -105,7 +105,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             updatePref(
                 preferences.downloadNewChaptersInCategories(),
                 preferences.excludeCategoriesInDownloadNew(),
-                binding.downloadNew
+                binding.downloadNew,
             )
         ) {
             true -> preferences.downloadNewChapters().set(true)
@@ -116,7 +116,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             updatePref(
                     preferences.libraryUpdateCategories(),
                     preferences.libraryUpdateCategoriesExclude(),
-                    binding.includeGlobal
+                    binding.includeGlobal,
                 ) == false
         ) {
             preferences.libraryUpdateInterval().set(0)
@@ -155,7 +155,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             binding.downloadNew,
             preferences.downloadNewChaptersInCategories(),
             preferences.excludeCategoriesInDownloadNew(),
-            true
+            true,
         )
         if (downloadNew && preferences.downloadNewChaptersInCategories().get().isEmpty()) {
             binding.downloadNew.isVisible = false
@@ -169,7 +169,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             binding.includeGlobal,
             preferences.libraryUpdateCategories(),
             preferences.libraryUpdateCategoriesExclude(),
-            preferences.libraryUpdateInterval().get() > 0
+            preferences.libraryUpdateInterval().get() > 0,
         )
     }
 
@@ -177,7 +177,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     private fun updatePref(
         categories: Preference<Set<String>>,
         excludeCategories: Preference<Set<String>>,
-        box: TriStateCheckBox
+        box: TriStateCheckBox,
     ): Boolean? {
         val categoryId = category?.id ?: return null
         if (!box.isVisible) return null
@@ -206,7 +206,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         box: TriStateCheckBox,
         categories: Preference<Set<String>>,
         excludeCategories: Preference<Set<String>>,
-        shouldShow: Boolean
+        shouldShow: Boolean,
     ) {
         val updateCategories = categories.get()
         val excludeUpdateCategories = excludeCategories.get()

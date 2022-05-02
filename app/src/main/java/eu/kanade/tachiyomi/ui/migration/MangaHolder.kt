@@ -13,7 +13,7 @@ import eu.kanade.tachiyomi.util.view.setCards
 class MangaHolder(
     view: View,
     adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-    showOutline: Boolean
+    showOutline: Boolean,
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     private val binding = MangaListItemBinding.bind(view)

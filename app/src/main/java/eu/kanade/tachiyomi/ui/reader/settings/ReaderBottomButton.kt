@@ -21,7 +21,7 @@ enum class ReaderBottomButton(val value: String, @StringRes val stringRes: Int) 
             ViewChapters,
             WebView,
             PageLayout,
-            CropBordersWebtoon
+            CropBordersWebtoon,
         ).map { it.value }.toSet()
     }
 }

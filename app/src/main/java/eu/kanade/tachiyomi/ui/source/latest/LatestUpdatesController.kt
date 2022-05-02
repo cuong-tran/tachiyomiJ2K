@@ -17,7 +17,7 @@ class LatestUpdatesController(bundle: Bundle) : BrowseSourceController(bundle) {
     constructor(source: CatalogueSource) : this(
         Bundle().apply {
             putLong(SOURCE_ID_KEY, source.id)
-        }
+        },
     )
 
     override fun getTitle(): String {

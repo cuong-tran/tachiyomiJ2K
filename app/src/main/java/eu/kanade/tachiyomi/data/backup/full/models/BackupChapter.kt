@@ -54,7 +54,7 @@ data class BackupChapter(
                 dateFetch = chapter.date_fetch,
                 dateUpload = chapter.date_upload,
                 sourceOrder = chapter.source_order,
-                pagesLeft = chapter.pages_left
+                pagesLeft = chapter.pages_left,
             )
         }
     }

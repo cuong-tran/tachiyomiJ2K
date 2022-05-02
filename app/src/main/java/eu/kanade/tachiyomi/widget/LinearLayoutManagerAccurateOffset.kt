@@ -85,7 +85,7 @@ class LinearLayoutManagerAccurateOffset(context: Context?) : LinearLayoutManager
             childTypeMap,
             childTypeHeightMap,
             childTypeEstimateMap,
-            childAvgHeightMap
+            childAvgHeightMap,
         )
     }
 

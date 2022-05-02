@@ -16,7 +16,7 @@ open class ReaderPage(
     /** Value to check if a page is can be doubled up, but can't because the next page is too wide */
     var isolatedPage: Boolean = false,
     var firstHalf: Boolean? = null,
-    var longPage: Boolean? = null
+    var longPage: Boolean? = null,
 ) : Page(index, url, imageUrl, null) {
 
     open lateinit var chapter: ReaderChapter

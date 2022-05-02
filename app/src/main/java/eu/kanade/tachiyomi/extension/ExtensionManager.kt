@@ -41,7 +41,7 @@ import uy.kohesive.injekt.api.get
  */
 class ExtensionManager(
     private val context: Context,
-    private val preferences: PreferencesHelper = Injekt.get()
+    private val preferences: PreferencesHelper = Injekt.get(),
 ) {
 
     /**
@@ -467,7 +467,7 @@ class ExtensionManager(
             apkName = extension.apkName,
             pkgName = extension.pkgName,
             name = extension.name,
-            versionCode = extension.versionCode
+            versionCode = extension.versionCode,
         )
     }
 

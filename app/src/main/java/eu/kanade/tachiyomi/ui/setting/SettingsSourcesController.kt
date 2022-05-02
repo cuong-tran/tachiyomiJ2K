@@ -81,8 +81,8 @@ class SettingsSourcesController : SettingsController(), FloatingSearchInterface 
                             }
                             true
                         }
-                    }
-                )
+                    },
+                ),
             )
         }
     }
@@ -142,7 +142,7 @@ class SettingsSourcesController : SettingsController(), FloatingSearchInterface 
 
                     preferences.hiddenSources().set(
                         if (checked) current - id
-                        else current + id
+                        else current + id,
                     )
 
                     group.removeAll()
@@ -220,7 +220,7 @@ class SettingsSourcesController : SettingsController(), FloatingSearchInterface 
 
                     return onCollapse?.invoke(item) ?: true
                 }
-            }
+            },
         )
 
         if (expandActionViewFromInteraction) {

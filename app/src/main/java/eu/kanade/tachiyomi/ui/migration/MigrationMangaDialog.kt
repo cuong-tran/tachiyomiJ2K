@@ -31,10 +31,10 @@ class MigrationMangaDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
             (
                 if (mangaSkipped > 0) " " + view?.context?.getString(
                     R.string.skipping_,
-                    mangaSkipped
+                    mangaSkipped,
                 )
                 else ""
-                )
+                ),
         ) ?: ""
         return activity!!.materialAlertDialog()
             .setMessage(confirmString)

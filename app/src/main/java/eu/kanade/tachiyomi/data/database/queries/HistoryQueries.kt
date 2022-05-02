@@ -48,7 +48,7 @@ interface HistoryQueries : DbProvider {
                 .query(getRecentMangasLimitQuery(search.sqLite, offset, isResuming))
 //                .args(date.time, startDate.time)
                 .observesTables(HistoryTable.TABLE)
-                .build()
+                .build(),
         )
         .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
         .prepare()
@@ -65,7 +65,7 @@ interface HistoryQueries : DbProvider {
                 .query(getRecentHistoryUngrouped(search.sqLite, offset, isResuming))
 //                .args(date.time, startDate.time)
                 .observesTables(HistoryTable.TABLE)
-                .build()
+                .build(),
         )
         .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
         .prepare()
@@ -85,12 +85,12 @@ interface HistoryQueries : DbProvider {
                         includeRead,
                         endless,
                         offset,
-                        isResuming
-                    )
+                        isResuming,
+                    ),
                 )
 //                .args(date.time, startDate.time)
                 .observesTables(HistoryTable.TABLE)
-                .build()
+                .build(),
         )
         .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
         .prepare()
@@ -102,7 +102,7 @@ interface HistoryQueries : DbProvider {
                 .query(getHistoryByMangaId())
                 .args(mangaId)
                 .observesTables(HistoryTable.TABLE)
-                .build()
+                .build(),
         )
         .prepare()
 
@@ -113,7 +113,7 @@ interface HistoryQueries : DbProvider {
                 .query(getHistoryByChapterUrl())
                 .args(chapterUrl)
                 .observesTables(HistoryTable.TABLE)
-                .build()
+                .build(),
         )
         .prepare()
 
@@ -151,7 +151,7 @@ interface HistoryQueries : DbProvider {
         .byQuery(
             DeleteQuery.builder()
                 .table(HistoryTable.TABLE)
-                .build()
+                .build(),
         )
         .prepare()
 
@@ -161,7 +161,7 @@ interface HistoryQueries : DbProvider {
                 .table(HistoryTable.TABLE)
                 .where("${HistoryTable.COL_LAST_READ} = ?")
                 .whereArgs(0)
-                .build()
+                .build(),
         )
         .prepare()
 }

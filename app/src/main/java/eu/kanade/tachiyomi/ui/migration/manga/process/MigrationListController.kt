@@ -165,7 +165,7 @@ class MigrationListController(bundle: Bundle? = null) :
                                         try {
                                             val searchResult = smartSearchEngine.normalSearch(
                                                 source,
-                                                mangaObj.title
+                                                mangaObj.title,
                                             )
 
                                             if (searchResult != null &&
@@ -177,7 +177,7 @@ class MigrationListController(bundle: Bundle? = null) :
                                                 val localManga =
                                                     smartSearchEngine.networkToLocalManga(
                                                         searchResult,
-                                                        source.id
+                                                        source.id,
                                                     )
                                                 val chapters =
                                                     source.getChapterList(localManga.toMangaInfo()).map { it.toSChapter() }
@@ -186,7 +186,7 @@ class MigrationListController(bundle: Bundle? = null) :
                                                         db,
                                                         chapters,
                                                         localManga,
-                                                        source
+                                                        source,
                                                     )
                                                 } catch (e: Exception) {
                                                     return@source null
@@ -210,13 +210,13 @@ class MigrationListController(bundle: Bundle? = null) :
                                 val searchResult = try {
                                     val searchResult = smartSearchEngine.normalSearch(
                                         source,
-                                        mangaObj.title
+                                        mangaObj.title,
                                     )
 
                                     if (searchResult != null) {
                                         val localManga = smartSearchEngine.networkToLocalManga(
                                             searchResult,
-                                            source.id
+                                            source.id,
                                         )
                                         val chapters = try {
                                             source.getChapterList(localManga.toMangaInfo()).map { it.toSChapter() }
@@ -308,8 +308,8 @@ class MigrationListController(bundle: Bundle? = null) :
                     res.getQuantityString(
                         R.plurals.manga_migrated,
                         manaulMigrations,
-                        manaulMigrations
-                    )
+                        manaulMigrations,
+                    ),
                 )
             }
             router.popCurrentController()
@@ -455,7 +455,7 @@ class MigrationListController(bundle: Bundle? = null) :
             menuMigrate.icon = VectorDrawableCompat.create(
                 resources!!,
                 R.drawable.ic_done_24dp,
-                null
+                null,
             )
         }
 
@@ -477,13 +477,13 @@ class MigrationListController(bundle: Bundle? = null) :
                 this,
                 true,
                 totalManga,
-                mangaSkipped
+                mangaSkipped,
             ).showDialog(router)
             R.id.action_migrate_manga -> MigrationMangaDialog(
                 this,
                 false,
                 totalManga,
-                mangaSkipped
+                mangaSkipped,
             ).showDialog(router)
             else -> return super.onOptionsItemSelected(item)
         }
@@ -512,7 +512,7 @@ class MigrationListController(bundle: Bundle? = null) :
             return MigrationListController(
                 Bundle().apply {
                     putParcelable(CONFIG_EXTRA, config)
-                }
+                },
             )
         }
     }

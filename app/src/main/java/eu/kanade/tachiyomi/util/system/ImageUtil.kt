@@ -255,11 +255,11 @@ object ImageUtil {
         if (darkBG) {
             return if (!isLandscape && isWhite(image.getPixel(left, bot)) && isWhite(image.getPixel(right, bot))) GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor)
+                intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor),
             )
             else if (!isLandscape && isWhite(image.getPixel(left, top)) && isWhite(image.getPixel(right, top))) GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel)
+                intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel),
             )
             else ColorDrawable(blackPixel)
         }
@@ -273,7 +273,7 @@ object ImageUtil {
         ) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor)
+                intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor),
             )
         } else if (!isLandscape && (
             bottomIsBlackStreak || (
@@ -285,7 +285,7 @@ object ImageUtil {
         ) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel)
+                intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel),
             )
         }
         return ColorDrawable(backgroundColor)
@@ -311,7 +311,7 @@ object ImageUtil {
     fun splitBitmap(
         imageBitmap: Bitmap,
         secondHalf: Boolean,
-        progressCallback: ((Int) -> Unit)? = null
+        progressCallback: ((Int) -> Unit)? = null,
     ): ByteArrayInputStream {
         val height = imageBitmap.height
         val width = imageBitmap.width
@@ -330,7 +330,7 @@ object ImageUtil {
         imageBitmap: Bitmap,
         rightSideOnTop: Boolean,
         hasMargins: Boolean,
-        progressCallback: ((Int) -> Unit)? = null
+        progressCallback: ((Int) -> Unit)? = null,
     ): ByteArrayInputStream {
         val height = imageBitmap.height
         val width = imageBitmap.width
@@ -343,13 +343,13 @@ object ImageUtil {
             0,
             0,
             result.width,
-            result.height / 2
+            result.height / 2,
         )
         val lowerPart = Rect(
             0,
             result.height / 2 + gap,
             result.width,
-            result.height
+            result.height,
         )
         canvas.drawBitmap(
             imageBitmap,
@@ -357,10 +357,10 @@ object ImageUtil {
                 if (!rightSideOnTop) 0 else width / 2,
                 0,
                 if (!rightSideOnTop) width / 2 else width,
-                height
+                height,
             ),
             upperPart,
-            null
+            null,
         )
         canvas.drawBitmap(
             imageBitmap,
@@ -368,10 +368,10 @@ object ImageUtil {
                 if (rightSideOnTop) 0 else width / 2,
                 0,
                 if (rightSideOnTop) width / 2 else width,
-                height
+                height,
             ),
             lowerPart,
-            null
+            null,
         )
         progressCallback?.invoke(99)
         val output = ByteArrayOutputStream()
@@ -385,7 +385,7 @@ object ImageUtil {
         imageBitmap2: Bitmap,
         isLTR: Boolean,
         @ColorInt background: Int = Color.WHITE,
-        progressCallback: ((Int) -> Unit)? = null
+        progressCallback: ((Int) -> Unit)? = null,
     ): ByteArrayInputStream {
         val height = imageBitmap.height
         val width = imageBitmap.width
@@ -399,7 +399,7 @@ object ImageUtil {
             if (isLTR) 0 else width2,
             (maxHeight - imageBitmap.height) / 2,
             (if (isLTR) 0 else width2) + imageBitmap.width,
-            imageBitmap.height + (maxHeight - imageBitmap.height) / 2
+            imageBitmap.height + (maxHeight - imageBitmap.height) / 2,
         )
         canvas.drawBitmap(imageBitmap, imageBitmap.rect, upperPart, null)
         progressCallback?.invoke(98)
@@ -407,7 +407,7 @@ object ImageUtil {
             if (!isLTR) 0 else width,
             (maxHeight - imageBitmap2.height) / 2,
             (if (!isLTR) 0 else width) + imageBitmap2.width,
-            imageBitmap2.height + (maxHeight - imageBitmap2.height) / 2
+            imageBitmap2.height + (maxHeight - imageBitmap2.height) / 2,
         )
         canvas.drawBitmap(imageBitmap2, imageBitmap2.rect, bottomPart, null)
         progressCallback?.invoke(99)
@@ -459,7 +459,7 @@ object ImageUtil {
     fun getPercentOfColor(
         @ColorInt color: Int,
         @ColorInt colorFrom: Int,
-        @ColorInt colorTo: Int
+        @ColorInt colorTo: Int,
     ): Float {
         val reds = arrayOf(Color.red(color), Color.red(colorFrom), Color.red(colorTo))
         val blues = arrayOf(Color.blue(color), Color.blue(colorFrom), Color.blue(colorTo))
@@ -473,7 +473,7 @@ object ImageUtil {
             rPercent.takeIf { reds[2] != reds[1] },
             bPercent.takeIf { blues[2] != blues[1] },
             gPercent.takeIf { greens[2] != greens[1] },
-            aPercent.takeIf { alphas[2] != alphas[1] }
+            aPercent.takeIf { alphas[2] != alphas[1] },
         ).filterNotNull().average().toFloat().takeIf { it in 0f..1f } ?: 0f
     }
 }

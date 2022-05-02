@@ -23,7 +23,7 @@ class BrowseSourceItem(
     val manga: Manga,
     private val catalogueAsList: Preference<Boolean>,
     private val catalogueListType: Preference<Int>,
-    private val outlineOnCovers: Preference<Boolean>
+    private val outlineOnCovers: Preference<Boolean>,
 ) :
     AbstractFlexibleItem<BrowseSourceHolder>() {
 
@@ -45,14 +45,14 @@ class BrowseSourceItem(
                     binding.card.setCardForegroundColor(
                         ContextCompat.getColorStateList(
                             context,
-                            R.color.library_comfortable_grid_foreground
-                        )
+                            R.color.library_comfortable_grid_foreground,
+                        ),
                     )
                 }
                 binding.setBGAndFG(listType)
                 binding.constraintLayout.layoutParams = FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
                 )
                 binding.coverThumbnail.maxHeight = Int.MAX_VALUE
                 binding.coverThumbnail.minimumHeight = 0
@@ -74,7 +74,7 @@ class BrowseSourceItem(
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: BrowseSourceHolder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
         holder.onSetValues(manga)
     }

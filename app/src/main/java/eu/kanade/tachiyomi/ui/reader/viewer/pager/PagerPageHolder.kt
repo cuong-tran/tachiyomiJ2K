@@ -73,7 +73,7 @@ import kotlin.math.roundToInt
 class PagerPageHolder(
     val viewer: PagerViewer,
     val page: ReaderPage,
-    private var extraPage: ReaderPage? = null
+    private var extraPage: ReaderPage? = null,
 ) : FrameLayout(viewer.activity), ViewPagerAdapter.PositionableView {
 
     /**
@@ -148,13 +148,13 @@ class PagerPageHolder(
             when (val theme = viewer.config.readerTheme) {
                 3 -> Color.TRANSPARENT
                 else -> ThemeUtil.readerBackgroundColor(theme)
-            }
+            },
         )
         progressBar.foregroundTintList = ColorStateList.valueOf(
             context.getResourceColor(
                 if (isInvertedFromTheme()) R.attr.colorPrimaryInverse
-                else R.attr.colorPrimary
-            )
+                else R.attr.colorPrimary,
+            ),
         )
     }
 
@@ -200,7 +200,7 @@ class PagerPageHolder(
                         override fun onImageLoadError(e: Exception) {
                             onImageDecodeError()
                         }
-                    }
+                    },
                 )
             }
         }
@@ -283,7 +283,7 @@ class PagerPageHolder(
                         .withInterruptible(true)
                         .start()
                 },
-                500
+                500,
             )
         }
     }
@@ -316,7 +316,7 @@ class PagerPageHolder(
         ) {
             setScaleAndCenter(
                 scale,
-                PointF(centerV, (center?.y?.plus(topInsets)?.minus(bottomInsets) ?: 0f))
+                PointF(centerV, (center?.y?.plus(topInsets)?.minus(bottomInsets) ?: 0f)),
             )
         }
     }
@@ -543,7 +543,7 @@ class PagerPageHolder(
                                     page.bg = imageView.background
                                     page.bgType = getBGType(
                                         viewer.config.readerTheme,
-                                        context
+                                        context,
                                     ) + item.hashCode()
                                 }
                             }
@@ -582,10 +582,10 @@ class PagerPageHolder(
                 BitmapFactory.decodeByteArray(
                     bytesArray,
                     0,
-                    bytesArray.size
+                    bytesArray.size,
                 ),
                 preferences.readerTheme().get() == 2,
-                context
+                context,
             )
         }
     }
@@ -663,7 +663,7 @@ class PagerPageHolder(
                     0f,
                     insets?.displayCutout?.boundingRectTop?.height()?.toFloat() ?: 0f,
                     0f,
-                    insets?.displayCutout?.boundingRectBottom?.height()?.toFloat() ?: 0f
+                    insets?.displayCutout?.boundingRectBottom?.height()?.toFloat() ?: 0f,
                 )
             }
             setOnImageEventListener(
@@ -691,7 +691,7 @@ class PagerPageHolder(
                     override fun onImageLoadError(e: Exception) {
                         onImageDecodeError()
                     }
-                }
+                },
             )
         }
         addView(subsamplingImageView, MATCH_PARENT, MATCH_PARENT)
@@ -720,7 +720,7 @@ class PagerPageHolder(
                         }
                         return true
                     }
-                }
+                },
             )
         }
         addView(imageView)

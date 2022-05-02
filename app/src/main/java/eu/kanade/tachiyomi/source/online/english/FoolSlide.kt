@@ -38,7 +38,7 @@ open class FoolSlide(override val domainName: String, private val urlModifier: S
             lang,
             volume,
             chapterNumber,
-            subChapterNumber
+            subChapterNumber,
         ).joinToString("/") + "/"
     }
 
@@ -71,7 +71,7 @@ open class FoolSlide(override val domainName: String, private val urlModifier: S
             val chapters = deferredChapters.await()
             val context = Injekt.get<PreferencesHelper>().context
             val trueChapter = chapters?.find { it.url == chapterUrl }?.toChapter() ?: error(
-                context.getString(R.string.chapter_not_found)
+                context.getString(R.string.chapter_not_found),
             )
             if (manga != null) Triple(trueChapter, manga, chapters) else null
         }
@@ -103,7 +103,7 @@ open class FoolSlide(override val domainName: String, private val urlModifier: S
             url,
             body = FormBody.Builder()
                 .add("adult", "true")
-                .build()
+                .build(),
         )
     }
 }

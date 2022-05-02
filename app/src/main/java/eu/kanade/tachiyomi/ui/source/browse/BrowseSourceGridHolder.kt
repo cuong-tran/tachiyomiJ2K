@@ -28,7 +28,7 @@ class BrowseSourceGridHolder(
     private val view: View,
     private val adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     compact: Boolean,
-    showOutline: Boolean
+    showOutline: Boolean,
 ) : BrowseSourceHolder(view, adapter) {
 
     private val binding = MangaGridItemBinding.bind(view)

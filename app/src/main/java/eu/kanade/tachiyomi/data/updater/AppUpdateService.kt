@@ -174,7 +174,7 @@ class AppUpdateService : Service() {
             val data = file.inputStream()
 
             val params = PackageInstaller.SessionParams(
-                PackageInstaller.SessionParams.MODE_FULL_INSTALL
+                PackageInstaller.SessionParams.MODE_FULL_INSTALL,
             )
             params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
             val sessionId = packageInstaller.createSession(params)

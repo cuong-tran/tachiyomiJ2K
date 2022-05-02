@@ -18,7 +18,7 @@ import uy.kohesive.injekt.api.get
 class MigrationPresenter(
     private val sourceManager: SourceManager = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
-    val preferences: PreferencesHelper = Injekt.get()
+    val preferences: PreferencesHelper = Injekt.get(),
 ) : BasePresenter<MigrationController>() {
 
     var state = ViewState()
@@ -36,7 +36,7 @@ class MigrationPresenter(
             .doOnNext { state = state.copy(sourcesWithManga = findSourcesWithManga(it)) }
             .combineLatest(
                 stateRelay.map { it.selectedSource }
-                    .distinctUntilChanged()
+                    .distinctUntilChanged(),
             ) { library, source -> library to source }
             .filter { (_, source) -> source != null }.observeOn(Schedulers.io())
             .map { (library, source) -> libraryToMigrationItem(library, source!!.id) }

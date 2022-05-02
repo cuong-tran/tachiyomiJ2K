@@ -68,7 +68,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     constructor(pkgName: String) : this(
         Bundle().apply {
             putString(PKGNAME_KEY, pkgName)
-        }
+        },
     )
 
     override fun createBinding(inflater: LayoutInflater) =
@@ -93,7 +93,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         val themedContext by lazy { getPreferenceThemeContext() }
         val manager = PreferenceManager(themedContext)
         val dataStore = SharedPreferencesDataStore(
-            context.getSharedPreferences(extension.getPreferenceKey(), Context.MODE_PRIVATE)
+            context.getSharedPreferences(extension.getPreferenceKey(), Context.MODE_PRIVATE),
         )
         manager.preferenceDataStore = dataStore
         manager.onDisplayPreferenceDialogListener = this
@@ -120,7 +120,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         binding.extensionPrefsRecycler.adapter = ConcatAdapter(
             concatAdapterConfig,
             extHeaderAdapter,
-            PreferenceGroupAdapter(screen)
+            PreferenceGroupAdapter(screen),
         )
         binding.extensionPrefsRecycler.addItemDecoration(ExtensionSettingsDividerItemDecoration(context))
     }
@@ -190,9 +190,9 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
                     binding.coordinator.snack(
                         context.getString(
                             R.string._must_be_enabled_first,
-                            title
+                            title,
                         ),
-                        Snackbar.LENGTH_LONG
+                        Snackbar.LENGTH_LONG,
                     ) {
                         setAction(R.string.enable) {
                             preferences.enabledLanguages() += source.lang
@@ -276,7 +276,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
                     .newInstance(preference.getKey())
             else -> throw IllegalArgumentException(
                 "Tried to display dialog for unknown " +
-                    "preference type. Did you forget to override onDisplayPreferenceDialog()?"
+                    "preference type. Did you forget to override onDisplayPreferenceDialog()?",
             )
         }
         f.targetController = this

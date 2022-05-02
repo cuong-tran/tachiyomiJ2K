@@ -50,7 +50,7 @@ class SettingsBrowseController : SettingsController() {
                     entriesRes = arrayOf(
                         R.string.over_any_network,
                         R.string.over_wifi_only,
-                        R.string.dont_auto_update
+                        R.string.dont_auto_update,
                     )
                     defaultValue = AutoAppUpdaterJob.ONLY_ON_UNMETERED
                 }
@@ -66,7 +66,7 @@ class SettingsBrowseController : SettingsController() {
                         titleRes = R.string.notify_extension_updated
                         isChecked = Notifications.isNotificationChannelEnabled(
                             context,
-                            Notifications.CHANNEL_EXT_UPDATED
+                            Notifications.CHANNEL_EXT_UPDATED,
                         )
                         updatedExtNotifPref = this
                         onChange {
@@ -78,7 +78,7 @@ class SettingsBrowseController : SettingsController() {
                                     putExtra(Settings.EXTRA_APP_PACKAGE, BuildConfig.APPLICATION_ID)
                                     putExtra(
                                         Settings.EXTRA_CHANNEL_ID,
-                                        Notifications.CHANNEL_EXT_UPDATED
+                                        Notifications.CHANNEL_EXT_UPDATED,
                                     )
                                 }
                             startActivity(intent)
@@ -130,12 +130,12 @@ class SettingsBrowseController : SettingsController() {
                     preferences.migrationSources().set(pinnedSources)
                     (activity as? MainActivity)?.setUndoSnackBar(
                         view?.snack(
-                            R.string.migration_sources_changed
+                            R.string.migration_sources_changed,
                         ) {
                             setAction(R.string.undo) {
                                 preferences.migrationSources().set(ogSources)
                             }
-                        }
+                        },
                     )
                 }
             }
@@ -156,12 +156,12 @@ class SettingsBrowseController : SettingsController() {
                     preferences.migrationSources().set(enabledSources)
                     (activity as? MainActivity)?.setUndoSnackBar(
                         view?.snack(
-                            R.string.migration_sources_changed
+                            R.string.migration_sources_changed,
                         ) {
                             setAction(R.string.undo) {
                                 preferences.migrationSources().set(ogSources)
                             }
-                        }
+                        },
                     )
                 }
             }

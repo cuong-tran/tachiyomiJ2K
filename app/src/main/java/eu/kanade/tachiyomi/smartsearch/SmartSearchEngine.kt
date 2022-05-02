@@ -17,7 +17,7 @@ import kotlin.coroutines.CoroutineContext
 
 class SmartSearchEngine(
     parentContext: CoroutineContext,
-    val extraSearchParams: String? = null
+    val extraSearchParams: String? = null,
 ) : CoroutineScope {
     override val coroutineContext: CoroutineContext = parentContext + Job() + Dispatchers.Default
 
@@ -83,7 +83,7 @@ class SmartSearchEngine(
             '(' to ')',
             '[' to ']',
             '<' to '>',
-            '{' to '}'
+            '{' to '}',
         )
         var openingBracketPairs = bracketPairs.mapIndexed { index, (opening, _) ->
             opening to index

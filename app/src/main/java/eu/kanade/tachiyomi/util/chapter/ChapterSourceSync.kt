@@ -25,7 +25,7 @@ fun syncChaptersWithSource(
     db: DatabaseHelper,
     rawSourceChapters: List<SChapter>,
     manga: Manga,
-    source: Source
+    source: Source,
 ): Pair<List<Chapter>, List<Chapter>> {
     if (rawSourceChapters.isEmpty()) {
         throw Exception("No chapters found")
@@ -169,7 +169,7 @@ fun syncChaptersWithSource(
     }
     return Pair(
         chapterFilter.filterChaptersByScanlators(toAdd.subtract(readded).toList(), manga),
-        toDelete - readded
+        toDelete - readded,
     )
 }
 

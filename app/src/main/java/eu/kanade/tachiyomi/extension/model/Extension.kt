@@ -22,7 +22,7 @@ sealed class Extension {
         val sources: List<Source>,
         val hasUpdate: Boolean = false,
         val isObsolete: Boolean = false,
-        val isUnofficial: Boolean = false
+        val isUnofficial: Boolean = false,
     ) : Extension()
 
     data class Available(
@@ -34,14 +34,14 @@ sealed class Extension {
         override val isNsfw: Boolean,
         val apkName: String,
         val iconUrl: String,
-        val sources: List<AvailableSource>? = null
+        val sources: List<AvailableSource>? = null,
     ) : Extension()
 
     data class AvailableSource(
         val name: String,
         val id: String,
         val lang: String,
-        val baseUrl: String
+        val baseUrl: String,
     )
 
     data class Untrusted(
@@ -51,6 +51,6 @@ sealed class Extension {
         override val versionCode: Long,
         val signatureHash: String,
         override val lang: String? = null,
-        override val isNsfw: Boolean = false
+        override val isNsfw: Boolean = false,
     ) : Extension()
 }

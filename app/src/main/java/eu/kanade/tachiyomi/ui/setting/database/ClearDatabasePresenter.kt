@@ -57,8 +57,8 @@ class ClearDatabasePresenter : BaseCoroutinePresenter<ClearDatabaseController>()
                                 SortSources.MOST_ENTRIES -> Int.MAX_VALUE - it.mangaCount
                             }
                         },
-                        { it.source.name }
-                    )
+                        { it.source.name },
+                    ),
                 )
             withUIContext {
                 controller?.setItems(sources)

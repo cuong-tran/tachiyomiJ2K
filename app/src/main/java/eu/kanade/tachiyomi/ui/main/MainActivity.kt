@@ -189,7 +189,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         setExitSharedElementCallback(object : MaterialContainerTransformSharedElementCallback() {
             override fun onMapSharedElements(
                 names: MutableList<String>,
-                sharedElements: MutableMap<String, View>
+                sharedElements: MutableMap<String, View>,
             ) {
                 val mangaController = router.backstack.lastOrNull()?.controller as? MangaDetailsController
                 if (mangaController == null || chapterIdToExitTo == 0L) {
@@ -202,7 +202,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 sharedElements[names[0]] = selectedViewHolder.itemView
                 chapterIdToExitTo = 0L
             }
-        })
+        },
+        )
         window.sharedElementsUseOverlay = false
 
         super.onCreate(savedInstanceState)
@@ -233,7 +234,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         lifecycleScope.launchUI {
                             NotificationReceiver.dismissNotification(
                                 context,
-                                Notifications.ID_LIBRARY_PROGRESS
+                                Notifications.ID_LIBRARY_PROGRESS,
                             )
                         }
                     }
@@ -276,19 +277,19 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             // with horizontal insets
             v.updatePadding(
                 left = systemInsets.left,
-                right = systemInsets.right
+                right = systemInsets.right,
             )
             binding.appBar.updatePadding(
-                top = systemInsets.top
+                top = systemInsets.top,
             )
             binding.bottomNav?.updatePadding(
-                bottom = systemInsets.bottom
+                bottom = systemInsets.bottom,
             )
             binding.sideNav?.updatePadding(
                 left = 0,
                 right = 0,
                 bottom = systemInsets.bottom,
-                top = systemInsets.top
+                top = systemInsets.top,
             )
             binding.bottomView?.isVisible = systemInsets.bottom > 0
             binding.bottomView?.updateLayoutParams<ViewGroup.LayoutParams> {
@@ -332,7 +333,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         R.id.nav_recents -> RecentsController()
                         else -> BrowseController()
                     },
-                    id
+                    id,
                 )
             } else if (currentRoot.tag()?.toIntOrNull() == id) {
                 if (router.backstackSize == 1) {
@@ -392,7 +393,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 (controller as? SettingsController)?.onActionViewCollapse(item)
                 return true
             }
-        })
+        },
+        )
 
         binding.appBar.alpha = 1f
 
@@ -417,7 +419,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     from: Controller?,
                     isPush: Boolean,
                     container: ViewGroup,
-                    handler: ControllerChangeHandler
+                    handler: ControllerChangeHandler,
                 ) {
                     syncActivityViewWithController(to, from, isPush)
                     binding.appBar.isVisible = true
@@ -433,7 +435,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     from: Controller?,
                     isPush: Boolean,
                     container: ViewGroup,
-                    handler: ControllerChangeHandler
+                    handler: ControllerChangeHandler,
                 ) {
                     nav.translationY = 0f
                     showDLQueueTutorial()
@@ -446,7 +448,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
                     }
                 }
-            }
+            },
         )
 
         syncActivityViewWithController(router.backstack.lastOrNull()?.controller)
@@ -551,7 +553,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val bgColor = binding.appBar.backgroundColor ?: Color.TRANSPARENT
         if (changeBG && (if (solidBG) bgColor == Color.TRANSPARENT else false)) {
             binding.appBar.setBackgroundColor(
-                if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSurface)
+                if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSurface),
             )
         }
         setupSearchTBMenu(binding.toolbar.menu)
@@ -579,7 +581,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     insets.hasSideNavBar() -> Color.BLACK
                     isInNightMode() -> ColorUtils.setAlphaComponent(
                         getResourceColor(R.attr.colorPrimaryVariant),
-                        179
+                        179,
                     )
                     else -> Color.argb(179, 0, 0, 0)
                 }
@@ -597,7 +599,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             else -> {
                 ColorUtils.setAlphaComponent(
                     getResourceColor(R.attr.colorPrimaryVariant),
-                    179
+                    179,
                 )
             }
         }
@@ -613,14 +615,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val scale = Settings.Global.getFloat(
                 contentResolver,
                 Settings.Global.ANIMATOR_DURATION_SCALE,
-                1.0f
+                1.0f,
             )
             val duration = resources.getInteger(android.R.integer.config_mediumAnimTime) * scale
             delay(duration.toLong())
             delay(100)
             if (Color.alpha(window?.statusBarColor ?: Color.BLACK) >= 255) window?.statusBarColor =
                 getResourceColor(
-                    android.R.attr.statusBarColor
+                    android.R.attr.statusBarColor,
                 )
         }
         super.onSupportActionModeFinished(mode)
@@ -666,10 +668,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 TapTarget.forView(
                     recentsItem,
                     getString(R.string.manage_whats_downloading),
-                    getString(R.string.visit_recents_for_download_queue)
+                    getString(R.string.visit_recents_for_download_queue),
                 ).outerCircleColorInt(getResourceColor(R.attr.colorSecondary)).outerCircleAlpha(0.95f)
                     .titleTextSize(
-                        20
+                        20,
                     )
                     .titleTextColorInt(getResourceColor(R.attr.colorOnSecondary)).descriptionTextSize(16)
                     .descriptionTextColorInt(getResourceColor(R.attr.colorOnSecondary))
@@ -681,7 +683,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         super.onTargetClick(view)
                         nav.selectedItemId = R.id.nav_recents
                     }
-                }
+                },
             )
         }
     }
@@ -730,7 +732,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     extensionManager.findAvailableExtensionsAsync()
                     val pendingUpdates = ExtensionGithubApi().checkForUpdates(
                         this@MainActivity,
-                        extensionManager.availableExtensions.takeIf { it.isNotEmpty() }
+                        extensionManager.availableExtensions.takeIf { it.isNotEmpty() },
                     )
                     preferences.extensionUpdatesCount().set(pendingUpdates.size)
                     preferences.lastExtCheck().set(Date().time)
@@ -751,7 +753,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         if (notificationId > -1) NotificationReceiver.dismissNotification(
             applicationContext,
             notificationId,
-            intent.getIntExtra("groupId", 0)
+            intent.getIntExtra("groupId", 0),
         )
         when (intent.action) {
             SHORTCUT_LIBRARY -> nav.selectedItemId = R.id.nav_library
@@ -768,7 +770,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         when (intent.action) {
                             SHORTCUT_RECENTLY_UPDATED -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
                             else -> RecentsPresenter.VIEW_TYPE_ONLY_HISTORY
-                        }
+                        },
                     )
                 }
             }
@@ -887,7 +889,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 when (nav.selectedItemId) {
                     R.id.nav_library -> 0
                     else -> 1
-                }
+                },
             )
         }
     }
@@ -983,14 +985,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 oldMenuItem.groupId,
                 oldMenuItem.itemId,
                 index,
-                oldMenuItem.title
+                oldMenuItem.title,
             ).item
         } else {
             menu.add(
                 oldMenuItem.groupId,
                 oldMenuItem.itemId,
                 index,
-                oldMenuItem.title
+                oldMenuItem.title,
             )
         }
         menuItem.isVisible = isVisible
@@ -1039,7 +1041,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     window,
                     onDismiss = {
                         this.overflowDialog = null
-                    }
+                    },
                 )
                 overflowDialog.show()
             }
@@ -1089,7 +1091,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     protected open fun syncActivityViewWithController(
         to: Controller?,
         from: Controller? = null,
-        isPush: Boolean = false
+        isPush: Boolean = false,
     ) {
         if (from is DialogController || to is DialogController) {
             return
@@ -1111,7 +1113,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             animationSet = AnimatorSet()
             val alphaAnimation = ValueAnimator.ofFloat(
                 nav.alpha,
-                if (hideBottomNav) 0f else 1f
+                if (hideBottomNav) 0f else 1f,
             )
             alphaAnimation.addUpdateListener { valueAnimator ->
                 nav.alpha = valueAnimator.animatedValue as Float
@@ -1122,7 +1124,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     binding.bottomView?.visibility =
                         if (hideBottomNav) View.GONE else binding.bottomView?.visibility
                             ?: View.GONE
-                }
+                },
             )
             alphaAnimation.duration = 200
             alphaAnimation.startDelay = 50
@@ -1161,7 +1163,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             }
             val tA = ValueAnimator.ofFloat(
                 binding.tabsFrameLayout.alpha,
-                if (show) 1f else 0f
+                if (show) 1f else 0f,
             )
             tA.addUpdateListener { valueAnimator ->
                 binding.tabsFrameLayout.alpha = valueAnimator.animatedValue as Float
@@ -1173,7 +1175,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         binding.mainTabs.clearOnTabSelectedListeners()
                         binding.mainTabs.removeAllTabs()
                     }
-                }
+                },
             )
             tA.duration = 100
             tabAnimation = tA
@@ -1201,13 +1203,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             MaterialMenuSheet.MenuSheetItem(
                 0,
                 textRes = R.string.whats_new_this_release,
-                drawable = R.drawable.ic_new_releases_24dp
+                drawable = R.drawable.ic_new_releases_24dp,
             ),
             MaterialMenuSheet.MenuSheetItem(
                 1,
                 textRes = R.string.close,
-                drawable = R.drawable.ic_close_24dp
-            )
+                drawable = R.drawable.ic_close_24dp,
+            ),
         ),
         title = getString(R.string.updated_to_, BuildConfig.VERSION_NAME),
         showDivider = true,
@@ -1217,7 +1219,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 try {
                     val intent = Intent(
                         Intent.ACTION_VIEW,
-                        RELEASE_URL.toUri()
+                        RELEASE_URL.toUri(),
                     )
                     startActivity(intent)
                 } catch (e: Throwable) {
@@ -1225,7 +1227,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 }
             }
             true
-        }
+        },
     )
 
     private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
@@ -1237,7 +1239,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             e1: MotionEvent,
             e2: MotionEvent,
             velocityX: Float,
-            velocityY: Float
+            velocityY: Float,
         ): Boolean {
             var result = false
             val diffY = e2.y - e1.y

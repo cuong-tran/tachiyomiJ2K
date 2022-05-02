@@ -31,7 +31,7 @@ class BackupCategory(
                 name = category.name,
                 order = category.order,
                 flags = category.flags,
-                mangaSort = category.mangaSort
+                mangaSort = category.mangaSort,
             )
         }
     }

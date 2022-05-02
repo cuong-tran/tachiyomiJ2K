@@ -57,7 +57,7 @@ class PreMigrationController(bundle: Bundle? = null) :
 
         val ourAdapter = adapter ?: MigrationSourceAdapter(
             getEnabledSources().map { MigrationSourceItem(it, isEnabled(it.id.toString())) },
-            this
+            this,
         )
         adapter = ourAdapter
         binding.recycler.layoutManager = LinearLayoutManager(view.context)
@@ -76,7 +76,7 @@ class PreMigrationController(bundle: Bundle? = null) :
                 // offset the binding.recycler by the binding.fab's inset + some inset on top
                 v.updatePaddingRelative(
                     bottom = insets.getInsets(systemBars()).bottom + binding.fab.marginBottom +
-                        (binding.fab.height)
+                        (binding.fab.height),
                 )
             }
         }
@@ -86,7 +86,7 @@ class PreMigrationController(bundle: Bundle? = null) :
                 dialog = MigrationBottomSheetDialog(activity!!, this)
                 dialog?.show()
                 val bottomSheet = dialog?.findViewById<FrameLayout>(
-                    com.google.android.material.R.id.design_bottom_sheet
+                    com.google.android.material.R.id.design_bottom_sheet,
                 )
                 if (bottomSheet != null) {
                     val behavior: BottomSheetBehavior<*> = BottomSheetBehavior.from(bottomSheet)
@@ -107,9 +107,9 @@ class PreMigrationController(bundle: Bundle? = null) :
             MigrationListController.create(
                 MigrationProcedureConfig(
                     config.toList(),
-                    extraSearchParams = extraParam
-                )
-            ).withFadeTransaction().tag(MigrationListController.TAG)
+                    extraSearchParams = extraParam,
+                ),
+            ).withFadeTransaction().tag(MigrationListController.TAG),
         )
     }
 
@@ -148,7 +148,7 @@ class PreMigrationController(bundle: Bundle? = null) :
             sources.filter { isEnabled(it.id.toString()) }.sortedBy {
             sourcesSaved.indexOf(
                 it.id
-                    .toString()
+                    .toString(),
             )
         } +
             sources.filterNot { isEnabled(it.id.toString()) }
@@ -204,11 +204,11 @@ class PreMigrationController(bundle: Bundle? = null) :
             router.pushController(
                 if (skipPre) {
                     MigrationListController.create(
-                        MigrationProcedureConfig(mangaIds, null)
+                        MigrationProcedureConfig(mangaIds, null),
                     )
                 } else {
                     create(mangaIds)
-                }.withFadeTransaction().tag(if (skipPre) MigrationListController.TAG else null)
+                }.withFadeTransaction().tag(if (skipPre) MigrationListController.TAG else null),
             )
         }
 
@@ -216,7 +216,7 @@ class PreMigrationController(bundle: Bundle? = null) :
             return PreMigrationController(
                 Bundle().apply {
                     putLongArray(MANGA_IDS_EXTRA, mangaIds.toLongArray())
-                }
+                },
             )
         }
     }

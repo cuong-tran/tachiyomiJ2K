@@ -70,7 +70,7 @@ class MangaDex : DelegatedHttpSource() {
             val chapters = deferredChapters.await()
             val context = Injekt.get<PreferencesHelper>().context
             val trueChapter = chapters?.find { it.url == "/api$url" }?.toChapter() ?: error(
-                context.getString(R.string.chapter_not_found)
+                context.getString(R.string.chapter_not_found),
             )
             if (manga != null) {
                 Triple(trueChapter, manga, chapters.orEmpty())

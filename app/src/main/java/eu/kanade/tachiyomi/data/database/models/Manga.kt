@@ -96,7 +96,7 @@ interface Manga : SManga {
                 TYPE_MANHUA -> R.string.manhua
                 TYPE_COMIC -> R.string.comic
                 else -> R.string.manga
-            }
+            },
         ).lowercase(Locale.getDefault())
     }
 
@@ -133,7 +133,7 @@ interface Manga : SManga {
             TYPE_WEBTOON
         } else if (currentTags.any { tag -> isManhuaTag(tag) } || sourceName.contains(
                 "manhua",
-                true
+                true,
             )
         ) {
             TYPE_MANHUA
@@ -348,6 +348,6 @@ fun Manga.toMangaInfo(): MangaInfo {
         genres = this.getGenres() ?: emptyList(),
         key = this.url,
         status = this.status,
-        title = this.title
+        title = this.title,
     )
 }

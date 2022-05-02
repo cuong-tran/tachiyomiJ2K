@@ -38,7 +38,7 @@ class ExtensionInstallBroadcast : BroadcastReceiver() {
             val data = UniFile.fromUri(context, intent.data).openInputStream()
 
             val params = SessionParams(
-                SessionParams.MODE_FULL_INSTALL
+                SessionParams.MODE_FULL_INSTALL,
             )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 params.setRequireUserAction(USER_ACTION_NOT_REQUIRED)
@@ -137,7 +137,7 @@ class ExtensionInstallActivity : Activity() {
             val data = UniFile.fromUri(this, intent.data).openInputStream()
 
             val params = SessionParams(
-                SessionParams.MODE_FULL_INSTALL
+                SessionParams.MODE_FULL_INSTALL,
             )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 params.setRequireUserAction(USER_ACTION_NOT_REQUIRED)

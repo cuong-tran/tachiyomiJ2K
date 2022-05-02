@@ -51,7 +51,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
                         sheetBehavior.skipCollapsed = true
                     }
                 }
-            }
+            },
         )
     }
 
@@ -107,7 +107,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
         binding.setAsDefaultSort.setOnClickListener {
             presenter.setGlobalChapterSort(
                 presenter.manga.sorting,
-                presenter.manga.sortDescending
+                presenter.manga.sortDescending,
             )
             binding.setAsDefaultSort.isInvisible = true
             binding.resetAsDefaultSort.isInvisible = true
@@ -144,7 +144,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
             presenter.setGlobalChapterFilters(
                 binding.chapterFilterLayout.showUnread.state,
                 binding.chapterFilterLayout.showDownload.state,
-                binding.chapterFilterLayout.showBookmark.state
+                binding.chapterFilterLayout.showBookmark.state,
             )
             binding.chapterFilterLayout.setAsDefaultFilter.isInvisible = true
             binding.chapterFilterLayout.resetAsDefaultFilter.isInvisible = true
@@ -185,7 +185,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
                 .setPositiveButton(R.string.filter) { _, _ ->
                     presenter.setScanlatorFilter(filteredScanlators)
                 }
-                .setNeutralButton(R.string.reset) { _, _, ->
+                .setNeutralButton(R.string.reset) { _, _ ->
                     presenter.setScanlatorFilter(emptySet())
                 }
                 .show().apply {
@@ -200,7 +200,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
         presenter.setFilters(
             binding.chapterFilterLayout.showUnread.state,
             binding.chapterFilterLayout.showDownload.state,
-            binding.chapterFilterLayout.showBookmark.state
+            binding.chapterFilterLayout.showBookmark.state,
         )
         checkIfFilterMatchesDefault(filterLayout)
     }
@@ -233,7 +233,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
                 binding.byUploadDate -> Manga.CHAPTER_SORTING_UPLOAD_DATE
                 else -> Manga.CHAPTER_SORTING_SOURCE
             },
-            state == SortTextView.State.DESCENDING
+            state == SortTextView.State.DESCENDING,
         )
         checkIfSortMatchesDefault()
     }

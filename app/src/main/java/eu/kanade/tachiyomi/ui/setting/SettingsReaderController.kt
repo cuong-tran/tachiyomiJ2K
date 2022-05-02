@@ -38,9 +38,9 @@ class SettingsReaderController : SettingsController() {
                 entries = listOf(
                     context.getString(R.string.no_animation),
                     context.getString(
-                        R.string.fast
+                        R.string.fast,
                     ),
-                    context.getString(R.string.normal)
+                    context.getString(R.string.normal),
                 )
                 entryValues = listOf(1, 250, 500) // using a value of 0 breaks the image viewer, so
                 // min is 1
@@ -104,7 +104,7 @@ class SettingsReaderController : SettingsController() {
                     R.string.white,
                     R.string.black,
                     R.string.smart_based_on_page,
-                    R.string.smart_based_on_page_and_theme
+                    R.string.smart_based_on_page_and_theme,
                 )
                 entryRange = 0..3
                 defaultValue = 2
@@ -165,13 +165,13 @@ class SettingsReaderController : SettingsController() {
                     R.string.none,
                     R.string.horizontally,
                     R.string.vertically,
-                    R.string.both_axes
+                    R.string.both_axes,
                 )
                 entryValues = listOf(
                     ViewerNavigation.TappingInvertMode.NONE.name,
                     ViewerNavigation.TappingInvertMode.HORIZONTAL.name,
                     ViewerNavigation.TappingInvertMode.VERTICAL.name,
-                    ViewerNavigation.TappingInvertMode.BOTH.name
+                    ViewerNavigation.TappingInvertMode.BOTH.name,
                 )
                 defaultValue = ViewerNavigation.TappingInvertMode.NONE.name
             }
@@ -185,7 +185,7 @@ class SettingsReaderController : SettingsController() {
                     R.string.fit_width,
                     R.string.fit_height,
                     R.string.original_size,
-                    R.string.smart_fit
+                    R.string.smart_fit,
                 )
                 entryRange = 1..6
                 defaultValue = 1
@@ -233,7 +233,7 @@ class SettingsReaderController : SettingsController() {
                     R.string.automatic,
                     R.string.left,
                     R.string.right,
-                    R.string.center
+                    R.string.center,
                 )
                 entryRange = 1..4
                 defaultValue = 1
@@ -290,13 +290,13 @@ class SettingsReaderController : SettingsController() {
                     R.string.none,
                     R.string.horizontally,
                     R.string.vertically,
-                    R.string.both_axes
+                    R.string.both_axes,
                 )
                 entryValues = listOf(
                     ViewerNavigation.TappingInvertMode.NONE.name,
                     ViewerNavigation.TappingInvertMode.HORIZONTAL.name,
                     ViewerNavigation.TappingInvertMode.VERTICAL.name,
-                    ViewerNavigation.TappingInvertMode.BOTH.name
+                    ViewerNavigation.TappingInvertMode.BOTH.name,
                 )
                 defaultValue = ViewerNavigation.TappingInvertMode.NONE.name
             }
@@ -315,7 +315,7 @@ class SettingsReaderController : SettingsController() {
                     R.string.webtoon_side_padding_10,
                     R.string.webtoon_side_padding_15,
                     R.string.webtoon_side_padding_20,
-                    R.string.webtoon_side_padding_25
+                    R.string.webtoon_side_padding_25,
                 )
                 entryValues = listOf(0, 10, 15, 20, 25)
                 defaultValue = "0"

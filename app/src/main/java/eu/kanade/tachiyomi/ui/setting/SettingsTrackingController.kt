@@ -70,8 +70,8 @@ class SettingsTrackingController :
                             view?.snack(
                                 context.getString(
                                     R.string.could_not_update_scoring_,
-                                    error?.localizedMessage.orEmpty()
-                                )
+                                    error?.localizedMessage.orEmpty(),
+                                ),
                             )
                         }
                     }
@@ -102,7 +102,7 @@ class SettingsTrackingController :
 
     private inline fun PreferenceGroup.trackPreference(
         service: TrackService,
-        crossinline login: () -> Unit
+        crossinline login: () -> Unit,
     ): TrackerPreference {
         return add(
             TrackerPreference(context).apply {
@@ -124,7 +124,7 @@ class SettingsTrackingController :
                         login()
                     }
                 }
-            }
+            },
         )
     }
 

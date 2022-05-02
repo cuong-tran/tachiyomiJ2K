@@ -46,14 +46,14 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     private val blendedAccent = ColorUtils.blendARGB(
         context.getResourceColor(R.attr.colorSecondary),
         context.getResourceColor(R.attr.colorOnBackground),
-        0.5f
+        0.5f,
     )
 
     private val slightAccent by lazy {
         ColorUtils.blendARGB(
             context.getResourceColor(R.attr.colorSecondary),
             context.getResourceColor(R.attr.colorOnBackground),
-            0.9f
+            0.9f,
         )
     }
 
@@ -72,7 +72,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     private val binding = MaterialSpinnerViewBinding.inflate(
         LayoutInflater.from(context),
         this,
-        false
+        false,
     )
 
     init {
@@ -164,7 +164,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     fun bindToIntPreference(
         pref: Preference<Int>,
         @ArrayRes intValuesResource: Int,
-        block: ((Int) -> Unit)? = null
+        block: ((Int) -> Unit)? = null,
     ) {
         this.pref = pref
         prefOffset = 0
@@ -199,7 +199,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     private fun makeSettingsPopup(
         preference: Preference<Int>,
         intValues: List<Int?>,
-        block: ((Int) -> Unit)? = null
+        block: ((Int) -> Unit)? = null,
     ): PopupMenu {
         val popup = popup()
         // Set a listener so we are notified if a menu item is clicked
@@ -215,7 +215,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     private fun makeSettingsPopup(
         preference: Preference<Int>,
         offset: Int = 0,
-        block: ((Int) -> Unit)? = null
+        block: ((Int) -> Unit)? = null,
     ): PopupMenu {
         val popup = popup()
         // Set a listener so we are notified if a menu item is clicked

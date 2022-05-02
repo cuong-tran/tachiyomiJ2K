@@ -181,7 +181,7 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
         binding.categorySort.setText(category.sortRes())
         binding.collapseArrow.setImageResource(
             if (category.isHidden) R.drawable.ic_expand_more_24dp
-            else R.drawable.ic_expand_less_24dp
+            else R.drawable.ic_expand_less_24dp,
         )
         when {
             adapter.mode == SelectableAdapter.Mode.MULTI -> {
@@ -249,7 +249,7 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
                 activity,
                 items,
                 activity.getString(R.string.sort_by),
-                sortingMode?.mainValue
+                sortingMode?.mainValue,
             ) { sheet, item ->
                 onCatSortClicked(category, item)
                 val nCategory = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
@@ -268,7 +268,7 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
     private fun getSortRes(
         sortMode: LibrarySort?,
         isAscending: Boolean,
-        @DrawableRes defaultDrawableRes: Int = R.drawable.ic_check_24dp
+        @DrawableRes defaultDrawableRes: Int = R.drawable.ic_check_24dp,
     ): Int {
         sortMode ?: return defaultDrawableRes
         return when (sortMode) {
@@ -286,7 +286,7 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
     private fun getSortRes(
         sortingMode: Int?,
         isAscending: Boolean,
-        @DrawableRes defaultDrawableRes: Int = R.drawable.ic_check_24dp
+        @DrawableRes defaultDrawableRes: Int = R.drawable.ic_check_24dp,
     ): Int {
         sortingMode ?: return defaultDrawableRes
         return when (val sortMode = LibrarySort.valueOf(sortingMode)) {
@@ -328,12 +328,12 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
         val allSelected = adapter.libraryListener?.allSelected(flexibleAdapterPosition) == true
         val drawable = ContextCompat.getDrawable(
             contentView.context,
-            if (allSelected) R.drawable.ic_check_circle_24dp else R.drawable.ic_radio_button_unchecked_24dp
+            if (allSelected) R.drawable.ic_check_circle_24dp else R.drawable.ic_radio_button_unchecked_24dp,
         )
         val tintedDrawable = drawable?.mutate()
         tintedDrawable?.setTint(
             if (allSelected) contentView.context.getResourceColor(R.attr.colorSecondary)
-            else ContextCompat.getColor(contentView.context, R.color.gray_button)
+            else ContextCompat.getColor(contentView.context, R.color.gray_button),
         )
         binding.checkbox.setImageDrawable(tintedDrawable)
     }

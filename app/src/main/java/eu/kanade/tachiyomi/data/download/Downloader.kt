@@ -62,7 +62,7 @@ class Downloader(
     private val context: Context,
     private val provider: DownloadProvider,
     private val cache: DownloadCache,
-    private val sourceManager: SourceManager
+    private val sourceManager: SourceManager,
 ) {
     private val preferences: PreferencesHelper by injectLazy()
     private val chapterCache: ChapterCache by injectLazy()
@@ -227,7 +227,7 @@ class Downloader(
                         downloadChapter(download).subscribeOn(Schedulers.io())
                     }
                 },
-                5
+                5,
             )
             .onBackpressureLatest()
             .observeOn(AndroidSchedulers.mainThread())
@@ -239,7 +239,7 @@ class Downloader(
                     DownloadService.stop(context)
                     Timber.e(error)
                     notifier.onError(error.message)
-                }
+                },
             )
     }
 
@@ -323,13 +323,13 @@ class Downloader(
         ) {
             val intent = Intent(
                 Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-                "package:${context.packageName}".toUri()
+                "package:${context.packageName}".toUri(),
             )
 
             notifier.onError(
                 context.getString(R.string.external_storage_download_notice),
                 download.chapter.name,
-                intent
+                intent,
             )
             return@defer Observable.just(download)
         }
@@ -389,7 +389,7 @@ class Downloader(
     private fun getOrDownloadImage(
         page: Page,
         download: Download,
-        tmpDir: UniFile
+        tmpDir: UniFile,
     ): Observable<Page> {
         // If the image URL is empty, do nothing
         if (page.imageUrl == null) {
@@ -439,7 +439,7 @@ class Downloader(
     private fun moveImageFromCache(
         cacheFile: File,
         tmpDir: UniFile,
-        filename: String
+        filename: String,
     ): Observable<UniFile> {
         return Observable.just(cacheFile).map {
             val tmpFile = tmpDir.createFile("$filename.tmp")
@@ -467,7 +467,7 @@ class Downloader(
         page: Page,
         source: HttpSource,
         tmpDir: UniFile,
-        filename: String
+        filename: String,
     ): Observable<UniFile> {
         page.status = Page.DOWNLOAD_IMAGE
         page.progress = 0
@@ -519,7 +519,7 @@ class Downloader(
         download: Download,
         mangaDir: UniFile,
         tmpDir: UniFile,
-        dirname: String
+        dirname: String,
     ) {
         // Ensure that the chapter folder has all the images.
         val downloadedImages = tmpDir.listFiles().orEmpty().filterNot { it.name!!.endsWith(".tmp") }

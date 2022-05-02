@@ -146,7 +146,7 @@ class SettingsAppearanceController : SettingsController() {
                 defaultValue = 1
                 isVisible = max(
                     context.resources.displayMetrics.widthPixels,
-                    context.resources.displayMetrics.heightPixels
+                    context.resources.displayMetrics.heightPixels,
                 ) >= 720.dpToPx
             }
 

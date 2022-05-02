@@ -22,7 +22,7 @@ class MangaItem(val manga: Manga) : AbstractFlexibleItem<MangaHolder>() {
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: MangaHolder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
         holder.bind(this)
     }

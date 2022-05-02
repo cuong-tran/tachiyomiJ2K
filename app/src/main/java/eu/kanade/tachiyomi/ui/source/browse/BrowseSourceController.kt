@@ -72,7 +72,7 @@ open class BrowseSourceController(bundle: Bundle) :
     constructor(
         source: CatalogueSource,
         searchQuery: String? = null,
-        smartSearchConfig: BrowseController.SmartSearchConfig? = null
+        smartSearchConfig: BrowseController.SmartSearchConfig? = null,
     ) : this(
         Bundle().apply {
             putLong(SOURCE_ID_KEY, source.id)
@@ -84,13 +84,13 @@ open class BrowseSourceController(bundle: Bundle) :
             if (smartSearchConfig != null) {
                 putParcelable(SMART_SEARCH_CONFIG_KEY, smartSearchConfig)
             }
-        }
+        },
     )
 
     constructor(source: CatalogueSource) : this(
         Bundle().apply {
             putLong(SOURCE_ID_KEY, source.id)
-        }
+        },
     )
 
     /**
@@ -228,9 +228,9 @@ open class BrowseSourceController(bundle: Bundle) :
                 }
                 binding.emptyView.updatePadding(
                     top = (bigToolbarHeight + insets.getInsets(systemBars()).top),
-                    bottom = insets.getInsets(systemBars()).bottom
+                    bottom = insets.getInsets(systemBars()).bottom,
                 )
-            }
+            },
         )
         binding.fab.applyBottomAnimatedInsets(16.dpToPx)
 
@@ -243,7 +243,7 @@ open class BrowseSourceController(bundle: Bundle) :
                         binding.fab.shrink()
                     }
                 }
-            }
+            },
         )
 
         if (oldPosition != RecyclerView.NO_POSITION) {
@@ -450,7 +450,7 @@ open class BrowseSourceController(bundle: Bundle) :
             source.id,
             source.baseUrl,
             presenter
-                .source.name
+                .source.name,
         )
         startActivity(intent)
     }
@@ -536,7 +536,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
             actions += if (presenter.source is LocalSource) {
                 EmptyView.Action(
-                    R.string.local_source_help_guide
+                    R.string.local_source_help_guide,
                 ) { openLocalSourceHelpGuide() }
             } else {
                 EmptyView.Action(R.string.retry, retryAction)
@@ -544,7 +544,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
             if (presenter.source is HttpSource) {
                 actions += EmptyView.Action(
-                    R.string.open_in_webview
+                    R.string.open_in_webview,
                 ) { openInWebView() }
             }
 
@@ -552,7 +552,7 @@ open class BrowseSourceController(bundle: Bundle) :
                 if (presenter.source is HttpSource) R.drawable.ic_browse_off_24dp
                 else R.drawable.ic_local_library_24dp,
                 message,
-                actions
+                actions,
             )
         } else {
             snack = binding.sourceLayout.snack(message, Snackbar.LENGTH_INDEFINITE) {
@@ -707,7 +707,7 @@ open class BrowseSourceController(bundle: Bundle) :
                 snack = view.snack(R.string.added_to_library)
             },
             onMangaMoved = { adapter?.notifyItemChanged(position) },
-            onMangaDeleted = { presenter.confirmDeletion(manga) }
+            onMangaDeleted = { presenter.confirmDeletion(manga) },
         )
         if (snack?.duration == Snackbar.LENGTH_INDEFINITE) {
             (activity as? MainActivity)?.setUndoSnackBar(snack)

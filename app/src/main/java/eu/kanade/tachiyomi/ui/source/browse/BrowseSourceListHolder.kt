@@ -24,7 +24,7 @@ import eu.kanade.tachiyomi.util.view.setCards
 class BrowseSourceListHolder(
     private val view: View,
     adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-    showOutline: Boolean
+    showOutline: Boolean,
 ) :
     BrowseSourceHolder(view, adapter) {
 

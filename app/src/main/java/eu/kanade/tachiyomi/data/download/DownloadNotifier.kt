@@ -83,7 +83,7 @@ internal class DownloadNotifier(private val context: Context) {
                 addAction(
                     R.drawable.ic_pause_24dp,
                     context.getString(R.string.pause),
-                    NotificationReceiver.pauseDownloadsPendingBroadcast(context)
+                    NotificationReceiver.pauseDownloadsPendingBroadcast(context),
                 )
             }
 
@@ -93,17 +93,17 @@ internal class DownloadNotifier(private val context: Context) {
                 val chapter = download.chapter.name.replaceFirst(
                     "$quotedTitle[\\s]*[-]*[\\s]*"
                         .toRegex(RegexOption.IGNORE_CASE),
-                    ""
+                    "",
                 )
                 setContentTitle("$title - $chapter".chop(30))
                 setContentText(
-                    context.getString(R.string.downloading)
+                    context.getString(R.string.downloading),
                 )
             } else {
                 setContentTitle(
                     context.getString(
-                        R.string.downloading
-                    )
+                        R.string.downloading,
+                    ),
                 )
                 setContentText(null)
             }
@@ -135,7 +135,7 @@ internal class DownloadNotifier(private val context: Context) {
                 addAction(
                     R.drawable.ic_pause_24dp,
                     context.getString(R.string.pause),
-                    NotificationReceiver.pauseDownloadsPendingBroadcast(context)
+                    NotificationReceiver.pauseDownloadsPendingBroadcast(context),
                 )
             }
 
@@ -150,7 +150,7 @@ internal class DownloadNotifier(private val context: Context) {
                 val quotedTitle = Pattern.quote(title)
                 val chapter = download.chapter.name.replaceFirst(
                     "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE),
-                    ""
+                    "",
                 )
                 setContentTitle("$title - $chapter".chop(30))
                 setContentText(downloadingProgressText)
@@ -180,13 +180,13 @@ internal class DownloadNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_play_arrow_24dp,
                 context.getString(R.string.resume),
-                NotificationReceiver.resumeDownloadsPendingBroadcast(context)
+                NotificationReceiver.resumeDownloadsPendingBroadcast(context),
             )
             // Clear action
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel_all),
-                NotificationReceiver.clearDownloadsPendingBroadcast(context)
+                NotificationReceiver.clearDownloadsPendingBroadcast(context),
             )
         }
 
@@ -228,13 +228,13 @@ internal class DownloadNotifier(private val context: Context) {
             setSmallIcon(R.drawable.ic_warning_white_24dp)
             setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText(context.getString(R.string.download_queue_size_warning))
+                    .bigText(context.getString(R.string.download_queue_size_warning)),
             )
             setContentIntent(
                 NotificationHandler.openUrl(
                     context,
-                    LibraryUpdateNotifier.HELP_WARNING_URL
-                )
+                    LibraryUpdateNotifier.HELP_WARNING_URL,
+                ),
             )
             setTimeoutAfter(30000)
         }
@@ -256,7 +256,7 @@ internal class DownloadNotifier(private val context: Context) {
     fun onError(
         error: String? = null,
         chapter: String? = null,
-        customIntent: Intent? = null
+        customIntent: Intent? = null,
     ) {
         // Create notification
         with(notification) {
@@ -264,8 +264,8 @@ internal class DownloadNotifier(private val context: Context) {
             setContentText(error ?: context.getString(R.string.could_not_download_unexpected_error))
             setStyle(
                 NotificationCompat.BigTextStyle().bigText(
-                    error ?: context.getString(R.string.could_not_download_unexpected_error)
-                )
+                    error ?: context.getString(R.string.could_not_download_unexpected_error),
+                ),
             )
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setCategory(NotificationCompat.CATEGORY_ERROR)
@@ -277,8 +277,8 @@ internal class DownloadNotifier(private val context: Context) {
                         context,
                         0,
                         customIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                    ),
                 )
             } else {
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))

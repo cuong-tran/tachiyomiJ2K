@@ -18,7 +18,7 @@ data class GithubRelease(
     @SerialName("body") val info: String,
     @SerialName("html_url") val releaseLink: String,
     @SerialName("prerelease") val preRelease: Boolean?,
-    @SerialName("assets") private val assets: List<Assets>
+    @SerialName("assets") private val assets: List<Assets>,
 ) {
 
     /**

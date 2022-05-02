@@ -106,7 +106,7 @@ fun getRecentsQueryDistinct(search: String, offset: Int = 0, isResuming: Boolean
 fun getRecentMangasLimitQuery(
     search: String = "",
     offset: Int = 0,
-    isResuming: Boolean
+    isResuming: Boolean,
 ) =
     """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*, ${History.TABLE}.*
@@ -137,7 +137,7 @@ fun getRecentMangasLimitQuery(
 fun getRecentHistoryUngrouped(
     search: String = "",
     offset: Int = 0,
-    isResuming: Boolean
+    isResuming: Boolean,
 ) =
     """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*, ${History.TABLE}.*
@@ -166,7 +166,7 @@ fun getAllRecentsType(
     includeRead: Boolean,
     endless: Boolean,
     offset: Int = 0,
-    isResuming: Boolean
+    isResuming: Boolean,
 ) = """
 	SELECT * FROM
 	(SELECT mangas.url as mangaUrl, mangas.*, chapters.*, history.*

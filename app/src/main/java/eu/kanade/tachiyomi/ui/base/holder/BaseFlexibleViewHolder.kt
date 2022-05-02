@@ -8,7 +8,7 @@ import eu.kanade.tachiyomi.util.system.isLTR
 abstract class BaseFlexibleViewHolder(
     view: View,
     adapter: FlexibleAdapter<*>,
-    stickyHeader: Boolean = false
+    stickyHeader: Boolean = false,
 ) :
     FlexibleViewHolder(view, adapter, stickyHeader) {
     override fun getRearRightView(): View? {

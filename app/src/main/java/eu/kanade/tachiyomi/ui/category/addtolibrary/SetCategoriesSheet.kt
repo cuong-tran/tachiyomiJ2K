@@ -38,7 +38,7 @@ class SetCategoriesSheet(
     var categories: MutableList<Category>,
     var preselected: Array<TriStateCheckBox.State>,
     private val addingToLibrary: Boolean,
-    val onMangaAdded: (() -> Unit) = { }
+    val onMangaAdded: (() -> Unit) = { },
 ) : E2EBottomSheetDialog<SetCategoriesSheetBinding>(activity) {
 
     constructor(
@@ -47,7 +47,7 @@ class SetCategoriesSheet(
         categories: MutableList<Category>,
         preselected: Array<Int>,
         addingToLibrary: Boolean,
-        onMangaAdded: () -> Unit
+        onMangaAdded: () -> Unit,
     ) : this(
         activity, listOf(manga), categories,
         categories.map {
@@ -57,7 +57,7 @@ class SetCategoriesSheet(
                 TriStateCheckBox.State.UNCHECKED
             }
         }.toTypedArray(),
-        addingToLibrary, onMangaAdded
+        addingToLibrary, onMangaAdded,
     )
 
     private val fastAdapter: FastAdapter<AddCategoryItem>
@@ -96,7 +96,7 @@ class SetCategoriesSheet(
                 listManga.first().seriesType(context)
             } else {
                 context.getString(R.string.selection).lowercase(Locale.ROOT)
-            }
+            },
         )
 
         setOnShowListener {
@@ -112,7 +112,7 @@ class SetCategoriesSheet(
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     updateBottomButtons()
                 }
-            }
+            },
         )
 
         binding.titleLayout.checkHeightThen {
@@ -135,7 +135,7 @@ class SetCategoriesSheet(
                     skipInversed = preselected[index] != TriStateCheckBox.State.IGNORE
                     state = preselected[index]
                 }
-            }
+            },
         )
         setCategoriesButtons()
         fastAdapter.onClickListener = onClickListener@{ view, _, item, _ ->
@@ -192,9 +192,9 @@ class SetCategoriesSheet(
                 else -> context.resources.getQuantityString(
                     R.plurals.category_plural,
                     items.size,
-                    items.size
+                    items.size,
                 )
-            }
+            },
         )
     }
 
@@ -205,7 +205,7 @@ class SetCategoriesSheet(
         updateBottomButtons()
         binding.root.post {
             binding.categoryRecyclerView.scrollToPosition(
-                max(0, itemAdapter.adapterItems.indexOf(selectedItems.firstOrNull()))
+                max(0, itemAdapter.adapterItems.indexOf(selectedItems.firstOrNull())),
             )
         }
     }
@@ -222,7 +222,7 @@ class SetCategoriesSheet(
         val headerHeight = (activity as? MainActivity)?.toolbarHeight ?: 0
         binding.buttonLayout.updatePaddingRelative(
             bottom = activity.window.decorView.rootWindowInsetsCompat
-                ?.getInsets(systemBars())?.bottom ?: 0
+                ?.getInsets(systemBars())?.bottom ?: 0,
         )
 
         binding.buttonLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
@@ -241,7 +241,7 @@ class SetCategoriesSheet(
                                 preselected.getOrElse(index) { TriStateCheckBox.State.UNCHECKED } != TriStateCheckBox.State.IGNORE
                             state = map[category.id] ?: TriStateCheckBox.State.CHECKED
                         }
-                    }
+                    },
                 )
                 setCategoriesButtons()
             }.show(activity)

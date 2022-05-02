@@ -8,7 +8,7 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 
 open class BaseChapterHolder(
     view: View,
-    private val adapter: BaseChapterAdapter<*>
+    private val adapter: BaseChapterAdapter<*>,
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     init {
@@ -33,7 +33,7 @@ open class BaseChapterHolder(
 
                 // Hide download and show delete if the chapter is downloaded
                 if (chapter.status != Download.State.DOWNLOADED) popup.menu.findItem(R.id.action_delete).title = downloadButton.context.getString(
-                    R.string.cancel
+                    R.string.cancel,
                 )
 
                 // Set a listener so we are notified if a menu item is clicked

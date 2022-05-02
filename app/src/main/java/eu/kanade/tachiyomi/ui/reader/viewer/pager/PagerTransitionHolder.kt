@@ -24,7 +24,7 @@ import rx.android.schedulers.AndroidSchedulers
 @SuppressLint("ViewConstructor")
 class PagerTransitionHolder(
     val viewer: PagerViewer,
-    val transition: ChapterTransition
+    val transition: ChapterTransition,
 ) : LinearLayout(viewer.activity), ViewPagerAdapter.PositionableView {
 
     /**

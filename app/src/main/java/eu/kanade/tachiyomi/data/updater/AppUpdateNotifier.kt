@@ -64,8 +64,8 @@ internal class AppUpdateNotifier(private val context: Context) {
                         R.string.new_beta_version_available
                     } else {
                         R.string.new_version_available
-                    }
-                )
+                    },
+                ),
             )
             setContentIntent(pendingIntent)
             setAutoCancel(true)
@@ -81,8 +81,8 @@ internal class AppUpdateNotifier(private val context: Context) {
                     context,
                     0,
                     intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                ),
             )
             addReleasePageAction()
         }
@@ -97,7 +97,7 @@ internal class AppUpdateNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_new_releases_24dp,
                 context.getString(R.string.release_page),
-                PendingIntent.getActivity(context, releaseUrl.hashCode(), releaseIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.getActivity(context, releaseUrl.hashCode(), releaseIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE),
             )
         }
     }
@@ -120,7 +120,7 @@ internal class AppUpdateNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel),
-                NotificationReceiver.cancelUpdateDownloadPendingBroadcast(context)
+                NotificationReceiver.cancelUpdateDownloadPendingBroadcast(context),
             )
             addReleasePageAction()
         }
@@ -159,13 +159,13 @@ internal class AppUpdateNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_system_update_24dp,
                 context.getString(R.string.install),
-                NotificationHandler.installApkPendingActivity(context, uri)
+                NotificationHandler.installApkPendingActivity(context, uri),
             )
             // Cancel action
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel),
-                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_INSTALL)
+                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_INSTALL),
             )
             addReleasePageAction()
         }
@@ -188,7 +188,7 @@ internal class AppUpdateNotifier(private val context: Context) {
                 context,
                 0,
                 context.packageManager.getLaunchIntentForPackage(BuildConfig.APPLICATION_ID),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
             setContentIntent(pendingIntent)
             clearActions()
@@ -215,13 +215,13 @@ internal class AppUpdateNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_refresh_24dp,
                 context.getString(R.string.retry),
-                AppUpdateService.downloadApkPendingService(context, url)
+                AppUpdateService.downloadApkPendingService(context, url),
             )
             // Cancel action
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel),
-                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_UPDATER)
+                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_UPDATER),
             )
             addReleasePageAction()
         }
@@ -241,13 +241,13 @@ internal class AppUpdateNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_refresh_24dp,
                 context.getString(R.string.retry),
-                NotificationHandler.installApkPendingActivity(context, uri)
+                NotificationHandler.installApkPendingActivity(context, uri),
             )
             // Cancel action
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel),
-                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_UPDATER)
+                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_UPDATER),
             )
             addReleasePageAction()
         }

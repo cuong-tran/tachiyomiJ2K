@@ -19,7 +19,7 @@ import eu.kanade.tachiyomi.util.view.setCards
 
 abstract class LibraryHolder(
     view: View,
-    val adapter: LibraryCategoryAdapter
+    val adapter: LibraryCategoryAdapter,
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     protected val color = ColorUtils.setAlphaComponent(itemView.context.getResourceColor(R.attr.colorSecondary), 75)
@@ -56,7 +56,7 @@ abstract class LibraryHolder(
             },
             showTotal,
             item.sourceLanguage,
-            this is LibraryGridHolder
+            this is LibraryGridHolder,
         )
     }
 

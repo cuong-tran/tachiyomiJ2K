@@ -29,7 +29,7 @@ import java.text.DecimalFormat
 
 class MigrationProcessHolder(
     private val view: View,
-    private val adapter: MigrationProcessAdapter
+    private val adapter: MigrationProcessAdapter,
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     private val db: DatabaseHelper by injectLazy()
@@ -59,11 +59,11 @@ class MigrationProcessHolder(
 
             binding.migrationMenu.setVectorCompat(
                 R.drawable.ic_more_vert_24dp,
-                R.attr.colorOnBackground
+                R.attr.colorOnBackground,
             )
             binding.skipManga.setVectorCompat(
                 R.drawable.ic_close_24dp,
-                R.attr.colorOnBackground
+                R.attr.colorOnBackground,
             )
             binding.migrationMenu.isInvisible = true
             binding.skipManga.isVisible = true
@@ -75,8 +75,8 @@ class MigrationProcessHolder(
                         adapter.controller.router.pushController(
                             MangaDetailsController(
                                 manga,
-                                true
-                            ).withFadeTransaction()
+                                true,
+                            ).withFadeTransaction(),
                         )
                     }
                 }
@@ -108,8 +108,8 @@ class MigrationProcessHolder(
                             adapter.controller.router.pushController(
                                 MangaDetailsController(
                                     searchResult,
-                                    true
-                                ).withFadeTransaction()
+                                    true,
+                                ).withFadeTransaction(),
                             )
                         }
                     } else {
@@ -164,12 +164,12 @@ class MigrationProcessHolder(
         if (latestChapter > 0f) {
             subtitle.text = root.context.getString(
                 R.string.latest_,
-                DecimalFormat("#.#").format(latestChapter)
+                DecimalFormat("#.#").format(latestChapter),
             )
         } else {
             subtitle.text = root.context.getString(
                 R.string.latest_,
-                root.context.getString(R.string.unknown)
+                root.context.getString(R.string.unknown),
             )
         }
     }

@@ -56,7 +56,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
             regularDrawable = ContextCompat.getDrawable(
                 itemView.context,
                 R.drawable
-                    .ic_add_24dp
+                    .ic_add_24dp,
             )
             binding.image.isVisible = false
             binding.editButton.setImageDrawable(null)
@@ -67,7 +67,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
             regularDrawable = ContextCompat.getDrawable(
                 itemView.context,
                 R.drawable
-                    .ic_drag_handle_24dp
+                    .ic_drag_handle_24dp,
             )
             binding.image.isVisible = true
             binding.editText.setText(binding.title.text)
@@ -89,8 +89,8 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
                 binding.reorder.setImageDrawable(
                     ContextCompat.getDrawable(
                         itemView.context,
-                        R.drawable.ic_delete_24dp
-                    )
+                        R.drawable.ic_delete_24dp,
+                    ),
                 )
                 binding.reorder.setOnClickListener {
                     adapter.categoryItemListener.onItemDelete(flexibleAdapterPosition)
@@ -109,8 +109,8 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
                 ContextCompat.getColor(
                     itemView.context,
                     R
-                        .color.gray_button
-                )
+                        .color.gray_button,
+                ),
             )
             binding.reorder.setImageDrawable(regularDrawable)
         }
@@ -137,7 +137,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         inputMethodManager.showSoftInput(
             binding.editText,
             WindowManager.LayoutParams
-                .SOFT_INPUT_ADJUST_PAN
+                .SOFT_INPUT_ADJUST_PAN,
         )
     }
 

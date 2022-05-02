@@ -98,7 +98,7 @@ class FullBackupRestore(context: Context, notifier: BackupNotifier) : AbstractBa
         history: List<BackupHistory>,
         tracks: List<Track>,
         backupCategories: List<BackupCategory>,
-        customManga: CustomMangaManager.MangaJson?
+        customManga: CustomMangaManager.MangaJson?,
     ) {
         db.inTransaction {
             val dbManga = backupManager.getMangaFromDatabase(manga)
@@ -129,7 +129,7 @@ class FullBackupRestore(context: Context, notifier: BackupNotifier) : AbstractBa
         history: List<BackupHistory>,
         tracks: List<Track>,
         backupCategories: List<BackupCategory>,
-        customManga: CustomMangaManager.MangaJson?
+        customManga: CustomMangaManager.MangaJson?,
     ) {
         try {
             val fetchedManga = backupManager.restoreManga(manga)
@@ -149,7 +149,7 @@ class FullBackupRestore(context: Context, notifier: BackupNotifier) : AbstractBa
         history: List<BackupHistory>,
         tracks: List<Track>,
         backupCategories: List<BackupCategory>,
-        customManga: CustomMangaManager.MangaJson?
+        customManga: CustomMangaManager.MangaJson?,
     ) {
         backupManager.restoreChaptersForManga(backupManga, chapters)
 
@@ -162,7 +162,7 @@ class FullBackupRestore(context: Context, notifier: BackupNotifier) : AbstractBa
         history: List<BackupHistory>,
         tracks: List<Track>,
         backupCategories: List<BackupCategory>,
-        customManga: CustomMangaManager.MangaJson?
+        customManga: CustomMangaManager.MangaJson?,
     ) {
         // Restore categories
         backupManager.restoreCategoriesForManga(manga, categories, backupCategories)

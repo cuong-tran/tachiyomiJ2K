@@ -105,7 +105,7 @@ class SettingsBackupController : SettingsController() {
                     R.string.every_12_hours,
                     R.string.daily,
                     R.string.every_2_days,
-                    R.string.weekly
+                    R.string.weekly,
                 )
                 entryValues = listOf(0, 6, 12, 24, 48, 168)
 
@@ -219,7 +219,7 @@ class SettingsBackupController : SettingsController() {
                 R.string.chapters,
                 R.string.tracking,
                 R.string.history,
-                R.string.custom_manga_info
+                R.string.custom_manga_info,
             )
                 .map { activity.getString(it) }
 
@@ -227,7 +227,7 @@ class SettingsBackupController : SettingsController() {
                 .setTitle(R.string.what_should_backup)
                 .setMultiChoiceItems(
                     options.toTypedArray(),
-                    booleanArrayOf(true, true, true, true, true, true)
+                    booleanArrayOf(true, true, true, true, true, true),
                 ) { dialog, position, _ ->
                     if (position == 0) {
                         val listView = (dialog as AlertDialog).listView

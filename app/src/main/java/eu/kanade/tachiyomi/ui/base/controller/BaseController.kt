@@ -57,7 +57,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
                     viewScope.cancel()
                     Timber.d("Destroy view for ${controller.instance()}")
                 }
-            }
+            },
         )
     }
 
@@ -145,7 +145,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
 
                     return onCollapse?.invoke(item) ?: true
                 }
-            }
+            },
         )
 
         if (expandActionViewFromInteraction) {

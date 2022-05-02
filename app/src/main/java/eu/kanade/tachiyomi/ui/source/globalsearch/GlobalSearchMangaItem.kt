@@ -22,7 +22,7 @@ class GlobalSearchMangaItem(val manga: Manga) : AbstractFlexibleItem<GlobalSearc
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: GlobalSearchMangaHolder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
         holder.bind(manga)
     }

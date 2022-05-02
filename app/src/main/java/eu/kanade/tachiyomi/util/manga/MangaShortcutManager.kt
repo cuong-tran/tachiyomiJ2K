@@ -32,7 +32,7 @@ class MangaShortcutManager(
     val preferences: PreferencesHelper = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
-    val sourceManager: SourceManager = Injekt.get()
+    val sourceManager: SourceManager = Injekt.get(),
 ) {
 
     val context: Context = preferences.context
@@ -78,7 +78,7 @@ class MangaShortcutManager(
 
                             ShortcutInfo.Builder(
                                 context,
-                                "Manga-${item.id?.toString() ?: item.title}"
+                                "Manga-${item.id?.toString() ?: item.title}",
                             )
                                 .setShortLabel(item.title.takeUnless { it.isBlank() } ?: context.getString(R.string.manga))
                                 .setLongLabel(item.title.takeUnless { it.isBlank() } ?: context.getString(R.string.manga))
@@ -88,11 +88,11 @@ class MangaShortcutManager(
                                     } else {
                                         Icon.createWithBitmap(bitmap)
                                     }
-                                    else Icon.createWithResource(context, R.drawable.ic_book_24dp)
+                                    else Icon.createWithResource(context, R.drawable.ic_book_24dp),
                                 )
                                 .setIntent(
                                     SearchActivity.openMangaIntent(context, item.id, true)
-                                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),
                                 )
                                 .build()
                         }
@@ -111,17 +111,17 @@ class MangaShortcutManager(
                                     else {
                                         Icon.createWithResource(
                                             context,
-                                            R.drawable.sc_extensions_48dp
+                                            R.drawable.sc_extensions_48dp,
                                         )
-                                    }
+                                    },
                                 )
                                 .setIntent(
                                     Intent(
                                         context,
-                                        SearchActivity::class.java
+                                        SearchActivity::class.java,
                                     ).setAction(MainActivity.SHORTCUT_SOURCE)
                                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                                        .putExtra(BrowseSourceController.SOURCE_ID_KEY, item.id)
+                                        .putExtra(BrowseSourceController.SOURCE_ID_KEY, item.id),
                                 )
                                 .build()
                         }

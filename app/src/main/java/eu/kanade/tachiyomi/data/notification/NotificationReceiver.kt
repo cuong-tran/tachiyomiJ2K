@@ -61,7 +61,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_DELETE_IMAGE -> deleteImage(
                 context,
                 intent.getStringExtra(EXTRA_FILE_LOCATION)!!,
-                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
             )
             // Cancel library update and dismiss notification
             ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
@@ -73,14 +73,14 @@ class NotificationReceiver : BroadcastReceiver() {
                 shareBackup(
                     context,
                     intent.getParcelableExtra(EXTRA_URI)!!,
-                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
                 )
             ACTION_MARK_AS_READ -> {
                 val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 if (notificationId > -1) dismissNotification(
                     context,
                     notificationId,
-                    intent.getIntExtra(EXTRA_GROUP_ID, 0)
+                    intent.getIntExtra(EXTRA_GROUP_ID, 0),
                 )
                 val urls = intent.getStringArrayExtra(EXTRA_CHAPTER_URL) ?: return
                 val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
@@ -93,7 +93,7 @@ class NotificationReceiver : BroadcastReceiver() {
                     context,
                     intent.getParcelableExtra(EXTRA_URI)!!,
                     "text/plain",
-                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
                 )
         }
     }
@@ -346,7 +346,7 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             notificationId: Int,
             groupId: Int? =
-                null
+                null,
         ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 val groupKey = context.notificationManager.activeNotifications.find {
@@ -385,7 +385,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 context,
                 0,
                 shareIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
 
@@ -417,14 +417,14 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             manga: Manga,
             chapter:
-                Chapter
+                Chapter,
         ): PendingIntent {
             val newIntent = ReaderActivity.newIntent(context, manga, chapter)
             return PendingIntent.getActivity(
                 context,
                 manga.id.hashCode(),
                 newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
 
@@ -446,7 +446,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 context,
                 downloadLink.hashCode(),
                 newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
 
@@ -468,7 +468,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 context,
                 manga.id.hashCode(),
                 newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
 
@@ -502,7 +502,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 context,
                 0,
                 newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
 
@@ -517,7 +517,7 @@ class NotificationReceiver : BroadcastReceiver() {
             manga: Manga,
             chapters:
                 Array<Chapter>,
-            groupId: Int
+            groupId: Int,
         ):
             PendingIntent {
             val newIntent = Intent(context, NotificationReceiver::class.java).apply {

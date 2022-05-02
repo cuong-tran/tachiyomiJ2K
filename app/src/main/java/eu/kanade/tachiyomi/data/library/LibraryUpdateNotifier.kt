@@ -82,7 +82,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                 .setContentTitle("${context.getString(R.string.updating_library)} (${current + 1}/$total)")
                 .setContentText(if (preferences.hideNotificationContent()) null else manga.title)
                 .setProgress(total, current, false)
-                .build()
+                .build(),
         )
     }
 
@@ -106,18 +106,18 @@ class LibraryUpdateNotifier(private val context: Context) {
                     NotificationCompat.BigTextStyle().bigText(
                         errors.joinToString("\n") {
                             it.chop(TITLE_MAX_LEN)
-                        }
-                    )
+                        },
+                    ),
                 )
                 setContentIntent(pendingIntent)
                 setSmallIcon(R.drawable.ic_tachij2k_notification)
                 addAction(
                     R.drawable.nnf_ic_file_folder,
                     context.getString(R.string.open_log),
-                    pendingIntent
+                    pendingIntent,
                 )
             }
-                .build()
+                .build(),
         )
     }
 
@@ -141,18 +141,18 @@ class LibraryUpdateNotifier(private val context: Context) {
                     NotificationCompat.BigTextStyle().bigText(
                         skips.joinToString("\n") {
                             it.chop(TITLE_MAX_LEN)
-                        }
-                    )
+                        },
+                    ),
                 )
                 setContentIntent(NotificationHandler.openUrl(context, HELP_SKIPPED_URL))
                 setSmallIcon(R.drawable.ic_tachij2k_notification)
                 addAction(
                     R.drawable.nnf_ic_file_folder,
                     context.getString(R.string.open_log),
-                    NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
+                    NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri),
                 )
             }
-                .build()
+                .build(),
         )
     }
 
@@ -179,7 +179,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                                     val request = ImageRequest.Builder(context).data(manga)
                                         .parameters(
                                             Parameters.Builder().set(MangaFetcher.onlyCache, true)
-                                                .build()
+                                                .build(),
                                         )
                                         .networkCachePolicy(CachePolicy.READ_ONLY)
                                         .transformations(CircleCropTransformation())
@@ -199,7 +199,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                                         context.resources.getQuantityString(
                                             R.plurals.notification_and_n_more,
                                             (chapterNames.size - (MAX_CHAPTERS - 1)),
-                                            (chapterNames.size - (MAX_CHAPTERS - 1))
+                                            (chapterNames.size - (MAX_CHAPTERS - 1)),
                                         )
                                 } else chapterNames.joinToString(", ")
                                 setContentText(chaptersNames)
@@ -210,8 +210,8 @@ class LibraryUpdateNotifier(private val context: Context) {
                                     NotificationReceiver.openChapterPendingActivity(
                                         context,
                                         manga,
-                                        chapters.first()
-                                    )
+                                        chapters.first(),
+                                    ),
                                 )
                                 addAction(
                                     R.drawable.ic_eye_24dp,
@@ -220,8 +220,8 @@ class LibraryUpdateNotifier(private val context: Context) {
                                         context,
                                         manga,
                                         chapters,
-                                        Notifications.ID_NEW_CHAPTERS
-                                    )
+                                        Notifications.ID_NEW_CHAPTERS,
+                                    ),
                                 )
                                 addAction(
                                     R.drawable.ic_book_24dp,
@@ -229,13 +229,13 @@ class LibraryUpdateNotifier(private val context: Context) {
                                     NotificationReceiver.openChapterPendingActivity(
                                         context,
                                         manga,
-                                        Notifications.ID_NEW_CHAPTERS
-                                    )
+                                        Notifications.ID_NEW_CHAPTERS,
+                                    ),
                                 )
                                 setAutoCancel(true)
                             },
-                            manga.id.hashCode()
-                        )
+                            manga.id.hashCode(),
+                        ),
                     )
                 }
             }
@@ -253,8 +253,8 @@ class LibraryUpdateNotifier(private val context: Context) {
                                 context.resources.getQuantityString(
                                     R.plurals.for_n_titles,
                                     updates.size,
-                                    updates.size
-                                )
+                                    updates.size,
+                                ),
                             )
                             if (!preferences.hideNotificationContent()) {
                                 setStyle(
@@ -262,8 +262,8 @@ class LibraryUpdateNotifier(private val context: Context) {
                                         .bigText(
                                             updates.keys.joinToString("\n") {
                                                 it.title.chop(45)
-                                            }
-                                        )
+                                            },
+                                        ),
                                 )
                             }
                         } else if (!preferences.hideNotificationContent()) {
@@ -275,7 +275,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                         setGroupSummary(true)
                         setContentIntent(getNotificationIntent())
                         setAutoCancel(true)
-                    }
+                    },
                 )
 
                 notifications.forEach {

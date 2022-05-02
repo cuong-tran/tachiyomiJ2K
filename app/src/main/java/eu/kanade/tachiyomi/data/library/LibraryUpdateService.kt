@@ -78,7 +78,7 @@ class LibraryUpdateService(
     val preferences: PreferencesHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
     val trackManager: TrackManager = Injekt.get(),
-    private val mangaShortcutManager: MangaShortcutManager = Injekt.get()
+    private val mangaShortcutManager: MangaShortcutManager = Injekt.get(),
 ) : Service() {
 
     /**
@@ -374,7 +374,7 @@ class LibraryUpdateService(
             val skippedFile = writeErrorFile(
                 skippedUpdates,
                 "skipped",
-                getString(R.string.learn_more_at_, LibraryUpdateNotifier.HELP_SKIPPED_URL)
+                getString(R.string.learn_more_at_, LibraryUpdateNotifier.HELP_SKIPPED_URL),
             ).getUriCompat(this)
             notifier.showUpdateSkippedNotification(skippedUpdates.map { it.key.title }, skippedFile)
         }
@@ -410,7 +410,7 @@ class LibraryUpdateService(
     private suspend fun updateMangaChapters(
         manga: LibraryManga,
         progress: Int,
-        shouldDownload: Boolean
+        shouldDownload: Boolean,
     ):
         Boolean {
         try {
@@ -442,7 +442,7 @@ class LibraryUpdateService(
                     }
                 }
                 if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
-                    manga
+                    manga,
                 )
             }
             return hasDownloads
@@ -481,7 +481,7 @@ class LibraryUpdateService(
                         notifier.showProgressNotification(
                             manga,
                             count.andIncrement,
-                            mangaToUpdate.size
+                            mangaToUpdate.size,
                         )
 
                         val networkManga = try {
@@ -628,7 +628,7 @@ class LibraryUpdateService(
             context: Context,
             category: Category? = null,
             target: Target = Target.CHAPTERS,
-            mangaToUse: List<LibraryManga>? = null
+            mangaToUse: List<LibraryManga>? = null,
         ): Boolean {
             return if (!isRunning()) {
                 val intent = Intent(context, LibraryUpdateService::class.java).apply {
@@ -637,7 +637,7 @@ class LibraryUpdateService(
                         putExtra(KEY_CATEGORY, id)
                         if (mangaToUse != null) putExtra(
                             KEY_MANGAS,
-                            mangaToUse.mapNotNull { it.id }.toLongArray()
+                            mangaToUse.mapNotNull { it.id }.toLongArray(),
                         )
                     }
                 }

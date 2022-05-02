@@ -23,7 +23,7 @@ class DownloadPageLoader(
     private val chapter: ReaderChapter,
     private val manga: Manga,
     private val source: Source,
-    private val downloadManager: DownloadManager
+    private val downloadManager: DownloadManager,
 ) : PageLoader() {
 
     /**
@@ -75,7 +75,7 @@ class DownloadPageLoader(
 
                             {
                                 context.contentResolver.openInputStream(page.uri ?: Uri.EMPTY)!!
-                            }
+                            },
                         ).apply {
                             status = Page.READY
                         }

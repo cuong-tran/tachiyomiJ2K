@@ -66,7 +66,7 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
             attrs,
             R.styleable.Toolbar,
             0,
-            defStyleRes
+            defStyleRes,
         )
         subtitleTextAppearance = a.getResourceId(R.styleable.Toolbar_subtitleTextAppearance, 0)
         a.recycle()
