@@ -145,10 +145,11 @@ dependencies {
     implementation("com.fredporciuncula:flow-preferences:1.6.0")
 
     // Network client
-    implementation("com.squareup.okhttp3:okhttp:${Versions.okhttp}")
-    implementation("com.squareup.okhttp3:logging-interceptor:${Versions.okhttp}")
-    implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:${Versions.okhttp}")
-    implementation("com.squareup.okio:okio:2.10.0")
+    val okhttpVersion = "4.9.3"
+    implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
+    implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
+    implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:$okhttpVersion")
+    implementation("com.squareup.okio:okio:3.0.0")
 
     // Chucker
     val chuckerVersion = "3.5.2"
@@ -212,8 +213,9 @@ dependencies {
     // UI
     implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")
     implementation("br.com.simplepass:loading-button-android:2.2.0")
-    implementation("com.mikepenz:fastadapter:${Versions.fastAdapter}")
-    implementation("com.mikepenz:fastadapter-extensions-binding:${Versions.fastAdapter}")
+    val fastAdapterVersion = "5.6.0"
+    implementation("com.mikepenz:fastadapter:$fastAdapterVersion")
+    implementation("com.mikepenz:fastadapter-extensions-binding:$fastAdapterVersion")
     implementation("com.github.arkon.FlexibleAdapter:flexible-adapter:c8013533")
     implementation("com.github.arkon.FlexibleAdapter:flexible-adapter-ui:c8013533")
     implementation("com.nononsenseapps:filepicker:2.5.2")
@@ -224,18 +226,12 @@ dependencies {
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.tachiyomiorg:DirectionalViewPager:1.0.0")
     implementation("com.github.florent37:viewtooltip:1.2.2")
-    implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.0")
+    implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
 
     // Conductor
     val conductorVersion = "3.0.0"
     implementation("com.bluelinelabs:conductor:$conductorVersion")
     implementation("com.github.tachiyomiorg:conductor-support-preference:$conductorVersion")
-
-    // RxBindings
-    implementation("com.jakewharton.rxbinding:rxbinding-kotlin:${Versions.RX_BINDING}")
-    implementation("com.jakewharton.rxbinding:rxbinding-appcompat-v7-kotlin:${Versions.RX_BINDING}")
-    implementation("com.jakewharton.rxbinding:rxbinding-support-v4-kotlin:${Versions.RX_BINDING}")
-    implementation("com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin:${Versions.RX_BINDING}")
 
     // Shizuku
     val shizukuVersion = "12.1.0"

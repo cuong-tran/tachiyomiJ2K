@@ -8,7 +8,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.preference.CheckBoxPreference
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
-import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.minusAssign
 import eu.kanade.tachiyomi.data.preference.plusAssign
@@ -19,7 +18,6 @@ import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.view.activityBinding
-import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.widget.preference.SwitchPreferenceCategory
 import uy.kohesive.injekt.Injekt
@@ -195,11 +193,11 @@ class SettingsSourcesController : SettingsController(), FloatingSearchInterface 
             true
         }
 
-        searchView?.queryTextChanges()?.filter { isControllerVisible }
-            ?.subscribeUntilDestroy {
-                query = it.toString()
-                drawSources()
-            }
+        setOnQueryTextChangeListener(searchView) {
+            query = it ?: ""
+            drawSources()
+            true
+        }
 
         if (useSearchTB) {
             // Fixes problem with the overflow icon showing up in lieu of search
