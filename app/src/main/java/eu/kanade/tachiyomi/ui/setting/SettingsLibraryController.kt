@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.preference.DEVICE_BATTERY_NOT_LOW
 import eu.kanade.tachiyomi.data.preference.DEVICE_CHARGING
 import eu.kanade.tachiyomi.data.preference.DEVICE_ONLY_ON_WIFI
 import eu.kanade.tachiyomi.data.preference.DelayedLibrarySuggestionsJob
@@ -132,8 +133,8 @@ class SettingsLibraryController : SettingsController() {
             multiSelectListPreferenceMat(activity) {
                 bindTo(preferences.libraryUpdateDeviceRestriction())
                 titleRes = R.string.library_update_restriction
-                entriesRes = arrayOf(R.string.wifi, R.string.charging)
-                entryValues = listOf(DEVICE_ONLY_ON_WIFI, DEVICE_CHARGING)
+                entriesRes = arrayOf(R.string.wifi, R.string.charging, R.string.battery_not_low)
+                entryValues = listOf(DEVICE_ONLY_ON_WIFI, DEVICE_CHARGING, DEVICE_BATTERY_NOT_LOW)
                 preSummaryRes = R.string.restrictions_
                 noSelectionRes = R.string.none
 

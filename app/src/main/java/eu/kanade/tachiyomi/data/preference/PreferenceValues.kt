@@ -8,3 +8,4 @@ const val MANGA_NON_READ = "manga_started"
 // Device
 const val DEVICE_ONLY_ON_WIFI = "wifi"
 const val DEVICE_CHARGING = "ac"
+const val DEVICE_BATTERY_NOT_LOW = "battery_not_low"
