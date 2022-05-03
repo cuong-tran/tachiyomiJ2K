@@ -81,7 +81,7 @@ open class MangaImpl : Manga {
 
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl && other::ogTitle.isInitialized &&
-            !other.title.isBlank() && other.ogTitle != ogTitle
+            other.title.isNotBlank() && other.ogTitle != ogTitle
         ) {
             val oldTitle = ogTitle
             title = other.ogTitle
