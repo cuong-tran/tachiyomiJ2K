@@ -23,7 +23,7 @@ class CrashLogUtil(private val context: Context) {
     fun dumpLogs() {
         try {
             val file = context.createFileInCacheDir("tachiyomi_crash_logs.txt")
-            file.appendText(getDebugInfo() + "\n")
+            file.appendText(getDebugInfo() + "\n\n")
             Runtime.getRuntime().exec("logcat *:E -d -f ${file.absolutePath}")
 
             showNotification(file.getUriCompat(context))
