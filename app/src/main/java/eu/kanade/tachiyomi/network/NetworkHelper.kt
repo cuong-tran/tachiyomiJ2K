@@ -39,7 +39,7 @@ class NetworkHelper(val context: Context) {
                                 .maxContentLength(250000L)
                                 .redactHeaders(emptySet())
                                 .alwaysReadResponseBody(false)
-                                .build()
+                                .build(),
                         )
                     }
 
