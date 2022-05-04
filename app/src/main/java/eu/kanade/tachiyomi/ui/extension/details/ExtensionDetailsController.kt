@@ -219,12 +219,16 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
             val newScreen = screen.preferenceManager.createPreferenceScreen(context)
             source.setupPreferenceScreen(newScreen)
 
+            val dataStore = SharedPreferencesDataStore(
+                context.getSharedPreferences(source.getPreferenceKey(), Context.MODE_PRIVATE),
+            )
             // Reparent the preferences
             while (newScreen.preferenceCount != 0) {
                 val pref = newScreen.getPreference(0)
                 pref.isIconSpaceReserved = true
                 pref.fragment = "source_${source.id}"
                 pref.order = Int.MAX_VALUE
+                pref.preferenceDataStore = dataStore
                 pref.isVisible = source.isEnabled()
 
                 // Apply incognito IME for EditTextPreference
