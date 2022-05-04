@@ -372,7 +372,7 @@ class LibraryUpdateService(
             val skippedFile = writeErrorFile(
                 skippedUpdates,
                 "skipped",
-                getString(R.string.learn_more_at_, LibraryUpdateNotifier.HELP_SKIPPED_URL),
+                getString(R.string.learn_why) + " - " + LibraryUpdateNotifier.HELP_SKIPPED_URL,
             ).getUriCompat(this)
             notifier.showUpdateSkippedNotification(skippedUpdates.map { it.key.title }, skippedFile)
         }

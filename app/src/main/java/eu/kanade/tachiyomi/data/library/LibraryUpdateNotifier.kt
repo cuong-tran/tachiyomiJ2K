@@ -149,6 +149,11 @@ class LibraryUpdateNotifier(private val context: Context) {
                     context.getString(R.string.open_log),
                     NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri),
                 )
+                addAction(
+                    R.drawable.ic_help_outline_24dp,
+                    context.getString(R.string.learn_why),
+                    NotificationHandler.openUrl(context, HELP_SKIPPED_URL),
+                )
             }
                 .build(),
         )
