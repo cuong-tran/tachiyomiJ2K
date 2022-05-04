@@ -28,7 +28,7 @@ buildscript {
         classpath("com.android.tools.build:gradle:7.1.3")
         classpath(LegacyPluginClassPath.googleServices)
         classpath(LegacyPluginClassPath.kotlinPlugin)
-        classpath("com.google.android.gms:oss-licenses-plugin:0.10.4")
+        classpath("com.google.android.gms:oss-licenses-plugin:0.10.5")
         classpath(LegacyPluginClassPath.kotlinSerializations)
     }
     repositories {
