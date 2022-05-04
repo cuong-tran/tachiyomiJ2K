@@ -48,7 +48,7 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
     var mainActivity: MainActivity? = null
     private var isExtraSmall = false
     val useLargeToolbar: Boolean
-        get() = preferences.useLargeToolbar() && !isExtraSmall
+        get() = preferences.useLargeToolbar().get() && !isExtraSmall
 
     var compactSearchMode = false
 

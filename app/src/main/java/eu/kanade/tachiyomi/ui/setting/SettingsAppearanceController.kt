@@ -88,10 +88,9 @@ class SettingsAppearanceController : SettingsController() {
 
         preferenceCategory {
             switchPreference {
-                key = Keys.useLargeToolbar
+                bindTo(preferences.useLargeToolbar())
                 titleRes = R.string.expanded_toolbar
                 summaryRes = R.string.show_larger_toolbar
-                defaultValue = true
 
                 onChange {
                     val useLarge = it as Boolean

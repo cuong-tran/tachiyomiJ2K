@@ -229,8 +229,6 @@ object PreferenceKeys {
 
     const val themeMangaDetails = "theme_manga_details"
 
-    const val useLargeToolbar = "use_large_toolbar"
-
     const val incognitoMode = "incognito_mode"
 
     const val sideNavMode = "side_nav_mode"
