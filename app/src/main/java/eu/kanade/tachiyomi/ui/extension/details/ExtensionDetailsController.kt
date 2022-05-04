@@ -31,14 +31,17 @@ import eu.kanade.tachiyomi.data.preference.minusAssign
 import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.databinding.ExtensionDetailControllerBinding
 import eu.kanade.tachiyomi.extension.model.Extension
+import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.getPreferenceKey
+import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.setting.DSL
 import eu.kanade.tachiyomi.ui.setting.onChange
 import eu.kanade.tachiyomi.ui.setting.switchPreference
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.view.openInBrowser
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
@@ -46,8 +49,11 @@ import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
 import eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText.Companion.setIncognito
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 @SuppressLint("RestrictedApi")
 class ExtensionDetailsController(bundle: Bundle? = null) :
@@ -60,6 +66,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     private var preferenceScreen: PreferenceScreen? = null
 
     private val preferences: PreferencesHelper = Injekt.get()
+    private val network: NetworkHelper by injectLazy()
 
     init {
         setHasOptionsMenu(true)
@@ -147,24 +154,74 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.extension_details, menu)
 
-        menu.findItem(R.id.action_history).isVisible = presenter.extension?.isUnofficial == false
+        presenter.extension?.let { extension ->
+            menu.findItem(R.id.action_history).isVisible = !extension.isUnofficial
+            menu.findItem(R.id.action_readme).isVisible = !extension.isUnofficial
+            if (extension.hasReadme) {
+                menu.findItem(R.id.action_readme).icon = view?.context?.contextCompatDrawable(R.drawable.ic_help_24dp)
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_history -> openCommitHistory()
+            R.id.action_history -> openChangelog()
+            R.id.action_readme -> openReadme()
+            R.id.action_clear_cookies -> clearCookies()
         }
         return super.onOptionsItemSelected(item)
     }
 
-    private fun openCommitHistory() {
-        val pkgName = presenter.extension!!.pkgName.substringAfter("eu.kanade.tachiyomi.extension.")
-        val pkgFactory = presenter.extension!!.pkgFactory
-        val url = when {
-            !pkgFactory.isNullOrEmpty() -> "$URL_EXTENSION_COMMITS/multisrc/src/main/java/eu/kanade/tachiyomi/multisrc/$pkgFactory"
-            else -> "$URL_EXTENSION_COMMITS/src/${pkgName.replace(".", "/")}"
+    private fun openChangelog() {
+        val extension = presenter.extension!!
+        val pkgName = extension.pkgName.substringAfter("eu.kanade.tachiyomi.extension.")
+        val pkgFactory = extension.pkgFactory
+        if (extension.hasChangelog) {
+            val url = createUrl(URL_EXTENSION_BLOB, pkgName, pkgFactory, "/CHANGELOG.md")
+            openInBrowser(url)
+            return
         }
+
+        // Falling back on GitHub commit history because there is no explicit changelog in extension
+        val url = createUrl(URL_EXTENSION_COMMITS, pkgName, pkgFactory)
         openInBrowser(url)
+    }
+
+    private fun createUrl(url: String, pkgName: String, pkgFactory: String?, path: String = ""): String {
+        return when {
+            !pkgFactory.isNullOrEmpty() -> "$url/multisrc/src/main/java/eu/kanade/tachiyomi/multisrc/$pkgFactory$path"
+            else -> "$url/src/${pkgName.replace(".", "/")}$path"
+        }
+    }
+
+    private fun openReadme() {
+        val extension = presenter.extension!!
+
+        if (!extension.hasReadme) {
+            openInBrowser("https://tachiyomi.org/help/faq/#extensions")
+            return
+        }
+
+        val pkgName = extension.pkgName.substringAfter("eu.kanade.tachiyomi.extension.")
+        val pkgFactory = extension.pkgFactory
+        val url = createUrl(URL_EXTENSION_BLOB, pkgName, pkgFactory, "/README.md")
+        openInBrowser(url)
+        return
+    }
+
+    private fun clearCookies() {
+        val urls = presenter.extension?.sources
+            ?.filterIsInstance<HttpSource>()
+            ?.map { it.baseUrl }
+            ?.distinct() ?: emptyList()
+
+        val cleared = urls.sumOf {
+            network.cookieManager.remove(it.toHttpUrl())
+        }
+
+        Timber.d("Cleared $cleared cookies for: ${urls.joinToString()}")
+        val context = view?.context ?: return
+        binding.coordinator.snack(context.getString(R.string.cookies_cleared))
     }
 
     private fun addPreferencesForSource(screen: PreferenceScreen, source: Source, isMultiSource: Boolean, isMultiLangSingleSource: Boolean) {
@@ -307,6 +364,8 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     private companion object {
         const val PKGNAME_KEY = "pkg_name"
         const val LASTOPENPREFERENCE_KEY = "last_open_preference"
+        private const val URL_EXTENSION_BLOB =
+            "https://github.com/tachiyomiorg/tachiyomi-extensions/blob/master"
         private const val URL_EXTENSION_COMMITS =
             "https://github.com/tachiyomiorg/tachiyomi-extensions/commits/master"
     }

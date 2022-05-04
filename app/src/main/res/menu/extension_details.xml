@@ -7,4 +7,16 @@
         android:title="@string/whats_new"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/action_readme"
+        android:icon="@drawable/ic_help_outline_24dp"
+        android:title="@string/faq_and_guides"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_clear_cookies"
+        android:icon="@drawable/ic_delete_24dp"
+        android:title="@string/clear_cookies"
+        app:showAsAction="never" />
+
 </menu>

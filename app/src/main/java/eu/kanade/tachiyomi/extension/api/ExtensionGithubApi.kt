@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.extension.api
 
 import android.content.Context
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.LoadResult
@@ -10,25 +11,29 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.system.withIOContext
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.int
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.long
+import kotlinx.serialization.Serializable
 import uy.kohesive.injekt.injectLazy
 
 internal class ExtensionGithubApi {
 
     private val networkService: NetworkHelper by injectLazy()
+    private val preferences: PreferencesHelper by injectLazy()
 
     suspend fun findExtensions(): List<Extension.Available> {
         return withIOContext {
-            networkService.client
+            val extensions = networkService.client
                 .newCall(GET("${REPO_URL_PREFIX}index.min.json"))
                 .await()
-                .parseAs<JsonArray>()
-                .let { parseResponse(it) }
+                .parseAs<List<ExtensionJsonObject>>()
+                .toExtensions()
+
+            // Sanity check - a small number of extensions probably means something broke
+            // with the repo generator
+            if (extensions.size < 100) {
+                throw Exception()
+            }
+
+            extensions
         }
     }
 
@@ -55,31 +60,26 @@ internal class ExtensionGithubApi {
         }
     }
 
-    private fun parseResponse(json: JsonArray): List<Extension.Available> {
-        return json
-            .filter { element ->
-                val versionName = element.jsonObject["version"]!!.jsonPrimitive.content
-                val libVersion = versionName.substringBeforeLast('.').toDouble()
+    private fun List<ExtensionJsonObject>.toExtensions(): List<Extension.Available> {
+        return this
+            .filter {
+                val libVersion = it.version.substringBeforeLast('.').toDouble()
                 libVersion >= ExtensionLoader.LIB_VERSION_MIN && libVersion <= ExtensionLoader.LIB_VERSION_MAX
             }
-            .map { element ->
-                val name = element.jsonObject["name"]!!.jsonPrimitive.content.substringAfter("Tachiyomi: ")
-                val pkgName = element.jsonObject["pkg"]!!.jsonPrimitive.content
-                val apkName = element.jsonObject["apk"]!!.jsonPrimitive.content
-                val versionName = element.jsonObject["version"]!!.jsonPrimitive.content
-                val versionCode = element.jsonObject["code"]!!.jsonPrimitive.long
-                val lang = element.jsonObject["lang"]!!.jsonPrimitive.content
-                val nsfw = element.jsonObject["nsfw"]!!.jsonPrimitive.int == 1
-                val sources = element.jsonObject["sources"]?.jsonArray?.map f@{
-                    val sName = it.jsonObject["name"]?.jsonPrimitive?.content ?: return@f null
-                    val sId = it.jsonObject["id"]?.jsonPrimitive?.content ?: return@f null
-                    val sLang = it.jsonObject["lang"]?.jsonPrimitive?.content ?: ""
-                    val sBaseUrl = it.jsonObject["baseUrl"]?.jsonPrimitive?.content ?: ""
-                    Extension.AvailableSource(sName, sId, sLang, sBaseUrl)
-                }?.filterNotNull()
-                val icon = "${REPO_URL_PREFIX}icon/${apkName.replace(".apk", ".png")}"
-
-                Extension.Available(name, pkgName, versionName, versionCode, lang, nsfw, apkName, icon, sources)
+            .map {
+                Extension.Available(
+                    name = it.name.substringAfter("Tachiyomi: "),
+                    pkgName = it.pkg,
+                    versionName = it.version,
+                    versionCode = it.code,
+                    lang = it.lang,
+                    isNsfw = it.nsfw == 1,
+                    hasReadme = it.hasReadme == 1,
+                    hasChangelog = it.hasChangelog == 1,
+                    sources = it.sources,
+                    apkName = it.apk,
+                    iconUrl = "${REPO_URL_PREFIX}icon/${it.apk.replace(".apk", ".png")}",
+                )
             }
     }
 
@@ -89,3 +89,17 @@ internal class ExtensionGithubApi {
 }
 
 private const val REPO_URL_PREFIX = "https://raw.githubusercontent.com/tachiyomiorg/tachiyomi-extensions/repo/"
+
+@Serializable
+private data class ExtensionJsonObject(
+    val name: String,
+    val pkg: String,
+    val apk: String,
+    val lang: String,
+    val code: Long,
+    val version: String,
+    val nsfw: Int,
+    val hasReadme: Int = 0,
+    val hasChangelog: Int = 0,
+    val sources: List<Extension.AvailableSource>?,
+)

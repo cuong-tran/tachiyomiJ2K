@@ -105,8 +105,8 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
             binding.sourceImage.load(extension.iconUrl) {
                 target(CoverViewTarget(binding.sourceImage))
             }
-        } else {
-            extension.getApplicationIcon(itemView.context)?.let { binding.sourceImage.setImageDrawable(it) }
+        } else if (extension is Extension.Installed) {
+            binding.sourceImage.load(extension.icon)
         }
         bindButton(item)
     }

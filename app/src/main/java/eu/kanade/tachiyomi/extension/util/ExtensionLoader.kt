@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceFactory
 import eu.kanade.tachiyomi.util.lang.Hash
+import eu.kanade.tachiyomi.util.system.getApplicationIcon
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
@@ -35,6 +36,8 @@ internal object ExtensionLoader {
     private const val METADATA_SOURCE_CLASS = "tachiyomi.extension.class"
     private const val METADATA_SOURCE_FACTORY = "tachiyomi.extension.factory"
     private const val METADATA_NSFW = "tachiyomi.extension.nsfw"
+    private const val METADATA_HAS_README = "tachiyomi.extension.hasReadme"
+    private const val METADATA_HAS_CHANGELOG = "tachiyomi.extension.hasChangelog"
     const val LIB_VERSION_MIN = 1.2
     const val LIB_VERSION_MAX = 1.3
 
@@ -151,6 +154,9 @@ internal object ExtensionLoader {
             return LoadResult.Error("NSFW extension $pkgName not allowed")
         }
 
+        val hasReadme = appInfo.metaData.getInt(METADATA_HAS_README, 0) == 1
+        val hasChangelog = appInfo.metaData.getInt(METADATA_HAS_CHANGELOG, 0) == 1
+
         val classLoader = PathClassLoader(appInfo.sourceDir, null, context.classLoader)
 
         val sources = appInfo.metaData.getString(METADATA_SOURCE_CLASS)!!
@@ -179,7 +185,6 @@ internal object ExtensionLoader {
         val langs = sources.filterIsInstance<CatalogueSource>()
             .map { it.lang }
             .toSet()
-
         val lang = when (langs.size) {
             0 -> ""
             1 -> langs.first()
@@ -193,9 +198,12 @@ internal object ExtensionLoader {
             versionCode,
             lang,
             isNsfw,
+            hasReadme,
+            hasChangelog,
             sources = sources,
             pkgFactory = appInfo.metaData.getString(METADATA_SOURCE_FACTORY),
             isUnofficial = signatureHash != officialSignature,
+            icon = context.getApplicationIcon(pkgName),
         )
         return LoadResult.Success(extension)
     }

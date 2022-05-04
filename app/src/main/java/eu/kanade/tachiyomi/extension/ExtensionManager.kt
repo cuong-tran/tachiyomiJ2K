@@ -68,6 +68,8 @@ class ExtensionManager(
      */
     private val installedExtensionsRelay = BehaviorRelay.create<List<Extension.Installed>>()
 
+    private val iconMap = mutableMapOf<String, Drawable>()
+
     /**
      * List of the currently installed extensions.
      */
@@ -79,12 +81,19 @@ class ExtensionManager(
         }
 
     fun getAppIconForSource(source: Source): Drawable? {
+        return getAppIconForSource(source.id)
+    }
+
+    fun getAppIconForSource(sourceId: Long): Drawable? {
         val pkgName =
-            installedExtensions.find { ext -> ext.sources.any { it.id == source.id } }?.pkgName
-        return if (pkgName != null) try {
-            context.packageManager.getApplicationIcon(pkgName)
-        } catch (e: Exception) {
-            null
+            installedExtensions.find { ext -> ext.sources.any { it.id == sourceId } }?.pkgName
+        return if (pkgName != null) {
+            try {
+                return iconMap[pkgName]
+                    ?: iconMap.getOrPut(pkgName) { context.packageManager.getApplicationIcon(pkgName) }
+            } catch (e: Exception) {
+                null
+            }
         } else null
     }
 
@@ -105,7 +114,7 @@ class ExtensionManager(
             setupAvailableSourcesMap()
         }
 
-    private var availableSources = hashMapOf<String, Extension.AvailableSource>()
+    private var availableSources = hashMapOf<Long, Extension.AvailableSource>()
 
     /**
      * Relay used to notify the untrusted extensions.
@@ -200,7 +209,7 @@ class ExtensionManager(
         }
     }
 
-    fun getStubSource(id: Long) = availableSources[id.toString()]
+    fun getStubSource(id: Long) = availableSources[id]
 
     /**
      * Finds the available extensions in the [api] and updates [availableExtensions].

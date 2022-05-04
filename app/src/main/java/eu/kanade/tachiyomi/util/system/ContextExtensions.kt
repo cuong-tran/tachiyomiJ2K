@@ -455,3 +455,11 @@ fun Context.createFileInCacheDir(name: String): File {
     file.createNewFile()
     return file
 }
+
+fun Context.getApplicationIcon(pkgName: String): Drawable? {
+    return try {
+        packageManager.getApplicationIcon(pkgName)
+    } catch (e: PackageManager.NameNotFoundException) {
+        null
+    }
+}
