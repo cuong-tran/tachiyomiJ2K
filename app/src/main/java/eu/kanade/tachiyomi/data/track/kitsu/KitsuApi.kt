@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.track.kitsu
 
 import androidx.core.net.toUri
-import com.github.salomonbrys.kotson.get
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.GET

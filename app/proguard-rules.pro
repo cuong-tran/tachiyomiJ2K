@@ -10,7 +10,6 @@
 -keep,allowoptimization class rx.** { public protected *; }
 -keep,allowoptimization class org.jsoup.** { public protected *; }
 -keep,allowoptimization class com.google.gson.** { public protected *; }
--keep,allowoptimization class com.github.salomonbrys.kotson.** { public protected *; }
 -keep,allowoptimization class com.squareup.duktape.** { public protected *; }
 -keep,allowoptimization class uy.kohesive.injekt.** { public protected *; }
 -keep,allowoptimization class eu.davidea.flexibleadapter.** { public protected *; }
@@ -30,7 +29,6 @@
 -keep class kotlin.** { *; }
 -keep class okhttp3.** { *; }
 -keep class com.google.gson.** { *; }
--keep class com.github.salomonbrys.kotson.** { *; }
 
 # OkHttp
 -dontwarn okhttp3.**

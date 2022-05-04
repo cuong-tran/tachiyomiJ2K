@@ -165,7 +165,6 @@ dependencies {
     val kotlinSerialization =  "1.3.2"
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinSerialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${kotlinSerialization}")
-    implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
 
     // JavaScript engine
     implementation("app.cash.quickjs:quickjs-android:0.9.2")
