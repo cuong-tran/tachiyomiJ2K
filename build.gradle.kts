@@ -25,7 +25,6 @@ subprojects {
 
 buildscript {
     dependencies {
-        classpath(LegacyPluginClassPath.fireBaseCrashlytics)
         classpath("com.android.tools.build:gradle:7.1.3")
         classpath(LegacyPluginClassPath.googleServices)
         classpath(LegacyPluginClassPath.kotlinPlugin)

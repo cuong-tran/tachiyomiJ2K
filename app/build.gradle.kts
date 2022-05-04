@@ -10,8 +10,11 @@ plugins {
     id(Plugins.kotlinParcelize)
     id(Plugins.kotlinSerialization)
     id("com.google.android.gms.oss-licenses-plugin")
-    id(Plugins.firebaseCrashlytics)
     id(Plugins.googleServices) apply false
+}
+
+if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
+    apply<com.google.gms.googleservices.GoogleServicesPlugin>()
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -146,6 +149,7 @@ dependencies {
     implementation("androidx.multidex:multidex:2.0.1")
 
     implementation("com.google.firebase:firebase-core:20.1.2")
+    implementation("com.google.firebase:firebase-analytics-ktx:20.1.2")
 
     val lifecycleVersion = "2.4.0-rc01"
     kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
@@ -300,8 +304,4 @@ tasks {
     preBuild {
         dependsOn(formatKotlin, copyHebrewStrings)
     }
-}
-
-if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
-    apply(mapOf("plugin" to "com.google.gms.google-services"))
 }

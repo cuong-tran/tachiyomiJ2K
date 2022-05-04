@@ -10,7 +10,6 @@ object LegacyPluginClassPath {
     const val googleServices = "com.google.gms:google-services:4.3.10"
     const val kotlinPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}"
     const val kotlinSerializations = "org.jetbrains.kotlin:kotlin-serialization:${Versions.kotlin}"
-    const val fireBaseCrashlytics = "com.google.firebase:firebase-crashlytics-gradle:2.3.0"
 }
 
 object AndroidVersions {
@@ -24,7 +23,6 @@ object AndroidVersions {
 
 object Plugins {
     const val androidApplication = "com.android.application"
-    const val firebaseCrashlytics = "com.google.firebase.crashlytics"
     const val googleServices = "com.google.gms.google-services"
     const val kapt = "kapt"
     const val kotlinParcelize = "kotlin-parcelize"
