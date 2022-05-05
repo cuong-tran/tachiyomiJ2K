@@ -47,6 +47,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithTrackServiceTwoWay
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
+import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.lang.trimOrNull
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
@@ -120,7 +121,7 @@ class MangaDetailsPresenter(
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
         tracks = db.getTracks(manga).executeAsBlocking()
-        if (manga.source == LocalSource.ID) {
+        if (manga.isLocal()) {
             refreshAll()
         } else if (!manga.initialized) {
             isLoading = true
@@ -315,7 +316,7 @@ class MangaDetailsPresenter(
 
     /** Refresh Manga Info and Chapter List (not tracking) */
     fun refreshAll() {
-        if (controller?.isNotOnline() == true && manga.source != LocalSource.ID) return
+        if (controller?.isNotOnline() == true && !manga.isLocal()) return
         presenterScope.launch {
             isLoading = true
             var mangaError: java.lang.Exception? = null
@@ -731,9 +732,10 @@ class MangaDetailsPresenter(
         tags: Array<String>?,
         status: Int?,
         seriesType: Int?,
+        lang: String?,
         resetCover: Boolean = false,
     ) {
-        if (manga.source == LocalSource.ID) {
+        if (manga.isLocal()) {
             manga.title = if (title.isNullOrBlank()) manga.url else title.trim()
             manga.author = author?.trimOrNull()
             manga.artist = artist?.trimOrNull()
@@ -754,7 +756,7 @@ class MangaDetailsPresenter(
                 db.updateViewerFlags(manga).executeAsBlocking()
             }
             manga.status = status ?: SManga.UNKNOWN
-            LocalSource(downloadManager.context).updateMangaInfo(manga)
+            LocalSource(downloadManager.context).updateMangaInfo(manga, lang)
             db.updateMangaInfo(manga).executeAsBlocking()
         } else {
             var genre = if (!tags.isNullOrEmpty() && tags.joinToString(", ") != manga.originalGenre) {
@@ -804,7 +806,7 @@ class MangaDetailsPresenter(
     fun editCoverWithStream(uri: Uri): Boolean {
         val inputStream =
             downloadManager.context.contentResolver.openInputStream(uri) ?: return false
-        if (manga.source == LocalSource.ID) {
+        if (manga.isLocal()) {
             LocalSource.updateCover(downloadManager.context, manga, inputStream)
             controller?.setPaletteColor()
             return true

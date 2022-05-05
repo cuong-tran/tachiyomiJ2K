@@ -85,6 +85,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.source.globalsearch.GlobalSearchController
+import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -1868,7 +1869,7 @@ class LibraryController(
                 PreMigrationController.navigateToMigration(
                     skipPre,
                     router,
-                    selectedMangas.filter { it.id != LocalSource.ID }.mapNotNull { it.id },
+                    selectedMangas.filter { it.isLocal() }.mapNotNull { it.id },
                 )
                 destroyActionModeIfNeeded()
             }

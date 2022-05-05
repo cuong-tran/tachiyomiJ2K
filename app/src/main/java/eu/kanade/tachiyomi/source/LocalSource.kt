@@ -21,12 +21,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromStream
-import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
 import rx.Observable
 import tachiyomi.source.model.ChapterInfo
 import tachiyomi.source.model.MangaInfo
@@ -45,6 +40,24 @@ class LocalSource(private val context: Context) : CatalogueSource, UnmeteredSour
 
         private const val COVER_NAME = "cover.jpg"
         private val LATEST_THRESHOLD = TimeUnit.MILLISECONDS.convert(7, TimeUnit.DAYS)
+        private val langMap = hashMapOf<String, String>()
+
+        fun getMangaLang(manga: SManga, context: Context): String {
+            return langMap.getOrPut(manga.url) {
+                val localDetails = getBaseDirectories(context)
+                    .asSequence()
+                    .mapNotNull { File(it, manga.url).listFiles()?.toList() }
+                    .flatten()
+                    .firstOrNull { it.extension.equals("json", ignoreCase = true) }
+
+                return if (localDetails != null) {
+                    val obj = Json.decodeFromStream<MangaJson>(localDetails.inputStream())
+                    obj.lang ?: "other"
+                } else {
+                    "other"
+                }
+            }
+        }
 
         fun updateCover(context: Context, manga: SManga, input: InputStream): File? {
             val dir = getBaseDirectories(context).firstOrNull()
@@ -186,43 +199,46 @@ class LocalSource(private val context: Context) : CatalogueSource, UnmeteredSour
             .firstOrNull { it.extension.equals("json", ignoreCase = true) }
 
         return if (localDetails != null) {
-            val obj = json.decodeFromStream<JsonObject>(localDetails.inputStream())
+            val obj = json.decodeFromStream<MangaJson>(localDetails.inputStream())
 
+            obj.lang?.let { langMap[manga.key] = it }
             manga.copy(
-                title = obj["title"]?.jsonPrimitive?.contentOrNull ?: manga.title,
-                author = obj["author"]?.jsonPrimitive?.contentOrNull ?: manga.author,
-                artist = obj["artist"]?.jsonPrimitive?.contentOrNull ?: manga.artist,
-                description = obj["description"]?.jsonPrimitive?.contentOrNull ?: manga.description,
-                genres = obj["genre"]?.jsonArray?.map { it.jsonPrimitive.content } ?: manga.genres,
-                status = obj["status"]?.jsonPrimitive?.intOrNull ?: manga.status,
+                title = obj.title ?: manga.title,
+                author = obj.author ?: manga.author,
+                artist = obj.artist ?: manga.artist,
+                description = obj.artist ?: manga.description,
+                genres = obj.genre?.toList() ?: manga.genres,
+                status = obj.status ?: manga.status,
             )
         } else {
             manga
         }
     }
 
-    fun updateMangaInfo(manga: SManga) {
+    fun updateMangaInfo(manga: SManga, lang: String?) {
         val directory = getBaseDirectories(context).map { File(it, manga.url) }.find {
             it.exists()
         } ?: return
+        lang?.let { langMap[manga.url] = it }
         val json = Json { prettyPrint = true }
         val existingFileName = directory.listFiles()?.find { it.extension == "json" }?.name
         val file = File(directory, existingFileName ?: "info.json")
-        file.writeText(json.encodeToString(manga.toJson()))
+        file.writeText(json.encodeToString(manga.toJson(lang)))
     }
 
-    private fun SManga.toJson(): MangaJson {
-        return MangaJson(title, author, artist, description, genre?.split(", ")?.toTypedArray(), status)
+    private fun SManga.toJson(lang: String?): MangaJson {
+        return MangaJson(title, author, artist, description, genre?.split(", ")?.toTypedArray(), status, lang)
     }
 
     @Serializable
     data class MangaJson(
-        val title: String,
-        val author: String?,
-        val artist: String?,
-        val description: String?,
-        val genre: Array<String>?,
-        val status: Int?,
+        val title: String? = null,
+        val author: String? = null,
+        val artist: String? = null,
+        val description: String? = null,
+        val genre: Array<String>? = null,
+        val status: Int? = null,
+        val lang: String? = null,
     ) {
 
         override fun equals(other: Any?): Boolean {

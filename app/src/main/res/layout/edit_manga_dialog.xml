@@ -120,6 +120,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
+            <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+                android:id="@+id/manga_lang"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="18dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="6dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                app:title="@string/language" />
+
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/manga_genres_tags"
                 android:layout_width="match_parent"

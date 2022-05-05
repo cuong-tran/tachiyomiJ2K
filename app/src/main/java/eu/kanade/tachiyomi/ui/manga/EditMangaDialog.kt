@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.EditMangaDialogBinding
+import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.source.model.SManga
@@ -30,12 +31,14 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class EditMangaDialog : DialogController {
 
@@ -46,6 +49,7 @@ class EditMangaDialog : DialogController {
     private var willResetCover = false
 
     lateinit var binding: EditMangaDialogBinding
+    val langauges = mutableListOf<String>()
 
     private val infoController
         get() = targetController as MangaDetailsController
@@ -90,6 +94,7 @@ class EditMangaDialog : DialogController {
         binding.mangaCover.loadManga(manga)
         val isLocal = manga.isLocal()
 
+        binding.mangaLang.isVisible = isLocal
         if (isLocal) {
             if (manga.title != manga.url) {
                 binding.title.append(manga.title)
@@ -98,6 +103,30 @@ class EditMangaDialog : DialogController {
             binding.mangaAuthor.append(manga.author ?: "")
             binding.mangaArtist.append(manga.artist ?: "")
             binding.mangaDescription.append(manga.description ?: "")
+            val preferences = infoController.presenter.preferences
+            val extensionManager: ExtensionManager by injectLazy()
+            val activeLangs = preferences.enabledLanguages().get()
+
+            langauges.add("")
+            langauges.addAll(
+                extensionManager.availableExtensions.groupBy { it.lang }.keys
+                    .sortedWith(
+                        compareBy(
+                            { it !in activeLangs },
+                            { LocaleHelper.getSourceDisplayName(it, binding.root.context) },
+                        ),
+                    )
+                    .filter { it != "all" },
+            )
+            binding.mangaLang.setEntries(
+                langauges.map {
+                    LocaleHelper.getSourceDisplayName(it, binding.root.context)
+                },
+            )
+            binding.mangaLang.setSelection(
+                langauges.indexOf(LocalSource.getMangaLang(manga, binding.root.context))
+                    .takeIf { it > -1 } ?: 0,
+            )
         } else {
             if (manga.title != manga.originalTitle) {
                 binding.title.append(manga.title)
@@ -278,7 +307,7 @@ class EditMangaDialog : DialogController {
             .toTypedArray()
 
     private fun resetTags() {
-        if (manga.genre.isNullOrBlank() || manga.source == LocalSource.ID) setGenreTags(emptyList())
+        if (manga.genre.isNullOrBlank() || manga.isLocal()) setGenreTags(emptyList())
         else {
             setGenreTags(manga.getOriginalGenres().orEmpty())
             binding.seriesType.setSelection(manga.seriesType(true) - 1)
@@ -302,6 +331,7 @@ class EditMangaDialog : DialogController {
             binding.mangaGenresTags.tags,
             binding.mangaStatus.selectedPosition,
             if (binding.resetsReadingMode.isVisible) binding.seriesType.selectedPosition + 1 else null,
+            langauges.getOrNull(binding.mangaLang.selectedPosition),
             willResetCover,
         )
     }

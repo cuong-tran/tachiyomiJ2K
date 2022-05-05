@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterRead
+import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.lang.getUrlWithoutDomain
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -922,7 +923,7 @@ class ReaderPresenter(
 
         Observable
             .fromCallable {
-                if (manga.source == LocalSource.ID) {
+                if (manga.isLocal()) {
                     val context = Injekt.get<Application>()
                     coverCache.deleteFromCache(manga)
                     LocalSource.updateCover(context, manga, stream())

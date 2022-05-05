@@ -12,9 +12,9 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.ChaptersItemBinding
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 
@@ -42,8 +42,7 @@ class ChapterHolder(
             itemView.context.getString(R.string.chapter_, number)
         } else chapter.name
 
-        localSource = manga.source == LocalSource.ID
-        binding.downloadButton.downloadButton.isVisible = !localSource && !isLocked
+        binding.downloadButton.downloadButton.isVisible = !manga.isLocal() && !isLocked
 
         ChapterUtil.setTextViewForChapter(binding.chapterTitle, item, hideStatus = isLocked)
 

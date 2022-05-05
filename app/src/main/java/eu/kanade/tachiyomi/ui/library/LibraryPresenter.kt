@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_I
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.lang.chopByWords
 import eu.kanade.tachiyomi.util.lang.removeArticles
@@ -366,7 +367,7 @@ class LibraryPresenter(
         // Filter for downloaded manga
         if (filterDownloaded != STATE_IGNORE) {
             val isDownloaded = when {
-                item.manga.source == LocalSource.ID -> true
+                item.manga.isLocal() -> true
                 item.downloadCount != -1 -> item.downloadCount > 0
                 else -> downloadManager.getDownloadCount(item.manga) > 0
             }
@@ -405,7 +406,11 @@ class LibraryPresenter(
         val showLanguageBadges = preferences.languageBadge().get()
         for (item in itemList) {
             item.sourceLanguage = if (showLanguageBadges) {
-                sourceManager.get(item.manga.source)?.lang
+                if (item.manga.isLocal()) {
+                    LocalSource.getMangaLang(item.manga, context)
+                } else {
+                    sourceManager.get(item.manga.source)?.lang
+                }
             } else {
                 null
             }
