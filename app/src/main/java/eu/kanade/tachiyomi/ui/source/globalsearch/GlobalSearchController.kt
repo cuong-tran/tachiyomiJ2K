@@ -74,12 +74,7 @@ open class GlobalSearchController(
 
     override fun createBinding(inflater: LayoutInflater) = SourceGlobalSearchControllerBinding.inflate(inflater)
 
-    /**
-     * Set the title of controller.
-     *
-     * @return title.
-     */
-    override fun getTitle(): String? {
+    override fun getSearchTitle(): String? {
         return customTitle ?: presenter.query
     }
 
