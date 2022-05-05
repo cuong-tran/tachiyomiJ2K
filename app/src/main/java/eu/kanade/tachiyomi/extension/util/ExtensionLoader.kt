@@ -208,14 +208,16 @@ internal object ExtensionLoader {
         return LoadResult.Success(extension)
     }
 
+    fun isPackageNameAnExtension(packageManager: PackageManager, pkgName: String): Boolean =
+        isPackageAnExtension(packageManager.getPackageInfo(pkgName, PACKAGE_FLAGS))
+
     /**
      * Returns true if the given package is an extension.
      *
      * @param pkgInfo The package info of the application.
      */
-    private fun isPackageAnExtension(pkgInfo: PackageInfo): Boolean {
-        return pkgInfo.reqFeatures.orEmpty().any { it.name == EXTENSION_FEATURE }
-    }
+    private fun isPackageAnExtension(pkgInfo: PackageInfo): Boolean =
+        pkgInfo.reqFeatures.orEmpty().any { it.name == EXTENSION_FEATURE }
 
     /**
      * Returns the signature hash of the package or null if it's not signed.

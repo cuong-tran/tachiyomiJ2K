@@ -38,6 +38,7 @@ import com.hippo.unifile.UniFile
 import com.nononsenseapps.filepicker.FilePickerActivity
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.widget.CustomLayoutPickerActivity
 import uy.kohesive.injekt.Injekt
@@ -218,6 +219,21 @@ fun Context.withOriginalWidth(): Context {
     overrideConf.screenWidthDp = width
     resources.configuration.updateFrom(overrideConf)
     return this
+}
+
+fun Context.extensionIntentForText(text: String): Intent? {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(text))
+    val info = packageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL)
+        .firstOrNull {
+            try {
+                val pkgName = it.activityInfo.packageName
+                ExtensionLoader.isPackageNameAnExtension(packageManager, pkgName)
+            } catch (_: Exception) {
+                false
+            }
+        } ?: return null
+    intent.setClassName(info.activityInfo.packageName, info.activityInfo.name)
+    return intent
 }
 
 fun Context.isLandscape(): Boolean {
