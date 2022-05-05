@@ -37,11 +37,7 @@ class LinearLayoutManagerAccurateOffset(context: Context?) : LinearLayoutManager
             childSizesMap[position] = child.height
             val type = getItemViewType(child)
             childTypeMap[position] = type
-            if (childTypeHeightMap[type] != null) {
-                childTypeHeightMap[type]!![position] = child.height
-            } else {
-                childTypeHeightMap[type] = hashMapOf(position to child.height)
-            }
+            childTypeHeightMap.getOrPut(type) { hashMapOf() }[position] = child.height
         }
     }
 

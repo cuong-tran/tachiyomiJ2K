@@ -19,13 +19,7 @@ object EstimatedItemHeight {
         return if (childSizesMap[pos] != null) {
             childSizesMap[pos] ?: 0
         } else {
-            val type = if (childTypeMap[pos] == null) {
-                val t = itemViewType ?: 0
-                childTypeMap[pos] = t
-                t
-            } else {
-                childTypeMap[pos] ?: 0
-            }
+            val type = childTypeMap.getOrPut(pos) { itemViewType ?: 0 }
             when {
                 childTypeEstimateMap[type] != null -> childTypeEstimateMap[type] ?: 0
                 childAvgHeightMap[type] == null && !childTypeHeightMap[type]?.values.isNullOrEmpty() -> {
