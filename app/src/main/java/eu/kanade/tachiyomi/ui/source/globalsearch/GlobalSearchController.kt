@@ -196,7 +196,7 @@ open class GlobalSearchController(
     }
 
     override fun onActionViewCollapse(item: MenuItem?) {
-        if (activity is SearchActivity && extensionFilter != null) {
+        if (activity is SearchActivity) {
             (activity as? SearchActivity)?.backPress()
         } else if (customTitle == null) {
             router.popCurrentController()
