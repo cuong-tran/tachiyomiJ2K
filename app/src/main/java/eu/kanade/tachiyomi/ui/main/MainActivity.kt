@@ -49,6 +49,7 @@ import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
+import com.google.common.primitives.Ints.max
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
@@ -115,7 +116,6 @@ import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
-import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToLong
 
@@ -173,7 +173,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     val toolbarHeight: Int
-        get() = max(binding.toolbar.height, binding.cardFrame.height)
+        get() = max(binding.toolbar.height, binding.cardFrame.height, binding.appBar.attrToolbarHeight)
 
     fun bigToolbarHeight(includeSearchToolbar: Boolean, includeTabs: Boolean, includeLargeToolbar: Boolean): Int {
         return if (!includeLargeToolbar || !binding.appBar.useLargeToolbar) {
