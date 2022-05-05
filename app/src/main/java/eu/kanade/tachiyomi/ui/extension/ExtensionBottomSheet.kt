@@ -360,6 +360,10 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             presenter.deselectSource()
             return false
         }
+        if (binding.sheetToolbar.hasExpandedActionView()) {
+            binding.sheetToolbar.collapseActionView()
+            return false
+        }
         return true
     }
 
