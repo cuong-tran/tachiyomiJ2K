@@ -850,8 +850,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     override fun onBackPressed() {
-        if (binding.searchToolbar.isSearchExpanded && binding.cardFrame.isVisible) {
-            binding.searchToolbar.searchItem?.collapseActionView()
+        if (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) {
+            binding.searchToolbar.collapseActionView()
             return
         }
         backPress()
