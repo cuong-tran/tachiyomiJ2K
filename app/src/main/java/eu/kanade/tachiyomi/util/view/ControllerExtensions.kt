@@ -99,18 +99,24 @@ fun Controller.setOnQueryTextChangeListener(
     )
 }
 
-fun Controller.removeQueryListener() {
-    val searchView = activityBinding?.searchToolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
-    val searchView2 = activityBinding?.toolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
-    searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-        override fun onQueryTextSubmit(query: String?) = true
-        override fun onQueryTextChange(newText: String?) = true
-    },
-    )
-    searchView2?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-        override fun onQueryTextSubmit(query: String?) = true
-        override fun onQueryTextChange(newText: String?) = true
-    },
+fun Controller.removeQueryListener(includeSearchTB: Boolean = true) {
+    val searchView =
+        activityBinding?.searchToolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
+    val searchView2 =
+        activityBinding?.toolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
+    if (includeSearchTB) {
+        searchView?.setOnQueryTextListener(
+            object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?) = true
+                override fun onQueryTextChange(newText: String?) = true
+            },
+        )
+    }
+    searchView2?.setOnQueryTextListener(
+        object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?) = true
+            override fun onQueryTextChange(newText: String?) = true
+        },
     )
 }
 

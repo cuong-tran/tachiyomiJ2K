@@ -97,7 +97,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
 
     override fun onActivityPaused(activity: Activity) {
         super.onActivityPaused(activity)
-        removeQueryListener()
+        removeQueryListener(false)
     }
 
     fun setTitle() {
