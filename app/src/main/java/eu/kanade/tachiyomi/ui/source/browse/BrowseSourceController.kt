@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.source.BrowseController
 import eu.kanade.tachiyomi.ui.source.globalsearch.GlobalSearchController
@@ -40,6 +41,7 @@ import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.applyBottomAnimatedInsets
 import eu.kanade.tachiyomi.util.view.fullAppBarHeight
@@ -130,11 +132,11 @@ open class BrowseSourceController(bundle: Bundle) :
         get() = recycler
 
     override fun getTitle(): String? {
-        return presenter.source.name
+        return if (presenter.sourceIsInitialized) presenter.source.name else null
     }
 
     override fun getSearchTitle(): String? {
-        return searchTitle(presenter.source.name)
+        return if (presenter.sourceIsInitialized) searchTitle(presenter.source.name) else null
     }
 
     // disabling for now, one day maybe it will source icons will good
@@ -161,6 +163,15 @@ open class BrowseSourceController(bundle: Bundle) :
         activityBinding?.appBar?.y = 0f
         activityBinding?.appBar?.updateAppBarAfterY(recycler)
         activityBinding?.appBar?.lockYPos = true
+        if (!presenter.sourceIsInitialized) {
+            activity?.toast(R.string.source_not_installed)
+            if (activity is SearchActivity) {
+                activity?.finish()
+            } else {
+                router.popCurrentController()
+            }
+            return
+        }
         requestFilePermissionsSafe(301, preferences, presenter.source is LocalSource)
     }
 
@@ -447,8 +458,7 @@ open class BrowseSourceController(bundle: Bundle) :
             activity,
             source.id,
             source.baseUrl,
-            presenter
-                .source.name,
+            source.name,
         )
         startActivity(intent)
     }
