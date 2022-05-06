@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
-import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -20,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -492,18 +490,6 @@ open class BrowseSourceController(bundle: Bundle) :
         adapter.onLoadMoreComplete(mangas)
         if (isControllerVisible) {
             activityBinding?.appBar?.lockYPos = false
-        }
-    }
-
-    override fun onActivityResumed(activity: Activity) {
-        super.onActivityResumed(activity)
-
-        if (BuildConfig.DEBUG && isControllerVisible) {
-            val searchView = activityBinding?.searchToolbar?.searchView
-            setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = true) {
-                searchWithQuery(it ?: "")
-                true
-            }
         }
     }
 
