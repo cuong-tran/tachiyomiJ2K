@@ -971,21 +971,6 @@ class LibraryController(
             binding.recyclerCover.isFocusable = false
             singleCategory = presenter.categories.size <= 1
 
-            if (preferences.showLibrarySearchSuggestions().get()) {
-                activityBinding?.searchToolbar?.setOnLongClickListener {
-                    val suggestion = preferences.librarySearchSuggestion().get()
-                    if (suggestion.isNotBlank()) {
-                        val searchItem = activityBinding?.searchToolbar?.searchItem
-                        val searchView = activityBinding?.searchToolbar?.searchView
-                            ?: return@setOnLongClickListener false
-                        searchItem?.expandActionView()
-                        searchView.setQuery(suggestion.removeSuffix("…"), false)
-                        true
-                    } else {
-                        false
-                    }
-                }
-            }
             if (binding.libraryGridRecycler.recycler.manager is StaggeredGridLayoutManager && staggeredBundle != null) {
                 binding.libraryGridRecycler.recycler.manager.onRestoreInstanceState(staggeredBundle)
                 staggeredBundle = null
@@ -1761,6 +1746,14 @@ class LibraryController(
         if (binding.recyclerCover.isClickable) {
             showCategories(false)
         }
+    }
+
+    override fun onSearchActionViewLongClickQuery(): String? {
+        if (preferences.showLibrarySearchSuggestions().get()) {
+            val suggestion = preferences.librarySearchSuggestion().get().takeIf { it.isNotBlank() }
+            return suggestion?.removeSuffix("…")
+        }
+        return null
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

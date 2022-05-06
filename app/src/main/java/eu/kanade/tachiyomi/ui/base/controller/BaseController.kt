@@ -156,6 +156,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
 
     open fun onActionViewExpand(item: MenuItem?) { }
     open fun onActionViewCollapse(item: MenuItem?) { }
+    open fun onSearchActionViewLongClickQuery(): String? = null
 
     fun hideItemsIfExpanded(searchItem: MenuItem?, menu: Menu?, isExpanded: Boolean = false) {
         menu ?: return
