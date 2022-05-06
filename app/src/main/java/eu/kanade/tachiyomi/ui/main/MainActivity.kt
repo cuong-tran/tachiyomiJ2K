@@ -121,6 +121,7 @@ import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToLong
 
+@SuppressLint("ResourceType")
 open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceListener {
 
     protected lateinit var router: Router
