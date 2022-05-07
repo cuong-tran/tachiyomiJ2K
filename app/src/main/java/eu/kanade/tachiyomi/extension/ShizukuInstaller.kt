@@ -89,9 +89,9 @@ class ShizukuInstaller(private val context: Context, val finishedQueue: (Shizuku
                 val size = context.getUriSize(entry.uri) ?: throw IllegalStateException()
                 context.contentResolver.openInputStream(entry.uri)!!.use {
                     val createCommand = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        "pm install-create --user current -i ${context.packageName} -S $size"
+                        "pm install-create --user current -r -i ${context.packageName} -S $size"
                     } else {
-                        "pm install-create -i ${context.packageName} -S $size"
+                        "pm install-create -r -i ${context.packageName} -S $size"
                     }
                     val createResult = exec(createCommand)
                     sessionId = SESSION_ID_REGEX.find(createResult.out)?.value
