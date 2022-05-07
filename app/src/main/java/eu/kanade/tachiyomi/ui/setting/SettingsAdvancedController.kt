@@ -58,6 +58,7 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
+import rikka.sui.Sui
 
 class SettingsAdvancedController : SettingsController() {
 
@@ -277,7 +278,7 @@ class SettingsAdvancedController : SettingsController() {
                 defaultValue = false
                 onChange {
                     it as Boolean
-                    if (it && !context.isPackageInstalled(ShizukuInstaller.shizukuPkgName)) {
+                    if (it && !context.isPackageInstalled(ShizukuInstaller.shizukuPkgName) && !Sui.isSui()) {
                         context.materialAlertDialog()
                             .setTitle(R.string.shizuku)
                             .setMessage(R.string.ext_installer_shizuku_unavailable_dialog)

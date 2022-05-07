@@ -17,6 +17,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import rikka.shizuku.Shizuku
+import rikka.sui.Sui
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.BufferedReader
@@ -66,7 +67,7 @@ class ShizukuInstaller(private val context: Context, val finishedQueue: (Shizuku
 
     init {
         Shizuku.addBinderDeadListener(shizukuDeadListener)
-        require(Shizuku.pingBinder() && context.isPackageInstalled(shizukuPkgName)) {
+        require(Shizuku.pingBinder() && (context.isPackageInstalled(shizukuPkgName) || Sui.isSui())) {
             finishedQueue(this)
             context.getString(R.string.ext_installer_shizuku_stopped)
         }
