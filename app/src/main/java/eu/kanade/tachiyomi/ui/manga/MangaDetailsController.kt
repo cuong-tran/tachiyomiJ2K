@@ -1443,7 +1443,10 @@ class MangaDetailsController :
             activity,
             presenter.sourceManager,
             this,
-            onMangaAdded = {
+            onMangaAdded = { migrationInfo ->
+                migrationInfo?.let {
+                    presenter.fetchChapters(andTracking = true)
+                }
                 updateHeader()
                 showAddedSnack()
             },
