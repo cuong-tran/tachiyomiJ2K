@@ -53,7 +53,6 @@ import eu.kanade.tachiyomi.data.image.coil.getBestColor
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.databinding.MangaDetailsControllerBinding
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -101,6 +100,7 @@ import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.getText
+import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
@@ -570,10 +570,13 @@ class MangaDetailsController :
             // fetch cover again in case the user set a new cover while reading
             setPaletteColor()
         }
-        val isCurrentController = router?.backstack?.lastOrNull()?.controller ==
-            this
-        if (isCurrentController) {
+        if (isControllerVisible) {
             setStatusBarAndToolbar()
+            val searchView =
+                activityBinding?.toolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
+            searchView?.post {
+                setSearchViewListener(searchView)
+            }
         }
     }
 
@@ -717,7 +720,7 @@ class MangaDetailsController :
         adapter?.setChapters(presenter.chapters)
         tabletAdapter?.notifyItemChanged(0)
         addMangaHeader()
-        activity?.invalidateOptionsMenu()
+        updateMenuVisibility(activityBinding?.toolbar?.menu)
     }
 
     fun updateChapters(chapters: List<ChapterItem>) {
@@ -731,7 +734,7 @@ class MangaDetailsController :
         adapter?.setChapters(chapters)
         addMangaHeader()
         colorToolbar(binding.recycler.canScrollVertically(-1))
-        activity?.invalidateOptionsMenu()
+        updateMenuVisibility(activityBinding?.toolbar?.menu)
     }
 
     private fun addMangaHeader() {
@@ -971,21 +974,7 @@ class MangaDetailsController :
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.manga_details, menu)
         colorToolbar(binding.recycler.canScrollVertically(-1))
-        val editItem = menu.findItem(R.id.action_edit)
-        editItem.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch &&
-            !presenter.manga.isLocal()
-        menu.findItem(R.id.action_mark_all_as_read).isVisible =
-            presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_mark_all_as_unread).isVisible =
-            presenter.anyRead() && !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_remove_downloads).isVisible =
-            presenter.hasDownloads() && !presenter.isLockedFromSearch &&
-            !presenter.manga.isLocal()
-        menu.findItem(R.id.remove_non_bookmarked).isVisible =
-            presenter.hasBookmark() && !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_migrate).isVisible = !presenter.isLockedFromSearch &&
-            manga?.source != LocalSource.ID && presenter.manga.favorite
+        updateMenuVisibility(menu)
         menu.findItem(R.id.action_migrate).title = view?.context?.getString(
             R.string.migrate_,
             presenter.manga.seriesType(view!!.context),
@@ -998,13 +987,19 @@ class MangaDetailsController :
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
         searchView.queryHint = resources?.getString(R.string.search_chapters)
-        searchItem.collapseActionView()
-        if (query.isNotEmpty()) {
+        if (query.isNotEmpty() && (!searchItem.isActionViewExpanded || searchView.query != query)) {
             searchItem.expandActionView()
+            setSearchViewListener(searchView)
             searchView.setQuery(query, true)
             searchView.clearFocus()
+        } else {
+            setSearchViewListener(searchView)
         }
 
+        searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
+    }
+
+    private fun setSearchViewListener(searchView: SearchView?) {
         setOnQueryTextChangeListener(searchView) {
             query = it ?: ""
             if (!isTablet) {
@@ -1016,7 +1011,25 @@ class MangaDetailsController :
             adapter?.performFilter()
             true
         }
-        searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
+    }
+
+    private fun updateMenuVisibility(menu: Menu?) {
+        menu ?: return
+        val editItem = menu.findItem(R.id.action_edit)
+        editItem?.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_download)?.isVisible = !presenter.isLockedFromSearch &&
+            !presenter.manga.isLocal()
+        menu.findItem(R.id.action_mark_all_as_read)?.isVisible =
+            presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_mark_all_as_unread)?.isVisible =
+            presenter.anyRead() && !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_remove_downloads)?.isVisible =
+            presenter.hasDownloads() && !presenter.isLockedFromSearch &&
+            !presenter.manga.isLocal()
+        menu.findItem(R.id.remove_non_bookmarked)?.isVisible =
+            presenter.hasBookmark() && !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_migrate)?.isVisible = !presenter.isLockedFromSearch &&
+            !presenter.manga.isLocal() && presenter.manga.favorite
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
