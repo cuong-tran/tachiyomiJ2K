@@ -488,6 +488,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             .asImmediateFlowIn(lifecycleScope) {
                 binding.toolbar.setIncognitoMode(it)
                 binding.searchToolbar.setIncognitoMode(it)
+                SecureActivityDelegate.setSecure(this)
             }
         preferences.sideNavIconAlignment()
             .asImmediateFlowIn(lifecycleScope) {

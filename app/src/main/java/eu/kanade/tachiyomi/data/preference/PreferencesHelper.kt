@@ -32,6 +32,7 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
+import eu.kanade.tachiyomi.data.preference.PreferenceValues as Values
 
 fun <T> Preference<T>.asImmediateFlow(block: (value: T) -> Unit): Flow<T> {
     block(get())
@@ -325,7 +326,7 @@ class PreferencesHelper(val context: Context) {
 
     fun lastUnlock() = flowPrefs.getLong(Keys.lastUnlock, 0)
 
-    fun secureScreen() = flowPrefs.getBoolean(Keys.secureScreen, false)
+    fun secureScreen() = flowPrefs.getEnum("secure_screen_v2", Values.SecureScreenMode.INCOGNITO)
 
     fun hideNotificationContent() = prefs.getBoolean(Keys.hideNotificationContent, false)
 
