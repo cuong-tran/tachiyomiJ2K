@@ -104,5 +104,6 @@ body:
           required: true
         - label: I have updated all installed extensions.
           required: true
+        - label: I have admitted that I am a clown to be laughed at by having checked this box, as I have not read these acknowledgements.
         - label: I have filled out all of the requested information in this form.
           required: true
