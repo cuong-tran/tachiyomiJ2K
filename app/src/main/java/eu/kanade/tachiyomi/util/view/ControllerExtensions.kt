@@ -230,7 +230,7 @@ fun Controller.scrollViewWith(
     swipeRefreshLayout?.setDistanceToTriggerSync(150.dpToPx)
     val swipeCircle = swipeRefreshLayout?.findChild<ImageView>()
     activityBinding!!.appBar.doOnLayout {
-        if (fullAppBarHeight!! > 0) {
+        if (fullAppBarHeight!! > 0 && isControllerVisible) {
             appBarHeight = fullAppBarHeight!!
             recycler.requestApplyInsets()
         }
@@ -485,7 +485,7 @@ fun Controller.scrollViewWith(
                             if (activityBinding!!.bottomNav?.isVisible == true &&
                                 preferences.hideBottomNavOnScroll().get()
                             ) closerToBottom else closerToTop
-                        lastY = activityBinding!!.appBar.snapAppBarY(recycler) {
+                        lastY = activityBinding!!.appBar.snapAppBarY(this@scrollViewWith, recycler) {
                             val activityBinding = activityBinding ?: return@snapAppBarY
                             swipeCircle?.translationY = max(
                                 activityBinding.appBar.y,
@@ -531,7 +531,9 @@ fun Controller.setItemAnimatorForAppBar(recycler: RecyclerView) {
             val duration = (recycler.itemAnimator?.changeDuration ?: 250) * 2
             itemAppBarAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
                 addUpdateListener {
-                    activityBinding?.appBar?.updateAppBarAfterY(recycler)
+                    if (isControllerVisible) {
+                        activityBinding?.appBar?.updateAppBarAfterY(recycler)
+                    }
                 }
             }
             itemAppBarAnimator?.duration = duration
