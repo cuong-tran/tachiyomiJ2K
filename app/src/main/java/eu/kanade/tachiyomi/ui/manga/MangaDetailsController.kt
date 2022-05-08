@@ -583,11 +583,14 @@ class MangaDetailsController :
         if (!returningFromReader) return
         returningFromReader = false
         runBlocking {
+            val itemAnimator = binding.recycler.itemAnimator
             val chapters =
                 withTimeoutOrNull(1000) { presenter.getChaptersNow() } ?: return@runBlocking
+            binding.recycler.itemAnimator = null
             tabletAdapter?.notifyItemChanged(0)
             adapter?.setChapters(chapters)
             addMangaHeader()
+            binding.recycler.itemAnimator = itemAnimator
         }
     }
 
