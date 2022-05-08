@@ -88,6 +88,7 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
     /** A value used to determine the offset needed for a appbar's y to show only the smaller toolbar */
     val yNeededForSmallToolbar: Int
         get() {
+            if (toolbarMode != ToolbarState.EXPANDED) return 0
             val tabHeight = if (tabsFrameLayout?.isVisible == true) 48.dpToPx else 0
             return -preLayoutHeight + (mainToolbar?.height ?: 0) + tabHeight
         }
