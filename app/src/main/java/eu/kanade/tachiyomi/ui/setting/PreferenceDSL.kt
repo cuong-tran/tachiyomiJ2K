@@ -180,7 +180,8 @@ fun <T> ListPreference.bindTo(preference: com.fredporciuncula.flow.preferences.P
 
 fun <T> ListMatPreference.bindTo(preference: com.fredporciuncula.flow.preferences.Preference<T>) {
     key = preference.key
-    defaultValue = preference.defaultValue.toString()
+    val defValue = preference.defaultValue
+    defaultValue = if (defValue is Set<*>) defValue else defValue.toString()
 }
 
 fun <T> IntListMatPreference.bindTo(preference: com.fredporciuncula.flow.preferences.Preference<T>) {
