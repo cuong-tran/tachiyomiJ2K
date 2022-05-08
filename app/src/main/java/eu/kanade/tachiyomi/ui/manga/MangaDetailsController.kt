@@ -454,9 +454,7 @@ class MangaDetailsController :
         if (isColor == toolbarIsColored || (isTablet && isColor)) return
         val activity = activity ?: return
         toolbarIsColored = isColor
-        val isCurrentController =
-            router?.backstack?.lastOrNull()?.controller == this@MangaDetailsController
-        if (isCurrentController) setTitle()
+        if (isControllerVisible) setTitle()
         if (actionMode != null) {
             return
         }
@@ -1187,11 +1185,7 @@ class MangaDetailsController :
     }
 
     private fun updateToolbarTitleAlpha(@FloatRange(from = 0.0, to = 1.0) alpha: Float? = null, isScrollingDown: Boolean = false) {
-        if ((
-            router?.backstack?.lastOrNull()?.controller != this@MangaDetailsController &&
-                alpha == null
-            ) || isScrollingDown
-        ) return
+        if ((!isControllerVisible && alpha == null) || isScrollingDown) return
         val scrolledList = binding.recycler
         val toolbarTextView = activityBinding?.toolbar?.toolbarTitle ?: return
         val tbAlpha = when {
