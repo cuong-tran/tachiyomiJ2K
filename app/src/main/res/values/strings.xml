@@ -1049,6 +1049,7 @@
     <string name="no_animation">No animation</string>
     <string name="normal">Normal</string>
     <string name="oldest">Oldest</string>
+    <string name="open_in_app">Open in app</string>
     <string name="open_in_browser">Open in browser</string>
     <string name="open_log">Open log</string>
     <string name="open_in_webview">Open in WebView</string>
