@@ -1862,7 +1862,7 @@ class LibraryController(
                 PreMigrationController.navigateToMigration(
                     skipPre,
                     router,
-                    selectedMangas.filter { it.isLocal() }.mapNotNull { it.id },
+                    selectedMangas.filter { !it.isLocal() }.mapNotNull { it.id },
                 )
                 destroyActionModeIfNeeded()
             }
