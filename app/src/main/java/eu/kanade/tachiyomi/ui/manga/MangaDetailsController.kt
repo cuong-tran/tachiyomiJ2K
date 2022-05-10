@@ -15,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -196,6 +197,7 @@ class MangaDetailsController :
     private var headerHeight = 0
     private var fullCoverActive = false
     var returningFromReader = false
+    private var floatingActionMode: android.view.ActionMode? = null
 
     override fun getTitle(): String? {
         return manga?.title
@@ -367,6 +369,7 @@ class MangaDetailsController :
     override fun onDestroyView(view: View) {
         snack?.dismiss()
         adapter = null
+        finishFloatingActionMode()
         trackingBottomSheet = null
         super.onDestroyView(view)
     }
@@ -425,6 +428,19 @@ class MangaDetailsController :
                 }
             },
         )
+
+        binding.touchView.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                finishFloatingActionMode()
+            }
+            false
+        }
+    }
+
+    private fun finishFloatingActionMode() {
+        floatingActionMode ?: return
+        floatingActionMode?.finish()
+        floatingActionMode = null
     }
 
     private fun setInsets(insets: WindowInsetsCompat, appbarHeight: Int, offset: Int) {
@@ -1345,7 +1361,7 @@ class MangaDetailsController :
         }
     }
 
-    override fun tagClicked(text: String) {
+    override fun localSearch(text: String) {
         if (router.backstackSize < 2) {
             return
         }
@@ -1375,6 +1391,15 @@ class MangaDetailsController :
     override fun globalSearch(text: String) {
         if (isNotOnline()) return
         router.pushController(GlobalSearchController(text).withFadeTransaction())
+    }
+
+    override fun showFloatingActionMode(view: View, content: String, label: Int) {
+        if (content.isBlank()) return
+        finishFloatingActionMode()
+        floatingActionMode = view.startActionMode(
+            FloatingMangaDetailsActionModeCallback(content, label),
+            android.view.ActionMode.TYPE_FLOATING,
+        )
     }
 
     override fun showChapterFilter() {
@@ -1652,6 +1677,47 @@ class MangaDetailsController :
             Download,
             Read,
             Unread
+        }
+    }
+
+    inner class FloatingMangaDetailsActionModeCallback(
+        val text: String,
+        val label: Int,
+    ) : android.view.ActionMode.Callback {
+        override fun onCreateActionMode(mode: android.view.ActionMode?, menu: Menu?): Boolean {
+            mode?.menuInflater?.inflate(R.menu.manga_details_title, menu)
+            val context = view?.context ?: return false
+            val prevController = router.backstack.getOrNull(router.backstackSize - 2)?.controller
+            val localItem = menu?.findItem(R.id.action_local_search) ?: return true
+            localItem.isVisible = when (prevController) {
+                is LibraryController, is BrowseController, is RecentsController -> true
+                else -> false
+            }
+            val library = context.getString(R.string.library).lowercase(Locale.getDefault())
+            localItem.title = context.getString(R.string.search_, library)
+            return true
+        }
+
+        override fun onPrepareActionMode(mode: android.view.ActionMode?, menu: Menu?): Boolean {
+            return false
+        }
+
+        override fun onActionItemClicked(
+            mode: android.view.ActionMode?,
+            item: MenuItem?,
+        ): Boolean {
+            mode?.finish()
+            val context = view?.context ?: return true
+            when (item?.itemId) {
+                R.id.action_copy -> copyToClipboard(text, context.getString(label))
+                R.id.action_global_search -> globalSearch(text)
+                R.id.action_local_search -> localSearch(text)
+            }
+            return true
+        }
+
+        override fun onDestroyActionMode(mode: android.view.ActionMode?) {
+            floatingActionMode = null
         }
     }
 }

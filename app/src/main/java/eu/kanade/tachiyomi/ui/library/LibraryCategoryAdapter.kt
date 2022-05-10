@@ -129,7 +129,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
         }
     }
 
-    fun performFilter() {
+    private fun performFilter() {
         val s = getFilter(String::class.java)
         if (s.isNullOrBlank()) {
             if (mangas.firstOrNull()?.filter?.isNotBlank() == true) {

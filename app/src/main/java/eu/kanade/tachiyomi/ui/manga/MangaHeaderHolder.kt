@@ -127,22 +127,15 @@ class MangaHeaderHolder(
             favoriteButton.setOnClickListener {
                 adapter.delegate.favoriteManga(false)
             }
-            title.setOnClickListener {
-                title.text?.let { adapter.delegate.globalSearch(it.toString().toNormalized()) }
+            title.setOnClickListener { view ->
+                title.text?.toString()?.toNormalized()?.let {
+                    adapter.delegate.showFloatingActionMode(view, it, R.string.title)
+                }
             }
-            title.setOnLongClickListener {
-                adapter.delegate.copyToClipboard(title.text.toString(), R.string.title)
-                true
-            }
-            mangaAuthor.setOnClickListener {
-                mangaAuthor.text?.let { adapter.delegate.globalSearch(it.toString()) }
-            }
-            mangaAuthor.setOnLongClickListener {
-                adapter.delegate.copyToClipboard(
-                    mangaAuthor.text.toString(),
-                    R.string.author,
-                )
-                true
+            mangaAuthor.setOnClickListener { view ->
+                mangaAuthor.text?.toString()?.let {
+                    adapter.delegate.showFloatingActionMode(view, it, R.string.title)
+                }
             }
             applyBlur()
             mangaCover.setOnClickListener { adapter.delegate.zoomImageFromThumb(coverCard) }
@@ -489,7 +482,7 @@ class MangaHeaderHolder(
                     chip.setTextColor(textColor)
                     chip.text = genreText
                     chip.setOnClickListener {
-                        adapter.delegate.tagClicked(genreText)
+                        adapter.delegate.localSearch(genreText)
                     }
                     chip.setOnLongClickListener {
                         adapter.delegate.copyToClipboard(genreText, genreText)

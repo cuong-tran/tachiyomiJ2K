@@ -131,8 +131,9 @@ class MangaDetailsAdapter(
         fun startDownloadRange(position: Int)
         fun readNextChapter(readingButton: View)
         fun topCoverHeight(): Int
-        fun tagClicked(text: String)
+        fun localSearch(text: String)
         fun globalSearch(text: String)
+        fun showFloatingActionMode(view: View, content: String, label: Int)
         fun showChapterFilter()
         fun favoriteManga(longPress: Boolean)
         fun copyToClipboard(content: String, label: Int, useToast: Boolean = false)
