@@ -107,16 +107,16 @@ class PagerPageHolder(
 
     /**
      * Subscription used to read the header of the image. This is needed in order to instantiate
-     * the appropiate image view depending if the image is animated (GIF).
+     * the appropriate image view depending if the image is animated (GIF).
      */
     private var readImageHeaderSubscription: Subscription? = null
 
-    var status: Int = 0
-    var extraStatus: Int = 0
-    var progress: Int = 0
-    var extraProgress: Int = 0
+    private var status: Int = 0
+    private var extraStatus: Int = 0
+    private var progress: Int = 0
+    private var extraProgress: Int = 0
 
-    var scope: CoroutineScope? = null
+    private var scope: CoroutineScope? = null
 
     init {
         addView(progressBar)
