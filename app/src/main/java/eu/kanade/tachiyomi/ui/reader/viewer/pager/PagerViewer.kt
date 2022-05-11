@@ -89,6 +89,9 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
     private var pagerListener = object : ViewPager.SimpleOnPageChangeListener() {
         override fun onPageSelected(position: Int) {
+            if (activity.isScrollingThroughPagesOrChapters.not()) {
+                activity.hideMenu()
+            }
             onPageChange(position)
         }
 

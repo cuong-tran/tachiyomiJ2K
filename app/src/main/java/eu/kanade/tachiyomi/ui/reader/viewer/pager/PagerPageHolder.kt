@@ -160,6 +160,11 @@ class PagerPageHolder(
         }
     }
 
+    override fun onScaleChanged(newScale: Float) {
+        super.onScaleChanged(newScale)
+        viewer.activity.hideMenu()
+    }
+
     override fun onImageLoadError() {
         super.onImageLoadError()
         onImageDecodeError()

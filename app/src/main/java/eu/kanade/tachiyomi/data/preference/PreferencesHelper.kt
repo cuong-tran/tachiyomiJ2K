@@ -179,6 +179,8 @@ class PreferencesHelper(val context: Context) {
 
     fun webtoonPageLayout() = flowPrefs.getInt(Keys.webtoonPageLayout, PageLayout.SINGLE_PAGE.value)
 
+    fun webtoonReaderHideThreshold() = flowPrefs.getEnum("reader_hide_threshold", Values.ReaderHideThreshold.LOW)
+
     fun webtoonInvertDoublePages() = flowPrefs.getBoolean(Keys.webtoonInvertDoublePages, false)
 
     fun readerBottomButtons() = flowPrefs.getStringSet(
