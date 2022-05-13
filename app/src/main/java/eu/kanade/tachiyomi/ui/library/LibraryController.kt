@@ -1758,7 +1758,9 @@ class LibraryController(
             R.id.action_search -> expandActionViewFromInteraction = true
             R.id.action_filter -> {
                 hasExpanded = true
-                binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.expand()
+                val sheetBehavior = binding.filterBottomSheet.filterBottomSheet.sheetBehavior
+                if (!sheetBehavior.isExpanded()) sheetBehavior?.expand()
+                else showDisplayOptions()
             }
             else -> return super.onOptionsItemSelected(item)
         }
