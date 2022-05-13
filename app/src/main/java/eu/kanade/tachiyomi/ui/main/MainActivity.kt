@@ -23,6 +23,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.annotation.IdRes
 import androidx.appcompat.view.menu.ActionMenuItemView
 import androidx.appcompat.view.menu.MenuItemImpl
@@ -102,6 +104,7 @@ import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.blurBehindWindow
+import eu.kanade.tachiyomi.util.view.canStillGoBack
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.findChild
 import eu.kanade.tachiyomi.util.view.getItemView
@@ -178,6 +181,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     val toolbarHeight: Int
         get() = max(binding.toolbar.height, binding.cardFrame.height, binding.appBar.attrToolbarHeight)
 
+    var backPressedCallback: OnBackPressedCallback? = null
+    private val backCallback = {
+        pressingBack()
+        reEnableBackPressedCallBack()
+    }
+
     fun bigToolbarHeight(includeSearchToolbar: Boolean, includeTabs: Boolean, includeLargeToolbar: Boolean): Int {
         return if (!includeLargeToolbar || !binding.appBar.useLargeToolbar) {
             toolbarHeight + if (includeTabs) 48.dpToPx else 0
@@ -212,6 +221,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         window.sharedElementsUseOverlay = false
 
         super.onCreate(savedInstanceState)
+        backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
         if (!isTaskRoot && this !is SearchActivity) {
@@ -358,7 +368,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
 
         binding.toolbar.setNavigationOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
 
         binding.searchToolbar.setNavigationOnClickListener {
@@ -370,7 +380,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 rootSearchController !is SmallToolbarInterface
             ) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
-            } else onBackPressed()
+            } else onBackPressedDispatcher.onBackPressed()
         }
 
         binding.searchToolbar.searchItem?.setOnActionExpandListener(
@@ -388,6 +398,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     (controller as? BaseController<*>)?.onActionViewExpand(item)
                     (controller as? SettingsController)?.onActionViewExpand(item)
                     binding.searchToolbar.menu.forEach { it.isVisible = false }
+                    lifecycleScope.launchUI { reEnableBackPressedCallBack() }
                     return true
                 }
 
@@ -398,6 +409,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     setupSearchTBMenu(binding.toolbar.menu, true)
                     (controller as? BaseController<*>)?.onActionViewCollapse(item)
                     (controller as? SettingsController)?.onActionViewCollapse(item)
+                    lifecycleScope.launchUI { reEnableBackPressedCallBack() }
                     return true
                 }
             },
@@ -499,6 +511,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 }
             }
         setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller), changeBG = false)
+    }
+
+    fun reEnableBackPressedCallBack() {
+        val returnToStart = preferences.backReturnsToStart().get() && this !is SearchActivity
+        backPressedCallback?.isEnabled =
+            (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) ||
+            router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
     }
 
     override fun onTitleChanged(title: CharSequence?, color: Int) {
@@ -877,7 +896,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
     }
 
-    override fun onBackPressed() {
+    private fun pressingBack() {
         if (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) {
             binding.searchToolbar.collapseActionView()
             return
@@ -885,22 +904,24 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         backPress()
     }
 
-    open fun backPress() {
-        val sheetController = router.backstack.lastOrNull()?.controller as? BottomSheetController
-        if (if (router.backstackSize == 1) !(sheetController?.handleSheetBack() ?: false)
-            else !router.handleBack()
-        ) {
+    override fun finish() {
+        if (!preferences.backReturnsToStart().get() && this !is SearchActivity) {
+            setStartingTab()
+        }
+        if (this !is SearchActivity) {
+            SecureActivityDelegate.locked = true
+        }
+        saveExtras()
+        super.finish()
+    }
+
+    protected open fun backPress() {
+        val controller = router.backstack.lastOrNull()?.controller
+        if (if (router.backstackSize == 1) controller?.handleBack() != true else !router.handleBack()) {
             if (preferences.backReturnsToStart().get() && this !is SearchActivity &&
                 startingTab() != nav.selectedItemId
             ) {
                 goToStartingTab()
-            } else {
-                if (!preferences.backReturnsToStart().get() && this !is SearchActivity) {
-                    setStartingTab()
-                }
-                SecureActivityDelegate.locked = this !is SearchActivity
-                saveExtras()
-                super.onBackPressed()
             }
         }
     }
@@ -909,7 +930,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         get() = binding.bottomNav ?: binding.sideNav!!
 
     private fun setStartingTab() {
-        if (this is SearchActivity) return
+        if (this is SearchActivity || !isBindingInitialized) return
         if (nav.selectedItemId != R.id.nav_browse &&
             preferences.startingTab().get() >= 0
         ) {
@@ -1124,6 +1145,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         if (from is DialogController || to is DialogController) {
             return
         }
+        reEnableBackPressedCallBack()
         setFloatingToolbar(canShowFloatingToolbar(to))
         val onRoot = router.backstackSize == 1
         val navIcon = if (onRoot) searchDrawable else backDrawable
@@ -1351,5 +1373,4 @@ interface BottomSheetController {
     fun showSheet()
     fun hideSheet()
     fun toggleSheet()
-    fun handleSheetBack(): Boolean
 }

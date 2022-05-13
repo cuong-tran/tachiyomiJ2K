@@ -59,6 +59,8 @@ class MigrationController :
         return title
     }
 
+    override fun canStillGoBack(): Boolean = presenter.state.selectedSource != null
+
     override fun handleBack(): Boolean {
         return if (presenter.state.selectedSource != null) {
             presenter.deselectSource()

@@ -192,7 +192,7 @@ open class GlobalSearchController(
 
     override fun onActionViewCollapse(item: MenuItem?) {
         if (activity is SearchActivity) {
-            (activity as? SearchActivity)?.backPress()
+            (activity as? SearchActivity)?.onBackPressedDispatcher?.onBackPressed()
         } else if (customTitle == null) {
             router.popCurrentController()
         }

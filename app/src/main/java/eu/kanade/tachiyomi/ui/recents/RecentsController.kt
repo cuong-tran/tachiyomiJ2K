@@ -287,6 +287,7 @@ class RecentsController(bundle: Bundle? = null) :
                     )
                     if (oldShow != showingDownloads) {
                         updateTitleAndMenu()
+                        (activity as? MainActivity)?.reEnableBackPressedCallBack()
                     }
                 }
 
@@ -446,7 +447,11 @@ class RecentsController(bundle: Bundle? = null) :
             binding.swipeRefresh.isRefreshing
     }
 
-    override fun handleSheetBack(): Boolean {
+    override fun canStillGoBack(): Boolean {
+        return showingDownloads || presenter.preferences.recentsViewType().get() != presenter.viewType
+    }
+
+    override fun handleBack(): Boolean {
         if (showingDownloads) {
             binding.downloadBottomSheet.dlBottomSheet.dismiss()
             return true
@@ -600,6 +605,7 @@ class RecentsController(bundle: Bundle? = null) :
     fun tempJumpTo(viewType: Int) {
         presenter.toggleGroupRecents(viewType, false)
         activityBinding?.mainTabs?.selectTab(activityBinding?.mainTabs?.getTabAt(viewType))
+        (activity as? MainActivity)?.reEnableBackPressedCallBack()
         updateTitleAndMenu()
     }
 

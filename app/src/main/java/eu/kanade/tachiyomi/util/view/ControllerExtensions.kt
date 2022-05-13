@@ -18,6 +18,7 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.annotation.MainThread
 import androidx.appcompat.widget.SearchView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
@@ -39,6 +40,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
+import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -743,3 +745,12 @@ val Controller.fullAppBarHeight: Int?
 
 val Controller.isControllerVisible: Boolean
     get() = router.backstack.lastOrNull()?.controller == this
+
+@MainThread
+fun Router.canStillGoBack(): Boolean {
+    if (backstack.size > 1) return true
+    (backstack.lastOrNull()?.controller as? BaseController<*>)?.let { controller ->
+        return controller.canStillGoBack()
+    }
+    return false
+}

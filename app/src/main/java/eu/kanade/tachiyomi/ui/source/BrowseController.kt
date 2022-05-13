@@ -179,6 +179,7 @@ class BrowseController :
                     showingExtensions = progress > 0.92f
                     if (oldShow != showingExtensions) {
                         updateTitleAndMenu()
+                        (activity as? MainActivity)?.reEnableBackPressedCallBack()
                     }
                     binding.bottomSheet.sheetToolbar.isVisible = true
                     setBottomSheetTabs(max(0f, progress))
@@ -406,7 +407,9 @@ class BrowseController :
         }
     }
 
-    override fun handleSheetBack(): Boolean {
+    override fun canStillGoBack(): Boolean = showingExtensions
+
+    override fun handleBack(): Boolean {
         if (showingExtensions) {
             if (binding.bottomSheet.root.canGoBack()) {
                 binding.bottomSheet.root.sheetBehavior?.collapse()

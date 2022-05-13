@@ -50,14 +50,6 @@ class SearchActivity : MainActivity() {
         (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
     }
 
-    override fun onBackPressed() {
-        if (binding.searchToolbar.isSearchExpanded && binding.cardFrame.isVisible) {
-            binding.searchToolbar.searchItem?.collapseActionView()
-            return
-        }
-        backPress()
-    }
-
     // Override finishAfterTransition since the animation gets weird when launching this from other apps
     override fun finishAfterTransition() {
         if (backToMain) {
@@ -70,13 +62,12 @@ class SearchActivity : MainActivity() {
     override fun backPress() {
         if (router.backstack.size <= 1 || !router.handleBack()) {
             SecureActivityDelegate.locked = true
-            super.backPress()
         }
     }
 
     private fun popToRoot() {
         if (intentShouldGoBack()) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         } else if (!router.handleBack()) {
             val intent = Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -110,6 +101,7 @@ class SearchActivity : MainActivity() {
         if (from is DialogController || to is DialogController) {
             return
         }
+        reEnableBackPressedCallBack()
         nav.isVisible = false
         binding.bottomView?.isVisible = false
     }

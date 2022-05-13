@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.webkit.WebView
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.SourceManager
@@ -23,6 +25,12 @@ open class WebViewActivity : BaseWebViewActivity() {
 
     private val sourceManager by injectLazy<SourceManager>()
     private var bundle: Bundle? = null
+
+    private var backPressedCallback: OnBackPressedCallback? = null
+    private val backCallback = {
+        if (binding.webview.canGoBack()) binding.webview.goBack()
+        reEnableBackPressedCallBack()
+    }
 
     companion object {
         const val SOURCE_KEY = "source_key"
@@ -45,6 +53,7 @@ open class WebViewActivity : BaseWebViewActivity() {
 
         binding.swipeRefresh.isEnabled = false
 
+        backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
         if (bundle == null) {
             val source = sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource ?: return
             val url = intent.extras!!.getString(URL_KEY) ?: return
@@ -104,6 +113,10 @@ open class WebViewActivity : BaseWebViewActivity() {
         return true
     }
 
+    private fun reEnableBackPressedCallBack() {
+        backPressedCallback?.isEnabled = binding.webview.canGoBack()
+    }
+
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val backItem = binding.toolbar.menu.findItem(R.id.action_web_back)
         val forwardItem = binding.toolbar.menu.findItem(R.id.action_web_forward)
@@ -119,12 +132,8 @@ open class WebViewActivity : BaseWebViewActivity() {
         val extenstionCanOpenUrl = binding.webview.canGoBack() &&
             binding.webview.url?.let { extensionIntentForText(it) != null } ?: false
         binding.toolbar.menu.findItem(R.id.action_open_in_app)?.isVisible = extenstionCanOpenUrl
+        reEnableBackPressedCallBack()
         return super.onPrepareOptionsMenu(menu)
-    }
-
-    override fun onBackPressed() {
-        if (binding.webview.canGoBack()) binding.webview.goBack()
-        else super.onBackPressed()
     }
 
     /**

@@ -111,7 +111,7 @@ class ReaderPresenter(
      * Relay used when loading prev/next chapter needed to lock the UI (with a dialog).
      */
     private val isLoadingAdjacentChapterRelay = BehaviorRelay.create<Boolean>()
-
+    private var finished = false
     companion object {
         /**
          * To check if any chapter of the current reading session was downloaded
@@ -176,6 +176,8 @@ class ReaderPresenter(
      * trigger deletion of the downloaded chapters.
      */
     fun onBackPressed() {
+        if (finished) return
+        finished = true
         deletePendingChapters()
         val currentChapters = viewerChaptersRelay.value
         if (currentChapters != null) {
