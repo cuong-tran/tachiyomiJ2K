@@ -221,12 +221,12 @@ class MigrationListController(bundle: Bundle? = null) :
                                             searchResult,
                                             source.id,
                                         )
-                                        val chapters = try {
+                                        val chapters: List<SChapter> = try {
                                             source.getChapterList(localManga.toMangaInfo()).map { it.toSChapter() }
                                         } catch (e: java.lang.Exception) {
                                             Timber.e(e)
-                                            emptyList<SChapter>()
-                                        } ?: emptyList()
+                                            emptyList()
+                                        }
                                         withContext(Dispatchers.IO) {
                                             syncChaptersWithSource(db, chapters, localManga, source)
                                         }
