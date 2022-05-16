@@ -1280,7 +1280,7 @@ class LibraryController(
             adapter.removeAllScrollableHeaders()
         }
         adapter.setFilter(query)
-        if (adapter.itemCount == 0) return true
+        if (presenter.allLibraryItems.isEmpty()) return true
         viewScope.launchUI {
             adapter.performFilterAsync()
         }
