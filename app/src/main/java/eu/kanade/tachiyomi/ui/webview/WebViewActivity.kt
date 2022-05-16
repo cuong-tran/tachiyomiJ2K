@@ -54,6 +54,10 @@ open class WebViewActivity : BaseWebViewActivity() {
         binding.swipeRefresh.isEnabled = false
 
         backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
+        binding.toolbar.setNavigationOnClickListener {
+            backPressedCallback?.isEnabled = false
+            onBackPressedDispatcher.onBackPressed()
+        }
         if (bundle == null) {
             val source = sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource ?: return
             val url = intent.extras!!.getString(URL_KEY) ?: return
