@@ -10,6 +10,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.system.isConnectedToWifi
 import kotlinx.coroutines.coroutineScope
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -25,7 +26,11 @@ class AutoAppUpdaterJob(private val context: Context, workerParams: WorkerParame
             ) {
                 return@coroutineScope Result.failure()
             }
-            val result = AppUpdateChecker().checkForUpdate(context, doExtrasAfterNewUpdate = false)
+            val preferences = Injekt.get<PreferencesHelper>()
+            if (preferences.appShouldAutoUpdate() == ONLY_ON_UNMETERED && !context.isConnectedToWifi()) {
+                return@coroutineScope Result.failure()
+            }
+            val result = AppUpdateChecker().checkForUpdate(context, true, doExtrasAfterNewUpdate = false)
             if (result is AppUpdateResult.NewUpdate && !AppUpdateService.isRunning()) {
                 AppUpdateNotifier(context).cancel()
                 AppUpdateNotifier.releasePageUrl = result.release.releaseLink
@@ -44,16 +49,8 @@ class AutoAppUpdaterJob(private val context: Context, workerParams: WorkerParame
         const val NEVER = 2
 
         fun setupTask(context: Context) {
-            val preferences = Injekt.get<PreferencesHelper>()
-            val restrictions = preferences.appShouldAutoUpdate()
-            val wifiRestriction = if (restrictions == ONLY_ON_UNMETERED) {
-                NetworkType.UNMETERED
-            } else {
-                NetworkType.CONNECTED
-            }
-
             val constraints = Constraints.Builder()
-                .setRequiredNetworkType(wifiRestriction)
+                .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresDeviceIdle(true)
                 .build()
 
