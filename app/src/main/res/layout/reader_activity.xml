@@ -44,25 +44,23 @@
         android:visibility="gone" />
 
     <FrameLayout
-        android:id="@+id/reader_menu"
+        android:id="@+id/app_bar"
+        tools:background="?attr/colorSurface"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" >
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_height="wrap_content">
 
-        <FrameLayout
-            android:id="@+id/app_bar"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:titleTextColor="?actionBarTintColor"
-                app:subtitleTextColor="@color/action_bar_tint_alpha"
-                android:background="@drawable/reader_toolbar_ripple" />
-
-        </FrameLayout>
+            app:navigationContentDescription="@string/close"
+            android:layout_height="?attr/actionBarSize"
+            tools:title="Chapter 3"
+            tools:subtitle="Chapter name"
+            app:titleTextColor="?actionBarTintColor"
+            app:subtitleTextColor="@color/action_bar_tint_alpha"
+            android:background="@drawable/reader_toolbar_ripple" />
     </FrameLayout>
 
     <View
