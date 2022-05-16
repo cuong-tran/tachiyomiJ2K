@@ -12,6 +12,7 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
@@ -129,14 +130,15 @@ class MangaHeaderHolder(
             }
             title.setOnClickListener { view ->
                 title.text?.toString()?.toNormalized()?.let {
-                    adapter.delegate.showFloatingActionMode(view, it, R.string.title)
+                    adapter.delegate.showFloatingActionMode(view as TextView, it)
                 }
             }
             mangaAuthor.setOnClickListener { view ->
                 mangaAuthor.text?.toString()?.let {
-                    adapter.delegate.showFloatingActionMode(view, it, R.string.title)
+                    adapter.delegate.showFloatingActionMode(view as TextView, it)
                 }
             }
+            mangaSummary.customSelectionActionModeCallback = adapter.delegate.customActionMode(mangaSummary)
             applyBlur()
             mangaCover.setOnClickListener { adapter.delegate.zoomImageFromThumb(coverCard) }
             trackButton.setOnClickListener { adapter.delegate.showTrackingSheet() }
@@ -469,6 +471,19 @@ class MangaHeaderHolder(
                     if (dark) 0.945f else 0.175f,
                 ),
             )
+            val states = arrayOf(
+                intArrayOf(-android.R.attr.state_activated),
+                intArrayOf(),
+            )
+            val colors = intArrayOf(
+                downloadedColor,
+                ColorUtils.blendARGB(
+                    downloadedColor,
+                    context.getResourceColor(R.attr.colorControlNormal),
+                    0.25f,
+                ),
+            )
+            val colorStateList = ColorStateList(states, colors)
             if (manga.genre.isNullOrBlank().not()) {
                 (manga.getGenres() ?: emptyList()).map { genreText ->
                     val chip = LayoutInflater.from(binding.root.context).inflate(
@@ -478,14 +493,14 @@ class MangaHeaderHolder(
                     ) as Chip
                     val id = View.generateViewId()
                     chip.id = id
-                    chip.chipBackgroundColor = ColorStateList.valueOf(downloadedColor)
+                    chip.chipBackgroundColor = colorStateList
                     chip.setTextColor(textColor)
                     chip.text = genreText
                     chip.setOnClickListener {
-                        adapter.delegate.localSearch(genreText)
+                        adapter.delegate.showFloatingActionMode(chip, searchSource = true)
                     }
                     chip.setOnLongClickListener {
-                        adapter.delegate.copyToClipboard(genreText, genreText)
+                        adapter.delegate.showFloatingActionMode(chip, searchSource = true)
                         true
                     }
                     this.addView(chip)

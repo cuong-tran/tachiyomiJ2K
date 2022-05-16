@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.view.ActionMode
 import android.view.View
+import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -133,11 +135,12 @@ class MangaDetailsAdapter(
         fun topCoverHeight(): Int
         fun localSearch(text: String)
         fun globalSearch(text: String)
-        fun showFloatingActionMode(view: View, content: String, label: Int)
+        fun showFloatingActionMode(view: TextView, content: String? = null, searchSource: Boolean = false)
         fun showChapterFilter()
         fun favoriteManga(longPress: Boolean)
         fun copyToClipboard(content: String, label: Int, useToast: Boolean = false)
-        fun copyToClipboard(content: String, label: String, useToast: Boolean = false)
+        fun customActionMode(view: TextView): ActionMode.Callback
+        fun copyToClipboard(content: String, label: String?, useToast: Boolean = false)
         fun zoomImageFromThumb(thumbView: View)
         fun showTrackingSheet()
         fun updateScroll()

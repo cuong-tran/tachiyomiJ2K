@@ -19,6 +19,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
 import androidx.appcompat.app.AppCompatActivity
@@ -39,6 +40,7 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
+import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -54,8 +56,10 @@ import eu.kanade.tachiyomi.data.image.coil.getBestColor
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.databinding.MangaDetailsControllerBinding
+import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
@@ -1379,10 +1383,25 @@ class MangaDetailsController :
                     router.getControllerWithTag(R.id.nav_library.toString()) as LibraryController
                 controller.search(text)
             }
+        }
+    }
+
+    fun sourceSearch(text: String) {
+        when (
+            val previousController =
+                router.backstack.getOrNull(router.backstackSize - 2)?.controller
+        ) {
             is BrowseSourceController -> {
                 if (presenter.source is HttpSource) {
                     router.handleBack()
                     previousController.searchWithGenre(text)
+                }
+            }
+            else -> {
+                if (presenter.source is CatalogueSource) {
+                    val controller = BrowseSourceController(presenter.source)
+                    router.pushController(controller.withFadeTransaction())
+                    controller.searchWithGenre(text)
                 }
             }
         }
@@ -1393,13 +1412,22 @@ class MangaDetailsController :
         router.pushController(GlobalSearchController(text).withFadeTransaction())
     }
 
-    override fun showFloatingActionMode(view: View, content: String, label: Int) {
-        if (content.isBlank()) return
+    override fun showFloatingActionMode(view: TextView, content: String?, searchSource: Boolean) {
         finishFloatingActionMode()
-        floatingActionMode = view.startActionMode(
-            FloatingMangaDetailsActionModeCallback(content, label),
-            android.view.ActionMode.TYPE_FLOATING,
+        val actionModeCallback = if (content != null) FloatingMangaDetailsActionModeCallback(
+            content,
+            searchSource = searchSource,
         )
+        else FloatingMangaDetailsActionModeCallback(view, searchSource = searchSource)
+        if (view is Chip) {
+            view.isActivated = true
+        }
+        floatingActionMode =
+            view.startActionMode(actionModeCallback, android.view.ActionMode.TYPE_FLOATING)
+    }
+
+    override fun customActionMode(view: TextView): android.view.ActionMode.Callback {
+        return FloatingMangaDetailsActionModeCallback(view, false)
     }
 
     override fun showChapterFilter() {
@@ -1500,7 +1528,7 @@ class MangaDetailsController :
      */
     override fun copyToClipboard(content: String, label: Int, useToast: Boolean) {
         val view = view ?: return
-        val contentType = view.context.getString(label)
+        val contentType = if (label != 0) view.context.getString(label) else null
         copyToClipboard(content, contentType, useToast)
     }
 
@@ -1510,7 +1538,7 @@ class MangaDetailsController :
      * @param content the actual text to copy to the board
      * @param label Label to show to the user describing the content
      */
-    override fun copyToClipboard(content: String, label: String, useToast: Boolean) {
+    override fun copyToClipboard(content: String, label: String?, useToast: Boolean) {
         if (content.isBlank()) return
 
         val activity = activity ?: return
@@ -1519,6 +1547,7 @@ class MangaDetailsController :
         val clipboard = activity.getSystemService(ClipboardManager::class.java)
         clipboard.setPrimaryClip(ClipData.newPlainText(label, content))
 
+        label ?: return
         if (useToast) {
             activity.toast(view.context.getString(R.string._copied_to_clipboard, label))
         } else {
@@ -1681,20 +1710,49 @@ class MangaDetailsController :
     }
 
     inner class FloatingMangaDetailsActionModeCallback(
-        val text: String,
-        val label: Int,
+        private val textView: TextView?,
+        private val showCopy: Boolean = true,
+        private val searchSource: Boolean = false,
     ) : android.view.ActionMode.Callback {
+        constructor(
+            text: String,
+            showCopy: Boolean = true,
+            searchSource: Boolean = false,
+        ) : this(null, showCopy, searchSource) {
+            customText = text
+        }
+
+        var customText: String? = null
+        val text: String
+            get() {
+                return customText ?: if (textView?.isTextSelectable == true) {
+                    textView.text.subSequence(textView.selectionStart, textView.selectionEnd)
+                        .toString()
+                } else {
+                    textView?.text?.toString() ?: ""
+                }
+            }
         override fun onCreateActionMode(mode: android.view.ActionMode?, menu: Menu?): Boolean {
-            mode?.menuInflater?.inflate(R.menu.manga_details_title, menu)
+            mode?.menuInflater?.inflate(
+                if (searchSource) R.menu.manga_details_tag else R.menu.manga_details_title,
+                menu,
+            )
+            menu?.findItem(R.id.action_copy)?.isVisible = showCopy
+            val sourceMenuItem = menu?.findItem(R.id.action_source_search)
+            sourceMenuItem?.isVisible = searchSource && presenter.source is CatalogueSource
             val context = view?.context ?: return false
             val prevController = router.backstack.getOrNull(router.backstackSize - 2)?.controller
             val localItem = menu?.findItem(R.id.action_local_search) ?: return true
             localItem.isVisible = when (prevController) {
-                is LibraryController, is BrowseController, is RecentsController -> true
+                is LibraryController, is RecentsController -> true
                 else -> false
             }
             val library = context.getString(R.string.library).lowercase(Locale.getDefault())
             localItem.title = context.getString(R.string.search_, library)
+            sourceMenuItem?.title = context.getString(R.string.search_, presenter.source.name)
+            if (searchSource) {
+                sourceMenuItem?.icon = presenter.source.icon()
+            }
             return true
         }
 
@@ -1706,18 +1764,25 @@ class MangaDetailsController :
             mode: android.view.ActionMode?,
             item: MenuItem?,
         ): Boolean {
-            mode?.finish()
-            val context = view?.context ?: return true
             when (item?.itemId) {
-                R.id.action_copy -> copyToClipboard(text, context.getString(label))
+                R.id.action_copy -> copyToClipboard(text, null)
                 R.id.action_global_search -> globalSearch(text)
+                R.id.action_source_search -> sourceSearch(text)
                 R.id.action_local_search -> localSearch(text)
+            }
+            if (showCopy) {
+                mode?.finish()
             }
             return true
         }
 
         override fun onDestroyActionMode(mode: android.view.ActionMode?) {
-            floatingActionMode = null
+            if (showCopy) {
+                floatingActionMode = null
+            }
+            if (textView is Chip) {
+                textView.isActivated = false
+            }
         }
     }
 }
