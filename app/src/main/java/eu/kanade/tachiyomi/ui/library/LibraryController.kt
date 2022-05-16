@@ -459,6 +459,7 @@ class LibraryController(
 
     private fun showFilterTip() {
         if (preferences.shownFilterTutorial().get() || !hasExpanded) return
+        if (filterTooltip != null) return
         val activityBinding = activityBinding ?: return
         val activity = activity ?: return
         val icon = (activityBinding.bottomNav ?: activityBinding.sideNav)?.getItemView(R.id.nav_library) ?: return
