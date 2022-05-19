@@ -44,6 +44,7 @@ import eu.kanade.tachiyomi.widget.CustomLayoutPickerActivity
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
+import kotlin.math.max
 
 private const val TABLET_UI_MIN_SCREEN_WIDTH_DP = 720
 
@@ -165,6 +166,9 @@ val Resources.isLTR
     get() = configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
 
 fun Context.isTablet() = resources.configuration.smallestScreenWidthDp >= 600
+
+val displayMaxHeightInPx: Int
+    get() = Resources.getSystem().displayMetrics.let { max(it.heightPixels, it.widthPixels) }
 
 /** Gets the duration multiplier for general animations on the device
  * @see Settings.Global.ANIMATOR_DURATION_SCALE
