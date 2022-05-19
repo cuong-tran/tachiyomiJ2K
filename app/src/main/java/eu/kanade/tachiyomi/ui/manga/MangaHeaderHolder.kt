@@ -133,10 +133,22 @@ class MangaHeaderHolder(
                     adapter.delegate.showFloatingActionMode(view as TextView, it)
                 }
             }
+            title.setOnLongClickListener {
+                title.text?.toString()?.toNormalized()?.let {
+                    adapter.delegate.copyToClipboard(it, R.string.title)
+                }
+                true
+            }
             mangaAuthor.setOnClickListener { view ->
                 mangaAuthor.text?.toString()?.let {
                     adapter.delegate.showFloatingActionMode(view as TextView, it)
                 }
+            }
+            mangaAuthor.setOnLongClickListener {
+                mangaAuthor.text?.toString()?.let {
+                    adapter.delegate.copyToClipboard(it, R.string.author)
+                }
+                true
             }
             mangaSummary.customSelectionActionModeCallback = adapter.delegate.customActionMode(mangaSummary)
             applyBlur()
@@ -500,7 +512,7 @@ class MangaHeaderHolder(
                         adapter.delegate.showFloatingActionMode(chip, searchSource = true)
                     }
                     chip.setOnLongClickListener {
-                        adapter.delegate.showFloatingActionMode(chip, searchSource = true)
+                        adapter.delegate.copyToClipboard(genreText, genreText)
                         true
                     }
                     this.addView(chip)

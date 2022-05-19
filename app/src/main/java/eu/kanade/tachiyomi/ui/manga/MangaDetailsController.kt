@@ -106,6 +106,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.isControllerVisible
+import eu.kanade.tachiyomi.util.view.previousController
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
@@ -1414,8 +1415,14 @@ class MangaDetailsController :
 
     override fun showFloatingActionMode(view: TextView, content: String?, searchSource: Boolean) {
         finishFloatingActionMode()
+        val previousController = previousController
+        if (!searchSource && previousController !is LibraryController && previousController !is RecentsController) {
+            globalSearch(content ?: view.text.toString())
+            return
+        }
         val actionModeCallback = if (content != null) FloatingMangaDetailsActionModeCallback(
             content,
+            showCopy = view is Chip,
             searchSource = searchSource,
         )
         else FloatingMangaDetailsActionModeCallback(view, searchSource = searchSource)
@@ -1427,7 +1434,7 @@ class MangaDetailsController :
     }
 
     override fun customActionMode(view: TextView): android.view.ActionMode.Callback {
-        return FloatingMangaDetailsActionModeCallback(view, false)
+        return FloatingMangaDetailsActionModeCallback(view, false, closeMode = false)
     }
 
     override fun showChapterFilter() {
@@ -1713,12 +1720,14 @@ class MangaDetailsController :
         private val textView: TextView?,
         private val showCopy: Boolean = true,
         private val searchSource: Boolean = false,
+        private val closeMode: Boolean = true,
     ) : android.view.ActionMode.Callback {
         constructor(
             text: String,
             showCopy: Boolean = true,
             searchSource: Boolean = false,
-        ) : this(null, showCopy, searchSource) {
+            closeMode: Boolean = true,
+        ) : this(null, showCopy, searchSource, closeMode) {
             customText = text
         }
 
@@ -1741,9 +1750,8 @@ class MangaDetailsController :
             val sourceMenuItem = menu?.findItem(R.id.action_source_search)
             sourceMenuItem?.isVisible = searchSource && presenter.source is CatalogueSource
             val context = view?.context ?: return false
-            val prevController = router.backstack.getOrNull(router.backstackSize - 2)?.controller
             val localItem = menu?.findItem(R.id.action_local_search) ?: return true
-            localItem.isVisible = when (prevController) {
+            localItem.isVisible = when (previousController) {
                 is LibraryController, is RecentsController -> true
                 else -> false
             }
@@ -1769,8 +1777,9 @@ class MangaDetailsController :
                 R.id.action_global_search -> globalSearch(text)
                 R.id.action_source_search -> sourceSearch(text)
                 R.id.action_local_search -> localSearch(text)
+                else -> return false
             }
-            if (showCopy) {
+            if (closeMode) {
                 mode?.finish()
             }
             return true
