@@ -72,8 +72,17 @@ class AppUpdateChecker {
 
     private fun isNewVersion(versionTag: String): Boolean {
         // Removes prefixes like "r" or "v"
-        val newVersion = versionTag.replace("[^\\d.]".toRegex(), "")
-        return newVersion != BuildConfig.VERSION_NAME
+        val newVersion = versionTag.replace("-", ".").replace("[^\\d.]".toRegex(), "")
+        val oldVersion = BuildConfig.VERSION_NAME.replace("-", ".").replace("[^\\d.]".toRegex(), "")
+        val newSemVer = newVersion.split(".").map { it.toInt() }
+        val oldSemVer = oldVersion.split(".").map { it.toInt() }
+
+        oldSemVer.mapIndexed { index, i ->
+            if (newSemVer.getOrElse(index) { i } > i) {
+                return true
+            }
+        }
+        return false
     }
 }
 
