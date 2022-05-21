@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.util.lang
 
 import android.content.Context
-import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
@@ -9,15 +8,15 @@ import android.text.Spanned
 import android.text.SpannedString
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
-import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
-import android.text.style.SuperscriptSpan
 import android.text.style.TextAppearanceSpan
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
+import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
 import androidx.core.text.inSpans
+import androidx.core.text.scale
+import androidx.core.text.superscript
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import net.greypanther.natsort.CaseInsensitiveSimpleNaturalComparator
@@ -155,6 +154,9 @@ fun String.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int> {
 fun String.withSubtitle(context: Context, @StringRes subtitleRes: Int) =
     withSubtitle(context, context.getString(subtitleRes))
 
+fun String.withSubtitle(subtitle: Spanned): Spanned =
+    SpannableStringBuilder(this + "\n").append(subtitle)
+
 fun String.withSubtitle(context: Context, subtitle: String): Spanned {
     val spannable = SpannableStringBuilder(this + "\n" + subtitle)
     spannable.setSpan(
@@ -166,14 +168,16 @@ fun String.withSubtitle(context: Context, subtitle: String): Spanned {
     return spannable
 }
 
-fun String.addBetaTag(context: Context): Spanned {
+fun String.addBetaTag(context: Context, useSuperScript: Boolean = true): Spanned {
     val betaText = context.getString(R.string.beta)
-    val betaSpan = SpannableStringBuilder(this + betaText)
-    betaSpan.setSpan(SuperscriptSpan(), length, length + betaText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    betaSpan.setSpan(RelativeSizeSpan(0.75f), length, length + betaText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    betaSpan.setSpan(StyleSpan(Typeface.BOLD), length, length + betaText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    betaSpan.setSpan(ForegroundColorSpan(context.getResourceColor(R.attr.colorSecondary)), length, length + betaText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    return betaSpan
+    val colorS = context.getResourceColor(R.attr.colorSecondary)
+    return buildSpannedString {
+        append(this@addBetaTag)
+        val buttonSpan: SpannableStringBuilder.() -> Unit = {
+            bold { scale(0.75f) { color(colorS) { append(betaText) } } }
+        }
+        if (useSuperScript) superscript(buttonSpan) else buttonSpan()
+    }
 }
 
 fun String.toNormalized(): String = replace("’", "'")

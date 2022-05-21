@@ -25,7 +25,7 @@ class AppUpdateChecker {
         }
 
         return withIOContext {
-            val result = if (preferences.checkForBetas()) {
+            val result = if (preferences.checkForBetas().get()) {
                 networkService.client
                     .newCall(GET("https://api.github.com/repos/$GITHUB_REPO/releases"))
                     .await()
@@ -72,17 +72,25 @@ class AppUpdateChecker {
 
     private fun isNewVersion(versionTag: String): Boolean {
         // Removes prefixes like "r" or "v"
-        val newVersion = versionTag.replace("-", ".").replace("[^\\d.]".toRegex(), "")
-        val oldVersion = BuildConfig.VERSION_NAME.replace("-", ".").replace("[^\\d.]".toRegex(), "")
-        val newSemVer = newVersion.split(".").map { it.toInt() }
-        val oldSemVer = oldVersion.split(".").map { it.toInt() }
+        val newVersion = versionTag.replace("[^\\d.-]".toRegex(), "")
+        val oldVersion = BuildConfig.VERSION_NAME.replace("[^\\d.-]".toRegex(), "")
+        val newPreReleaseVer = newVersion.split("-")
+        val oldPreReleaseVer = oldVersion.split("-")
+        val newSemVer = newPreReleaseVer.first().split(".").map { it.toInt() }
+        val oldSemVer = oldPreReleaseVer.first().split(".").map { it.toInt() }
 
         oldSemVer.mapIndexed { index, i ->
             if (newSemVer.getOrElse(index) { i } > i) {
                 return true
             }
         }
-        return newSemVer.size > oldSemVer.size
+        // For cases of extreme patch versions (new: 1.2.3.1 vs old: 1.2.3, return true)
+        return if (newSemVer.size > oldSemVer.size) {
+            true
+        } else {
+            // For production versions from beta (new: 1.2.3 vs old: 1.2.3-b1, return true)
+            (newPreReleaseVer.getOrNull(1) != null) != (oldPreReleaseVer.getOrNull(1) != null)
+        }
     }
 }
 
