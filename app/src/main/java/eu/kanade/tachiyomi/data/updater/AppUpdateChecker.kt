@@ -82,7 +82,7 @@ class AppUpdateChecker {
                 return true
             }
         }
-        return false
+        return newSemVer.size > oldSemVer.size
     }
 }
 
