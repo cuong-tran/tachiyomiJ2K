@@ -5,8 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.ViewGroup
 import androidx.core.graphics.ColorUtils
-import androidx.core.text.buildSpannedString
-import androidx.core.text.color
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updateLayoutParams
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
@@ -16,7 +14,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.toggle
 import eu.kanade.tachiyomi.databinding.TachiOverflowLayoutBinding
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.util.lang.addBetaTag
 import eu.kanade.tachiyomi.util.lang.withSubtitle
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -82,17 +79,7 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
             dismiss()
         }
 
-        val vName = "v${BuildConfig.VERSION_NAME}".substringBefore("-")
-        val newVName = buildSpannedString {
-            color(context.getResourceColor(android.R.attr.textColorSecondary)) {
-                append(vName)
-            }
-            if (BuildConfig.BETA) {
-                append("".addBetaTag(context, false))
-            }
-        }
-
-        binding.aboutItem.text = context.getString(R.string.about).withSubtitle(newVName)
+        binding.aboutItem.text = context.getString(R.string.about).withSubtitle(binding.aboutItem.context, "v${BuildConfig.VERSION_NAME}")
 
         binding.aboutItem.setOnClickListener {
             activity.showAbout()

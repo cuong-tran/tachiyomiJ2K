@@ -8,7 +8,6 @@ import androidx.preference.PreferenceManager
 import com.fredporciuncula.flow.preferences.FlowSharedPreferences
 import com.fredporciuncula.flow.preferences.Preference
 import com.google.android.material.color.DynamicColors
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -374,7 +373,7 @@ class PreferencesHelper(val context: Context) {
 
     fun lastAppCheck() = flowPrefs.getLong("last_app_check", 0)
 
-    fun checkForBetas() = flowPrefs.getBoolean("check_for_betas", BuildConfig.BETA)
+    fun checkForBetas() = prefs.getBoolean(Keys.checkForBetas, false)
 
     fun unreadBadgeType() = flowPrefs.getInt("unread_badge_type", 2)
 
