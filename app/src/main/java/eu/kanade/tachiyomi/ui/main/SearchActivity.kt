@@ -102,6 +102,7 @@ class SearchActivity : MainActivity() {
             return
         }
         reEnableBackPressedCallBack()
+        setFloatingToolbar(canShowFloatingToolbar(to))
         nav.isVisible = false
         binding.bottomView?.isVisible = false
     }
