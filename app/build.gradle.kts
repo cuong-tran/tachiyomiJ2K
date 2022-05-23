@@ -1,7 +1,4 @@
 import java.io.ByteArrayOutputStream
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 
 plugins {
     id(Plugins.androidApplication)
@@ -138,7 +135,7 @@ dependencies {
     implementation("tachiyomi.sourceapi:source-api:1.1")
 
     // Android X libraries
-    implementation("androidx.appcompat:appcompat:1.6.0-alpha03")
+    implementation("androidx.appcompat:appcompat:1.6.0-alpha04")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.material:material:1.6.0")
     implementation("androidx.webkit:webkit:1.4.0")
@@ -151,12 +148,12 @@ dependencies {
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0-rc01")
 
-    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("com.google.firebase:firebase-core:20.1.2")
-    implementation("com.google.firebase:firebase-analytics-ktx:20.1.2")
+    implementation("com.google.firebase:firebase-core:21.0.0")
+    implementation("com.google.firebase:firebase-analytics-ktx:21.0.0")
 
     val lifecycleVersion = "2.4.0-rc01"
     kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
@@ -229,7 +226,7 @@ dependencies {
     implementation("com.github.inorichi.injekt:injekt-core:65b0440")
 
     // Image library
-    val coilVersion = "2.0.0-rc03"
+    val coilVersion = "2.1.0"
     implementation("io.coil-kt:coil:$coilVersion")
     implementation("io.coil-kt:coil-gif:$coilVersion")
     implementation("io.coil-kt:coil-svg:$coilVersion")
