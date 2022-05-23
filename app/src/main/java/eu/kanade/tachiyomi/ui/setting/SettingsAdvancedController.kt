@@ -58,7 +58,6 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.io.File
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsAdvancedController : SettingsController() {
 
@@ -129,27 +128,15 @@ class SettingsAdvancedController : SettingsController() {
             switchPreference {
                 titleRes = R.string.check_for_beta_releases
                 summaryRes = R.string.try_new_features
-                key = Keys.checkForBetas
+                bindTo(preferences.checkForBetas())
 
                 onChange {
                     it as Boolean
-                    if (!it && BuildConfig.VERSION_NAME.contains("-b")) {
+                    if ((!it && BuildConfig.BETA) || (it && !BuildConfig.BETA)) {
                         activity!!.materialAlertDialog()
                             .setTitle(R.string.warning)
-                            .setMessage(R.string.warning_unenroll_from_beta)
-                            .setPositiveButton(android.R.string.ok) { _, _ ->
-                                isChecked = false
-                            }
-                            .setNegativeButton(android.R.string.cancel, null)
-                            .show()
-                        false
-                    } else if (it && !BuildConfig.VERSION_NAME.contains("-b")) {
-                        activity!!.materialAlertDialog()
-                            .setTitle(R.string.warning)
-                            .setMessage(R.string.warning_enroll_into_beta)
-                            .setPositiveButton(android.R.string.ok) { _, _ ->
-                                isChecked = true
-                            }
+                            .setMessage(if (it) R.string.warning_enroll_into_beta else R.string.warning_unenroll_from_beta)
+                            .setPositiveButton(android.R.string.ok) { _, _ -> isChecked = it }
                             .setNegativeButton(android.R.string.cancel, null)
                             .show()
                         false
