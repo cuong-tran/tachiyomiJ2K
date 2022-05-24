@@ -74,7 +74,10 @@ class KomgaApi(private val client: OkHttpClient) {
                 .build(),
         )
             .await()
-        return getTrackSearch(track.tracking_url)
+        return getTrackSearch(track.tracking_url).apply {
+            id = track.id
+            manga_id = track.manga_id
+        }
     }
 
     private fun SeriesDto.toTrack(): TrackSearch = TrackSearch.create(TrackManager.KOMGA).also {
