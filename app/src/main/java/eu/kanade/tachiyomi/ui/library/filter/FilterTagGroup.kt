@@ -28,6 +28,7 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             binding.secondButton,
             binding.thirdButton,
             binding.fourthButton,
+            binding.fifthButton,
         )
     }
 
@@ -36,6 +37,7 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             binding.separator1,
             binding.separator2,
             binding.separator3,
+            binding.separator4,
         )
     }
 
