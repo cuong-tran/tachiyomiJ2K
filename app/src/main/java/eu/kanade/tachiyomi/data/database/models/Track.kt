@@ -10,7 +10,7 @@ interface Track : Serializable {
 
     var sync_id: Int
 
-    var media_id: Int
+    var media_id: Long
 
     var library_id: Long?
 
@@ -24,11 +24,11 @@ interface Track : Serializable {
 
     var status: Int
 
-    var tracking_url: String
-
     var started_reading_date: Long
 
     var finished_reading_date: Long
+
+    var tracking_url: String
 
     fun copyPersonalFrom(other: Track) {
         last_chapter_read = other.last_chapter_read

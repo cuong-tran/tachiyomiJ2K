@@ -19,6 +19,7 @@ import kotlinx.serialization.json.float
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 import okhttp3.FormBody
@@ -89,7 +90,7 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
 
     private fun jsonToSearch(obj: JsonObject): TrackSearch {
         return TrackSearch.create(TrackManager.SHIKIMORI).apply {
-            media_id = obj["id"]!!.jsonPrimitive.int
+            media_id = obj["id"]!!.jsonPrimitive.long
             title = obj["name"]!!.jsonPrimitive.content
             total_chapters = obj["chapters"]!!.jsonPrimitive.int
             cover_url = baseUrl + obj["image"]!!.jsonObject["preview"]!!.jsonPrimitive.content
@@ -104,7 +105,7 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
     private fun jsonToTrack(obj: JsonObject, mangas: JsonObject): Track {
         return Track.create(TrackManager.SHIKIMORI).apply {
             title = mangas["name"]!!.jsonPrimitive.content
-            media_id = obj["id"]!!.jsonPrimitive.int
+            media_id = obj["id"]!!.jsonPrimitive.long
             total_chapters = mangas["chapters"]!!.jsonPrimitive.int
             last_chapter_read = obj["chapters"]!!.jsonPrimitive.float
             score = (obj["score"]!!.jsonPrimitive.int).toFloat()
