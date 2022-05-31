@@ -135,7 +135,7 @@ dependencies {
     implementation("tachiyomi.sourceapi:source-api:1.1")
 
     // Android X libraries
-    implementation("androidx.appcompat:appcompat:1.6.0-alpha04")
+    implementation("androidx.appcompat:appcompat:1.6.0-alpha03")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.material:material:1.6.0")
     implementation("androidx.webkit:webkit:1.4.0")
