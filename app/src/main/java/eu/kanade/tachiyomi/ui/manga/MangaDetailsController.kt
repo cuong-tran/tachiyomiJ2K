@@ -583,7 +583,7 @@ class MangaDetailsController :
             presenter.fetchChapters(refreshTracker == null)
             if (refreshTracker != null) {
                 trackingBottomSheet?.refreshItem(refreshTracker ?: 0)
-                presenter.refreshTracking()
+                presenter.refreshTracking(trackIndex = refreshTracker)
                 refreshTracker = null
             }
             // fetch cover again in case the user set a new cover while reading

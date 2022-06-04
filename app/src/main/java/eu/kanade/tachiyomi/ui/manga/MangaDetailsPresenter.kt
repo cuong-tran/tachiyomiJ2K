@@ -886,26 +886,27 @@ class MangaDetailsPresenter(
         withContext(Dispatchers.Main) { controller?.refreshTracking(trackList) }
     }
 
-    fun refreshTracking(showOfflineSnack: Boolean = false) {
+    fun refreshTracking(showOfflineSnack: Boolean = false, trackIndex: Int? = null) {
         if (controller?.isNotOnline(showOfflineSnack) == false) {
             presenterScope.launch {
-                val asyncList = trackList.filter { it.track != null }.map { item ->
-                    async(Dispatchers.IO) {
-                        val trackItem = try {
-                            item.service.refresh(item.track!!)
-                        } catch (e: Exception) {
-                            trackError(e)
-                            null
-                        }
-                        if (trackItem != null) {
-                            db.insertTrack(trackItem).executeAsBlocking()
-                            if (item.service is EnhancedTrackService) {
-                                syncChaptersWithTrackServiceTwoWay(db, chapters, trackItem, item.service)
+                val asyncList = (trackIndex?.let { listOf(trackList[it]) } ?: trackList.filter { it.track != null })
+                    .map { item ->
+                        async(Dispatchers.IO) {
+                            val trackItem = try {
+                                item.service.refresh(item.track!!)
+                            } catch (e: Exception) {
+                                trackError(e)
+                                null
                             }
-                            trackItem
-                        } else item.track
+                            if (trackItem != null) {
+                                db.insertTrack(trackItem).executeAsBlocking()
+                                if (item.service is EnhancedTrackService) {
+                                    syncChaptersWithTrackServiceTwoWay(db, chapters, trackItem, item.service)
+                                }
+                                trackItem
+                            } else item.track
+                        }
                     }
-                }
                 asyncList.awaitAll()
                 fetchTracks()
             }
