@@ -434,12 +434,12 @@ class LibraryController(
 
     fun showCategoryText(name: String) {
         textAnim?.cancel()
+        binding.jumperCategoryText.alpha = 1f
+        binding.jumperCategoryText.text = name
         textAnim = binding.jumperCategoryText.animate().alpha(0f).setDuration(250L).setStartDelay(
             2000,
         )
         textAnim?.start()
-        binding.jumperCategoryText.alpha = 1f
-        binding.jumperCategoryText.text = name
     }
 
     fun isAtTop(): Boolean {
