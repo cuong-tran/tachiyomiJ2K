@@ -171,6 +171,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
+                app:lineHeight="15sp"
                 android:maxLines="2"
                 android:textColor="@color/library_comfortable_title_selector"
                 app:layout_constraintBottom_toTopOf="@+id/subtitle"
