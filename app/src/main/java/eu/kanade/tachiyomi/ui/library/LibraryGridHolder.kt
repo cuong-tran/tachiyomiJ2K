@@ -90,7 +90,8 @@ class LibraryGridHolder(
         binding.title.post {
             val hasAuthorInFilter =
                 item.filter.isNotBlank() && authorArtist.contains(item.filter, true)
-            binding.subtitle.isVisible = (binding.title.lineCount <= 1 || hasAuthorInFilter) && authorArtist.isNotBlank()
+            binding.subtitle.isVisible =
+                (binding.title.lineCount <= 1 || hasAuthorInFilter) && authorArtist.isNotBlank()
             binding.title.maxLines = if (hasAuthorInFilter) 1 else 2
         }
 

@@ -97,11 +97,6 @@ class LibraryItem(
                         binding.card.updateLayoutParams<ConstraintLayout.LayoutParams> {
                             bottomMargin = (if (isStaggered) 2 else 6).dpToPx
                         }
-                    } else {
-                        binding.textLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                            height =
-                                if (isStaggered) ViewGroup.LayoutParams.WRAP_CONTENT else 31.spToPx
-                        }
                     }
                     binding.setBGAndFG(libraryLayout)
                 }
