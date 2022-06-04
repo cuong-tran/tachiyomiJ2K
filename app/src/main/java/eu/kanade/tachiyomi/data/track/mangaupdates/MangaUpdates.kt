@@ -94,17 +94,6 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
-//    override suspend fun bind(track: Track, hasReadChapters: Boolean): Track {
-//        return try {
-//            val (series, rating) = api.getSeriesListItem(track)
-//            series.copyTo(track)
-//            rating?.copyTo(track) ?: track
-//        } catch (e: Exception) {
-//            api.addSeriesToList(track, hasReadChapters)
-//            track
-//        }
-//    }
-
     override suspend fun search(query: String): List<TrackSearch> {
         return api.search(query)
             .map {
