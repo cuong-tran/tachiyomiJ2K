@@ -18,8 +18,8 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
     }
 
     override fun onScroll(
-        e1: MotionEvent?,
-        e2: MotionEvent?,
+        e1: MotionEvent,
+        e2: MotionEvent,
         distanceX: Float,
         distanceY: Float,
     ): Boolean {
@@ -29,7 +29,7 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
         return super.onScroll(e1, e2, distanceX, distanceY)
     }
 
-    override fun onSingleTapUp(e: MotionEvent?): Boolean {
+    override fun onSingleTapUp(e: MotionEvent): Boolean {
         return super.onSingleTapUp(e)
     }
 
