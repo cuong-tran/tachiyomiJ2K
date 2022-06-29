@@ -188,7 +188,7 @@ class LibraryPresenter(
         )
     }
 
-    private fun blankItem(id: Int = currentCategory): List<LibraryItem> {
+    fun blankItem(id: Int = currentCategory): List<LibraryItem> {
         return listOf(
             LibraryItem(
                 LibraryManga.createBlank(id),

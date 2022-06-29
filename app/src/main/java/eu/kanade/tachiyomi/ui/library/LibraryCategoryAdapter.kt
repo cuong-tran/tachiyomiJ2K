@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import eu.kanade.tachiyomi.util.system.withDefContext
+import kotlinx.coroutines.runBlocking
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
@@ -130,17 +131,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
     }
 
     private fun performFilter() {
-        val s = getFilter(String::class.java)
-        if (s.isNullOrBlank()) {
-            if (mangas.firstOrNull()?.filter?.isNotBlank() == true) {
-                mangas.forEach { it.filter = "" }
-            }
-            updateDataSet(mangas)
-        } else {
-            updateDataSet(mangas.filter { it.filter(s) })
-        }
-        isLongPressDragEnabled = libraryListener?.canDrag() == true && s.isNullOrBlank()
-        setItemsPerCategoryMap()
+        runBlocking { performFilterAsync() }
     }
 
     suspend fun performFilterAsync() {
@@ -152,7 +143,13 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
             updateDataSet(mangas)
         } else {
             val filteredManga = withDefContext { mangas.filter { it.filter(s) } }
-            updateDataSet(filteredManga)
+            if (filteredManga.isEmpty() && controller?.presenter?.showAllCategories == false) {
+                val catId = mangas.firstOrNull()?.manga?.category
+                val blankItem = catId?.let { controller.presenter.blankItem(it) }
+                updateDataSet(blankItem ?: emptyList())
+            } else {
+                updateDataSet(filteredManga)
+            }
         }
         isLongPressDragEnabled = libraryListener?.canDrag() == true && s.isNullOrBlank()
         setItemsPerCategoryMap()
