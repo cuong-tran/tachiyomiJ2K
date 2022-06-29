@@ -84,8 +84,8 @@ class DownloadCache(
         checkRenew()
 
         val files = mangaFiles[manga.id]?.toHashSet() ?: return false
-        return provider.getValidChapterDirNames(chapter).any {
-            it in files || "$it.cbz" in files
+        return provider.getValidChapterDirNames(chapter).any { chapName ->
+            files.any { chapName.equals(it, true) || "$chapName.cbz".equals(it, true) }
         }
     }
 
@@ -205,9 +205,9 @@ class DownloadCache(
         val id = manga.id ?: return
         for (chapter in chapters) {
             val list = provider.getValidChapterDirNames(chapter)
-            list.forEach {
-                if (mangaFiles[id] != null && it in mangaFiles[id]!!) {
-                    mangaFiles[id]?.remove(it)
+            list.forEach { fileName ->
+                mangaFiles[id]?.firstOrNull { fileName.equals(it, true) }?.let { chapterFile ->
+                    mangaFiles[id]?.remove(chapterFile)
                 }
             }
         }

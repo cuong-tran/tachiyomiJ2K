@@ -107,14 +107,15 @@ class DownloadProvider(private val context: Context) {
 
         return mangaDir.listFiles()!!.asList().filter { file ->
             file.name?.let { fileName ->
-                if (scanalatorNameHashSet.contains(fileName)) {
+                if (scanalatorNameHashSet.any { it.equals(fileName, true) }) {
                     return@filter true
                 }
-                if (scanalatorCbzNameHashSet.contains(fileName)) {
+                if (scanalatorCbzNameHashSet.any { it.equals(fileName, true) }) {
                     return@filter true
                 }
                 val afterScanlatorCheck = fileName.substringAfter("_")
-                return@filter chapterNameHashSet.contains(fileName) || chapterNameHashSet.contains(afterScanlatorCheck)
+                return@filter chapterNameHashSet.any { it.equals(fileName, true) } ||
+                    chapterNameHashSet.any { it.equals(afterScanlatorCheck, true) }
             }
             return@filter false
         }
