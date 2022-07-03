@@ -65,9 +65,14 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
     return categoriesForManga.any { it in includedCategories }
 }
 
+fun Manga.moveCategories(db: DatabaseHelper, activity: Activity, onMangaMoved: () -> Unit) {
+    moveCategories(db, activity, false, onMangaMoved)
+}
+
 fun Manga.moveCategories(
     db: DatabaseHelper,
     activity: Activity,
+    addingToLibrary: Boolean,
     onMangaMoved: () -> Unit,
 ) {
     val categories = db.getCategories().executeAsBlocking()
@@ -78,9 +83,12 @@ fun Manga.moveCategories(
         this,
         categories.toMutableList(),
         ids,
-        false,
+        addingToLibrary,
     ) {
         onMangaMoved()
+        if (addingToLibrary) {
+            autoAddTrack(db, onMangaMoved)
+        }
     }.show()
 }
 

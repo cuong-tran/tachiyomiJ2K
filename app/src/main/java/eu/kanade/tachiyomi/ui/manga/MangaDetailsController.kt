@@ -1443,10 +1443,16 @@ class MangaDetailsController :
 
     override fun favoriteManga(longPress: Boolean) {
         if (needsToBeUnlocked()) return
+        val manga = presenter.manga
         if (longPress) {
             showCategoriesSheet()
-        } else {
+        } else if (!manga.favorite) {
             toggleMangaFavorite()
+        } else {
+            val categories = presenter.getCategories()
+            val favButton = getHeader()?.binding?.favoriteButton ?: return
+            val popup = makeFavPopup(favButton, categories)
+            popup?.show()
         }
     }
 
@@ -1484,8 +1490,12 @@ class MangaDetailsController :
     }
 
     private fun showCategoriesSheet() {
-        presenter.manga.moveCategories(presenter.db, activity!!) {
+        val adding = !presenter.manga.favorite
+        presenter.manga.moveCategories(presenter.db, activity!!, adding) {
             updateHeader()
+            if (adding) {
+                showAddedSnack()
+            }
         }
     }
 
