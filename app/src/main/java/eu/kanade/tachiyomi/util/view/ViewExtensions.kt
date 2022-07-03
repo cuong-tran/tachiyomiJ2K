@@ -410,10 +410,10 @@ fun MaterialCardView.makeShapeCorners(
                 setBottomRightCorner(CornerFamily.ROUNDED, bottomEnd)
                 setTopRightCorner(CornerFamily.ROUNDED, if (bottomEnd > 0) 4f.dpToPx else 0f)
             } else {
-                setTopLeftCorner(CornerFamily.ROUNDED, if (topStart > 0) 4f.dpToPx else 0f)
-                setBottomLeftCorner(CornerFamily.ROUNDED, topStart)
-                setBottomRightCorner(CornerFamily.ROUNDED, if (bottomEnd > 0) 4f.dpToPx else 0f)
-                setTopRightCorner(CornerFamily.ROUNDED, bottomEnd)
+                setTopLeftCorner(CornerFamily.ROUNDED, if (bottomEnd > 0) 4f.dpToPx else 0f)
+                setBottomLeftCorner(CornerFamily.ROUNDED, bottomEnd)
+                setBottomRightCorner(CornerFamily.ROUNDED, if (topStart > 0) 4f.dpToPx else 0f)
+                setTopRightCorner(CornerFamily.ROUNDED, topStart)
             }
         }
         .build()
