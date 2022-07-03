@@ -90,8 +90,9 @@ class LibraryPresenter(
         private set
     var allLibraryItems: List<LibraryItem> = emptyList()
         private set
+    var forceShowAllCategories = false
     val showAllCategories
-        get() = preferences.showAllCategories().get()
+        get() = forceShowAllCategories || preferences.showAllCategories().get()
 
     private val libraryIsGrouped
         get() = groupType != UNGROUPED
