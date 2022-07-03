@@ -47,6 +47,8 @@ class MigrationProcessHolder(
         arrayOf(binding.migrationMangaCardFrom, binding.migrationMangaCardTo).forEach {
             setCards(adapter.showOutline, it.card, it.unreadDownloadBadge.badgeView)
         }
+        binding.migrationMangaCardFrom.title.maxLines = 1
+        binding.migrationMangaCardTo.title.maxLines = 1
     }
 
     fun bind(item: MigrationProcessItem) {
