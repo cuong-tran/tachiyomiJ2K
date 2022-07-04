@@ -17,6 +17,13 @@ import android.os.Build
 import androidx.annotation.ColorInt
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
+import android.webkit.MimeTypeMap
+import androidx.core.graphics.alpha
+import androidx.core.graphics.applyCanvas
+import androidx.core.graphics.blue
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.green
+import androidx.core.graphics.red
 import tachiyomi.decoder.Format
 import tachiyomi.decoder.ImageDecoder
 import timber.log.Timber
@@ -72,6 +79,12 @@ object ImageUtil {
         }
         return if (bitmapResized != null) BitmapDrawable(resources, bitmapResized)
         else null
+    }
+
+    fun getExtensionFromMimeType(mime: String?): String {
+        return MimeTypeMap.getSingleton().getExtensionFromMimeType(mime)
+            ?: SUPPLEMENTARY_MIMETYPE_MAPPING[mime]
+            ?: "jpg"
     }
 
     fun isAnimatedAndSupported(stream: InputStream): Boolean {
@@ -587,4 +600,10 @@ object ImageUtil {
         if (resetAfterExtraction) imageStream.reset()
         return options
     }
+
+    // Android doesn't include some mappings
+    private val SUPPLEMENTARY_MIMETYPE_MAPPING = mapOf(
+        // https://issuetracker.google.com/issues/182703810
+        "image/jxl" to "jxl",
+    )
 }
