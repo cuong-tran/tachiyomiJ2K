@@ -53,7 +53,7 @@ object ImageUtil {
                 Format.Gif -> ImageType.GIF
                 Format.Heif -> ImageType.HEIF
                 Format.Jpeg -> ImageType.JPEG
-//                Format.Jxl -> ImageType.JXL
+                Format.Jxl -> ImageType.JXL
                 Format.Png -> ImageType.PNG
                 Format.Webp -> ImageType.WEBP
                 else -> null
@@ -95,7 +95,7 @@ object ImageUtil {
         HEIF("image/heif", "heif"),
         JPEG("image/jpeg", "jpg"),
 
-//        JXL("image/jxl", "jxl"),
+        JXL("image/jxl", "jxl"),
         PNG("image/png", "png"),
         WEBP("image/webp", "webp"),
     }
