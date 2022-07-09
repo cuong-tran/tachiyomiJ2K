@@ -123,7 +123,7 @@ class MangaUpdatesApi(
     private suspend fun updateSeriesRating(track: Track) {
         if (track.score != 0f) {
             val body = buildJsonObject {
-                put("rating", track.score.toInt())
+                put("rating", track.score)
             }
             authClient.newCall(
                 PUT(

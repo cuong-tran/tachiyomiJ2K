@@ -491,6 +491,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
             return
         }
 
+        val scores = item.service.getScoreList().toTypedArray()
         val binding = TrackScoreDialogBinding.inflate(activity.layoutInflater)
         val dialog = activity.materialAlertDialog()
             .setTitle(R.string.score)
@@ -504,7 +505,6 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
             }
 
         val np = binding.scorePicker
-        val scores = item.service.getScoreList().toTypedArray()
         np.maxValue = scores.size - 1
         np.displayedValues = scores
 

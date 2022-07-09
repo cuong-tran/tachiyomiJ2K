@@ -15,6 +15,7 @@ import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
 import androidx.core.text.inSpans
+import androidx.core.text.parseAsHtml
 import androidx.core.text.scale
 import androidx.core.text.superscript
 import eu.kanade.tachiyomi.R
@@ -196,4 +197,11 @@ fun String.getUrlWithoutDomain(): String {
     } catch (e: URISyntaxException) {
         this
     }
+}
+
+/**
+ * HTML-decode the string
+ */
+fun String.htmlDecode(): String {
+    return this.parseAsHtml().toString()
 }
