@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.extension.api
 
 import android.content.Context
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.LoadResult
@@ -12,18 +11,34 @@ import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.serialization.Serializable
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 internal class ExtensionGithubApi {
 
     private val networkService: NetworkHelper by injectLazy()
-    private val preferences: PreferencesHelper by injectLazy()
+
+    private var requiresFallbackSource = false
 
     suspend fun findExtensions(): List<Extension.Available> {
         return withIOContext {
-            val extensions = networkService.client
-                .newCall(GET("${REPO_URL_PREFIX}index.min.json"))
-                .await()
+            val githubResponse = if (requiresFallbackSource) null else try {
+                networkService.client
+                    .newCall(GET("${REPO_URL_PREFIX}index.min.json"))
+                    .await()
+            } catch (e: Throwable) {
+                Timber.e(e, "Failed to get extensions from GitHub")
+                requiresFallbackSource = true
+                null
+            }
+
+            val response = githubResponse ?: run {
+                networkService.client
+                    .newCall(GET("${FALLBACK_REPO_URL_PREFIX}index.min.json"))
+                    .await()
+            }
+
+            val extensions = response
                 .parseAs<List<ExtensionJsonObject>>()
                 .toExtensions()
 
@@ -78,17 +93,26 @@ internal class ExtensionGithubApi {
                     hasChangelog = it.hasChangelog == 1,
                     sources = it.sources,
                     apkName = it.apk,
-                    iconUrl = "${REPO_URL_PREFIX}icon/${it.apk.replace(".apk", ".png")}",
+                    iconUrl = "${getUrlPrefix()}icon/${it.apk.replace(".apk", ".png")}",
                 )
             }
     }
 
     fun getApkUrl(extension: ExtensionManager.ExtensionInfo): String {
-        return "${REPO_URL_PREFIX}apk/${extension.apkName}"
+        return "${getUrlPrefix()}apk/${extension.apkName}"
+    }
+
+    private fun getUrlPrefix(): String {
+        return if (requiresFallbackSource) {
+            FALLBACK_REPO_URL_PREFIX
+        } else {
+            REPO_URL_PREFIX
+        }
     }
 }
 
 private const val REPO_URL_PREFIX = "https://raw.githubusercontent.com/tachiyomiorg/tachiyomi-extensions/repo/"
+private const val FALLBACK_REPO_URL_PREFIX = "https://gcore.jsdelivr.net/gh/tachiyomiorg/tachiyomi-extensions@repo/"
 
 @Serializable
 private data class ExtensionJsonObject(
