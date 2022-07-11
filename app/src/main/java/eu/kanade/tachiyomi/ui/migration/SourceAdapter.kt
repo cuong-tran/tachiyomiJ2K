@@ -29,11 +29,4 @@ class SourceAdapter(val allClickListener: OnAllClickListener) :
     interface OnAllClickListener {
         fun onAllClick(position: Int)
     }
-
-    override fun updateDataSet(items: MutableList<IFlexible<*>>?) {
-        if (this.items !== items) {
-            this.items = items
-            super.updateDataSet(items)
-        }
-    }
 }

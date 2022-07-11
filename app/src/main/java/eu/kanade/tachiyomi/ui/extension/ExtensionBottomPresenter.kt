@@ -3,23 +3,13 @@ package eu.kanade.tachiyomi.ui.extension
 import android.content.pm.PackageInstaller
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.ExtensionInstallService
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.extension.model.InstalledExtensionsOrder
-import eu.kanade.tachiyomi.source.LocalSource
-import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
-import eu.kanade.tachiyomi.ui.migration.MangaItem
-import eu.kanade.tachiyomi.ui.migration.SelectionHeader
-import eu.kanade.tachiyomi.ui.migration.SourceItem
+import eu.kanade.tachiyomi.ui.migration.BaseMigrationPresenter
 import eu.kanade.tachiyomi.util.system.LocaleHelper
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -28,7 +18,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 typealias ExtensionTuple =
@@ -38,26 +27,13 @@ typealias ExtensionIntallInfo = Pair<InstallStep, PackageInstaller.SessionInfo?>
 /**
  * Presenter of [ExtensionBottomSheet].
  */
-class ExtensionBottomPresenter(
-    private val extensionManager: ExtensionManager = Injekt.get(),
-    val preferences: PreferencesHelper = Injekt.get(),
-) : BaseCoroutinePresenter<ExtensionBottomSheet>() {
+class ExtensionBottomPresenter() : BaseMigrationPresenter<ExtensionBottomSheet>() {
 
     private var extensions = emptyList<ExtensionItem>()
 
-    var sourceItems = emptyList<SourceItem>()
-        private set
-
-    var mangaItems = hashMapOf<Long, List<MangaItem>>()
-        private set
-
     private var currentDownloads = hashMapOf<String, ExtensionIntallInfo>()
 
-    private val sourceManager: SourceManager = Injekt.get()
-
-    private var selectedSource: Long? = null
     private var firstLoad = true
-    private val db: DatabaseHelper = Injekt.get()
 
     override fun onCreate() {
         super.onCreate()
@@ -73,25 +49,7 @@ class ExtensionBottomPresenter(
                 )
                 withContext(Dispatchers.Main) { controller?.setExtensions(extensions, false) }
             }
-            val migrationJob = async {
-                val favs = db.getFavoriteMangas().executeOnIO()
-                sourceItems = findSourcesWithManga(favs)
-                mangaItems = HashMap(
-                    sourceItems.associate {
-                        it.source.id to this@ExtensionBottomPresenter.libraryToMigrationItem(
-                            favs,
-                            it.source.id,
-                        )
-                    },
-                )
-                withContext(Dispatchers.Main) {
-                    if (selectedSource != null) {
-                        controller?.setMigrationManga(mangaItems[selectedSource])
-                    } else {
-                        controller?.setMigrationSources(sourceItems)
-                    }
-                }
-            }
+            val migrationJob = async { firstTimeMigration() }
             listOf(migrationJob, extensionJob).awaitAll()
         }
         presenterScope.launch {
@@ -129,18 +87,6 @@ class ExtensionBottomPresenter(
         }
     }
 
-    private fun findSourcesWithManga(library: List<Manga>): List<SourceItem> {
-        val header = SelectionHeader()
-        return library.map { it.source }.toSet()
-            .mapNotNull { if (it != LocalSource.ID) sourceManager.getOrStub(it) else null }
-            .sortedBy { it.name }
-            .map { SourceItem(it, header) }
-    }
-
-    private fun libraryToMigrationItem(library: List<Manga>, sourceId: Long): List<MangaItem> {
-        return library.filter { it.source == sourceId }.map(::MangaItem)
-    }
-
     fun refreshExtensions() {
         presenterScope.launch {
             extensions = toItems(
@@ -151,25 +97,6 @@ class ExtensionBottomPresenter(
                 ),
             )
             withContext(Dispatchers.Main) { controller?.setExtensions(extensions, false) }
-        }
-    }
-
-    fun refreshMigrations() {
-        presenterScope.launch {
-            val favs = db.getFavoriteMangas().executeOnIO()
-            sourceItems = findSourcesWithManga(favs)
-            mangaItems = HashMap(
-                sourceItems.associate {
-                    it.source.id to this@ExtensionBottomPresenter.libraryToMigrationItem(favs, it.source.id)
-                },
-            )
-            withContext(Dispatchers.Main) {
-                if (selectedSource != null) {
-                    controller?.setMigrationManga(mangaItems[selectedSource])
-                } else {
-                    controller?.setMigrationSources(sourceItems)
-                }
-            }
         }
     }
 
@@ -354,19 +281,5 @@ class ExtensionBottomPresenter(
 
     fun trustSignature(signatureHash: String) {
         extensionManager.trustSignature(signatureHash)
-    }
-
-    fun setSelectedSource(source: Source) {
-        selectedSource = source.id
-        presenterScope.launch {
-            withContext(Dispatchers.Main) { controller?.setMigrationManga(mangaItems[source.id]) }
-        }
-    }
-
-    fun deselectSource() {
-        selectedSource = null
-        presenterScope.launch {
-            withContext(Dispatchers.Main) { controller?.setMigrationSources(sourceItems) }
-        }
     }
 }

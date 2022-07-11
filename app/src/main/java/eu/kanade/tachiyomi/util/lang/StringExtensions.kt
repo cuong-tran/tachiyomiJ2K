@@ -152,6 +152,9 @@ fun String.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int> {
     }
 }
 
+fun String.withColor(@ColorInt colorInt: Int) =
+    buildSpannedString { color(colorInt) { append(this@withColor) } }
+
 fun String.withSubtitle(context: Context, @StringRes subtitleRes: Int) =
     withSubtitle(context, context.getString(subtitleRes))
 

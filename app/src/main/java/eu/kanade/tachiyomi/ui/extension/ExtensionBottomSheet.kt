@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.databinding.RecyclerWithScrollerBinding
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstalledExtensionsOrder
 import eu.kanade.tachiyomi.ui.extension.details.ExtensionDetailsController
+import eu.kanade.tachiyomi.ui.migration.BaseMigrationInterface
 import eu.kanade.tachiyomi.ui.migration.MangaAdapter
 import eu.kanade.tachiyomi.ui.migration.MangaItem
 import eu.kanade.tachiyomi.ui.migration.SourceAdapter
@@ -46,7 +47,8 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     ExtensionTrustDialog.Listener,
-    SourceAdapter.OnAllClickListener {
+    SourceAdapter.OnAllClickListener,
+    BaseMigrationInterface {
 
     var sheetBehavior: BottomSheetBehavior<*>? = null
 
@@ -62,6 +64,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         get() = listOf(extAdapter, migAdapter)
 
     val presenter = ExtensionBottomPresenter()
+    var currentSourceTitle: String? = null
 
     private var extensions: List<ExtensionItem> = emptyList()
     var canExpand = false
@@ -323,22 +326,28 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         drawExtensions()
     }
 
-    fun setMigrationSources(sources: List<SourceItem>) {
+    override fun setMigrationSources(sources: List<SourceItem>) {
+        currentSourceTitle = null
+        val changingAdapters = migAdapter !is SourceAdapter
         if (migAdapter !is SourceAdapter) {
             migAdapter = SourceAdapter(this)
             migrationFrameLayout?.onBind(migAdapter!!)
             migAdapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
-        migAdapter?.updateDataSet(sources, true)
+        migAdapter?.updateDataSet(sources, changingAdapters)
+        controller.updateTitleAndMenu()
     }
 
-    fun setMigrationManga(manga: List<MangaItem>?) {
+    override fun setMigrationManga(title: String, manga: List<MangaItem>?) {
+        currentSourceTitle = title
+        val changingAdapters = migAdapter !is MangaAdapter
         if (migAdapter !is MangaAdapter) {
             migAdapter = MangaAdapter(this, presenter.preferences.outlineOnCovers().get())
             migrationFrameLayout?.onBind(migAdapter!!)
             migAdapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
-        migAdapter?.updateDataSet(manga, true)
+        migAdapter?.updateDataSet(manga, changingAdapters)
+        controller.updateTitleAndMenu()
     }
 
     fun drawExtensions() {

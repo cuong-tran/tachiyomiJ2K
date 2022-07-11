@@ -14,7 +14,13 @@ import eu.kanade.tachiyomi.source.Source
  * @param source Instance of [Source] containing source information.
  * @param header The header for this item.
  */
-data class SourceItem(val source: Source, val header: SelectionHeader? = null) :
+data class SourceItem(
+    val source: Source,
+    val header: SelectionHeader? = null,
+    val numberOfItems: Int,
+    val isUninstalled: Boolean,
+    val isObsolete: Boolean,
+) :
     AbstractSectionableItem<SourceHolder, SelectionHeader>(header) {
 
     /**

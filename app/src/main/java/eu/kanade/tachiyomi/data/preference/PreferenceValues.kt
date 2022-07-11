@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.preference
 
+import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 
 // Library
@@ -24,5 +25,17 @@ object PreferenceValues {
         HIGH(R.string.pref_high, 13),
         LOW(R.string.pref_low, 31),
         LOWEST(R.string.pref_lowest, 47),
+    }
+
+    enum class MigrationSourceOrder(val value: Int, @StringRes val titleResId: Int) {
+        Alphabetically(0, R.string.alphabetically),
+        MostEntries(1, R.string.most_entries),
+        Obsolete(2, R.string.obsolete),
+        ;
+
+        companion object {
+            fun fromValue(preference: Int) = values().find { it.value == preference } ?: Alphabetically
+            fun fromPreference(pref: PreferencesHelper) = fromValue(pref.migrationSourceOrder().get())
+        }
     }
 }

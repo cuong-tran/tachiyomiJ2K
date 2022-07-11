@@ -298,6 +298,8 @@ class PreferencesHelper(val context: Context) {
 
     fun installedExtensionsOrder() = flowPrefs.getInt(Keys.installedExtensionsOrder, InstalledExtensionsOrder.Name.value)
 
+    fun migrationSourceOrder() = flowPrefs.getInt("migration_source_order", Values.MigrationSourceOrder.Alphabetically.value)
+
     fun collapsedCategories() = flowPrefs.getStringSet("collapsed_categories", mutableSetOf())
 
     fun collapsedDynamicCategories() = flowPrefs.getStringSet("collapsed_dynamic_categories", mutableSetOf())

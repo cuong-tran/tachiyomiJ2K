@@ -1,18 +1,24 @@
 package eu.kanade.tachiyomi.ui.migration
 
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import androidx.core.view.doOnNextLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.preference.PreferenceValues
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.MigrationControllerBinding
-import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
+import eu.kanade.tachiyomi.ui.source.BrowseController
 import eu.kanade.tachiyomi.util.system.await
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
@@ -23,9 +29,10 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class MigrationController :
-    NucleusController<MigrationControllerBinding, MigrationPresenter>(),
+    BaseCoroutineController<MigrationControllerBinding, MigrationPresenter>(),
     FlexibleAdapter.OnItemClickListener,
-    SourceAdapter.OnAllClickListener {
+    SourceAdapter.OnAllClickListener,
+    BaseMigrationInterface {
 
     private var adapter: FlexibleAdapter<IFlexible<*>>? = null
 
@@ -35,9 +42,7 @@ class MigrationController :
             setTitle()
         }
 
-    override fun createPresenter(): MigrationPresenter {
-        return MigrationPresenter()
-    }
+    override val presenter = MigrationPresenter()
 
     override fun createBinding(inflater: LayoutInflater) = MigrationControllerBinding.inflate(inflater)
 
@@ -59,35 +64,14 @@ class MigrationController :
         return title
     }
 
-    override fun canStillGoBack(): Boolean = presenter.state.selectedSource != null
+    override fun canStillGoBack(): Boolean = adapter is MangaAdapter
 
     override fun handleBack(): Boolean {
-        return if (presenter.state.selectedSource != null) {
+        return if (adapter is MangaAdapter) {
             presenter.deselectSource()
             true
         } else {
             super.handleBack()
-        }
-    }
-
-    fun render(state: ViewState) {
-        if (state.selectedSource == null) {
-            title = resources?.getString(R.string.source_migration)
-            if (adapter !is SourceAdapter) {
-                adapter = SourceAdapter(this)
-                binding.migrationRecycler.adapter = adapter
-            }
-            adapter?.updateDataSet(state.sourcesWithManga)
-        } else {
-            title = state.selectedSource.toString()
-            if (adapter !is MangaAdapter) {
-                adapter = MangaAdapter(this, presenter.preferences.outlineOnCovers().get())
-                binding.migrationRecycler.adapter = adapter
-            }
-            adapter?.updateDataSet(state.mangaForSource, true)
-            activityBinding?.appBar?.doOnNextLayout {
-                binding.migrationRecycler.requestApplyInsets()
-            }
         }
     }
 
@@ -123,5 +107,57 @@ class MigrationController :
                 )
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.migration_main, menu)
+        menu.findItem(R.id.action_sources_settings).isVisible = false
+        val id = when (PreferenceValues.MigrationSourceOrder.fromPreference(presenter.preferences)) {
+            PreferenceValues.MigrationSourceOrder.Alphabetically -> R.id.action_sort_alpha
+            PreferenceValues.MigrationSourceOrder.MostEntries -> R.id.action_sort_largest
+            PreferenceValues.MigrationSourceOrder.Obsolete -> R.id.action_sort_obsolete
+        }
+        menu.findItem(id).isChecked = true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val sorting = when (item.itemId) {
+            R.id.action_sort_alpha -> PreferenceValues.MigrationSourceOrder.Alphabetically
+            R.id.action_sort_largest -> PreferenceValues.MigrationSourceOrder.MostEntries
+            R.id.action_sort_obsolete -> PreferenceValues.MigrationSourceOrder.Obsolete
+            else -> null
+        }
+        if (sorting != null) {
+            presenter.preferences.migrationSourceOrder().set(sorting.value)
+            presenter.refreshMigrations()
+            item.isChecked = true
+        }
+        when (item.itemId) {
+            R.id.action_migration_guide -> {
+                activity?.openInBrowser(BrowseController.HELP_URL)
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun setMigrationManga(title: String, manga: List<MangaItem>?) {
+        this.title = title
+        if (adapter !is MangaAdapter) {
+            adapter = MangaAdapter(this, presenter.preferences.outlineOnCovers().get())
+            binding.migrationRecycler.adapter = adapter
+        }
+        adapter?.updateDataSet(manga, true)
+        activityBinding?.appBar?.doOnNextLayout {
+            binding.migrationRecycler.requestApplyInsets()
+        }
+    }
+
+    override fun setMigrationSources(sources: List<SourceItem>) {
+        title = resources?.getString(R.string.source_migration)
+        if (adapter !is SourceAdapter) {
+            adapter = SourceAdapter(this)
+            binding.migrationRecycler.adapter = adapter
+        }
+        adapter?.updateDataSet(sources)
     }
 }

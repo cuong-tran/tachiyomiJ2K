@@ -2,6 +2,27 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_migration_sort"
+        android:icon="@drawable/ic_sort_24dp"
+        android:title="@string/sort_by"
+        app:showAsAction="ifRoom" >
+        <menu>
+            <group android:checkableBehavior="single"
+                android:id="@+id/action_sort_group">
+                <item
+                    android:id="@+id/action_sort_alpha"
+                    android:title="@string/alphabetically"/>
+                <item
+                    android:id="@+id/action_sort_largest"
+                    android:title="@string/most_entries"/>
+                <item
+                    android:id="@+id/action_sort_obsolete"
+                    android:title="@string/obsolete"/>
+            </group>
+        </menu>
+    </item>
+
+    <item
         android:id="@+id/action_sources_settings"
         android:icon="@drawable/ic_tune_24dp"
         android:title="@string/options"

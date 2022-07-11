@@ -27,6 +27,7 @@ import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferenceValues
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.BrowseControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
@@ -238,10 +239,12 @@ class BrowseController :
 
     private fun updateSheetMenu() {
         binding.bottomSheet.sheetToolbar.title =
-            view?.context?.getString(
-                if (binding.bottomSheet.tabs.selectedTabPosition == 0) R.string.extensions
-                else R.string.source_migration,
-            )
+            if (binding.bottomSheet.tabs.selectedTabPosition != 0) {
+                binding.bottomSheet.root.currentSourceTitle
+                    ?: view?.context?.getString(R.string.source_migration)
+            } else {
+                view?.context?.getString(R.string.extensions)
+            }
         val onExtensionTab = binding.bottomSheet.tabs.selectedTabPosition == 0
         if (binding.bottomSheet.sheetToolbar.menu.findItem(if (onExtensionTab) R.id.action_search else R.id.action_migration_guide) != null) {
             return
@@ -253,6 +256,13 @@ class BrowseController :
             if (binding.bottomSheet.tabs.selectedTabPosition == 0) R.menu.extension_main
             else R.menu.migration_main,
         )
+
+        val id = when (PreferenceValues.MigrationSourceOrder.fromPreference(preferences)) {
+            PreferenceValues.MigrationSourceOrder.Alphabetically -> R.id.action_sort_alpha
+            PreferenceValues.MigrationSourceOrder.MostEntries -> R.id.action_sort_largest
+            PreferenceValues.MigrationSourceOrder.Obsolete -> R.id.action_sort_obsolete
+        }
+        binding.bottomSheet.sheetToolbar.menu.findItem(id)?.isChecked = true
 
         // Initialize search option.
         binding.bottomSheet.sheetToolbar.menu.findItem(R.id.action_search)?.let { searchItem ->
@@ -279,6 +289,18 @@ class BrowseController :
 
     private fun setSheetToolbar() {
         binding.bottomSheet.sheetToolbar.setOnMenuItemClickListener { item ->
+            val sorting = when (item.itemId) {
+                R.id.action_sort_alpha -> PreferenceValues.MigrationSourceOrder.Alphabetically
+                R.id.action_sort_largest -> PreferenceValues.MigrationSourceOrder.MostEntries
+                R.id.action_sort_obsolete -> PreferenceValues.MigrationSourceOrder.Obsolete
+                else -> null
+            }
+            if (sorting != null) {
+                preferences.migrationSourceOrder().set(sorting.value)
+                binding.bottomSheet.root.presenter.refreshMigrations()
+                item.isChecked = true
+                return@setOnMenuItemClickListener true
+            }
             when (item.itemId) {
                 // Initialize option to open catalogue settings.
                 R.id.action_filter -> {
