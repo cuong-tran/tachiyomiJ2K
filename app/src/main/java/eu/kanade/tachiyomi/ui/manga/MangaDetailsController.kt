@@ -1565,6 +1565,7 @@ class MangaDetailsController :
         clipboard.setPrimaryClip(ClipData.newPlainText(label, content))
 
         label ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return
         if (useToast) {
             activity.toast(view.context.getString(R.string._copied_to_clipboard, label))
         } else {

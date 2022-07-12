@@ -101,7 +101,7 @@ class AboutController : SettingsController() {
                     val clipboard = it.getSystemService<ClipboardManager>()!!
                     val appInfo = it.getString(R.string.app_info)
                     clipboard.setPrimaryClip(ClipData.newPlainText(appInfo, deviceInfo))
-                    if (Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT < 33) {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
                         view?.snack(context.getString(R.string._copied_to_clipboard, appInfo))
                     }
                 }
