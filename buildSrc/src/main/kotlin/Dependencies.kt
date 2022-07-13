@@ -2,8 +2,8 @@ object AndroidVersions {
     const val compileSdk = 33
     const val minSdk = 23
     const val targetSdk = 30
-    const val versionCode = 93
-    const val versionName = "1.5.5"
+    const val versionCode = 94
+    const val versionName = "1.5.6"
     const val ndk = "23.1.7779620"
     const val kotlin = "1.6.21"
 }
