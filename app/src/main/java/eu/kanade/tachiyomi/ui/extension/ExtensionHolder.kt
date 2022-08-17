@@ -49,20 +49,15 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
                 InstalledExtensionsOrder.RecentlyUpdated -> {
                     extensionUpdateDate(extension.pkgName)?.let {
                         binding.date.isVisible = true
-                        binding.date.text = itemView.context.getString(
-                            R.string.updated_,
-                            it.timeSpanFromNow,
-                        )
+                        binding.date.text = itemView.context.timeSpanFromNow(R.string.updated_, it)
                         infoText.add("")
                     }
                 }
                 InstalledExtensionsOrder.RecentlyInstalled -> {
                     extensionInstallDate(extension.pkgName)?.let {
                         binding.date.isVisible = true
-                        binding.date.text = itemView.context.getString(
-                            R.string.installed_,
-                            it.timeSpanFromNow,
-                        )
+                        binding.date.text =
+                            itemView.context.timeSpanFromNow(R.string.installed_, it)
                         infoText.add("")
                     }
                 }

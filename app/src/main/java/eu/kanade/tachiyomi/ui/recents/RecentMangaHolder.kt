@@ -118,58 +118,36 @@ class RecentMangaHolder(
         }
         val notValidNum = item.mch.chapter.chapter_number <= 0
         binding.body.isVisible = !isSmallUpdates
+        val context = itemView.context
         binding.body.text = when {
-            item.mch.chapter.id == null -> binding.body.context.getString(
-                R.string.added_,
-                item.mch.manga.date_added.timeSpanFromNow(itemView.context),
-            )
+            item.mch.chapter.id == null -> context.timeSpanFromNow(R.string.added_, item.mch.manga.date_added)
             isSmallUpdates -> ""
             item.mch.history.id == null -> {
                 if (adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES) {
                     if (adapter.sortByFetched) {
-                        binding.body.context.getString(
-                            R.string.fetched_,
-                            item.chapter.date_fetch.timeSpanFromNow(itemView.context),
-                        )
+                        context.timeSpanFromNow(R.string.fetched_, item.chapter.date_fetch)
                     } else {
-                        binding.body.context.getString(
-                            R.string.updated_,
-                            item.chapter.date_upload.timeSpanFromNow(itemView.context),
-                        )
+                        context.timeSpanFromNow(R.string.updated_, item.chapter.date_upload)
                     }
                 } else {
-                    binding.body.context.getString(
-                        R.string.fetched_,
-                        item.chapter.date_fetch.timeSpanFromNow(itemView.context),
-                    ) + "\n" + binding.body.context.getString(
-                        R.string.updated_,
-                        item.chapter.date_upload.timeSpanFromNow(itemView.context),
-                    )
+                    context.timeSpanFromNow(R.string.fetched_, item.chapter.date_fetch) + "\n" +
+                        context.timeSpanFromNow(R.string.updated_, item.chapter.date_upload)
                 }
             }
-            item.chapter.id != item.mch.chapter.id ->
-                binding.body.context.getString(
-                    R.string.read_,
-                    item.mch.history.last_read.timeSpanFromNow,
-                ) + "\n" + binding.body.context.getString(
-                    if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
-                    if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number),
-                )
-            item.chapter.pages_left > 0 && !item.chapter.read ->
-                binding.body.context.getString(
-                    R.string.read_,
-                    item.mch.history.last_read.timeSpanFromNow(itemView.context),
-                ) + "\n" + itemView.resources.getQuantityString(
-                    R.plurals.pages_left,
-                    item.chapter.pages_left,
-                    item.chapter.pages_left,
-                )
-            else -> binding.body.context.getString(
-                R.string.read_,
-                item.mch.history.last_read.timeSpanFromNow(itemView.context),
+            item.chapter.id != item.mch.chapter.id -> context.timeSpanFromNow(R.string.read_, item.mch.history.last_read) +
+                "\n" + binding.body.context.getString(
+                if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
+                if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number),
             )
+            item.chapter.pages_left > 0 && !item.chapter.read -> context.timeSpanFromNow(R.string.read_, item.mch.history.last_read) +
+                "\n" + itemView.resources.getQuantityString(
+                R.plurals.pages_left,
+                item.chapter.pages_left,
+                item.chapter.pages_left,
+            )
+            else -> context.timeSpanFromNow(R.string.read_, item.mch.history.last_read)
         }
-        if ((itemView.context as? Activity)?.isDestroyed != true) {
+        if ((context as? Activity)?.isDestroyed != true) {
             binding.coverThumbnail.loadManga(item.mch.manga)
         }
         if (!item.mch.manga.isLocal()) {

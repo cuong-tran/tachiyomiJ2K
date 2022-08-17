@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.lang.chop
+import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import uy.kohesive.injekt.injectLazy
@@ -69,6 +70,7 @@ internal class DownloadNotifier(private val context: Context) {
     }
 
     fun setPlaceholder(download: Download?) {
+        val context = context.localeContext
         with(notification) {
             // Check if first call.
             if (!isDownloading) {
@@ -140,7 +142,7 @@ internal class DownloadNotifier(private val context: Context) {
             }
 
             val downloadingProgressText =
-                context.getString(R.string.downloading_progress)
+                context.localeContext.getString(R.string.downloading_progress)
                     .format(download.downloadedImages, download.pages!!.size)
 
             if (preferences.hideNotificationContent()) {
@@ -166,6 +168,7 @@ internal class DownloadNotifier(private val context: Context) {
      * Show notification when download is paused.
      */
     fun onDownloadPaused() {
+        val context = context.localeContext
         with(notification) {
             setContentTitle(context.getString(R.string.paused))
             setContentText(context.getString(R.string.download_paused))
@@ -203,6 +206,7 @@ internal class DownloadNotifier(private val context: Context) {
      * @param reason the text to show.
      */
     fun onWarning(reason: String) {
+        val context = context.localeContext
         with(notification) {
             setContentTitle(context.getString(R.string.downloads))
             setContentText(reason)
@@ -223,6 +227,7 @@ internal class DownloadNotifier(private val context: Context) {
      * Called when the downloader has too many downloads from one source.
      */
     fun massDownloadWarning() {
+        val context = context.localeContext
         val notification = context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER) {
             setContentTitle(context.getString(R.string.warning))
             setSmallIcon(R.drawable.ic_warning_white_24dp)
@@ -260,6 +265,7 @@ internal class DownloadNotifier(private val context: Context) {
         customIntent: Intent? = null,
     ) {
         // Create notification
+        val context = context.localeContext
         with(notification) {
             setContentTitle(
                 mangaTitle?.plus(": $chapter") ?: context.getString(R.string.download_error),

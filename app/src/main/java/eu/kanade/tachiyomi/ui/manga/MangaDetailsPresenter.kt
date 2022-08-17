@@ -374,7 +374,7 @@ class MangaDetailsPresenter(
                                 .map { it.toModel() },
                         )
                     }
-                    mangaShortcutManager.updateShortcuts()
+                    controller?.view?.context?.let { mangaShortcutManager.updateShortcuts(it) }
                 }
                 if (newChapters.second.isNotEmpty()) {
                     val removedChaptersId = newChapters.second.map { it.id }
@@ -447,7 +447,7 @@ class MangaDetailsPresenter(
             ) e.message?.split(": ")?.drop(1)
                 ?.joinToString(": ")
             else e.message
-            ) ?: preferences.context.getString(R.string.unknown_error)
+            ) ?: controller?.view?.context?.getString(R.string.unknown_error) ?: ""
     }
 
     /**
@@ -636,7 +636,8 @@ class MangaDetailsPresenter(
         filtersId.add(if (manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_BOOKMARKED) R.string.bookmarked else null)
         filtersId.add(if (manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED) R.string.not_bookmarked else null)
         filtersId.add(if (manga.filtered_scanlators?.isNotEmpty() == true) R.string.scanlators else null)
-        return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
+        return filtersId.filterNotNull()
+            .joinToString(", ") { controller?.view?.context?.getString(it) ?: "" }
     }
 
     fun setScanlatorFilter(filteredScanlators: Set<String>) {

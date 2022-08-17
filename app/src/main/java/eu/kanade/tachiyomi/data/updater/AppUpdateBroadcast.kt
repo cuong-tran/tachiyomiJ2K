@@ -8,6 +8,7 @@ import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.toast
 
 class AppUpdateBroadcast : BroadcastReceiver() {
@@ -27,7 +28,7 @@ class AppUpdateBroadcast : BroadcastReceiver() {
                     val notifyOnInstall = extras.getBoolean(AppUpdateService.EXTRA_NOTIFY_ON_INSTALL, false)
                     try {
                         if (notifyOnInstall) {
-                            AppUpdateNotifier(context).onInstallFinished()
+                            AppUpdateNotifier(context.localeContext).onInstallFinished()
                         }
                     } finally {
                         AppUpdateService.stop(context)
@@ -37,7 +38,7 @@ class AppUpdateBroadcast : BroadcastReceiver() {
                     if (status != PackageInstaller.STATUS_FAILURE_ABORTED) {
                         context.toast(R.string.could_not_install_update)
                         val uri = intent.getStringExtra(AppUpdateService.EXTRA_FILE_URI) ?: return
-                        AppUpdateNotifier(context).onInstallError(uri.toUri())
+                        AppUpdateNotifier(context.localeContext).onInstallError(uri.toUri())
                     }
                 }
             }
@@ -48,7 +49,7 @@ class AppUpdateBroadcast : BroadcastReceiver() {
                 remove(AppUpdateService.NOTIFY_ON_INSTALL_KEY)
             }
             if (notifyOnInstall) {
-                AppUpdateNotifier(context).onInstallFinished()
+                AppUpdateNotifier(context.localeContext).onInstallFinished()
             }
         }
     }

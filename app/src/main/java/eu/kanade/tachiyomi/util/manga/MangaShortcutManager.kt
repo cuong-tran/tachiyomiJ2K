@@ -22,7 +22,6 @@ import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.system.launchIO
-import kotlinx.coroutines.GlobalScope
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -35,15 +34,14 @@ class MangaShortcutManager(
     val sourceManager: SourceManager = Injekt.get(),
 ) {
 
-    val context: Context = preferences.context
-    fun updateShortcuts() {
+    fun updateShortcuts(context: Context) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
             if (!preferences.showSeriesInShortcuts() && !preferences.showSourcesInShortcuts()) {
                 val shortcutManager = context.getSystemService(ShortcutManager::class.java)
                 shortcutManager.removeAllDynamicShortcuts()
                 return
             }
-            GlobalScope.launchIO {
+            launchIO {
                 val shortcutManager = context.getSystemService(ShortcutManager::class.java)
 
                 val recentManga = if (preferences.showSeriesInShortcuts()) {

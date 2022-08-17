@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.getThemeWithExtras
+import eu.kanade.tachiyomi.util.system.setLocaleByAppCompat
 import eu.kanade.tachiyomi.util.system.setThemeByPref
 import uy.kohesive.injekt.injectLazy
 
@@ -14,6 +15,7 @@ abstract class BaseThemedActivity : AppCompatActivity() {
     private var updatedTheme: Resources.Theme? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setLocaleByAppCompat()
         updatedTheme = null
         setThemeByPref(preferences)
         super.onCreate(savedInstanceState)

@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.backup.legacy.LegacyBackupRestore
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
 import eu.kanade.tachiyomi.util.system.isServiceRunning
+import eu.kanade.tachiyomi.util.system.localeContext
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -61,7 +62,7 @@ class BackupRestoreService : Service() {
         fun stop(context: Context) {
             context.stopService(Intent(context, BackupRestoreService::class.java))
 
-            BackupNotifier(context).showRestoreError(context.getString(R.string.restoring_backup_canceled))
+            BackupNotifier(context.localeContext).showRestoreError(context.getString(R.string.restoring_backup_canceled))
         }
     }
 
@@ -78,7 +79,7 @@ class BackupRestoreService : Service() {
         super.onCreate()
 
         ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-        notifier = BackupNotifier(this)
+        notifier = BackupNotifier(this.localeContext)
         wakeLock = acquireWakeLock()
 
         startForeground(Notifications.ID_RESTORE_PROGRESS, notifier.showRestoreProgress().build())

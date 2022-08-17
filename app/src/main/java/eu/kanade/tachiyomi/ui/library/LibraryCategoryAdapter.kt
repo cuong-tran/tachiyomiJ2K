@@ -176,7 +176,8 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
     override fun onCreateBubbleText(position: Int): String {
         val preferences: PreferencesHelper by injectLazy()
         val db: DatabaseHelper by injectLazy()
-        if (position == itemCount - 1) return recyclerView.context.getString(R.string.bottom)
+        val context = recyclerView.context
+        if (position == itemCount - 1) return context.getString(R.string.bottom)
         return when (val item: IFlexible<*>? = getItem(position)) {
             is LibraryHeaderItem -> {
                 vibrateOnCategoryChange(item.category.name)
@@ -188,7 +189,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                     LibrarySort.DragAndDrop -> {
                         if (item.header.category.isDynamic) {
                             val category = db.getCategoriesForManga(item.manga).executeAsBlocking().firstOrNull()?.name
-                            category ?: recyclerView.context.getString(R.string.default_value)
+                            category ?: context.getString(R.string.default_value)
                         } else {
                             val title = item.manga.title
                             if (preferences.removeArticles().get()) title.removeArticles().chop(15)
@@ -200,10 +201,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                         val history = db.getChapters(id).executeAsBlocking()
                         val last = history.maxOfOrNull { it.date_fetch }
                         if (last != null && last > 100) {
-                            recyclerView.context.getString(
-                                R.string.fetched_,
-                                last.timeSpanFromNow(preferences.context),
-                            )
+                            context.timeSpanFromNow(R.string.fetched_, last)
                         } else {
                             "N/A"
                         }
@@ -213,18 +211,15 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                         val history = db.getHistoryByMangaId(id).executeAsBlocking()
                         val last = history.maxOfOrNull { it.last_read }
                         if (last != null && last > 100) {
-                            recyclerView.context.getString(
-                                R.string.read_,
-                                last.timeSpanFromNow(preferences.context),
-                            )
+                            context.timeSpanFromNow(R.string.read_, last)
                         } else {
                             "N/A"
                         }
                     }
                     LibrarySort.Unread -> {
                         val unread = item.manga.unread
-                        if (unread > 0) recyclerView.context.getString(R.string._unread, unread)
-                        else recyclerView.context.getString(R.string.read)
+                        if (unread > 0) context.getString(R.string._unread, unread)
+                        else context.getString(R.string.read)
                     }
                     LibrarySort.TotalChapters -> {
                         val total = item.manga.totalChapters
@@ -240,10 +235,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                     LibrarySort.LatestChapter -> {
                         val lastUpdate = item.manga.last_update
                         if (lastUpdate > 0) {
-                            recyclerView.context.getString(
-                                R.string.updated_,
-                                lastUpdate.timeSpanFromNow(preferences.context),
-                            )
+                            context.timeSpanFromNow(R.string.updated_, lastUpdate)
                         } else {
                             "N/A"
                         }
@@ -251,7 +243,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                     LibrarySort.DateAdded -> {
                         val added = item.manga.date_added
                         if (added > 0) {
-                            recyclerView.context.getString(R.string.added_, added.timeSpanFromNow(preferences.context))
+                            context.timeSpanFromNow(R.string.added_, added)
                         } else {
                             "N/A"
                         }

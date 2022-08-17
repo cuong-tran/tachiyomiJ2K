@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.source.SourcePresenter
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
+import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.notification
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -90,10 +91,11 @@ open class App : Application(), DefaultLifecycleObserver {
                 val notificationManager = NotificationManagerCompat.from(this)
                 if (enabled) {
                     disableIncognitoReceiver.register()
-                    val notification = notification(Notifications.CHANNEL_INCOGNITO_MODE) {
-                        val incogText = getString(R.string.incognito_mode)
+                    val nContext = localeContext
+                    val notification = nContext.notification(Notifications.CHANNEL_INCOGNITO_MODE) {
+                        val incogText = nContext.getString(R.string.incognito_mode)
                         setContentTitle(incogText)
-                        setContentText(getString(R.string.turn_off_, incogText))
+                        setContentText(nContext.getString(R.string.turn_off_, incogText))
                         setSmallIcon(R.drawable.ic_incognito_24dp)
                         setOngoing(true)
 

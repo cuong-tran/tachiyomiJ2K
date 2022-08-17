@@ -30,6 +30,7 @@ import eu.kanade.tachiyomi.ui.setting.titleRes
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.lang.toTimestampString
 import eu.kanade.tachiyomi.util.system.isOnline
+import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.openInBrowser
@@ -97,7 +98,7 @@ class AboutController : SettingsController() {
 
             onClick {
                 activity?.let {
-                    val deviceInfo = CrashLogUtil(it).getDebugInfo()
+                    val deviceInfo = CrashLogUtil(it.localeContext).getDebugInfo()
                     val clipboard = it.getSystemService<ClipboardManager>()!!
                     val appInfo = it.getString(R.string.app_info)
                     clipboard.setPrimaryClip(ClipData.newPlainText(appInfo, deviceInfo))

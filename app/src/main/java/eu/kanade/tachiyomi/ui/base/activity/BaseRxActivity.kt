@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getThemeWithExtras
+import eu.kanade.tachiyomi.util.system.setLocaleByAppCompat
 import eu.kanade.tachiyomi.util.system.setThemeByPref
 import nucleus.view.NucleusAppCompatActivity
 import uy.kohesive.injekt.injectLazy
@@ -18,6 +19,7 @@ abstract class BaseRxActivity<P : BasePresenter<*>> : NucleusAppCompatActivity<P
     private var updatedTheme: Resources.Theme? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setLocaleByAppCompat()
         updatedTheme = null
         setThemeByPref(preferences)
         super.onCreate(savedInstanceState)

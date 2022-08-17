@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.isConnectedToWifi
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.isServiceRunning
+import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.powerManager
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
@@ -241,7 +242,7 @@ class DownloadService : Service() {
 
     private fun getPlaceholderNotification(): Notification {
         return NotificationCompat.Builder(this, Notifications.CHANNEL_DOWNLOADER)
-            .setContentTitle(getString(R.string.downloading))
+            .setContentTitle(localeContext.getString(R.string.downloading))
             .build()
     }
 }

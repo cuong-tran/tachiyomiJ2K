@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -29,9 +30,9 @@ import uy.kohesive.injekt.injectLazy
 class LibraryItem(
     val manga: LibraryManga,
     header: LibraryHeaderItem,
+    private val context: Context?,
     private val preferences: PreferencesHelper = Injekt.get(),
-) :
-    AbstractSectionableItem<LibraryHolder, LibraryHeaderItem>(header), IFilterable<String> {
+) : AbstractSectionableItem<LibraryHolder, LibraryHeaderItem>(header), IFilterable<String> {
 
     var downloadCount = -1
     var unreadType = 2
@@ -172,7 +173,8 @@ class LibraryItem(
 
     private fun containsGenre(tag: String, genres: List<String>?): Boolean {
         if (tag.trim().isEmpty()) return true
-        val seriesType by lazy { manga.seriesType(preferences.context, sourceManager) }
+        context ?: return false
+        val seriesType by lazy { manga.seriesType(context, sourceManager) }
         return if (tag.startsWith("-")) {
             val realTag = tag.substringAfter("-")
             genres?.find {

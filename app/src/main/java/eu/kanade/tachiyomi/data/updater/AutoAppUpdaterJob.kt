@@ -11,6 +11,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.isConnectedToWifi
+import eu.kanade.tachiyomi.util.system.localeContext
 import kotlinx.coroutines.coroutineScope
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -32,7 +33,7 @@ class AutoAppUpdaterJob(private val context: Context, workerParams: WorkerParame
             }
             val result = AppUpdateChecker().checkForUpdate(context, true, doExtrasAfterNewUpdate = false)
             if (result is AppUpdateResult.NewUpdate && !AppUpdateService.isRunning()) {
-                AppUpdateNotifier(context).cancel()
+                AppUpdateNotifier(context.localeContext).cancel()
                 AppUpdateNotifier.releasePageUrl = result.release.releaseLink
                 AppUpdateService.start(context, result.release.downloadLink, false)
             }

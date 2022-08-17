@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.extension.ExtensionManager.ExtensionInfo
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
+import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CoroutineScope
@@ -140,7 +141,7 @@ class ExtensionInstallService(
     override fun onCreate() {
         super.onCreate()
         notificationManager.cancel(Notifications.ID_UPDATES_TO_EXTS)
-        notifier = ExtensionInstallNotifier(this)
+        notifier = ExtensionInstallNotifier(this.localeContext)
         wakeLock = acquireWakeLock(timeout = TimeUnit.MINUTES.toMillis(30))
         startForeground(Notifications.ID_EXTENSION_PROGRESS, notifier.progressNotificationBuilder.build())
     }

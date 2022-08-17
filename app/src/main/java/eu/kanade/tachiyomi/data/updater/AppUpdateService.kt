@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
+import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -52,7 +53,7 @@ class AppUpdateService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        notifier = AppUpdateNotifier(this)
+        notifier = AppUpdateNotifier(this.localeContext)
 
         startForeground(Notifications.ID_UPDATER, notifier.onDownloadStarted(getString(R.string.app_name)).build())
 

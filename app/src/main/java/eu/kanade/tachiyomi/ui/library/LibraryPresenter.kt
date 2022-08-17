@@ -66,6 +66,8 @@ class LibraryPresenter(
 ) : BaseCoroutinePresenter<LibraryController>() {
 
     private val context = preferences.context
+    private val viewContext
+        get() = controller?.view?.context
 
     private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
 
@@ -198,6 +200,7 @@ class LibraryPresenter(
             LibraryItem(
                 LibraryManga.createBlank(id),
                 LibraryHeaderItem({ getCategory(id) }, id),
+                viewContext,
             ),
         )
     }
@@ -581,7 +584,7 @@ class LibraryPresenter(
                     else headerItems[it.category]
                     ) ?: return@mapNotNull null
                 categorySet.add(it.category)
-                LibraryItem(it, headerItem)
+                LibraryItem(it, headerItem, viewContext)
             }.toMutableList()
 
             val categoriesHidden = if (forceShowAllCategories) {
@@ -599,7 +602,7 @@ class LibraryPresenter(
                     ) {
                         val headerItem = headerItems[catId]
                         if (headerItem != null) items.add(
-                            LibraryItem(LibraryManga.createBlank(catId), headerItem),
+                            LibraryItem(LibraryManga.createBlank(catId), headerItem, viewContext),
                         )
                     } else if (catId in categoriesHidden && showAll && categories.size > 1) {
                         val mangaToRemove = items.filter { it.manga.category == catId }
@@ -611,7 +614,14 @@ class LibraryPresenter(
                         items.removeAll(mangaToRemove)
                         val headerItem = headerItems[catId]
                         if (headerItem != null) items.add(
-                            LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size), headerItem),
+                            LibraryItem(
+                                LibraryManga.createHide(
+                                    catId,
+                                    mergedTitle,
+                                    mangaToRemove.size,
+                                ),
+                                headerItem, viewContext,
+                            ),
                         )
                     }
                 }
@@ -672,7 +682,7 @@ class LibraryPresenter(
                         } ?: listOf(unknown)
                     }
                     tags.map {
-                        LibraryItem(manga, makeOrGetHeader(it))
+                        LibraryItem(manga, makeOrGetHeader(it), viewContext)
                     }
                 }
                 BY_TRACK_STATUS -> {
@@ -688,9 +698,9 @@ class LibraryPresenter(
                             service.getStatus(track.status)
                         }
                     } else {
-                        context.getString(R.string.not_tracked)
+                        controller?.view?.context?.getString(R.string.not_tracked) ?: ""
                     }
-                    listOf(LibraryItem(manga, makeOrGetHeader(status)))
+                    listOf(LibraryItem(manga, makeOrGetHeader(status), viewContext))
                 }
                 BY_SOURCE -> {
                     val source = sourceManager.getOrStub(manga.source)
@@ -698,12 +708,13 @@ class LibraryPresenter(
                         LibraryItem(
                             manga,
                             makeOrGetHeader("${source.name}$sourceSplitter${source.id}"),
+                            viewContext,
                         ),
                     )
                 }
                 BY_AUTHOR -> {
                     if (manga.artist.isNullOrBlank() && manga.author.isNullOrBlank()) {
-                        listOf(LibraryItem(manga, makeOrGetHeader(unknown)))
+                        listOf(LibraryItem(manga, makeOrGetHeader(unknown), viewContext))
                     } else {
                         listOfNotNull(
                             manga.author.takeUnless { it.isNullOrBlank() },
@@ -714,11 +725,11 @@ class LibraryPresenter(
                                 author.ifBlank { null }
                             }
                         }.flatten().distinct().map {
-                            LibraryItem(manga, makeOrGetHeader(it, true))
+                            LibraryItem(manga, makeOrGetHeader(it, true), viewContext)
                         }
                     }
                 }
-                else -> listOf(LibraryItem(manga, makeOrGetHeader(mapStatus(manga.status))))
+                else -> listOf(LibraryItem(manga, makeOrGetHeader(mapStatus(manga.status)), viewContext))
             }
         }.flatten().toMutableList()
 
@@ -761,7 +772,11 @@ class LibraryPresenter(
                 sectionedLibraryItems[catId] = mangaToRemove
                 items.removeAll { it.header.catId == catId }
                 if (headerItem != null) items.add(
-                    LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size), headerItem),
+                    LibraryItem(
+                        LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size),
+                        headerItem,
+                        viewContext,
+                    ),
                 )
             }
         }

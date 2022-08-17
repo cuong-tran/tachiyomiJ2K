@@ -18,6 +18,8 @@ fun Long.timeSpanFromNow(context: Context): String {
     }
 }
 
+fun Context.timeSpanFromNow(res: Int, time: Long) = getString(res, time.timeSpanFromNow(this))
+
 /**
  * Convert local time millisecond value to Calendar instance in UTC
  *

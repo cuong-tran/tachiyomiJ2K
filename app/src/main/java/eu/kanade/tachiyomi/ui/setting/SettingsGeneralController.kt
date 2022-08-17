@@ -1,14 +1,22 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.content.Intent
+import android.content.res.XmlResourceParser
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.BuildCompat
+import androidx.core.os.LocaleListCompat
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
+import eu.kanade.tachiyomi.util.lang.addBetaTag
+import eu.kanade.tachiyomi.util.lang.compareToCaseInsensitiveNaturalOrder
+import eu.kanade.tachiyomi.util.system.systemLangContext
+import java.util.Locale
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsGeneralController : SettingsController() {
@@ -18,6 +26,8 @@ class SettingsGeneralController : SettingsController() {
     var lastThemeXLight: Int? = null
     var lastThemeXDark: Int? = null
     var themePreference: ThemePreference? = null
+
+    @BuildCompat.PrereleaseSdkCheck
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.general
 
@@ -130,6 +140,83 @@ class SettingsGeneralController : SettingsController() {
                     }
                 }
                 defaultValue = ""
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                listPreference(activity) {
+                    key = "language"
+                    isPersistent = false
+                    title = context.getString(R.string.language).let {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                            it.addBetaTag(context)
+                        } else {
+                            it
+                        }
+                    }
+                    dialogTitleRes = R.string.language
+                    val locales = mutableListOf<String>()
+                    val availLocales = Locale.getAvailableLocales()
+                    resources?.getXml(R.xml.locales_config).use { parser ->
+                        parser ?: return@use
+                        while (parser.next() != XmlResourceParser.END_DOCUMENT) {
+                            if (parser.eventType == XmlResourceParser.START_TAG && parser.name == "locale") {
+                                val locale = parser.getAttributeValue(
+                                    "http://schemas.android.com/apk/res/android",
+                                    "name",
+                                ) ?: continue
+                                if (availLocales.contains(Locale.forLanguageTag(locale))) {
+                                    locales.add(locale)
+                                }
+                            }
+                        }
+                    }
+                    val localesMap = locales.associateBy { Locale.forLanguageTag(it) }
+                        .toSortedMap { locale1, locale2 ->
+                            val l1 = locale1.getDisplayName(locale1)
+                                .replaceFirstChar { it.uppercase(locale1) }
+                            val l2 = locale2.getDisplayName(locale2)
+                                .replaceFirstChar { it.uppercase(locale2) }
+                            l1.compareToCaseInsensitiveNaturalOrder(l2)
+                        }
+                    val localArray = localesMap.keys.filterNotNull().toTypedArray()
+                    val localeList = LocaleListCompat.create(*localArray)
+                    val sysDef = context.systemLangContext.getString(R.string.system_default)
+                    entries = listOf(sysDef) + localesMap.keys.map { locale ->
+                        locale.getDisplayName(locale).replaceFirstChar { it.uppercase(locale) }
+                    }
+                    entryValues = listOf("") + localesMap.values
+                    defaultValue = ""
+                    val locale = AppCompatDelegate.getApplicationLocales()
+                        .getFirstMatch(locales.toTypedArray())
+                    if (locale != null) {
+                        tempValue = localArray.indexOf(
+                            if (locales.contains(locale.toLanguageTag())) {
+                                locale
+                            } else {
+                                localeList.getFirstMatch(arrayOf(locale.toLanguageTag()))
+                            },
+                        ) + 1
+                        tempEntry =
+                            locale.getDisplayName(locale).replaceFirstChar { it.uppercase(locale) }
+                    }
+
+                    onChange {
+                        val value = it as String
+                        val appLocale: LocaleListCompat = if (value.isBlank()) {
+                            preferences.appLanguage().delete()
+                            LocaleListCompat.getEmptyLocaleList()
+                        } else {
+                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                                preferences.appLanguage().set(value)
+                            }
+                            LocaleListCompat.forLanguageTags(value)
+                        }
+                        AppCompatDelegate.setApplicationLocales(appLocale)
+                        true
+                    }
+                }
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                    infoPreference(R.string.language_requires_app_restart)
+                }
             }
         }
     }

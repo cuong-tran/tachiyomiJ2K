@@ -747,7 +747,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     fun saveExtras() {
-        mangaShortcutManager.updateShortcuts()
+        mangaShortcutManager.updateShortcuts(this)
         MangaCoverMetadata.savePrefs()
     }
 

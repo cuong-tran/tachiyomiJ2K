@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
+import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.withIOContext
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
@@ -63,7 +64,7 @@ class AppUpdateChecker {
                 ) {
                     AutoAppUpdaterJob.setupTask(context)
                 }
-                AppUpdateNotifier(context).promptUpdate(result.release)
+                AppUpdateNotifier(context.localeContext).promptUpdate(result.release)
             }
 
             result

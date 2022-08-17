@@ -237,6 +237,8 @@ class PreferencesHelper(val context: Context) {
         else -> SimpleDateFormat(format, Locale.getDefault())
     }
 
+    fun appLanguage() = flowPrefs.getString("app_language", "")
+
     fun downloadsDirectory() = flowPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
 
     fun downloadOnlyOverWifi() = prefs.getBoolean(Keys.downloadOnlyOverWifi, true)

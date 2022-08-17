@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.app.ActivityManager
+import android.app.LocaleManager
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
@@ -44,6 +45,7 @@ import eu.kanade.tachiyomi.widget.CustomLayoutPickerActivity
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
+import java.util.Locale
 import kotlin.math.max
 
 private const val TABLET_UI_MIN_SCREEN_WIDTH_DP = 720
@@ -483,3 +485,41 @@ fun Context.getApplicationIcon(pkgName: String): Drawable? {
         null
     }
 }
+
+/** Context used for notifications as Appcompat app lang does not support notifications */
+val Context.localeContext: Context
+    get() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return this
+        val pref = Injekt.get<PreferencesHelper>()
+        val prefsLang = if (pref.appLanguage().isSet()) {
+            Locale.forLanguageTag(pref.appLanguage().get())
+        } else null
+        val configuration = Configuration(resources.configuration)
+        configuration.setLocale(
+            prefsLang
+                ?: AppCompatDelegate.getApplicationLocales()[0]
+                ?: Locale.getDefault(),
+        )
+        return createConfigurationContext(configuration)
+    }
+
+fun setLocaleByAppCompat() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        AppCompatDelegate.getApplicationLocales().get(0)?.let { Locale.setDefault(it) }
+    }
+}
+
+val Context.systemLangContext: Context
+    get() {
+        val configuration = Configuration(resources.configuration)
+
+        val systemLocale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getSystemService<LocaleManager>()?.systemLocales?.get(0)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Resources.getSystem().configuration.locales.get(0)
+        } else {
+            return this
+        } ?: Locale.getDefault()
+        configuration.setLocale(systemLocale)
+        return createConfigurationContext(configuration)
+    }

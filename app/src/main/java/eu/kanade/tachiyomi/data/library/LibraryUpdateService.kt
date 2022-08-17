@@ -42,6 +42,7 @@ import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
+import eu.kanade.tachiyomi.util.system.localeContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -170,7 +171,7 @@ class LibraryUpdateService(
      */
     override fun onCreate() {
         super.onCreate()
-        notifier = LibraryUpdateNotifier(this)
+        notifier = LibraryUpdateNotifier(this.localeContext)
         wakeLock = acquireWakeLock(timeout = TimeUnit.MINUTES.toMillis(30))
         startForeground(Notifications.ID_LIBRARY_PROGRESS, notifier.progressNotificationBuilder.build())
     }
@@ -380,7 +381,7 @@ class LibraryUpdateService(
             val errorFile = writeErrorFile(failedUpdates).getUriCompat(this)
             notifier.showUpdateErrorNotification(failedUpdates.map { it.key.title }, errorFile)
         }
-        mangaShortcutManager.updateShortcuts()
+        mangaShortcutManager.updateShortcuts(this)
         failedUpdates.clear()
         notifier.cancelProgressNotification()
         if (runExtensionUpdatesAfter && !DownloadService.isRunning(this)) {

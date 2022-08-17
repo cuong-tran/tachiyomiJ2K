@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.util.system.connectivityManager
+import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.notification
 import kotlinx.coroutines.coroutineScope
 import rikka.shizuku.Shizuku
@@ -110,6 +111,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
             notify(
                 Notifications.ID_UPDATES_TO_EXTS,
                 context.notification(Notifications.CHANNEL_UPDATES_TO_EXTS) {
+                    val context = context.localeContext
                     setContentTitle(
                         context.resources.getQuantityString(
                             R.plurals.extension_updates_available,

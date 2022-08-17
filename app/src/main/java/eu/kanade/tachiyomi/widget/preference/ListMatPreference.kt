@@ -20,6 +20,8 @@ open class ListMatPreference @JvmOverloads constructor(
         get() = emptyArray()
         set(value) { entries = value.map { context.getString(it) } }
     private var defValue: String = ""
+    var tempEntry: String? = null
+    var tempValue: Int? = null
     var entries: List<String> = emptyList()
 
     override fun onSetInitialValue(defaultValue: Any?) {
@@ -27,10 +29,19 @@ open class ListMatPreference @JvmOverloads constructor(
         defValue = defaultValue as? String ?: defValue
     }
 
+    private val indexOfPref: Int
+        get() = tempValue ?: entryValues.indexOf(
+            if (isPersistent) {
+                sharedPreferences?.getString(key, defValue)
+            } else {
+                tempEntry
+            } ?: defValue,
+        )
+
     override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {
-        val index = entryValues.indexOf(sharedPreferences?.getString(key, defValue))
+        val index = indexOfPref
         if (entries.isEmpty() || index == -1) ""
-        else entries[index]
+        else tempEntry ?: entries.getOrNull(index) ?: ""
     }
 
     override fun dialog(): MaterialAlertDialogBuilder {
@@ -41,10 +52,16 @@ open class ListMatPreference @JvmOverloads constructor(
 
     @SuppressLint("CheckResult")
     open fun MaterialAlertDialogBuilder.setListItems() {
-        val default = entryValues.indexOf(sharedPreferences?.getString(key, defValue) ?: defValue)
+        val default = indexOfPref
         setSingleChoiceItems(entries.toTypedArray(), default) { dialog, pos ->
             val value = entryValues[pos]
-            sharedPreferences?.edit { putString(key, value) }
+            if (isPersistent) {
+                sharedPreferences?.edit { putString(key, value) }
+            } else {
+                tempValue = pos
+                tempEntry = entries.getOrNull(pos)
+                notifyChanged()
+            }
             this@ListMatPreference.summary = this@ListMatPreference.summary
             callChangeListener(value)
             dialog.dismiss()

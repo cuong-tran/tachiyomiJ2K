@@ -39,6 +39,7 @@ import eu.kanade.tachiyomi.util.system.disableItems
 import eu.kanade.tachiyomi.util.system.isPackageInstalled
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import eu.kanade.tachiyomi.util.system.toast
@@ -90,7 +91,7 @@ class SettingsAdvancedController : SettingsController() {
             summaryRes = R.string.saves_error_logs
 
             onClick {
-                CrashLogUtil(context).dumpLogs()
+                CrashLogUtil(context.localeContext).dumpLogs()
             }
         }
 

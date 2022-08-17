@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.category
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
@@ -20,10 +19,7 @@ import uy.kohesive.injekt.api.get
 class CategoryPresenter(
     private val controller: CategoryController,
     private val db: DatabaseHelper = Injekt.get(),
-    preferences: PreferencesHelper = Injekt.get(),
 ) {
-
-    private val context = preferences.context
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
@@ -51,7 +47,8 @@ class CategoryPresenter(
     }
 
     private fun newCategory(): Category {
-        val default = Category.create(context.getString(R.string.create_new_category))
+        val default =
+            Category.create(controller.view?.context?.getString(R.string.create_new_category) ?: "")
         default.order = CREATE_CATEGORY_ORDER
         default.id = Int.MIN_VALUE
         return default
