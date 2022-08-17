@@ -1452,10 +1452,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         } else {
             getString(R.string.page_, page.number)
         }
-        val text = "${manga.title}: ${getString(
-            R.string.chapter_,
-            decimalFormat.format(chapter.chapter_number),
-        )}, $pageNumber"
+        val text = "${manga.title}: ${if (chapter.isRecognizedNumber) {
+            getString(R.string.chapter_, decimalFormat.format(chapter.chapter_number))
+        } else {
+            chapter.name
+        }
+        }, $pageNumber"
 
         val stream = file.getUriCompat(this)
         val intent = Intent(Intent.ACTION_SEND).apply {
