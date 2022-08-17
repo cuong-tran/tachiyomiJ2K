@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.track.mangaupdates.dto.copyTo
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.toTrackSearch
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
+import java.util.Locale
 
 class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
 
@@ -67,7 +68,8 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
-    private val _scoreList = listOf("0.0") + (10..100).map { String.format("%.1f", it / 10f) }
+    private val _scoreList =
+        (listOf(0) + (10..100)).map { String.format(Locale.ROOT, "%.1f", it / 10f) }
 
     override fun getScoreList(): List<String> = _scoreList
 
