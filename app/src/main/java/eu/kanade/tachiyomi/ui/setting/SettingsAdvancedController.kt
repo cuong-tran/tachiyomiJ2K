@@ -255,6 +255,15 @@ class SettingsAdvancedController : SettingsController() {
                     true
                 }
             }
+            editTextPreference(activity) {
+                bindTo(preferences.defaultUserAgent())
+                titleRes = R.string.user_agent_string
+
+                onChange {
+                    activity?.toast(R.string.requires_app_restart)
+                    true
+                }
+            }
         }
 
         preferenceCategory {

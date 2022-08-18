@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.startAuthentication
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.widget.preference.AdaptiveTitlePreferenceCategory
+import eu.kanade.tachiyomi.widget.preference.EditTextResetPreference
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
@@ -53,8 +54,8 @@ inline fun PreferenceGroup.checkBoxPreference(block: (@DSL CheckBoxPreference).(
     return initThenAdd(CheckBoxPreference(context), block)
 }
 
-inline fun PreferenceGroup.editTextPreference(block: (@DSL EditTextPreference).() -> Unit): EditTextPreference {
-    return initThenAdd(EditTextPreference(context), block).also(::initDialog)
+inline fun PreferenceGroup.editTextPreference(activity: Activity?, block: (@DSL EditTextResetPreference).() -> Unit): EditTextResetPreference {
+    return initThenAdd(EditTextResetPreference(activity, context), block) // .also(::initDialog)
 }
 
 inline fun PreferenceGroup.dropDownPreference(block: (@DSL DropDownPreference).() -> Unit):
@@ -164,6 +165,11 @@ fun <T> Preference.bindTo(preference: FlowPreference<T>) {
 }
 
 fun <T> ListPreference.bindTo(preference: FlowPreference<T>) {
+    key = preference.key
+    defaultValue = preference.defaultValue.toString()
+}
+
+fun <T> EditTextPreference.bindTo(preference: FlowPreference<T>) {
     key = preference.key
     defaultValue = preference.defaultValue.toString()
 }

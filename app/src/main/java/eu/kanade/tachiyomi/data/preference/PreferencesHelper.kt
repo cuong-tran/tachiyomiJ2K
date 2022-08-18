@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
 import eu.kanade.tachiyomi.extension.model.InstalledExtensionsOrder
+import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
@@ -434,6 +435,8 @@ class PreferencesHelper(val context: Context) {
     fun useLargeToolbar() = flowPrefs.getBoolean("use_large_toolbar", true)
 
     fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
+
+    fun defaultUserAgent() = flowPrefs.getString("default_user_agent", NetworkHelper.DEFAULT_USER_AGENT)
 
     fun showSeriesInShortcuts() = prefs.getBoolean(Keys.showSeriesInShortcuts, true)
     fun showSourcesInShortcuts() = prefs.getBoolean(Keys.showSourcesInShortcuts, true)

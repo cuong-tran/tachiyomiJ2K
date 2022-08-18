@@ -807,6 +807,7 @@
     <string name="crash_log_saved">Crash logs saved</string>
     <string name="network">Network</string>
     <string name="doh">DNS over HTTPS</string>
+    <string name="user_agent_string">Default user agent string</string>
     <string name="disabled">Disabled</string>
     <string name="cloudflare" translatable="false">Cloudflare</string>
     <string name="google" translatable="false">Google</string>
