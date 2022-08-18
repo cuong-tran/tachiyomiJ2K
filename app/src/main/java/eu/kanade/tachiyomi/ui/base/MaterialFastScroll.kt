@@ -112,7 +112,7 @@ open class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs:
         super.setBubbleAndHandlePosition(y)
         if (bubbleEnabled) {
             bubble.y = handle.y - bubble.height / 2f + handle.height / 2f
-            bubble.translationX = (-45f).dpToPxEnd
+            bubble.translationX = (-45f).dpToPxEnd(resources)
         }
     }
 

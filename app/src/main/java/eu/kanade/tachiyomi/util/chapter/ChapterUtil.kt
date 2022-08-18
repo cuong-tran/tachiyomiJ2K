@@ -57,7 +57,7 @@ class ChapterUtil {
                     ColorStateList.valueOf(bookmarkedColor(context)),
                 )
                 textView.compoundDrawablePadding = 3.dpToPx
-                textView.translationX = (-2f).dpToPxEnd
+                textView.translationX = (-2f).dpToPxEnd(textView.resources)
             } else {
                 textView.setCompoundDrawablesRelative(null, null, null, null)
                 textView.translationX = 0f
