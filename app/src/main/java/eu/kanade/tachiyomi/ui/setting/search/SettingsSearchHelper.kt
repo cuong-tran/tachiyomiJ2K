@@ -83,9 +83,10 @@ object SettingsSearchHelper {
         pref: Preference,
         breadcrumbs: String = "",
     ) {
+        val resources = ctrl.resources
         when {
             pref is PreferenceGroup -> {
-                val breadcrumbsStr = addLocalizedBreadcrumb(breadcrumbs, "${pref.title}")
+                val breadcrumbsStr = addLocalizedBreadcrumb(breadcrumbs, "${pref.title}", resources)
 
                 for (x in 0 until pref.preferenceCount) {
                     val subPref = pref.getPreference(x)
@@ -93,7 +94,7 @@ object SettingsSearchHelper {
                 }
             }
             pref is PreferenceCategory -> {
-                val breadcrumbsStr = addLocalizedBreadcrumb(breadcrumbs, "${pref.title}")
+                val breadcrumbsStr = addLocalizedBreadcrumb(breadcrumbs, "${pref.title}", resources)
 
                 for (x in 0 until pref.preferenceCount) {
                     val subPref = pref.getPreference(x)
@@ -119,8 +120,8 @@ object SettingsSearchHelper {
         }
     }
 
-    private fun addLocalizedBreadcrumb(path: String, node: String): String {
-        return if (Resources.getSystem().isLTR) {
+    private fun addLocalizedBreadcrumb(path: String, node: String, resources: Resources?): String {
+        return if ((resources ?: Resources.getSystem()).isLTR) {
             // This locale reads left to right.
             "$path > $node"
         } else {
