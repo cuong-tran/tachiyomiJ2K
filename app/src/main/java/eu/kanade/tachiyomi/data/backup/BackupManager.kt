@@ -1,10 +1,9 @@
-package eu.kanade.tachiyomi.data.backup.full
+package eu.kanade.tachiyomi.data.backup
 
 import android.content.Context
 import android.net.Uri
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.backup.AbstractBackupManager
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CATEGORY
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CATEGORY_MASK
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CHAPTER
@@ -15,15 +14,14 @@ import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_HISTORY
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_HISTORY_MASK
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_TRACK
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_TRACK_MASK
-import eu.kanade.tachiyomi.data.backup.full.models.Backup
-import eu.kanade.tachiyomi.data.backup.full.models.BackupCategory
-import eu.kanade.tachiyomi.data.backup.full.models.BackupChapter
-import eu.kanade.tachiyomi.data.backup.full.models.BackupFull
-import eu.kanade.tachiyomi.data.backup.full.models.BackupHistory
-import eu.kanade.tachiyomi.data.backup.full.models.BackupManga
-import eu.kanade.tachiyomi.data.backup.full.models.BackupSerializer
-import eu.kanade.tachiyomi.data.backup.full.models.BackupSource
-import eu.kanade.tachiyomi.data.backup.full.models.BackupTracking
+import eu.kanade.tachiyomi.data.backup.models.Backup
+import eu.kanade.tachiyomi.data.backup.models.BackupCategory
+import eu.kanade.tachiyomi.data.backup.models.BackupChapter
+import eu.kanade.tachiyomi.data.backup.models.BackupHistory
+import eu.kanade.tachiyomi.data.backup.models.BackupManga
+import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
+import eu.kanade.tachiyomi.data.backup.models.BackupSource
+import eu.kanade.tachiyomi.data.backup.models.BackupTracking
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -38,7 +36,7 @@ import timber.log.Timber
 import java.io.FileOutputStream
 import kotlin.math.max
 
-class FullBackupManager(context: Context) : AbstractBackupManager(context) {
+class BackupManager(context: Context) : AbstractBackupManager(context) {
 
     val parser = ProtoBuf
 
@@ -56,7 +54,7 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
             val databaseManga = getFavoriteManga()
 
             backup = Backup(
-                backupManga(databaseManga, flags),
+                backupMangas(databaseManga, flags),
                 backupCategories(),
                 emptyList(),
                 backupExtensionInfo(databaseManga),
@@ -81,7 +79,7 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
                         .forEach { it.delete() }
 
                     // Create new file to place backup
-                    dir.createFile(BackupFull.getDefaultFilename())
+                    dir.createFile(Backup.getBackupFilename())
                 } else {
                     UniFile.fromUri(context, uri)
                 }
@@ -104,7 +102,7 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
             val fileUri = file.uri
 
             // Make sure it's a valid backup file
-            FullBackupRestoreValidator().validate(context, fileUri)
+            BackupFileValidator().validate(context, fileUri)
 
             return fileUri.toString()
         } catch (e: Exception) {
@@ -114,9 +112,9 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
         }
     }
 
-    private fun backupManga(mangas: List<Manga>, flags: Int): List<BackupManga> {
+    private fun backupMangas(mangas: List<Manga>, flags: Int): List<BackupManga> {
         return mangas.map {
-            backupMangaObject(it, flags)
+            backupManga(it, flags)
         }
     }
 
@@ -148,7 +146,7 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
      * @param options options for the backup
      * @return [BackupManga] containing manga in a serializable form
      */
-    private fun backupMangaObject(manga: Manga, options: Int): BackupManga {
+    private fun backupManga(manga: Manga, options: Int): BackupManga {
         // Entry for this manga
         val mangaObject = BackupManga.copyFrom(manga, if (options and BACKUP_CUSTOM_INFO_MASK == BACKUP_CUSTOM_INFO) customMangaManager else null)
 
@@ -195,7 +193,7 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
         return mangaObject
     }
 
-    fun restoreMangaNoFetch(manga: Manga, dbManga: Manga) {
+    fun restoreExistingManga(manga: Manga, dbManga: Manga) {
         manga.id = dbManga.id
         manga.copyFrom(dbManga)
         insertManga(manga)
@@ -207,7 +205,7 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
      * @param manga manga that needs updating
      * @return Updated manga info.
      */
-    fun restoreManga(manga: Manga): Manga {
+    fun restoreNewManga(manga: Manga): Manga {
         return manga.also {
             it.initialized = it.description != null
             it.id = insertManga(it)
@@ -253,7 +251,7 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
      * @param manga the manga whose categories have to be restored.
      * @param categories the categories to restore.
      */
-    internal fun restoreCategoriesForManga(manga: Manga, categories: List<Int>, backupCategories: List<BackupCategory>) {
+    internal fun restoreCategories(manga: Manga, categories: List<Int>, backupCategories: List<BackupCategory>) {
         val dbCategories = db.getCategories().executeAsBlocking()
         val mangaCategoriesToUpdate = ArrayList<MangaCategory>(categories.size)
         categories.forEach { backupCategoryOrder ->
@@ -349,7 +347,7 @@ class FullBackupManager(context: Context) : AbstractBackupManager(context) {
         }
     }
 
-    internal fun restoreChaptersForManga(manga: Manga, chapters: List<Chapter>) {
+    internal fun restoreChapters(manga: Manga, chapters: List<Chapter>) {
         val dbChapters = db.getChapters(manga).executeAsBlocking()
 
         chapters.forEach { chapter ->
