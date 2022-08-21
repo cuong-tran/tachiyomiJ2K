@@ -62,6 +62,7 @@
     <string name="order_by">Order by</string>
     <string name="no_chapters_error">No chapters found</string>
     <string name="no_pages_found">No pages found</string>
+    <string name="loader_rar5_error">RARv5 format is not supported</string>
     <string name="remove_all_downloads">Remove all downloads?</string>
     <string name="no_chapters_to_delete">No chapters to delete</string>
     <string name="by_source_order">By source\'s order</string>
