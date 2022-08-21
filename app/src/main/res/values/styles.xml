@@ -5,19 +5,9 @@
     <!--Toolbars-->
     <!--========-->
 
-    <style name="Theme.ActionBar.Dark.DayNight" parent="@style/ThemeOverlay.Material3.Dark.ActionBar">
-        <item name="popupTheme">@style/ThemeOverlay.Material3.Light</item>
-        <item name="elevationOverlayEnabled">true</item>
-        <item name="elevationOverlayColor">?colorSecondary</item>
-    </style>
-
     <style name="Theme.ActionBar.DayNight" parent="ThemeOverlay.Material3.ActionBar">
         <item name="elevationOverlayEnabled">true</item>
         <item name="elevationOverlayColor">?colorSecondary</item>
-    </style>
-
-    <style name="ThemeOverlay.Tachiyomi.MaterialAlertDialog.Colored" parent="ThemeOverlay.Material3.MaterialAlertDialog">
-        <item name="android:background">?background</item>
     </style>
 
     <!--===============-->

@@ -65,11 +65,6 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         AppCompatDelegate.MODE_NIGHT_NO,
         R.string.yotsuba,
     ),
-    CLASSIC_BLUE(
-        R.style.Theme_Tachiyomi_AllBlue,
-        AppCompatDelegate.MODE_NIGHT_YES,
-        R.string.classic_blue,
-    ),
     ;
 
     val isDarkTheme = nightMode == AppCompatDelegate.MODE_NIGHT_YES
