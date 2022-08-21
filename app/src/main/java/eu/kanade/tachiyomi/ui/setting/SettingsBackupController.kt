@@ -20,10 +20,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupConst
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
-import eu.kanade.tachiyomi.data.backup.ValidatorParseException
 import eu.kanade.tachiyomi.data.backup.full.FullBackupRestoreValidator
 import eu.kanade.tachiyomi.data.backup.full.models.BackupFull
-import eu.kanade.tachiyomi.data.backup.legacy.LegacyBackupRestoreValidator
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.MiuiUtil
@@ -267,19 +265,9 @@ class SettingsBackupController : SettingsController() {
             val uri: Uri = args.getParcelable(KEY_URI)!!
 
             return try {
-                var type = BackupConst.BACKUP_TYPE_FULL
-                val results = try {
-                    FullBackupRestoreValidator().validate(activity, uri)
-                } catch (_: ValidatorParseException) {
-                    type = BackupConst.BACKUP_TYPE_LEGACY
-                    LegacyBackupRestoreValidator().validate(activity, uri)
-                }
+                val results = FullBackupRestoreValidator().validate(activity, uri)
 
-                var message = if (type == BackupConst.BACKUP_TYPE_FULL) {
-                    activity.getString(R.string.restore_content_full)
-                } else {
-                    activity.getString(R.string.restore_content)
-                }
+                var message = activity.getString(R.string.restore_content_full)
                 if (results.missingSources.isNotEmpty()) {
                     message += "\n\n${activity.getString(R.string.restore_missing_sources)}\n${results.missingSources.joinToString("\n") { "- $it" }}"
                 }
@@ -294,7 +282,7 @@ class SettingsBackupController : SettingsController() {
                         val context = applicationContext
                         if (context != null) {
                             activity.toast(R.string.restoring_backup)
-                            BackupRestoreService.start(context, uri, type)
+                            BackupRestoreService.start(context, uri)
                         }
                     }.create()
             } catch (e: Exception) {

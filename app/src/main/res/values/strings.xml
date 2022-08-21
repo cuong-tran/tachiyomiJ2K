@@ -763,7 +763,6 @@
     <string name="max_auto_backups">Max automatic backups</string>
     <string name="invalid_backup_file">Invalid backup file</string>
     <string name="invalid_backup_file_type">Invalid backup file type: %1$s\nIt should end with ".proto.gz" or ".json".</string>
-    <string name="file_is_missing_data">File is missing data.</string>
     <string name="backup_has_no_manga">Backup does not contain any manga.</string>
     <string name="backup_failed">Backup failed</string>
     <string name="empty_backup_error">No library entries to back up</string>
@@ -772,7 +771,6 @@
     <string name="restore_error">Failed to restore backup</string>
     <string name="restore_missing_sources">Missing sources:</string>
     <string name="restore_missing_trackers">Trackers not logged into:</string>
-    <string name="restore_content">Restore uses sources to fetch data, carrier costs may apply.\n\nMake sure you have installed all necessary extensions and are logged in to sources and tracking services before restoring.</string>
     <string name="restore_content_full">Data from the backup file will be restored.\n\nYou will need to install any missing extensions and log in to tracking services afterwards to use them.</string>
     <string name="restoring_backup_canceled">Canceled restore</string>
     <string name="backup_restore_invalid_uri">Error: empty URI</string>

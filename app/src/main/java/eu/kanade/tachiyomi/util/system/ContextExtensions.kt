@@ -92,7 +92,6 @@ fun Context.getFilePicker(currentDir: String): Intent {
     return Intent(this, CustomLayoutPickerActivity::class.java)
         .putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false)
         .putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, true)
-        .putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_DIR)
         .putExtra(FilePickerActivity.EXTRA_START_PATH, currentDir)
 }
 
