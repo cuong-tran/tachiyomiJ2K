@@ -5,11 +5,8 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
-import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.toSChapter
-import eu.kanade.tachiyomi.source.model.toSManga
 import uy.kohesive.injekt.injectLazy
 
 abstract class DelegatedHttpSource {
@@ -29,7 +26,7 @@ abstract class DelegatedHttpSource {
     protected open suspend fun getMangaInfo(url: String): Manga? {
         val id = delegate?.id ?: return null
         val manga = Manga.create(url, "", id)
-        val networkManga = delegate?.getMangaDetails(manga.toMangaInfo())?.toSManga() ?: return null
+        val networkManga = delegate?.getMangaDetails(manga.copy()) ?: return null
         val newManga = MangaImpl().apply {
             this.url = url
             title = try { networkManga.title } catch (e: Exception) { "" }
@@ -42,6 +39,6 @@ abstract class DelegatedHttpSource {
     suspend fun getChapters(url: String): List<SChapter>? {
         val id = delegate?.id ?: return null
         val manga = Manga.create(url, "", id)
-        return delegate?.getChapterList(manga.toMangaInfo())?.map { it.toSChapter() }
+        return delegate?.getChapterList(manga)
     }
 }

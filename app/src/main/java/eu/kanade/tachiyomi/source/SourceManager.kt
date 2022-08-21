@@ -13,8 +13,6 @@ import eu.kanade.tachiyomi.source.online.all.MangaDex
 import eu.kanade.tachiyomi.source.online.english.KireiCake
 import eu.kanade.tachiyomi.source.online.english.MangaPlus
 import rx.Observable
-import tachiyomi.source.model.ChapterInfo
-import tachiyomi.source.model.MangaInfo
 import uy.kohesive.injekt.injectLazy
 
 open class SourceManager(private val context: Context) {
@@ -95,7 +93,7 @@ open class SourceManager(private val context: Context) {
         override val name: String
             get() = extensionManager.getStubSource(id)?.name ?: id.toString()
 
-        override suspend fun getMangaDetails(manga: MangaInfo): MangaInfo {
+        override suspend fun getMangaDetails(manga: SManga): SManga {
             throw getSourceNotInstalledException()
         }
 
@@ -103,7 +101,7 @@ open class SourceManager(private val context: Context) {
             return Observable.error(getSourceNotInstalledException())
         }
 
-        override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
+        override suspend fun getChapterList(manga: SManga): List<SChapter> {
             throw getSourceNotInstalledException()
         }
 
@@ -111,7 +109,7 @@ open class SourceManager(private val context: Context) {
             return Observable.error(getSourceNotInstalledException())
         }
 
-        override suspend fun getPageList(chapter: ChapterInfo): List<tachiyomi.source.model.Page> {
+        override suspend fun getPageList(chapter: SChapter): List<Page> {
             throw getSourceNotInstalledException()
         }
 

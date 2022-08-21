@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.CatalogueSource
@@ -14,7 +13,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.source.filter.CheckboxItem
 import eu.kanade.tachiyomi.ui.source.filter.CheckboxSectionItem
@@ -244,8 +242,8 @@ open class BrowseSourcePresenter(
      */
     private suspend fun getMangaDetails(manga: Manga): Manga {
         try {
-            val networkManga = source.getMangaDetails(manga.toMangaInfo())
-            manga.copyFrom(networkManga.toSManga())
+            val networkManga = source.getMangaDetails(manga.copy())
+            manga.copyFrom(networkManga)
             manga.initialized = true
             db.insertManga(manga).executeAsBlocking()
         } catch (e: Exception) {

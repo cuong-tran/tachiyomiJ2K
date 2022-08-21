@@ -122,9 +122,6 @@ dependencies {
     }
     implementation("com.github.tachiyomiorg:image-decoder:7481a4a")
 
-    // Source models and interfaces from Tachiyomi 1.x
-    implementation("tachiyomi.sourceapi:source-api:1.1")
-
     // Android X libraries
     implementation("androidx.appcompat:appcompat:1.6.0-beta01")
     implementation("androidx.cardview:cardview:1.0.0")

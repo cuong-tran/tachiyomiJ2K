@@ -16,7 +16,6 @@ import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.MigrationListControllerBinding
 import eu.kanade.tachiyomi.smartsearch.SmartSearchEngine
@@ -24,8 +23,6 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.toSChapter
-import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -182,8 +179,7 @@ class MigrationListController(bundle: Bundle? = null) :
                                                         searchResult,
                                                         source.id,
                                                     )
-                                                val chapters =
-                                                    source.getChapterList(localManga.toMangaInfo()).map { it.toSChapter() }
+                                                val chapters = source.getChapterList(localManga)
                                                 try {
                                                     syncChaptersWithSource(
                                                         db,
@@ -222,7 +218,7 @@ class MigrationListController(bundle: Bundle? = null) :
                                             source.id,
                                         )
                                         val chapters: List<SChapter> = try {
-                                            source.getChapterList(localManga.toMangaInfo()).map { it.toSChapter() }
+                                            source.getChapterList(localManga)
                                         } catch (e: java.lang.Exception) {
                                             Timber.e(e)
                                             emptyList()
@@ -255,7 +251,7 @@ class MigrationListController(bundle: Bundle? = null) :
                 if (result != null && result.thumbnail_url == null) {
                     try {
                         val newManga =
-                            sourceManager.getOrStub(result.source).getMangaDetails(result.toMangaInfo()).toSManga()
+                            sourceManager.getOrStub(result.source).getMangaDetails(result)
                         result.copyFrom(newManga)
 
                         db.insertManga(result).executeAsBlocking()
@@ -361,7 +357,7 @@ class MigrationListController(bundle: Bundle? = null) :
             val result = CoroutineScope(migratingManga.manga.migrationJob).async {
                 val localManga = smartSearchEngine.networkToLocalManga(manga, source.id)
                 try {
-                    val chapters = source.getChapterList(localManga.toMangaInfo()).map { it.toSChapter() }
+                    val chapters = source.getChapterList(localManga)
                     syncChaptersWithSource(db, chapters, localManga, source)
                 } catch (e: Exception) {
                     return@async null
@@ -372,8 +368,7 @@ class MigrationListController(bundle: Bundle? = null) :
             if (result != null) {
                 try {
                     val newManga =
-                        sourceManager.getOrStub(result.source).getMangaDetails(result.toMangaInfo())
-                            .toSManga()
+                        sourceManager.getOrStub(result.source).getMangaDetails(result)
                     result.copyFrom(newManga)
 
                     db.insertManga(result).executeAsBlocking()

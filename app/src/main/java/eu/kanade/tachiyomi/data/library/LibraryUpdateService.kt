@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
@@ -32,8 +31,6 @@ import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.UnmeteredSource
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.model.toSChapter
-import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithTrackServiceTwoWay
@@ -420,7 +417,7 @@ class LibraryUpdateService(
             notifier.showProgressNotification(manga, progress, mangaToUpdate.size)
             val source = sourceManager.get(manga.source) as? HttpSource ?: return false
             val fetchedChapters = withContext(Dispatchers.IO) {
-                source.getChapterList(manga.toMangaInfo()).map { it.toSChapter() }
+                source.getChapterList(manga)
             }
             if (fetchedChapters.isNotEmpty()) {
                 val newChapters = syncChaptersWithSource(db, fetchedChapters, manga, source)
@@ -487,7 +484,7 @@ class LibraryUpdateService(
                         )
 
                         val networkManga = try {
-                            source.getMangaDetails(manga.toMangaInfo()).toSManga()
+                            source.getMangaDetails(manga.copy())
                         } catch (e: java.lang.Exception) {
                             Timber.e(e)
                             null

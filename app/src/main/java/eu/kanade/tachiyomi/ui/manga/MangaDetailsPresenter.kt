@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
@@ -33,8 +32,6 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.SourceNotFoundException
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.model.toSChapter
-import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
@@ -323,7 +320,7 @@ class MangaDetailsPresenter(
             var chapterError: java.lang.Exception? = null
             val chapters = async(Dispatchers.IO) {
                 try {
-                    source.getChapterList(manga.toMangaInfo()).map { it.toSChapter() }
+                    source.getChapterList(manga)
                 } catch (e: Exception) {
                     chapterError = e
                     emptyList()
@@ -332,7 +329,7 @@ class MangaDetailsPresenter(
             val thumbnailUrl = manga.thumbnail_url
             val nManga = async(Dispatchers.IO) {
                 try {
-                    source.getMangaDetails(manga.toMangaInfo()).toSManga()
+                    source.getMangaDetails(manga.copy())
                 } catch (e: java.lang.Exception) {
                     mangaError = e
                     null
@@ -419,7 +416,7 @@ class MangaDetailsPresenter(
 
         presenterScope.launch(Dispatchers.IO) {
             val chapters = try {
-                source.getChapterList(manga.toMangaInfo()).map { it.toSChapter() }
+                source.getChapterList(manga)
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) { controller?.showError(trimException(e)) }
                 return@launch

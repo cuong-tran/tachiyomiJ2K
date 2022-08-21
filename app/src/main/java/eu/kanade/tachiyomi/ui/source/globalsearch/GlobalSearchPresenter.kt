@@ -4,7 +4,6 @@ import android.os.Bundle
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.ExtensionManager
@@ -13,7 +12,6 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourcePresenter
 import eu.kanade.tachiyomi.util.system.runAsObservable
@@ -284,8 +282,8 @@ open class GlobalSearchPresenter(
      * @return The initialized manga.
      */
     private suspend fun getMangaDetails(manga: Manga, source: Source): Manga {
-        val networkManga = source.getMangaDetails(manga.toMangaInfo())
-        manga.copyFrom(networkManga.toSManga())
+        val networkManga = source.getMangaDetails(manga.copy())
+        manga.copyFrom(networkManga)
         manga.initialized = true
         db.insertManga(manga).executeAsBlocking()
         return manga
