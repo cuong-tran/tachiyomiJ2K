@@ -200,21 +200,13 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                         val id = item.manga.id ?: return ""
                         val history = db.getChapters(id).executeAsBlocking()
                         val last = history.maxOfOrNull { it.date_fetch }
-                        if (last != null && last > 100) {
-                            context.timeSpanFromNow(R.string.fetched_, last)
-                        } else {
-                            "N/A"
-                        }
+                        context.timeSpanFromNow(R.string.fetched_, last ?: 0)
                     }
                     LibrarySort.LastRead -> {
                         val id = item.manga.id ?: return ""
                         val history = db.getHistoryByMangaId(id).executeAsBlocking()
                         val last = history.maxOfOrNull { it.last_read }
-                        if (last != null && last > 100) {
-                            context.timeSpanFromNow(R.string.read_, last)
-                        } else {
-                            "N/A"
-                        }
+                        context.timeSpanFromNow(R.string.read_, last ?: 0)
                     }
                     LibrarySort.Unread -> {
                         val unread = item.manga.unread
@@ -233,20 +225,10 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                         }
                     }
                     LibrarySort.LatestChapter -> {
-                        val lastUpdate = item.manga.last_update
-                        if (lastUpdate > 0) {
-                            context.timeSpanFromNow(R.string.updated_, lastUpdate)
-                        } else {
-                            "N/A"
-                        }
+                        context.timeSpanFromNow(R.string.updated_, item.manga.last_update)
                     }
                     LibrarySort.DateAdded -> {
-                        val added = item.manga.date_added
-                        if (added > 0) {
-                            context.timeSpanFromNow(R.string.added_, added)
-                        } else {
-                            "N/A"
-                        }
+                        context.timeSpanFromNow(R.string.added_, item.manga.date_added)
                     }
                     LibrarySort.Title -> {
                         val title = if (preferences.removeArticles().get()) {
