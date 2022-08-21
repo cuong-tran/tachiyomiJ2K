@@ -134,11 +134,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
             binding.setAsDefaultSort.isInvisible = true
             binding.resetAsDefaultSort.isInvisible = true
         }
-
-        binding.hideTitles.setOnCheckedChangeListener { _, isChecked ->
-            presenter.hideTitle(isChecked)
-            checkIfFilterMatchesDefault(binding.chapterFilterLayout.root)
-        }
+        setHideTitleListener()
 
         binding.chapterFilterLayout.setAsDefaultFilter.setOnClickListener {
             presenter.setGlobalChapterFilters(
@@ -154,7 +150,9 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
             presenter.resetFilterToDefault()
 
             binding.chapterFilterLayout.root.setCheckboxes(presenter.manga, presenter.preferences)
+            binding.hideTitles.setOnCheckedChangeListener { _, _ -> }
             binding.hideTitles.isChecked = presenter.manga.hideChapterTitle(presenter.preferences)
+            setHideTitleListener()
             binding.chapterFilterLayout.setAsDefaultFilter.isInvisible = true
             binding.chapterFilterLayout.resetAsDefaultFilter.isInvisible = true
         }
@@ -193,6 +191,13 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
                     setOnCancelListener { alertDialog = null }
                     setOnDismissListener { alertDialog = null }
                 }
+        }
+    }
+
+    private fun setHideTitleListener() {
+        binding.hideTitles.setOnCheckedChangeListener { _, isChecked ->
+            presenter.hideTitle(isChecked)
+            checkIfFilterMatchesDefault(binding.chapterFilterLayout.root)
         }
     }
 

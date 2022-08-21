@@ -572,8 +572,8 @@ class MangaDetailsPresenter(
      */
     fun hideTitle(hide: Boolean) {
         manga.displayMode = if (hide) Manga.CHAPTER_DISPLAY_NUMBER else Manga.CHAPTER_DISPLAY_NAME
-        db.updateChapterFlags(manga).executeAsBlocking()
         manga.setFilterToLocal()
+        db.updateChapterFlags(manga).executeAsBlocking()
         if (mangaFilterMatchesDefault()) {
             manga.setFilterToGlobal()
         }
