@@ -313,41 +313,46 @@ class LocalSource(private val context: Context) : CatalogueSource, UnmeteredSour
     }
 
     private fun updateCover(chapter: SChapter, manga: SManga): File? {
-        return when (val format = getFormat(chapter)) {
-            is Format.Directory -> {
-                val entry = format.file.listFiles()
-                    ?.sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }
-                    ?.find { !it.isDirectory && ImageUtil.isImage(it.name) { FileInputStream(it) } }
+        return try {
+            when (val format = getFormat(chapter)) {
+                is Format.Directory -> {
+                    val entry = format.file.listFiles()
+                        ?.sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }
+                        ?.find { !it.isDirectory && ImageUtil.isImage(it.name) { FileInputStream(it) } }
 
-                entry?.let { updateCover(context, manga, it.inputStream()) }
-            }
-            is Format.Zip -> {
-                ZipFile(format.file).use { zip ->
-                    val entry = zip.entries().toList()
-                        .sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }
-                        .find { !it.isDirectory && ImageUtil.isImage(it.name) { zip.getInputStream(it) } }
+                    entry?.let { updateCover(context, manga, it.inputStream()) }
+                }
+                is Format.Zip -> {
+                    ZipFile(format.file).use { zip ->
+                        val entry = zip.entries().toList()
+                            .sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }
+                            .find { !it.isDirectory && ImageUtil.isImage(it.name) { zip.getInputStream(it) } }
 
-                    entry?.let { updateCover(context, manga, zip.getInputStream(it)) }
+                        entry?.let { updateCover(context, manga, zip.getInputStream(it)) }
+                    }
+                }
+                is Format.Rar -> {
+                    Archive(format.file).use { archive ->
+                        val entry = archive.fileHeaders
+                            .sortedWith { f1, f2 -> f1.fileName.compareToCaseInsensitiveNaturalOrder(f2.fileName) }
+                            .find { !it.isDirectory && ImageUtil.isImage(it.fileName) { archive.getInputStream(it) } }
+
+                        entry?.let { updateCover(context, manga, archive.getInputStream(it)) }
+                    }
+                }
+                is Format.Epub -> {
+                    EpubFile(format.file).use { epub ->
+                        val entry = epub.getImagesFromPages()
+                            .firstOrNull()
+                            ?.let { epub.getEntry(it) }
+
+                        entry?.let { updateCover(context, manga, epub.getInputStream(it)) }
+                    }
                 }
             }
-            is Format.Rar -> {
-                Archive(format.file).use { archive ->
-                    val entry = archive.fileHeaders
-                        .sortedWith { f1, f2 -> f1.fileName.compareToCaseInsensitiveNaturalOrder(f2.fileName) }
-                        .find { !it.isDirectory && ImageUtil.isImage(it.fileName) { archive.getInputStream(it) } }
-
-                    entry?.let { updateCover(context, manga, archive.getInputStream(it)) }
-                }
-            }
-            is Format.Epub -> {
-                EpubFile(format.file).use { epub ->
-                    val entry = epub.getImagesFromPages()
-                        .firstOrNull()
-                        ?.let { epub.getEntry(it) }
-
-                    entry?.let { updateCover(context, manga, epub.getInputStream(it)) }
-                }
-            }
+        } catch (e: Throwable) {
+            Timber.e(e, "Error updating cover for ${manga.title}")
+            null
         }
     }
 
