@@ -23,6 +23,19 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         const val DATABASE_VERSION = 15
     }
 
+    override fun onOpen(db: SupportSQLiteDatabase) {
+        super.onOpen(db)
+        setPragma(db, "foreign_keys = ON")
+        setPragma(db, "journal_mode = WAL")
+        setPragma(db, "synchronous = NORMAL")
+    }
+
+    private fun setPragma(db: SupportSQLiteDatabase, pragma: String) {
+        val cursor = db.query("PRAGMA $pragma")
+        cursor.moveToFirst()
+        cursor.close()
+    }
+
     override fun onCreate(db: SupportSQLiteDatabase) = with(db) {
         execSQL(MangaTable.createTableQuery)
         execSQL(ChapterTable.createTableQuery)
