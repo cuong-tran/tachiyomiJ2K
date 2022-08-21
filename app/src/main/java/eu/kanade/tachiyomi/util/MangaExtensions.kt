@@ -269,6 +269,7 @@ private fun showAddDuplicateDialog(
             db,
             enhancedServices,
             Injekt.get(),
+            Injekt.get(),
             source,
             sourceManager.getOrStub(newManga.source),
             libraryManga,

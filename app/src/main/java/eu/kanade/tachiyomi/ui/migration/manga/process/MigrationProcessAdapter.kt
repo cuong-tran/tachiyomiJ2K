@@ -7,6 +7,8 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.library.CustomMangaManager
+import eu.kanade.tachiyomi.data.library.CustomMangaManager.Companion.toJson
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.EnhancedTrackService
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -31,6 +33,7 @@ class MigrationProcessAdapter(
     val preferences: PreferencesHelper by injectLazy()
     val sourceManager: SourceManager by injectLazy()
     val coverCache: CoverCache by injectLazy()
+    val customMangaManager: CustomMangaManager by injectLazy()
 
     var showOutline = preferences.outlineOnCovers().get()
     val menuItemListener: MigrationProcessInterface = controller
@@ -132,7 +135,7 @@ class MigrationProcessAdapter(
     ) {
         if (controller.config == null) return
         val flags = preferences.migrateFlags().get()
-        migrateMangaInternal(flags, db, enhancedServices, coverCache, prevSource, source, prevManga, manga, replace)
+        migrateMangaInternal(flags, db, enhancedServices, coverCache, customMangaManager, prevSource, source, prevManga, manga, replace)
     }
 
     companion object {
@@ -142,6 +145,7 @@ class MigrationProcessAdapter(
             db: DatabaseHelper,
             enhancedServices: List<EnhancedTrackService>,
             coverCache: CoverCache,
+            customMangaManager: CustomMangaManager,
             prevSource: Source?,
             source: Source,
             prevManga: Manga,
@@ -210,9 +214,15 @@ class MigrationProcessAdapter(
             if (replace) manga.date_added = prevManga.date_added
             else manga.date_added = Date().time
 
-            // Update custom cover
-            if (MigrationFlags.hasCustomCover(flags) && coverCache.getCustomCoverFile(prevManga).exists()) {
-                coverCache.setCustomCoverToCache(manga, coverCache.getCustomCoverFile(prevManga).inputStream())
+            // Update custom cover & info
+            if (MigrationFlags.hasCustomMangaInfo(flags)) {
+                if (coverCache.getCustomCoverFile(prevManga).exists()) {
+                    coverCache.setCustomCoverToCache(manga, coverCache.getCustomCoverFile(prevManga).inputStream())
+                }
+                customMangaManager.getManga(prevManga)?.let { customManga ->
+                    customManga.id = manga.id!!
+                    customMangaManager.saveMangaInfo(customManga.toJson())
+                }
             }
 
             db.updateMangaFavorite(manga).executeAsBlocking()

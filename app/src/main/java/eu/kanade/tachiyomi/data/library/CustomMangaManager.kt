@@ -7,7 +7,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import uy.kohesive.injekt.injectLazy
 import java.io.File
 
 class CustomMangaManager(val context: Context) {
@@ -18,6 +17,20 @@ class CustomMangaManager(val context: Context) {
 
     init {
         fetchCustomData()
+    }
+
+    companion object {
+        fun Manga.toJson(): MangaJson {
+            return MangaJson(
+                id!!,
+                title,
+                author,
+                artist,
+                description,
+                genre?.split(", ")?.toTypedArray(),
+                status.takeUnless { it == -1 },
+            )
+        }
     }
 
     fun getManga(manga: Manga): Manga? = customMangaMap[manga.id]
@@ -45,7 +58,7 @@ class CustomMangaManager(val context: Context) {
             manga.artist == null &&
             manga.description == null &&
             manga.genre == null &&
-            manga.status ?: -1 == -1
+            (manga.status ?: -1) == -1
         ) {
             customMangaMap.remove(mangaId)
         } else {
@@ -54,26 +67,12 @@ class CustomMangaManager(val context: Context) {
         saveCustomInfo()
     }
 
-    private val json2: Json by injectLazy()
-
     private fun saveCustomInfo() {
         val jsonElements = customMangaMap.values.map { it.toJson() }
         if (jsonElements.isNotEmpty()) {
             editJson.delete()
             editJson.writeText(Json.encodeToString(MangaList(jsonElements)))
         }
-    }
-
-    private fun Manga.toJson(): MangaJson {
-        return MangaJson(
-            id!!,
-            title,
-            author,
-            artist,
-            description,
-            genre?.split(", ")?.toTypedArray(),
-            status.takeUnless { it == -1 },
-        )
     }
 
     @Serializable

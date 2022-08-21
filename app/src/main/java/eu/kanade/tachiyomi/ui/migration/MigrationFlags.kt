@@ -5,8 +5,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.util.system.toInt
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
@@ -15,13 +15,14 @@ object MigrationFlags {
     private const val CHAPTERS = 0b0001
     private const val CATEGORIES = 0b0010
     private const val TRACK = 0b0100
-    private const val CUSTOM_COVER = 0b1000
+    private const val CUSTOM_MANGA_INFO = 0b1000
 
     private val coverCache: CoverCache by injectLazy()
-    private val db: DatabaseHelper = Injekt.get()
+    private val db: DatabaseHelper by injectLazy()
+    private val customMangaManager: CustomMangaManager by injectLazy()
 
-    val titles get() = arrayOf(R.string.chapters, R.string.categories, R.string.tracking, R.string.custom_cover)
-    val flags get() = arrayOf(CHAPTERS, CATEGORIES, TRACK, CUSTOM_COVER)
+    val titles get() = arrayOf(R.string.chapters, R.string.categories, R.string.tracking, R.string.custom_manga_info)
+    val flags get() = arrayOf(CHAPTERS, CATEGORIES, TRACK, CUSTOM_MANGA_INFO)
 
     fun hasChapters(value: Int): Boolean {
         return value and CHAPTERS != 0
@@ -35,8 +36,8 @@ object MigrationFlags {
         return value and TRACK != 0
     }
 
-    fun hasCustomCover(value: Int): Boolean {
-        return value and CUSTOM_COVER != 0
+    fun hasCustomMangaInfo(value: Int): Boolean {
+        return value and CUSTOM_MANGA_INFO != 0
     }
 
     fun getEnabledFlags(value: Int): List<Boolean> {
@@ -63,8 +64,8 @@ object MigrationFlags {
                 flags.add(TRACK)
             }
 
-            if (coverCache.getCustomCoverFile(manga).exists()) {
-                flags.add(CUSTOM_COVER)
+            if (coverCache.getCustomCoverFile(manga).exists() || customMangaManager.getManga(manga) != null) {
+                flags.add(CUSTOM_MANGA_INFO)
             }
         }
         return flags.toTypedArray()
@@ -75,7 +76,7 @@ object MigrationFlags {
             CHAPTERS -> R.string.chapters
             CATEGORIES -> R.string.categories
             TRACK -> R.string.tracking
-            CUSTOM_COVER -> R.string.custom_cover
+            CUSTOM_MANGA_INFO -> R.string.custom_manga_info
             else -> 0
         }
     }
