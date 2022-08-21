@@ -258,17 +258,17 @@ private fun showAddDuplicateDialog(
 ) {
     val source = sourceManager.getOrStub(libraryManga.source)
 
+    val titles by lazy { MigrationFlags.titles(activity, libraryManga) }
     fun migrateManga(mDialog: DialogInterface, replace: Boolean) {
         val listView = (mDialog as AlertDialog).listView
-        var flags = 0
-        if (listView.isItemChecked(0)) flags = flags or MigrationFlags.CHAPTERS
-        if (listView.isItemChecked(1)) flags = flags or MigrationFlags.CATEGORIES
-        if (listView.isItemChecked(2)) flags = flags or MigrationFlags.TRACK
+        val enabled = titles.indices.map { listView.isItemChecked(it) }.toTypedArray()
+        val flags = MigrationFlags.getFlagsFromPositions(enabled, libraryManga)
         val enhancedServices by lazy { Injekt.get<TrackManager>().services.filterIsInstance<EnhancedTrackService>() }
         MigrationProcessAdapter.migrateMangaInternal(
             flags,
             db,
             enhancedServices,
+            Injekt.get(),
             source,
             sourceManager.getOrStub(newManga.source),
             libraryManga,
@@ -301,12 +301,9 @@ private fun showAddDuplicateDialog(
                     activity.materialAlertDialog().apply {
                         setTitle(R.string.migration)
                         setMultiChoiceItems(
-                            arrayOf(
-                                activity.getString(R.string.chapters),
-                                activity.getString(R.string.categories),
-                                activity.getString(R.string.tracking),
-                            ),
-                            booleanArrayOf(true, true, true), null,
+                            titles,
+                            titles.map { true }.toBooleanArray(),
+                            null,
                         )
                         setPositiveButton(R.string.migrate) { mDialog, _ ->
                             migrateManga(mDialog, true)

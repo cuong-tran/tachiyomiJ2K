@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.migration.manga.process
 
 import android.view.MenuItem
 import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -29,6 +30,7 @@ class MigrationProcessAdapter(
     var items: List<MigrationProcessItem> = emptyList()
     val preferences: PreferencesHelper by injectLazy()
     val sourceManager: SourceManager by injectLazy()
+    val coverCache: CoverCache by injectLazy()
 
     var showOutline = preferences.outlineOnCovers().get()
     val menuItemListener: MigrationProcessInterface = controller
@@ -130,7 +132,7 @@ class MigrationProcessAdapter(
     ) {
         if (controller.config == null) return
         val flags = preferences.migrateFlags().get()
-        migrateMangaInternal(flags, db, enhancedServices, prevSource, source, prevManga, manga, replace)
+        migrateMangaInternal(flags, db, enhancedServices, coverCache, prevSource, source, prevManga, manga, replace)
     }
 
     companion object {
@@ -139,6 +141,7 @@ class MigrationProcessAdapter(
             flags: Int,
             db: DatabaseHelper,
             enhancedServices: List<EnhancedTrackService>,
+            coverCache: CoverCache,
             prevSource: Source?,
             source: Source,
             prevManga: Manga,
@@ -206,6 +209,12 @@ class MigrationProcessAdapter(
             manga.favorite = true
             if (replace) manga.date_added = prevManga.date_added
             else manga.date_added = Date().time
+
+            // Update custom cover
+            if (MigrationFlags.hasCustomCover(flags) && coverCache.getCustomCoverFile(prevManga).exists()) {
+                coverCache.setCustomCoverToCache(manga, coverCache.getCustomCoverFile(prevManga).inputStream())
+            }
+
             db.updateMangaFavorite(manga).executeAsBlocking()
             db.updateMangaAdded(manga).executeAsBlocking()
             db.updateMangaTitle(manga).executeAsBlocking()

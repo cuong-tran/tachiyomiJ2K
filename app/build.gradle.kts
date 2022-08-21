@@ -135,6 +135,7 @@ dependencies {
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.core:core-ktx:1.8.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0")
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 

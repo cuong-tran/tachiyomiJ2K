@@ -34,39 +34,14 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <CheckBox
-            android:id="@+id/mig_chapters"
-            android:layout_width="wrap_content"
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/grid_flags_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:checked="true"
-            android:text="@string/chapters"
+            app:flexWrap="wrap"
             app:layout_constraintStart_toStartOf="@+id/data_label"
-            app:layout_constraintTop_toBottomOf="@+id/data_label" />
-
-        <CheckBox
-            android:id="@+id/mig_categories"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:checked="true"
-            android:text="@string/categories"
-            app:layout_constraintBottom_toBottomOf="@+id/mig_chapters"
-            app:layout_constraintStart_toEndOf="@+id/mig_chapters"
-            app:layout_constraintTop_toTopOf="@+id/mig_chapters" />
-
-        <CheckBox
-            android:id="@+id/mig_tracking"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:checked="true"
-            android:text="@string/tracking"
-            app:layout_constraintBottom_toBottomOf="@+id/mig_categories"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/mig_categories"
-            app:layout_constraintTop_toTopOf="@+id/mig_categories" />
+            app:layout_constraintTop_toBottomOf="@+id/data_label"/>
 
         <TextView
             android:id="@+id/options_label"
@@ -75,8 +50,8 @@
             android:layout_marginTop="8dp"
             android:text="@string/options"
             style="?textAppearanceTitleSmall"
-            app:layout_constraintStart_toStartOf="@+id/mig_chapters"
-            app:layout_constraintTop_toBottomOf="@+id/mig_chapters" />
+            app:layout_constraintStart_toStartOf="@+id/grid_flags_layout"
+            app:layout_constraintTop_toBottomOf="@+id/grid_flags_layout" />
 
         <RadioGroup
             android:id="@+id/sourceGroup"
