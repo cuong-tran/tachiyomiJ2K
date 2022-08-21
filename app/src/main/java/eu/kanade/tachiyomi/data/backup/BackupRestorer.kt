@@ -113,15 +113,6 @@ class BackupRestorer(context: Context, notifier: BackupNotifier) : AbstractBacku
 
         backupManager.restoreChapters(fetchedManga, chapters)
         restoreExtras(fetchedManga, categories, history, tracks, backupCategories, customManga)
-//        try {
-//            val fetchedManga = backupManager.restoreNewManga(manga)
-//            fetchedManga.id ?: return
-//            backupManager.restoreChaptersForManga(fetchedManga, chapters)
-//
-//            restoreExtraForManga(fetchedManga, categories, history, tracks, backupCategories, customManga)
-//        } catch (e: Exception) {
-//            errors.add(Date() to "${manga.title} - ${e.message}")
-//        }
     }
 
     private fun restoreNewManga(
