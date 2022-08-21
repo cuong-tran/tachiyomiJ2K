@@ -45,7 +45,13 @@ class EditTextResetPreference @JvmOverloads constructor(
                 notifyChanged()
             }
             this.setPositiveButton(android.R.string.ok) { _, _ ->
-                sharedPreferences?.edit { putString(key, textView.text.toString()) }
+                sharedPreferences?.edit {
+                    if (textView.text.isNullOrBlank()) {
+                        remove(key)
+                    } else {
+                        putString(key, textView.text.toString())
+                    }
+                }
                 callChangeListener(textView.text.toString())
                 notifyChanged()
             }
