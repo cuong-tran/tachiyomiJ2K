@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
+import kotlin.math.max
 
 object Migrations {
 
@@ -200,6 +201,12 @@ object Migrations {
                 val oldSecureScreen = prefs.getBoolean("secure_screen", false)
                 if (oldSecureScreen) {
                     preferences.secureScreen().set(PreferenceValues.SecureScreenMode.ALWAYS)
+                }
+            }
+            if (oldVersion < 97) {
+                val oldDLAfterReading = prefs.getInt("auto_download_after_reading", 0)
+                if (oldDLAfterReading > 0) {
+                    preferences.autoDownloadWhileReading().set(max(2, oldDLAfterReading))
                 }
             }
 
