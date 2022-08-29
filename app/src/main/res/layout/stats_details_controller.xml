@@ -169,22 +169,6 @@
                     app:closeIcon="@drawable/ic_arrow_drop_down_24dp"
                     app:closeIconEnabled="true"
                     app:closeIconTint="?attr/colorOnBackground" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_sort"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_count"
-                    android:textColor="?attr/colorOnBackground"
-                    app:checkedIconEnabled="false"
-                    app:chipIcon="@drawable/ic_sort_24dp"
-                    app:chipIconEnabled="true"
-                    app:chipIconTint="?attr/colorOnBackground"
-                    app:chipStrokeColor="?attr/colorSecondary"
-                    app:chipStrokeWidth="1dp"
-                    app:closeIcon="@drawable/ic_arrow_drop_down_24dp"
-                    app:closeIconEnabled="true"
-                    app:closeIconTint="?attr/colorOnBackground" />
             </com.google.android.material.chip.ChipGroup>
         </LinearLayout>
 
@@ -199,12 +183,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/stats_horizontal_scroll">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/marginSmall">
-
             <androidx.core.widget.NestedScrollView
                 android:id="@+id/stats_details_scroll_view"
                 android:layout_width="match_parent"
@@ -215,6 +193,28 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/stat_sort"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="12dp"
+                        android:background="@drawable/square_ripple"
+                        android:clickable="true"
+                        android:drawablePadding="6dp"
+                        android:alpha=".8"
+                        app:drawableTint="?android:textColorPrimary"
+                        android:ellipsize="start"
+                        android:focusable="true"
+                        android:gravity="center|end"
+                        android:maxLines="2"
+                        android:padding="6dp"
+                        android:layout_gravity="end"
+                        android:textAlignment="textEnd"
+                        style="?textAppearanceBodyMedium"
+                        android:textColor="?android:attr/textColorPrimary"
+                        tools:text="Title Count"
+                        app:drawableEndCompat="@drawable/ic_sort_24dp" />
 
                     <RelativeLayout
                         android:id="@+id/stats_date_layout"
@@ -321,8 +321,6 @@
                 </LinearLayout>
 
             </androidx.core.widget.NestedScrollView>
-
-        </LinearLayout>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

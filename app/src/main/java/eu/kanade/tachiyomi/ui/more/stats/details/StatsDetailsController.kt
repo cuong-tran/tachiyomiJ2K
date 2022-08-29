@@ -71,6 +71,8 @@ class StatsDetailsController :
 
     private val defaultStat = Stats.SERIES_TYPE
     private val defaultSort = StatsSort.COUNT_DESC
+    private var toolbarIsColored = false
+    private var colorAnimator: ValueAnimator? = null
 
     /**
      * Selected day in the read duration stat
@@ -88,7 +90,6 @@ class StatsDetailsController :
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         liftAppbarWith(binding.statsDetailsScrollView, false, liftOnScroll = { colorToolbar(it) })
-//        scrollViewWith(binding.statsDetailsScrollView, liftOnScroll = { colorToolbar(it) })
         setHasOptionsMenu(true)
 
         if (presenter.selectedStat == null) {
@@ -143,11 +144,7 @@ class StatsDetailsController :
                     ?.show()
             }
             chipStat.setOnCloseIconClickListener {
-                if (presenter.selectedStat != defaultStat) {
-                    presenter.selectedStat = defaultStat
-                    searchItem.collapseActionView()
-                    chipStat.reset(defaultStat.resourceId)
-                } else chipStat.callOnClick()
+                chipStat.callOnClick()
             }
             chipSeriesType.setOnClickListener {
                 (it as Chip).setMultiChoiceItemsDialog(
@@ -219,29 +216,24 @@ class StatsDetailsController :
                     chipCategory.reset(R.string.category)
                 } else chipCategory.callOnClick()
             }
-            chipSort.setOnClickListener {
+            statSort.setOnClickListener {
                 searchView.clearFocus()
-                activity!!.materialAlertDialog().setSingleChoiceItems(
-                    presenter.getSortDataArray(),
-                    StatsSort.values().indexOf(presenter.selectedStatsSort),
-                ) { dialog, which ->
-                    val newSelection = StatsSort.values()[which]
-                    if (newSelection == presenter.selectedStatsSort) return@setSingleChoiceItems
-                    chipSort.text = activity?.getString(newSelection.resourceId)
-                    presenter.selectedStatsSort = newSelection
-                    chipSort.setColors((presenter.selectedStatsSort != defaultSort).toInt())
+                activity!!.materialAlertDialog()
+                    .setSingleChoiceItems(
+                        presenter.getSortDataArray(),
+                        StatsSort.values().indexOf(presenter.selectedStatsSort),
+                    ) { dialog, which ->
+                        val newSelection = StatsSort.values()[which]
+                        if (newSelection == presenter.selectedStatsSort) return@setSingleChoiceItems
+                        statSort.text = activity?.getString(newSelection.resourceId)
+                        presenter.selectedStatsSort = newSelection
 
-                    dialog.dismiss()
-                    presenter.sortCurrentStats()
-                    resetAndSetup(updateStats = false, updateChipsVisibility = false)
-                }
+                        dialog.dismiss()
+                        presenter.sortCurrentStats()
+                        resetAndSetup(updateStats = false, updateChipsVisibility = false)
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
                     .show()
-            }
-            chipSort.setOnCloseIconClickListener {
-                if (presenter.selectedStatsSort != defaultSort) {
-                    presenter.selectedStatsSort = defaultSort
-                    chipSort.reset(defaultSort.resourceId)
-                } else chipSort.callOnClick()
             }
             statsDateText.setOnClickListener {
                 val dialog = MaterialDatePicker.Builder.datePicker()
@@ -267,11 +259,6 @@ class StatsDetailsController :
             }
         }
     }
-
-    var toolbarColorAnim: ValueAnimator? = null
-    var isToolbarColored = false
-    private var toolbarIsColored = false
-    private var colorAnimator: ValueAnimator? = null
 
     /** Set the toolbar to fully transparent or colored and translucent */
     private fun colorToolbar(isColor: Boolean) {
@@ -316,8 +303,7 @@ class StatsDetailsController :
             chipStatus.setState(presenter.selectedStatus, R.string.status, R.string.status)
             chipLanguage.setState(presenter.selectedLanguage, R.string.language, R.string.languages)
             chipCategory.setState(presenter.selectedCategory, R.string.category, R.string.categories, true)
-            chipSort.text = activity?.getString(presenter.selectedStatsSort?.resourceId ?: defaultSort.resourceId)
-            chipSort.setColors((presenter.selectedStatsSort != defaultSort).toInt())
+            statSort.text = activity?.getString(presenter.selectedStatsSort?.resourceId ?: defaultSort.resourceId)
         }
     }
 
@@ -510,7 +496,7 @@ class StatsDetailsController :
             chipLanguage.isVisible = presenter.selectedStat !in listOf(Stats.LANGUAGE, Stats.READ_DURATION) &&
                 (presenter.selectedStat == Stats.SOURCE || presenter.selectedSource.isEmpty())
             chipCategory.isVisible = presenter.selectedStat !in listOf(Stats.CATEGORY, Stats.READ_DURATION)
-            chipSort.isVisible = presenter.selectedStat !in listOf(
+            statSort.isVisible = presenter.selectedStat !in listOf(
                 Stats.SCORE, Stats.LENGTH, Stats.START_YEAR, Stats.READ_DURATION,
             )
         }
@@ -551,29 +537,30 @@ class StatsDetailsController :
             presenter.selectedCategory = mutableSetOf()
             chipCategory.text = activity?.getString(R.string.category)
             presenter.selectedStatsSort = defaultSort
-            chipSort.text = activity?.getString(defaultSort.resourceId)
+            statSort.text = activity?.getString(defaultSort.resourceId)
         }
     }
 
     private fun hasActiveFilters() = with(presenter) {
-        listOf(selectedStat, selectedStatsSort).any { it !in listOf(null, defaultStat, defaultSort) } ||
-            listOf(selectedSeriesType, selectedSource, selectedStatus, selectedLanguage, selectedCategory).any {
-                it.isNotEmpty()
-            }
+        listOf(selectedSeriesType, selectedSource, selectedStatus, selectedLanguage, selectedCategory).any {
+            it.isNotEmpty()
+        }
     }
 
     fun Chip.setColors(sizeStat: Int) {
         val emptyTextColor = activity!!.getResourceColor(R.attr.colorOnBackground)
         val filteredBackColor = activity!!.getResourceColor(R.attr.colorSecondary)
         val emptyBackColor = activity!!.getResourceColor(R.attr.colorSurface)
-        setTextColor(if (sizeStat == 0) emptyTextColor else emptyBackColor)
-        chipBackgroundColor = ColorStateList.valueOf(if (sizeStat == 0) emptyBackColor else filteredBackColor)
-        closeIcon = if (sizeStat == 0) context.contextCompatDrawable(R.drawable.ic_arrow_drop_down_24dp) else {
+        val alwaysShowIcon = this == binding.chipStat
+        val neverSelect = alwaysShowIcon || sizeStat == 0
+        setTextColor(if (neverSelect) emptyTextColor else emptyBackColor)
+        chipBackgroundColor = ColorStateList.valueOf(if (neverSelect) emptyBackColor else filteredBackColor)
+        closeIcon = if (neverSelect) context.contextCompatDrawable(R.drawable.ic_arrow_drop_down_24dp) else {
             context.contextCompatDrawable(R.drawable.ic_close_24dp)
         }
-        closeIconTint = ColorStateList.valueOf(if (sizeStat == 0) emptyTextColor else emptyBackColor)
-        isChipIconVisible = this in listOf(binding.chipStat, binding.chipSort) || sizeStat == 1
-        chipIconTint = ColorStateList.valueOf(if (sizeStat == 0) emptyTextColor else emptyBackColor)
+        closeIconTint = ColorStateList.valueOf(if (neverSelect) emptyTextColor else emptyBackColor)
+        isChipIconVisible = alwaysShowIcon || sizeStat == 1
+        chipIconTint = ColorStateList.valueOf(if (neverSelect) emptyTextColor else emptyBackColor)
     }
 
     /**
