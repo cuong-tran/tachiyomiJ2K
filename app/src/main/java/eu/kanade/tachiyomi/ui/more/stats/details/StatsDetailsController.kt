@@ -403,6 +403,7 @@ class StatsDetailsController :
         @PluralsRes
         resourceIdPlural: Int,
     ) {
+        val initialStateValues = selectedValues.toSet()
         val isCategory = statsList.isArrayOf<Category>()
         val items = statsList.map { if (isCategory) (it as Category).name else it.toString() }
             .toTypedArray()
@@ -420,12 +421,19 @@ class StatsDetailsController :
                     selectedValues.remove(newSelection)
                 }
             }
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton(android.R.string.cancel) { _, _ ->
+                selectedValues.clear()
+                selectedValues.addAll(initialStateValues)
+            }
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 setState(selectedValues, resourceId, resourceIdPlural, isCategory)
                 updateChipsVisibility()
                 binding.progress.isVisible = true
                 resetAndSetup(updateChipsVisibility = false)
+            }
+            .setOnCancelListener {
+                selectedValues.clear()
+                selectedValues.addAll(initialStateValues)
             }
             .show()
     }
