@@ -101,23 +101,10 @@ class DownloadProvider(private val context: Context) {
      */
     fun findChapterDirs(chapters: List<Chapter>, manga: Manga, source: Source): List<UniFile> {
         val mangaDir = findMangaDir(manga, source) ?: return emptyList()
-        val chapterNameHashSet = chapters.map { it.name }.toHashSet()
-        val scanalatorNameHashSet = chapters.map { getChapterDirName(it) }.toHashSet()
-        val scanalatorCbzNameHashSet = chapters.map { "${getChapterDirName(it)}.cbz" }.toHashSet()
-
-        return mangaDir.listFiles()!!.asList().filter { file ->
-            file.name?.let { fileName ->
-                if (scanalatorNameHashSet.any { it.equals(fileName, true) }) {
-                    return@filter true
-                }
-                if (scanalatorCbzNameHashSet.any { it.equals(fileName, true) }) {
-                    return@filter true
-                }
-                val afterScanlatorCheck = fileName.substringAfter("_")
-                return@filter chapterNameHashSet.any { it.equals(fileName, true) } ||
-                    chapterNameHashSet.any { it.equals(afterScanlatorCheck, true) }
-            }
-            return@filter false
+        return chapters.mapNotNull { chapter ->
+            getValidChapterDirNames(chapter).map { listOf(it, "$it.cbz") }.flatten().asSequence()
+                .mapNotNull { mangaDir.findFile(it) }
+                .firstOrNull()
         }
     }
 
