@@ -169,6 +169,9 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
             val icon = adapter.sourceManager.get(category.sourceId!!)?.icon()
             icon?.setBounds(0, 0, 32.dpToPx, 32.dpToPx)
             binding.categoryTitle.setCompoundDrawablesRelative(icon, null, null, null)
+        } else if (category.langId != null) {
+            val icon = getFlagIcon(category.langId!!) ?: 0
+            binding.categoryTitle.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, icon, 0)
         } else {
             binding.categoryTitle.setCompoundDrawablesRelative(null, null, null, null)
         }
@@ -190,7 +193,7 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
                 binding.updateButton.isVisible = false
                 setSelection()
             }
-            category.id ?: -1 < 0 -> {
+            (category.id ?: -1) < 0 -> {
                 binding.collapseArrow.isVisible = false
                 binding.checkbox.isVisible = false
                 setRefreshing(false)
@@ -209,6 +212,24 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
                 binding.updateButton.isVisible = !adapter.isSingleCategory
             }
         }
+    }
+
+    @SuppressLint("DiscouragedApi")
+    fun getFlagIcon(lang: String): Int? {
+        val flagId = itemView.resources.getIdentifier(
+            "ic_flag_${lang.replace("-", "_")}",
+            "drawable",
+            itemView.context.packageName,
+        ).takeIf { it != 0 } ?: (
+            if (lang.contains("-")) {
+                itemView.resources.getIdentifier(
+                    "ic_flag_${lang.split("-").first()}",
+                    "drawable",
+                    itemView.context.packageName,
+                ).takeIf { it != 0 }
+            } else null
+            )
+        return flagId
     }
 
     fun setRefreshing(refreshing: Boolean) {

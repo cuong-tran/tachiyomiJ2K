@@ -145,7 +145,7 @@
                     android:text="@string/language"
                     android:textColor="?attr/colorOnBackground"
                     app:checkedIconEnabled="false"
-                    app:chipIcon="@drawable/ic_language_24dp"
+                    app:chipIcon="@drawable/ic_translate_24dp"
                     app:chipIconEnabled="false"
                     app:chipIconTint="?attr/colorOnBackground"
                     app:chipStrokeColor="?attr/colorSecondary"

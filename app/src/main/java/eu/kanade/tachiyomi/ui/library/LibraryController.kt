@@ -75,6 +75,7 @@ import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.category.ManageCategoryDialog
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_AUTHOR
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
+import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_LANGUAGE
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_SOURCE
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
@@ -506,6 +507,7 @@ class LibraryController(
         if (presenter.isLoggedIntoTracking) {
             groupItems.add(BY_TRACK_STATUS)
         }
+        groupItems.add(BY_LANGUAGE)
         if (presenter.allCategories.size > 1) {
             groupItems.add(UNGROUPED)
         }

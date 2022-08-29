@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_AUTHOR
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
+import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_LANGUAGE
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_SOURCE
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
@@ -415,15 +416,15 @@ class LibraryPresenter(
     private fun setSourceLanguage(itemList: List<LibraryItem>) {
         val showLanguageBadges = preferences.languageBadge().get()
         for (item in itemList) {
-            item.sourceLanguage = if (showLanguageBadges) {
-                if (item.manga.isLocal()) {
-                    LocalSource.getMangaLang(item.manga, context)
-                } else {
-                    sourceManager.get(item.manga.source)?.lang
-                }
-            } else {
-                null
-            }
+            item.sourceLanguage = if (showLanguageBadges) getLanguage(item.manga) else null
+        }
+    }
+
+    private fun getLanguage(manga: Manga): String? {
+        return if (manga.isLocal()) {
+            LocalSource.getMangaLang(manga, context)
+        } else {
+            sourceManager.get(manga.source)?.lang
         }
     }
 
@@ -730,7 +731,25 @@ class LibraryPresenter(
                         }
                     }
                 }
-                else -> listOf(LibraryItem(manga, makeOrGetHeader(context.mapStatus(manga.status)), viewContext))
+                BY_LANGUAGE -> {
+                    val lang = getLanguage(manga)
+                    listOf(
+                        LibraryItem(
+                            manga,
+                            makeOrGetHeader(
+                                lang?.plus(langSplitter)?.plus(
+                                    run {
+                                        val locale = Locale.forLanguageTag(lang)
+                                        locale.getDisplayName(locale)
+                                            .replaceFirstChar { it.uppercase(locale) }
+                                    },
+                                ) ?: unknown,
+                            ),
+                            viewContext,
+                        ),
+                    )
+                }
+                else /* BY_STATUS */ -> listOf(LibraryItem(manga, makeOrGetHeader(context.mapStatus(manga.status)), viewContext))
             }
         }.flatten().toMutableList()
 
@@ -746,6 +765,10 @@ class LibraryPresenter(
                     val split = name.split(sourceSplitter)
                     name = split.first()
                     sourceId = split.last().toLongOrNull()
+                } else if (name.contains(langSplitter)) {
+                    val split = name.split(langSplitter)
+                    name = split.last()
+                    langId = split.first()
                 }
                 isHidden = getDynamicCategoryName(this) in hiddenDynamics
             }
@@ -764,7 +787,13 @@ class LibraryPresenter(
         headers.forEach { category ->
             val catId = category.id ?: return@forEach
             val headerItem =
-                tagItems[if (category.sourceId != null) "${category.name}$sourceSplitter${category.sourceId}" else category.name]
+                tagItems[
+                    when {
+                        category.sourceId != null -> "${category.name}$sourceSplitter${category.sourceId}"
+                        category.langId != null -> "${category.langId}$langSplitter${category.name}"
+                        else -> category.name
+                    },
+                ]
             if (category.isHidden) {
                 val mangaToRemove = items.filter { it.header.catId == catId }
                 val mergedTitle = mangaToRemove.joinToString("-") {
@@ -1052,8 +1081,7 @@ class LibraryPresenter(
 
     private fun getDynamicCategoryName(category: Category): String =
         groupType.toString() + dynamicCategorySplitter + (
-            category.sourceId?.toString()
-                ?: category.name
+            category.sourceId?.toString() ?: category.langId ?: category.name
             )
 
     fun toggleAllCategoryVisibility() {
@@ -1162,6 +1190,7 @@ class LibraryPresenter(
         private var lastLibraryItems: List<LibraryItem>? = null
         private var lastCategories: List<Category>? = null
         private const val sourceSplitter = "◘•◘"
+        private const val langSplitter = "⨼⨦⨠"
         private const val dynamicCategorySplitter = "▄╪\t▄╪\t▄"
 
         private val randomTags = arrayOf(0, 1, 2)
