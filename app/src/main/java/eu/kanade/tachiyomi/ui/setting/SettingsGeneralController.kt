@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.BuildCompat
 import androidx.core.os.LocaleListCompat
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
@@ -27,7 +26,6 @@ class SettingsGeneralController : SettingsController() {
     var lastThemeXDark: Int? = null
     var themePreference: ThemePreference? = null
 
-    @BuildCompat.PrereleaseSdkCheck
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.general
 
