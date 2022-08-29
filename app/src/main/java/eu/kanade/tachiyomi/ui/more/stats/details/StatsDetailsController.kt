@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.more.stats.details
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -13,6 +15,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.components.XAxis
@@ -40,11 +43,14 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsHelper
 import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
 import eu.kanade.tachiyomi.ui.more.stats.details.StatsDetailsPresenter.Stats
 import eu.kanade.tachiyomi.ui.more.stats.details.StatsDetailsPresenter.StatsSort
+import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toUtcCalendar
+import eu.kanade.tachiyomi.util.view.backgroundColor
+import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
@@ -81,7 +87,8 @@ class StatsDetailsController :
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        liftAppbarWith(binding.statsDetailsScrollView, false)
+        liftAppbarWith(binding.statsDetailsScrollView, false, liftOnScroll = { colorToolbar(it) })
+//        scrollViewWith(binding.statsDetailsScrollView, liftOnScroll = { colorToolbar(it) })
         setHasOptionsMenu(true)
 
         if (presenter.selectedStat == null) {
@@ -259,6 +266,42 @@ class StatsDetailsController :
                 changeDatesReadDurationWithArrow(presenter.endDate, 1)
             }
         }
+    }
+
+    var toolbarColorAnim: ValueAnimator? = null
+    var isToolbarColored = false
+    private var toolbarIsColored = false
+    private var colorAnimator: ValueAnimator? = null
+
+    /** Set the toolbar to fully transparent or colored and translucent */
+    private fun colorToolbar(isColor: Boolean) {
+        if (isColor == toolbarIsColored) return
+        val activity = activity ?: return
+        toolbarIsColored = isColor
+        if (isControllerVisible) setTitle()
+        val scrollingColor = activity.getResourceColor(R.attr.colorPrimaryVariant)
+        val topColor = activity.getResourceColor(R.attr.colorSurface)
+        colorAnimator?.cancel()
+        val percent = ImageUtil.getPercentOfColor(
+            binding.statsHorizontalScroll.backgroundColor ?: Color.TRANSPARENT,
+            activity.getResourceColor(R.attr.colorSurface),
+            activity.getResourceColor(R.attr.colorPrimaryVariant),
+        )
+        val cA = ValueAnimator.ofFloat(
+            percent,
+            toolbarIsColored.toInt().toFloat(),
+        )
+        colorAnimator = cA
+        colorAnimator?.addUpdateListener { animator ->
+            binding.statsHorizontalScroll.setBackgroundColor(
+                ColorUtils.blendARGB(
+                    topColor,
+                    scrollingColor,
+                    animator.animatedValue as Float,
+                ),
+            )
+        }
+        cA.start()
     }
 
     /**

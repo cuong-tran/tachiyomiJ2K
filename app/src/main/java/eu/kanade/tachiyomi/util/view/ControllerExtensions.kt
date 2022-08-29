@@ -125,11 +125,15 @@ fun Controller.removeQueryListener(includeSearchTB: Boolean = true) {
     )
 }
 
-fun <T> Controller.liftAppbarWith(recyclerOrNested: T, padView: Boolean = false) {
+fun <T> Controller.liftAppbarWith(
+    recyclerOrNested: T,
+    padView: Boolean = false,
+    liftOnScroll: ((Boolean) -> Unit)? = null,
+) {
     val recycler = recyclerOrNested as? RecyclerView ?: recyclerOrNested as? NestedScrollView ?: return
     if (padView) {
         var appBarHeight = (
-            if (fullAppBarHeight ?: 0 > 0) fullAppBarHeight!!
+            if ((fullAppBarHeight ?: 0) > 0) fullAppBarHeight!!
             else activityBinding?.appBar?.attrToolbarHeight ?: 0
             )
         activityBinding!!.toolbar.post {
@@ -166,6 +170,7 @@ fun <T> Controller.liftAppbarWith(recyclerOrNested: T, padView: Boolean = false)
     val colorToolbar: (Boolean) -> Unit = f@{ isColored ->
         isToolbarColored = isColored
         toolbarColorAnim?.cancel()
+        liftOnScroll?.invoke(isColored)
         val floatingBar =
             !(activityBinding?.toolbar?.isVisible == true || activityBinding?.tabsFrameLayout?.isVisible == true)
         val percent = ImageUtil.getPercentOfColor(
@@ -196,6 +201,14 @@ fun <T> Controller.liftAppbarWith(recyclerOrNested: T, padView: Boolean = false)
     activityBinding?.appBar?.updateAppBarAfterY(recycler)
 
     setAppBarBG(0f)
+    (recycler as? NestedScrollView)?.setOnScrollChangeListener { _, _, _, _, _ ->
+        if (router?.backstack?.lastOrNull()
+            ?.controller == this@liftAppbarWith && activity != null
+        ) {
+            val notAtTop = recycler.canScrollVertically(-1)
+            if (notAtTop != isToolbarColored) colorToolbar(notAtTop)
+        }
+    }
     (recycler as? RecyclerView)?.addOnScrollListener(
         object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
