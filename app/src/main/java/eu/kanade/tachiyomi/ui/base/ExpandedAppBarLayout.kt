@@ -9,12 +9,12 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.math.MathUtils
+import androidx.core.view.ScrollingView
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.marginTop
 import androidx.core.view.updateLayoutParams
-import androidx.core.widget.NestedScrollView
 import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bluelinelabs.conductor.Controller
@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.setTextColorAlpha
+import eu.kanade.tachiyomi.widget.StatefulNestedScrollView
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.abs
 import kotlin.math.max
@@ -273,13 +274,12 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
      * past the app bar's height, match the Y to the recyclerView's offset
      * @param cancelAnim if true, cancel the current snap animation
      */
-    fun <T> updateAppBarAfterY(recyclerOrNested: T?, cancelAnim: Boolean = true) {
-        val recyclerView = recyclerOrNested as? RecyclerView ?: recyclerOrNested as? NestedScrollView
+    fun updateAppBarAfterY(scrollView: ScrollingView?, cancelAnim: Boolean = true) {
         if (cancelAnim) {
             yAnimator?.cancel()
         }
         if (lockYPos) return
-        val offset = recyclerView?.computeVerticalScrollOffset() ?: 0
+        val offset = scrollView?.computeVerticalScrollOffset() ?: 0
         val bigHeight = bigView?.height ?: 0
         val realHeight = preLayoutHeightWhileSearching + paddingTop
         val tabHeight = if (tabsFrameLayout?.isVisible == true) 48.dpToPx else 0
@@ -358,7 +358,12 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
         val mainActivity = mainActivity ?: return
         val useSearchToolbar = mainToolbar.alpha <= 0.025f
         val idle = RecyclerView.SCROLL_STATE_IDLE
-        if (if (useSearchToolbar) -y >= height || (recyclerView is RecyclerView && recyclerView?.scrollState ?: idle <= idle) || context.isTablet()
+        val state = when (scrollView) {
+            is RecyclerView -> scrollView.scrollState
+            is StatefulNestedScrollView -> if (scrollView.hasStopped) idle else RecyclerView.SCROLL_STATE_DRAGGING
+            else -> idle
+        }
+        if (if (useSearchToolbar) -y >= height || (state <= idle) || context.isTablet()
             else mainActivity.currentToolbar == searchToolbar
         ) {
             useSearchToolbarForMenu(useSearchToolbar)
@@ -368,12 +373,11 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
     /**
      * Snap Appbar to hide the entire appbar or show the smaller toolbar
      *
-     * Only snaps if the [recyclerView] has scrolled farther than the current app bar's height
+     * Only snaps if the [scrollView] has scrolled farther than the current app bar's height
      * @param callback closure updates along with snapping the appbar, use if something needs to
      * update alongside the appbar
      */
-    fun snapAppBarY(controller: Controller?, recyclerView: RecyclerView, callback: (() -> Unit)?): Float {
-        yAnimator?.cancel()
+    fun snapAppBarY(controller: Controller?, scrollView: ScrollingView, callback: (() -> Unit)?): Float {
         val halfWay = compactAppBarHeight / 2
         val shortAnimationDuration = resources?.getInteger(
             if (toolbarMode != ToolbarState.EXPANDED) android.R.integer.config_shortAnimTime
@@ -381,7 +385,7 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
         ) ?: 0
         val realHeight = preLayoutHeightWhileSearching + paddingTop
         val closerToTop = abs(y) > realHeight - halfWay
-        val atTop = !recyclerView.canScrollVertically(-1)
+        val atTop = !(scrollView as View).canScrollVertically(-1)
         val shortH =
             if (toolbarMode != ToolbarState.EXPANDED || compactSearchMode) 0f else compactAppBarHeight
         val lastY = if (closerToTop && !atTop) {
@@ -390,14 +394,14 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
             shortH
         }
 
-        val onFirstItem = recyclerView.computeVerticalScrollOffset() < realHeight - shortH
+        val onFirstItem = scrollView.computeVerticalScrollOffset() < realHeight - shortH
 
         return if (!onFirstItem) {
             yAnimator = animate().y(lastY)
                 .setDuration(shortAnimationDuration.toLong())
             yAnimator?.setUpdateListener {
                 if (controller?.isControllerVisible == true) {
-                    updateAppBarAfterY(recyclerView, false)
+                    updateAppBarAfterY(scrollView, false)
                     callback?.invoke()
                 }
             }
@@ -405,7 +409,7 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
             useSearchToolbarForMenu(true)
             lastY
         } else {
-            useSearchToolbarForMenu(mainToolbar?.alpha ?: 0f <= 0f)
+            useSearchToolbarForMenu((mainToolbar?.alpha ?: 0f) <= 0f)
             y
         }
     }

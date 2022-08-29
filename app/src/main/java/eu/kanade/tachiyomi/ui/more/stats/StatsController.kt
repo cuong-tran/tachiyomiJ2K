@@ -18,19 +18,18 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.databinding.StatsControllerBinding
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.more.stats.details.StatsDetailsController
 import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.mapStatus
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
-import eu.kanade.tachiyomi.util.view.liftAppbarWith
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import timber.log.Timber
 import kotlin.math.roundToInt
 
-class StatsController : BaseController<StatsControllerBinding>(), SmallToolbarInterface {
+class StatsController : BaseController<StatsControllerBinding>() {
 
     val presenter = StatsPresenter()
 
@@ -46,8 +45,7 @@ class StatsController : BaseController<StatsControllerBinding>(), SmallToolbarIn
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        liftAppbarWith(binding.statsScrollView, true)
-
+        scrollViewWith(binding.statsScrollView, true)
         handleGeneralStats()
         if (mangaDistinct.isNotEmpty()) {
             binding.viewDetailLayout.setOnClickListener {
