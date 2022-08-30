@@ -706,6 +706,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         setExtensionsBadge()
         DownloadService.callListeners()
         showDLQueueTutorial()
+        reEnableBackPressedCallBack()
     }
 
     private fun showDLQueueTutorial() {
