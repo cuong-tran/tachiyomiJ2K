@@ -82,7 +82,7 @@
                     android:layout_marginTop="@dimen/marginClose"
                     android:gravity="center"
                     android:lines="2"
-                    android:text="@string/total_manga" />
+                    android:text="@string/titles_in_library" />
 
             </LinearLayout>
 
@@ -212,7 +212,7 @@
                     android:layout_marginTop="@dimen/marginClose"
                     android:gravity="center"
                     android:lines="3"
-                    android:text="@string/manga_tracked" />
+                    android:text="@string/tracked_titles" />
 
             </LinearLayout>
 
@@ -241,7 +241,7 @@
                     android:layout_marginTop="@dimen/marginClose"
                     android:gravity="center"
                     android:lines="3"
-                    android:text="@string/global_update_manga" />
+                    android:text="@string/titles_in_global_update" />
 
             </LinearLayout>
 
@@ -271,7 +271,7 @@
                     android:layout_marginTop="@dimen/marginClose"
                     android:gravity="center"
                     android:lines="3"
-                    android:text="@string/chapters_downloaded" />
+                    android:text="@string/downloaded_chapters" />
 
             </LinearLayout>
 
@@ -301,7 +301,7 @@
                     android:layout_marginTop="@dimen/marginClose"
                     android:gravity="center"
                     android:lines="3"
-                    android:text="@string/manga_local" />
+                    android:text="@string/local_titles" />
 
             </LinearLayout>
 
