@@ -508,7 +508,8 @@ class StatsDetailsController :
             chipStatus.isVisible = presenter.selectedStat !in listOf(Stats.STATUS, Stats.READ_DURATION)
             chipLanguage.isVisible = presenter.selectedStat !in listOf(Stats.LANGUAGE, Stats.READ_DURATION) &&
                 (presenter.selectedStat == Stats.SOURCE || presenter.selectedSource.isEmpty())
-            chipCategory.isVisible = presenter.selectedStat !in listOf(Stats.CATEGORY, Stats.READ_DURATION)
+            chipCategory.isVisible = presenter.selectedStat !in listOf(Stats.CATEGORY, Stats.READ_DURATION) &&
+                presenter.categoriesStats.size > 1
             statSort.isVisible = presenter.selectedStat !in listOf(
                 Stats.SCORE, Stats.LENGTH, Stats.START_YEAR, Stats.READ_DURATION,
             )

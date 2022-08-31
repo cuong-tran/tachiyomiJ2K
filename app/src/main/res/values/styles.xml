@@ -354,6 +354,21 @@
         <item name="android:checkable">false</item>
     </style>
 
+    <style name="Widget.Tachiyomi.Chip.Stat" parent="Widget.Material3.Chip.Assist">
+        <item name="android:textColor">?attr/colorOnBackground</item>
+        <item name="android:checkable">false</item>
+        <item name="checkedIconEnabled">false</item>
+        <item name="chipIconVisible">false</item>
+        <item name="chipIconEnabled">false</item>
+        <item name="chipIconTint">?attr/colorOnBackground</item>
+        <item name="chipStrokeColor">?attr/colorSecondary</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="closeIconEnabled">true</item>
+        <item name="closeIconVisible">true</item>
+        <item name="closeIcon">@drawable/ic_arrow_drop_down_24dp</item>
+        <item name="closeIconTint">?attr/colorOnBackground</item>
+    </style>
+
     <style name="Widget.Tachiyomi.Chip.AddTag" parent="Widget.Material3.Chip.Suggestion">
         <item name="chipBackgroundColor">@android:color/transparent</item>
         <item name="chipMinHeight">28dp</item>

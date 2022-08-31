@@ -74,101 +74,52 @@
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_stat"
+                    style="@style/Widget.Tachiyomi.Chip.Stat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/series_type"
-                    android:textColor="?attr/colorOnBackground"
-                    app:checkedIconEnabled="false"
                     app:chipIcon="@drawable/ic_query_stats_24dp"
-                    app:chipIconEnabled="true"
-                    app:chipIconTint="?attr/colorOnBackground"
-                    app:chipStrokeColor="?attr/colorSecondary"
-                    app:chipStrokeWidth="1dp"
-                    app:closeIcon="@drawable/ic_arrow_drop_down_24dp"
-                    app:closeIconEnabled="true"
-                    app:closeIconTint="?attr/colorOnBackground" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_series_type"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/series_type"
-                    android:textColor="?attr/colorOnBackground"
-                    android:visibility="gone"
-                    app:checkedIconEnabled="false"
-                    app:chipIcon="@drawable/ic_style_24dp"
-                    app:chipIconEnabled="false"
-                    app:chipIconTint="?attr/colorOnBackground"
-                    app:chipStrokeColor="?attr/colorSecondary"
-                    app:chipStrokeWidth="1dp"
-                    app:closeIcon="@drawable/ic_arrow_drop_down_24dp"
-                    app:closeIconEnabled="true"
-                    app:closeIconTint="?attr/colorOnBackground"
-                    tools:visibility="visible" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_source"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/source"
-                    android:textColor="?attr/colorOnBackground"
-                    app:checkedIconEnabled="false"
-                    app:chipIcon="@drawable/ic_browse_24dp"
-                    app:chipIconEnabled="false"
-                    app:chipIconTint="?attr/colorOnBackground"
-                    app:chipStrokeColor="?attr/colorSecondary"
-                    app:chipStrokeWidth="1dp"
-                    app:closeIcon="@drawable/ic_arrow_drop_down_24dp"
-                    app:closeIconEnabled="true"
-                    app:closeIconTint="?attr/colorOnBackground" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_status"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/status"
-                    android:textColor="?attr/colorOnBackground"
-                    app:checkedIconEnabled="false"
-                    app:chipIcon="@drawable/ic_progress_clock_24dp"
-                    app:chipIconEnabled="false"
-                    app:chipIconTint="?attr/colorOnBackground"
-                    app:chipStrokeColor="?attr/colorSecondary"
-                    app:chipStrokeWidth="1dp"
-                    app:closeIcon="@drawable/ic_arrow_drop_down_24dp"
-                    app:closeIconEnabled="true"
-                    app:closeIconTint="?attr/colorOnBackground" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_language"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/language"
-                    android:textColor="?attr/colorOnBackground"
-                    app:checkedIconEnabled="false"
-                    app:chipIcon="@drawable/ic_translate_24dp"
-                    app:chipIconEnabled="false"
-                    app:chipIconTint="?attr/colorOnBackground"
-                    app:chipStrokeColor="?attr/colorSecondary"
-                    app:chipStrokeWidth="1dp"
-                    app:closeIcon="@drawable/ic_arrow_drop_down_24dp"
-                    app:closeIconEnabled="true"
-                    app:closeIconTint="?attr/colorOnBackground" />
+                    app:chipIconEnabled="true" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_category"
+                    style="@style/Widget.Tachiyomi.Chip.Stat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/category"
-                    android:textColor="?attr/colorOnBackground"
-                    app:checkedIconEnabled="false"
-                    app:chipIcon="@drawable/ic_label_outline_24dp"
-                    app:chipIconEnabled="false"
-                    app:chipIconTint="?attr/colorOnBackground"
-                    app:chipStrokeColor="?attr/colorSecondary"
-                    app:chipStrokeWidth="1dp"
-                    app:closeIcon="@drawable/ic_arrow_drop_down_24dp"
-                    app:closeIconEnabled="true"
-                    app:closeIconTint="?attr/colorOnBackground" />
+                    app:chipIcon="@drawable/ic_label_outline_24dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_source"
+                    style="@style/Widget.Tachiyomi.Chip.Stat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/source"
+                    app:closeIcon="@drawable/ic_arrow_drop_down_24dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_status"
+                    style="@style/Widget.Tachiyomi.Chip.Stat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/status"
+                    app:chipIcon="@drawable/ic_progress_clock_24dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_series_type"
+                    style="@style/Widget.Tachiyomi.Chip.Stat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/series_type"
+                    app:chipIcon="@drawable/ic_style_24dp" />
+
+                 <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_language"
+                     style="@style/Widget.Tachiyomi.Chip.Stat"
+                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/language"
+                    app:chipIcon="@drawable/ic_translate_24dp" />
             </com.google.android.material.chip.ChipGroup>
         </LinearLayout>
 
