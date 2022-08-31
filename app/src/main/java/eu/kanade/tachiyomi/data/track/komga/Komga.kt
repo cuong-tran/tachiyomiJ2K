@@ -37,7 +37,9 @@ class Komga(private val context: Context, id: Int) : TrackService(id), EnhancedT
 
     override fun getLogo() = R.drawable.ic_tracker_komga
 
-    override fun getLogoColor() = Color.rgb(51, 37, 50)
+    override fun getTrackerColor() = Color.rgb(0, 94, 211)
+
+    override fun getLogoColor() = Color.argb(0, 51, 37, 50)
 
     override fun getStatusList() = listOf(UNREAD, READING, COMPLETED)
 

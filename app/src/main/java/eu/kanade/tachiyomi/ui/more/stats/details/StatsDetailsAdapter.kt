@@ -1,18 +1,21 @@
 package eu.kanade.tachiyomi.ui.more.stats.details
 
 import android.content.Context
+import android.graphics.Color
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.text.bold
 import androidx.core.view.isVisible
+import androidx.core.view.setPadding
 import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ListStatsDetailsBinding
 import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
 import eu.kanade.tachiyomi.ui.more.stats.details.StatsDetailsPresenter.Stats
 import eu.kanade.tachiyomi.ui.more.stats.details.StatsDetailsPresenter.StatsData
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 
@@ -52,6 +55,16 @@ class StatsDetailsAdapter(
             item.color ?: context.getResourceColor(R.attr.colorOnBackground),
         )
         holder.statsLabelText.text = item.label
+        if (item.iconRes != null) {
+            holder.statslogoContainer.isVisible = true
+            item.iconBGColor?.let { holder.statslogoContainer.setCardBackgroundColor(it) }
+            val padding =
+                if (Color.alpha(item.iconBGColor ?: Color.TRANSPARENT) == 0) 0 else 2.dpToPx
+            holder.statslogoIcon.setPadding(padding)
+            holder.statslogoIcon.setImageResource(item.iconRes!!)
+        } else {
+            holder.statslogoContainer.isVisible = false
+        }
         holder.statsCountText.text = getCountText(item)
         holder.statsCountPercentageText.text = getCountPercentageText(item)
         holder.statsProgressText.text = getProgressText(item)
@@ -93,6 +106,14 @@ class StatsDetailsAdapter(
             item.color ?: context.getResourceColor(R.attr.colorOnBackground),
         )
         holder.statsLabelText.text = item.label
+        if (item.icon != null) {
+            holder.statslogoContainer.isVisible = true
+            holder.statslogoContainer.setCardBackgroundColor(Color.TRANSPARENT)
+            holder.statslogoIcon.setImageDrawable(item.icon!!)
+            holder.statslogoIcon.setPadding(0)
+        } else {
+            holder.statslogoContainer.isVisible = false
+        }
         holder.statsCountText.text = getCountText(item)
         holder.statsCountPercentageText.text = getCountPercentageText(item)
         holder.statsProgressText.text = getProgressText(item)
@@ -168,5 +189,7 @@ class StatsDetailsAdapter(
         val statsDataLayout = binding.statsDataLayout
         val statsScoreStarImage = binding.statsScoreStarImage
         val statsSublabelText = binding.statsSublabelText
+        val statslogoContainer = binding.logoContainer
+        val statslogoIcon = binding.logoIcon
     }
 }

@@ -77,6 +77,8 @@ class Bangumi(private val context: Context, id: Int) : TrackService(id) {
 
     override fun getLogo() = R.drawable.ic_tracker_bangumi
 
+    override fun getTrackerColor() = Color.rgb(240, 147, 155)
+
     override fun getLogoColor() = Color.rgb(240, 145, 153)
 
     override fun getStatusList(): List<Int> {

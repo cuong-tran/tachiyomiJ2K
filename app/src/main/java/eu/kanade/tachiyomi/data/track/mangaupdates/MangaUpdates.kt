@@ -34,7 +34,9 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
 
     override fun getLogo(): Int = R.drawable.ic_tracker_manga_updates
 
-    override fun getLogoColor(): Int = Color.rgb(146, 160, 173)
+    override fun getTrackerColor() = Color.rgb(251, 148, 46)
+
+    override fun getLogoColor() = Color.argb(0, 146, 160, 173)
 
     override fun getStatusList(): List<Int> {
         return listOf(READING_LIST, COMPLETE_LIST, ON_HOLD_LIST, UNFINISHED_LIST, WISH_LIST)

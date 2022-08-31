@@ -38,6 +38,8 @@ class Shikimori(private val context: Context, id: Int) : TrackService(id) {
 
     override fun getLogo() = R.drawable.ic_tracker_shikimori
 
+    override fun getTrackerColor() = Color.rgb(218, 241, 255)
+
     override fun getLogoColor() = Color.rgb(40, 40, 40)
 
     override fun getStatusList(): List<Int> {

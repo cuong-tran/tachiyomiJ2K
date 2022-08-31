@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.more.stats.details
 
+import android.graphics.drawable.Drawable
+import androidx.annotation.DrawableRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -13,6 +15,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.more.stats.StatsHelper
 import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.mapSeriesType
@@ -230,12 +233,14 @@ class StatsDetailsPresenter(
             val label = context.getString(service?.nameRes() ?: R.string.not_tracked)
             currentStats?.add(
                 StatsData(
-                    color = pieColorList[currentStats?.size!!],
+                    color = service?.getTrackerColor() ?: pieColorList.first(),
                     count = mangaAndTrack.count(),
                     meanScore = mangaAndTrack.map { it.second }.getMeanScoreByTracker()?.roundToTwoDecimal(),
                     chaptersRead = mangaAndTrack.sumOf { it.first.read },
                     totalChapters = mangaAndTrack.sumOf { it.first.totalChapters },
                     label = label.uppercase(),
+                    iconRes = service?.getLogo(),
+                    iconBGColor = service?.getLogoColor(),
                     readDuration = mangaAndTrack.map { it.first }.getReadDuration(),
                 ),
             )
@@ -247,8 +252,9 @@ class StatsDetailsPresenter(
         currentStats = ArrayList()
         val libraryFormat = mangasDistinct.filterByChip().groupBy { it.source }
 
-        libraryFormat.forEach { (source, mangaList) ->
-            val sourceName = sources.find { it.id == source }?.toString() ?: source.toString()
+        libraryFormat.forEach { (sourceId, mangaList) ->
+            val source = sources.find { it.id == sourceId }
+            val sourceName = source?.toString() ?: sourceId.toString()
             currentStats?.add(
                 StatsData(
                     color = pieColorList[1],
@@ -257,6 +263,7 @@ class StatsDetailsPresenter(
                     chaptersRead = mangaList.sumOf { it.read },
                     totalChapters = mangaList.sumOf { it.totalChapters },
                     label = sourceName.uppercase(),
+                    icon = source?.icon(),
                     readDuration = mangaList.getReadDuration(),
                 ),
             )
@@ -273,7 +280,7 @@ class StatsDetailsPresenter(
             val label = categories.find { it.id == category }?.name ?: context.getString(R.string.default_value)
             currentStats?.add(
                 StatsData(
-                    color = pieColorList[currentStats?.size!! % 12],
+                    color = pieColorList[currentStats?.size!! % pieColorList.size],
                     count = mangaList.count(),
                     meanScore = mangaList.getMeanScoreRounded(),
                     chaptersRead = mangaList.sumOf { it.read },
@@ -582,6 +589,10 @@ class StatsDetailsPresenter(
         val chaptersRead: Int = 0,
         val totalChapters: Int = 0,
         var label: String? = null,
+        @DrawableRes
+        var iconRes: Int? = null,
+        var iconBGColor: Int? = null,
+        var icon: Drawable? = null,
         var subLabel: String? = null,
         var readDuration: Long = 0,
     )

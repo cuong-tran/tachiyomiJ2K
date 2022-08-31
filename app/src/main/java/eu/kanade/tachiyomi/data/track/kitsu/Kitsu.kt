@@ -41,6 +41,8 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
 
     override fun getLogo() = R.drawable.ic_tracker_kitsu
 
+    override fun getTrackerColor() = Color.rgb(253, 117, 92)
+
     override fun getLogoColor() = Color.rgb(51, 37, 50)
 
     override fun getStatusList(): List<Int> {
