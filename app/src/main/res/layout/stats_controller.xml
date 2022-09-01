@@ -441,7 +441,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/marginPage"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible" >
 
             <com.google.android.material.textview.MaterialTextView
                 style="?textAppearanceLabelLarge"
@@ -455,25 +456,33 @@
                 android:id="@+id/manga_stats_status_chart_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:maxWidth="600dp">
+                android:layout_gravity="center_horizontal">
 
                 <com.github.mikephil.charting.charts.PieChart
                     android:id="@+id/manga_stats_status_pie_chart"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="0dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHeight_max="300dp"
                     app:layout_constraintDimensionRatio="@fraction/chartRatio"
+                    app:layout_constraintEnd_toStartOf="@id/manga_stats_status_recycler_view"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/manga_stats_status_recycler_view"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_marginStart="12dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/marginNormal"
+                    tools:listitem="@layout/list_chart_legend"
                     android:nestedScrollingEnabled="false"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    app:layout_constraintStart_toStartOf="@id/manga_stats_status_pie_chart"
-                    app:layout_constraintTop_toBottomOf="@id/manga_stats_status_pie_chart" />
+                    app:layout_constraintStart_toEndOf="@id/manga_stats_status_pie_chart"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
