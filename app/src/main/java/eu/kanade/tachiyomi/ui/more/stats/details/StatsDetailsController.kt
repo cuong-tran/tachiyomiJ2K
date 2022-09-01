@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.more.stats.details
 
 import android.animation.ValueAnimator
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -14,11 +13,15 @@ import android.widget.TextView
 import androidx.annotation.PluralsRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.util.Pair
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePaddingRelative
 import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -57,6 +60,7 @@ import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.compatToolTipText
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
@@ -94,10 +98,12 @@ class StatsDetailsController :
 
     override fun createBinding(inflater: LayoutInflater) = StatsDetailsControllerBinding.inflate(inflater)
 
-    @SuppressLint("ClickableViewAccessibility")
+    val scrollView: View
+        get() = binding.statsDetailsScrollView ?: binding.statsRecyclerView
+
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        liftAppbarWith(binding.statsDetailsScrollView, false, liftOnScroll = { colorToolbar(it) })
+        liftAppbarWith(scrollView, false, liftOnScroll = { colorToolbar(it) })
         setHasOptionsMenu(true)
 
         if (presenter.selectedStat == null) {
@@ -107,6 +113,12 @@ class StatsDetailsController :
         resetAndSetup()
         initializeChips()
         with(binding) {
+            chartLinearLayout?.doOnApplyWindowInsetsCompat { view, insets, _ ->
+                view.updatePaddingRelative(
+                    bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom,
+                )
+            }
+
             statsClearButtonContainer.compatToolTipText = activity?.getString(R.string.clear_filters)
             statsClearButtonContainer.setOnClickListener {
                 resetFilters()
@@ -274,8 +286,9 @@ class StatsDetailsController :
         val scrollingColor = activity.getResourceColor(R.attr.colorPrimaryVariant)
         val topColor = activity.getResourceColor(R.attr.colorSurface)
         colorAnimator?.cancel()
+        val view = binding.filterConstraintLayout ?: binding.statsHorizontalScroll
         val percent = ImageUtil.getPercentOfColor(
-            binding.statsHorizontalScroll.backgroundColor ?: Color.TRANSPARENT,
+            view.backgroundColor ?: Color.TRANSPARENT,
             activity.getResourceColor(R.attr.colorSurface),
             activity.getResourceColor(R.attr.colorPrimaryVariant),
         )
@@ -285,7 +298,7 @@ class StatsDetailsController :
         )
         colorAnimator = cA
         colorAnimator?.addUpdateListener { animator ->
-            binding.statsHorizontalScroll.setBackgroundColor(
+            view.setBackgroundColor(
                 ColorUtils.blendARGB(
                     topColor,
                     scrollingColor,
@@ -477,8 +490,9 @@ class StatsDetailsController :
     private fun resetLayout(updateChipsVisibility: Boolean = false, resetReadDuration: Boolean = updateChipsVisibility) {
         with(binding) {
             progress.isVisible = true
-            statsDetailsScrollView.isInvisible = true
-            statsDetailsScrollView.scrollTo(0, 0)
+            scrollView.isInvisible = true
+            scrollView.scrollTo(0, 0)
+            chartLinearLayout?.isVisible = false
             statsPieChart.isVisible = false
             statsBarChart.isVisible = false
             statsLineChart.isVisible = false
@@ -501,6 +515,7 @@ class StatsDetailsController :
                 binding.noChartData.show(R.drawable.ic_heart_off_24dp, R.string.no_data_for_filters)
                 presenter.currentStats?.removeAll { it.count == 0 }
                 handleNoChartLayout()
+                chartLinearLayout?.isVisible = false
                 statsPieChart.isVisible = false
                 statsBarChart.isVisible = false
                 statsLineChart.isVisible = false
@@ -508,7 +523,7 @@ class StatsDetailsController :
                 binding.noChartData.hide()
                 handleLayout()
             }
-            statsDetailsScrollView.isVisible = true
+            scrollView.isVisible = true
             progress.isVisible = false
             totalDurationStatsText.text = adapter?.list?.sumOf { it.readDuration }?.getReadDuration()
         }
@@ -603,6 +618,9 @@ class StatsDetailsController :
      * Handle which layout should be displayed according to the selected stat
      */
     private fun handleLayout() {
+        binding.chartLinearLayout?.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            matchConstraintPercentWidth = 0.5f
+        }
         when (presenter.selectedStat) {
             Stats.SERIES_TYPE, Stats.STATUS, Stats.LANGUAGE, Stats.TRACKER, Stats.CATEGORY -> handlePieChart()
             Stats.SCORE -> handleScoreLayout()
@@ -725,9 +743,13 @@ class StatsDetailsController :
             statsPieChart.clear()
             statsPieChart.invalidate()
 
-            statsPieChart.visibility = View.VISIBLE
-            statsBarChart.visibility = View.GONE
-            statsLineChart.visibility = View.GONE
+            chartLinearLayout?.isVisible = true
+            statsPieChart.isVisible = true
+            statsBarChart.isVisible = false
+            statsLineChart.isVisible = false
+            chartLinearLayout?.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                matchConstraintPercentWidth = 0.33f
+            }
 
             try {
                 val pieData = PieData(pieDataSet)
@@ -758,9 +780,10 @@ class StatsDetailsController :
             statsBarChart.axisLeft.resetAxisMinimum()
             statsBarChart.axisLeft.resetAxisMaximum()
 
-            statsPieChart.visibility = View.GONE
-            statsBarChart.visibility = View.VISIBLE
-            statsLineChart.visibility = View.GONE
+            chartLinearLayout?.isVisible = true
+            statsPieChart.isVisible = false
+            statsBarChart.isVisible = true
+            statsLineChart.isVisible = false
 
             try {
                 val newValueFormatter = object : ValueFormatter() {
@@ -870,9 +893,10 @@ class StatsDetailsController :
             statsLineChart.clear()
             statsLineChart.invalidate()
 
-            statsPieChart.visibility = View.GONE
-            statsBarChart.visibility = View.GONE
-            statsLineChart.visibility = View.VISIBLE
+            chartLinearLayout?.isVisible = true
+            statsPieChart.isVisible = false
+            statsBarChart.isVisible = false
+            statsLineChart.isVisible = true
 
             try {
                 val newValueFormatter = object : ValueFormatter() {
