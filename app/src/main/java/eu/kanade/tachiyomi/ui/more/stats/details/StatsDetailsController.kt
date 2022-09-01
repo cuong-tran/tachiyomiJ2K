@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.PluralsRes
@@ -17,6 +16,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.util.Pair
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.components.XAxis
@@ -39,7 +40,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.databinding.StatsDetailsControllerBinding
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
-import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.more.stats.StatsHelper
 import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
 import eu.kanade.tachiyomi.ui.more.stats.details.StatsDetailsPresenter.Stats
@@ -47,15 +48,19 @@ import eu.kanade.tachiyomi.ui.more.stats.details.StatsDetailsPresenter.StatsSort
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toInt
+import eu.kanade.tachiyomi.util.system.toLocalCalendar
 import eu.kanade.tachiyomi.util.system.toUtcCalendar
+import eu.kanade.tachiyomi.util.system.withIOContext
+import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
-import eu.kanade.tachiyomi.util.view.setStyle
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.Calendar
 import java.util.Locale
@@ -63,10 +68,10 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
 
 class StatsDetailsController :
-    BaseController<StatsDetailsControllerBinding>(),
+    BaseCoroutineController<StatsDetailsControllerBinding, StatsDetailsPresenter>(),
     SmallToolbarInterface {
 
-    private val presenter = StatsDetailsPresenter()
+    override val presenter = StatsDetailsPresenter()
     private var query = ""
     private var adapter: StatsDetailsAdapter? = null
     lateinit var searchView: SearchView
@@ -102,31 +107,13 @@ class StatsDetailsController :
         resetAndSetup()
         initializeChips()
         with(binding) {
-            statsDetailsRefreshLayout.setStyle()
-            statsDetailsRefreshLayout.setOnRefreshListener {
-                statsDetailsRefreshLayout.isRefreshing = false
-                searchView.clearFocus()
-                searchItem.collapseActionView()
-                presenter.libraryMangas = presenter.getLibrary()
-                resetAndSetup()
-                initializeChips()
-            }
-
-            statsClearButton.compatToolTipText = activity?.getString(R.string.clear_filters)
-            statsClearButton.setOnClickListener {
+            statsClearButtonContainer.compatToolTipText = activity?.getString(R.string.clear_filters)
+            statsClearButtonContainer.setOnClickListener {
                 resetFilters()
                 searchView.clearFocus()
                 searchItem.collapseActionView()
                 resetAndSetup()
                 initializeChips()
-            }
-
-            statsHorizontalScroll.setOnTouchListener { _, motionEvent ->
-                when (motionEvent.action) {
-                    MotionEvent.ACTION_MOVE -> statsDetailsRefreshLayout.isEnabled = false
-                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> statsDetailsRefreshLayout.isEnabled = true
-                }
-                false
             }
 
             chipStat.setOnClickListener {
@@ -235,22 +222,37 @@ class StatsDetailsController :
 
                         dialog.dismiss()
                         presenter.sortCurrentStats()
-                        resetAndSetup(updateStats = false, updateChipsVisibility = false)
+                        resetLayout(updateChipsVisibility = false, resetReadDuration = false)
+                        updateStats()
                     }
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
             statsDateText.setOnClickListener {
-                val dialog = MaterialDatePicker.Builder.datePicker()
+                val dialog = MaterialDatePicker.Builder.dateRangePicker()
                     .setTitleText(R.string.read_duration_week)
-                    .setSelection(presenter.startDate.timeInMillis.toUtcCalendar()?.timeInMillis)
+                    .setSelection(
+                        Pair(
+                            presenter.startDate.timeInMillis.toUtcCalendar()?.timeInMillis,
+                            presenter.endDate.timeInMillis.toUtcCalendar()?.timeInMillis,
+                        ),
+                    )
                     .build()
 
                 dialog.addOnPositiveButtonClickListener { utcMillis ->
-                    presenter.updateReadDurationPeriod(utcMillis)
-                    statsBarChart.highlightValues(null)
-                    resetAndSetup(updateChipsVisibility = false, resetReadDuration = true)
-                    totalDurationStatsText.text = adapter?.list?.sumOf { it.readDuration }?.getReadDuration()
+                    binding.progress.isVisible = true
+                    viewScope.launch {
+                        withIOContext {
+                            presenter.updateReadDurationPeriod(
+                                utcMillis.first.toLocalCalendar()?.timeInMillis ?: utcMillis.first,
+                                utcMillis.second.toLocalCalendar()?.timeInMillis
+                                    ?: utcMillis.second,
+                            )
+                        }
+                        binding.statsDateText.text = presenter.getPeriodString()
+                        statsBarChart.highlightValues(null)
+                        presenter.getStatisticData()
+                    }
                 }
                 dialog.show((activity as AppCompatActivity).supportFragmentManager, activity?.getString(R.string.read_duration_week))
             }
@@ -319,7 +321,6 @@ class StatsDetailsController :
         with(binding) {
             if (highlightedDay == null) {
                 changeWeekReadDuration(weeksToAdd)
-                statsDateText.text = presenter.getPeriodString()
             } else {
                 val newDaySelected = highlightedDay?.get(Calendar.DAY_OF_MONTH)
                 val endDay = referenceDate.get(Calendar.DAY_OF_MONTH)
@@ -328,7 +329,6 @@ class StatsDetailsController :
                     changeWeekReadDuration(weeksToAdd)
                     if (!statsBarChart.isVisible) {
                         highlightedDay = null
-                        statsDateText.text = presenter.getPeriodString()
                         return
                     }
                 }
@@ -338,6 +338,11 @@ class StatsDetailsController :
                 }
                 val highlightValue = presenter.historyByDayAndManga.keys.toTypedArray()
                     .indexOfFirst { it.get(Calendar.DAY_OF_MONTH) == highlightedDay?.get(Calendar.DAY_OF_MONTH) }
+                if (highlightValue == -1) {
+                    highlightedDay = null
+                    changeDatesReadDurationWithArrow(referenceDate, weeksToAdd)
+                    return
+                }
                 statsBarChart.highlightValue(highlightValue.toFloat(), 0)
                 statsBarChart.marker.refreshContent(
                     statsBarChart.data.dataSets[0].getEntryForXValue(highlightValue.toFloat(), 0f),
@@ -352,10 +357,22 @@ class StatsDetailsController :
      * @param weeksToAdd number of weeks to add or remove
      */
     private fun changeWeekReadDuration(weeksToAdd: Int) {
-        presenter.startDate.apply { add(Calendar.WEEK_OF_YEAR, weeksToAdd) }
-        presenter.endDate.apply { add(Calendar.WEEK_OF_YEAR, weeksToAdd) }
-        presenter.history = presenter.getMangaHistoryGroupedByDay()
-        resetAndSetup(updateChipsVisibility = false)
+        if (weeksToAdd > 0) {
+            presenter.startDate.apply {
+                time = presenter.endDate.time
+                add(Calendar.DAY_OF_YEAR, 1)
+            }
+        } else {
+            presenter.startDate.apply {
+                add(Calendar.WEEK_OF_YEAR, -1)
+            }
+        }
+        binding.progress.isVisible = true
+        viewScope.launchIO {
+            presenter.updateReadDurationPeriod(presenter.startDate.timeInMillis)
+            withUIContext { binding.statsDateText.text = presenter.getPeriodString() }
+            presenter.getStatisticData()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -431,13 +448,15 @@ class StatsDetailsController :
 
     /**
      * Reset the layout and setup the chart to display
-     * @param updateStats whether to recalculate the displayed stats
      * @param updateChipsVisibility whether to update the chips visibility
      * @param resetReadDuration whether to reset the read duration values
      */
-    private fun resetAndSetup(updateStats: Boolean = true, updateChipsVisibility: Boolean = true, resetReadDuration: Boolean = updateChipsVisibility) {
+    private fun resetAndSetup(
+        updateChipsVisibility: Boolean = true,
+        resetReadDuration: Boolean = updateChipsVisibility,
+    ) {
         resetLayout(updateChipsVisibility, resetReadDuration)
-        setupStatistic(updateStats)
+        presenter.getStatisticData()
     }
 
     /**
@@ -458,11 +477,11 @@ class StatsDetailsController :
     private fun resetLayout(updateChipsVisibility: Boolean = false, resetReadDuration: Boolean = updateChipsVisibility) {
         with(binding) {
             progress.isVisible = true
-            statsDetailsScrollView.isVisible = false
+            statsDetailsScrollView.isInvisible = true
             statsDetailsScrollView.scrollTo(0, 0)
-            statsPieChart.visibility = View.GONE
-            statsBarChart.visibility = View.GONE
-            statsLineChart.visibility = View.GONE
+            statsPieChart.isVisible = false
+            statsBarChart.isVisible = false
+            statsLineChart.isVisible = false
 
             if (resetReadDuration) {
                 highlightedDay = null
@@ -474,17 +493,17 @@ class StatsDetailsController :
         }
     }
 
-    /**
-     * Setup the statistics and charts
-     * @param updateStats whether to recalculate the displayed stats
-     */
-    private fun setupStatistic(updateStats: Boolean = true) {
-        if (updateStats) presenter.getStatisticData()
+    fun updateStats() {
+        val currentStats = presenter.currentStats
         with(binding) {
-            if (presenter.currentStats.isNullOrEmpty() || presenter.currentStats!!.all { it.count == 0 }) {
+            val hasNoData = currentStats.isNullOrEmpty() || currentStats.all { it.count == 0 }
+            if (hasNoData) {
                 binding.noChartData.show(R.drawable.ic_heart_off_24dp, R.string.no_data_for_filters)
                 presenter.currentStats?.removeAll { it.count == 0 }
                 handleNoChartLayout()
+                statsPieChart.isVisible = false
+                statsBarChart.isVisible = false
+                statsLineChart.isVisible = false
             } else {
                 binding.noChartData.hide()
                 handleLayout()
@@ -500,7 +519,7 @@ class StatsDetailsController :
      */
     private fun updateChipsVisibility() {
         with(binding) {
-            statsClearButton.isVisible = hasActiveFilters()
+            statsClearButtonContainer.isVisible = hasActiveFilters()
             chipSeriesType.isVisible = presenter.selectedStat !in listOf(Stats.SERIES_TYPE, Stats.READ_DURATION)
             chipSource.isVisible =
                 presenter.selectedStat !in listOf(Stats.LANGUAGE, Stats.SOURCE, Stats.READ_DURATION) &&
@@ -659,7 +678,10 @@ class StatsDetailsController :
         }
 
         assignAdapter()
-        if (barEntries.all { it.y == 0f }) return
+        if (barEntries.all { it.y == 0f }) {
+            binding.statsBarChart.isVisible = false
+            return
+        }
         val barDataSet = BarDataSet(barEntries, "Read Duration Distribution")
         barDataSet.color = StatsHelper.PIE_CHART_COLOR_LIST[1]
         setupBarChart(
@@ -797,7 +819,7 @@ class StatsDetailsController :
                                 override fun onValueSelected(e: Entry, h: Highlight) {
                                     highlightValue(h)
                                     highlightedDay = presenter.historyByDayAndManga.keys.toTypedArray()[e.x.toInt()]
-                                    statsDateText.text = presenter.convertCalendarToString(highlightedDay!!)
+                                    statsDateText.text = presenter.convertCalendarToLongString(highlightedDay!!)
                                     presenter.setupReadDuration(highlightedDay)
                                     assignAdapter()
                                     totalDurationStatsText.text =

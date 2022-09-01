@@ -16,17 +16,21 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.icon
+import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.more.stats.StatsHelper
 import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.mapSeriesType
 import eu.kanade.tachiyomi.util.mapStatus
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
+import eu.kanade.tachiyomi.util.system.withUIContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 class StatsDetailsPresenter(
@@ -34,7 +38,7 @@ class StatsDetailsPresenter(
     prefs: PreferencesHelper = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
-) {
+) : BaseCoroutinePresenter<StatsDetailsController>() {
 
     private var context = prefs.context
     var libraryMangas = getLibrary()
@@ -91,6 +95,10 @@ class StatsDetailsPresenter(
 
     private val pieColorList = StatsHelper.PIE_CHART_COLOR_LIST
 
+    override fun onCreate() {
+        super.onCreate()
+    }
+
     /**
      * Get the data of the selected stat
      */
@@ -99,19 +107,22 @@ class StatsDetailsPresenter(
             return
         }
 
-        when (selectedStat) {
-            Stats.SERIES_TYPE -> setupSeriesType()
-            Stats.STATUS -> setupStatus()
-            Stats.SCORE -> setupScores()
-            Stats.LANGUAGE -> setupLanguages()
-            Stats.LENGTH -> setupLength()
-            Stats.TRACKER -> setupTrackers()
-            Stats.SOURCE -> setupSources()
-            Stats.CATEGORY -> setupCategories()
-            Stats.TAG -> setupTags()
-            Stats.START_YEAR -> setupStartYear()
-            Stats.READ_DURATION -> setupReadDuration()
-            else -> {}
+        presenterScope.launchIO {
+            when (selectedStat) {
+                Stats.SERIES_TYPE -> setupSeriesType()
+                Stats.STATUS -> setupStatus()
+                Stats.SCORE -> setupScores()
+                Stats.LANGUAGE -> setupLanguages()
+                Stats.LENGTH -> setupLength()
+                Stats.TRACKER -> setupTrackers()
+                Stats.SOURCE -> setupSources()
+                Stats.CATEGORY -> setupCategories()
+                Stats.TAG -> setupTags()
+                Stats.START_YEAR -> setupStartYear()
+                Stats.READ_DURATION -> setupReadDuration()
+                else -> {}
+            }
+            withUIContext { controller?.updateStats() }
         }
     }
 
@@ -519,17 +530,28 @@ class StatsDetailsPresenter(
         val calendar = Calendar.getInstance().apply {
             timeInMillis = startDate.timeInMillis
         }
-        return (0..6).associate { _ ->
+
+        val millionSeconds = endDate.timeInMillis - startDate.timeInMillis
+        val days = TimeUnit.MILLISECONDS.toDays(millionSeconds)
+        return (0..days).associate { _ ->
             Calendar.getInstance().apply { timeInMillis = calendar.timeInMillis } to history.filter {
                 val calH = Calendar.getInstance().apply { timeInMillis = it.history.last_read }
-                calH.get(Calendar.DAY_OF_WEEK) == calendar.get(Calendar.DAY_OF_WEEK)
+                calH.get(Calendar.DAY_OF_YEAR) == calendar.get(Calendar.DAY_OF_YEAR) &&
+                    calH.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
             }.also { calendar.add(Calendar.DAY_OF_WEEK, 1) }
         }
     }
 
     fun getCalendarShortDay(calendar: Calendar): String {
-        return calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault())
-            ?: context.getString(R.string.unknown)
+        return if (history.size > 14) {
+            ""
+        } else {
+            calendar.getDisplayName(
+                Calendar.DAY_OF_WEEK,
+                Calendar.SHORT,
+                Locale.getDefault(),
+            )
+        } ?: context.getString(R.string.unknown)
     }
 
     /**
@@ -538,7 +560,6 @@ class StatsDetailsPresenter(
     fun updateReadDurationPeriod(millis: Long) {
         startDate = Calendar.getInstance().apply {
             timeInMillis = millis
-            set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
             set(Calendar.HOUR_OF_DAY, 0)
             clear(Calendar.MINUTE)
             clear(Calendar.SECOND)
@@ -549,6 +570,31 @@ class StatsDetailsPresenter(
             add(Calendar.WEEK_OF_YEAR, 1)
         }
         history = getMangaHistoryGroupedByDay()
+    }
+
+    fun updateReadDurationPeriod(startMillis: Long, endMillis: Long) {
+        startDate = Calendar.getInstance().apply {
+            timeInMillis = startMillis
+            set(Calendar.HOUR_OF_DAY, 0)
+            clear(Calendar.MINUTE)
+            clear(Calendar.SECOND)
+            clear(Calendar.MILLISECOND)
+        }
+        endDate = Calendar.getInstance().apply {
+            timeInMillis = endMillis
+            set(Calendar.HOUR_OF_DAY, 0)
+            clear(Calendar.MINUTE)
+            clear(Calendar.SECOND)
+            clear(Calendar.MILLISECOND)
+            add(Calendar.DAY_OF_YEAR, 1)
+            timeInMillis -= 1
+        }
+        history = getMangaHistoryGroupedByDay()
+    }
+
+    fun convertCalendarToLongString(calendar: Calendar): String {
+        val formatter = SimpleDateFormat("EEEE, MMMM dd", Locale.getDefault())
+        return formatter.format(calendar.time)
     }
 
     fun convertCalendarToString(calendar: Calendar): String {
