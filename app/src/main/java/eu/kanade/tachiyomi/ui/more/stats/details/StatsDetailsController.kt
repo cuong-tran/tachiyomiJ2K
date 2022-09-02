@@ -242,7 +242,7 @@ class StatsDetailsController :
             }
             statsDateText.setOnClickListener {
                 val dialog = MaterialDatePicker.Builder.dateRangePicker()
-                    .setTitleText(R.string.read_duration_week)
+                    .setTitleText(R.string.read_duration)
                     .setSelection(
                         Pair(
                             presenter.startDate.timeInMillis.toUtcCalendar()?.timeInMillis,
@@ -266,7 +266,7 @@ class StatsDetailsController :
                         presenter.getStatisticData()
                     }
                 }
-                dialog.show((activity as AppCompatActivity).supportFragmentManager, activity?.getString(R.string.read_duration_week))
+                dialog.show((activity as AppCompatActivity).supportFragmentManager, activity?.getString(R.string.read_duration))
             }
             statsDateStartArrow.setOnClickListener {
                 changeDatesReadDurationWithArrow(presenter.startDate, -1)

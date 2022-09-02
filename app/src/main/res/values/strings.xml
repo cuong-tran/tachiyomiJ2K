@@ -998,9 +998,7 @@
     <string name="tracker">Tracker</string>
     <string name="length">Length</string>
     <string name="start_year">Start year</string>
-    <string name="title_count">Title count</string>
     <string name="no_data_for_filters">No data found for your current filters</string>
-    <string name="read_duration_week">Read duration week</string>
     <plurals name="_series_types">
         <item quantity="other">%d series types</item>
     </plurals>

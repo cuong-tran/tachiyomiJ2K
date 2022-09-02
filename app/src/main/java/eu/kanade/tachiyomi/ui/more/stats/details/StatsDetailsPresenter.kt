@@ -623,7 +623,7 @@ class StatsDetailsPresenter(
     }
 
     enum class StatsSort(val resourceId: Int) {
-        COUNT_DESC(R.string.title_count),
+        COUNT_DESC(R.string.most_entries),
         PROGRESS_DESC(R.string.chapters_read),
         MEAN_SCORE_DESC(R.string.mean_score),
     }
