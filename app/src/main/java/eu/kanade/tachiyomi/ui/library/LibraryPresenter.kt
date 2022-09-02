@@ -920,15 +920,20 @@ class LibraryPresenter(
     }
 
     /** Remove manga from the library and delete the downloads */
-    fun confirmDeletion(mangas: List<Manga>) {
+    fun confirmDeletion(mangas: List<Manga>, coverCacheToo: Boolean = true) {
         launchIO {
             val mangaToDelete = mangas.distinctBy { it.id }
             mangaToDelete.forEach { manga ->
-                coverCache.deleteFromCache(manga)
+                if (coverCacheToo) {
+                    coverCache.deleteFromCache(manga)
+                }
                 val source = sourceManager.get(manga.source) as? HttpSource
                 if (source != null) {
                     downloadManager.deleteManga(manga, source)
                 }
+            }
+            if (!coverCacheToo) {
+                requestDownloadBadgesUpdate()
             }
         }
     }

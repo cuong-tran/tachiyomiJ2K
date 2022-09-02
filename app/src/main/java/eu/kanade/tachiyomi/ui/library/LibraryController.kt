@@ -24,6 +24,7 @@ import android.view.ViewPropertyAnimator
 import android.view.ViewTreeObserver
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -94,6 +95,7 @@ import eu.kanade.tachiyomi.ui.source.globalsearch.GlobalSearchController
 import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
+import eu.kanade.tachiyomi.util.system.disableItems
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.getResourceDrawable
@@ -1952,13 +1954,35 @@ class LibraryController(
             R.id.action_move_to_category -> showChangeMangaCategoriesSheet()
             R.id.action_share -> shareManga()
             R.id.action_delete -> {
+                val options = arrayOf(
+                    R.string.remove_downloads,
+                    R.string.remove_from_library,
+                )
+                    .map { activity!!.getString(it) }
                 activity!!.materialAlertDialog()
-                    .setMessage(R.string.remove_from_library_question)
-                    .setPositiveButton(R.string.remove) { _, _ ->
-                        deleteMangasFromLibrary()
+                    .setTitle(R.string.remove)
+                    .setMultiChoiceItems(
+                        options.toTypedArray(),
+                        options.map { true }.toBooleanArray(),
+                    ) { dialog, position, _ ->
+                        if (position == 0) {
+                            val listView = (dialog as AlertDialog).listView
+                            listView.setItemChecked(position, true)
+                        }
+                    }
+                    .setPositiveButton(R.string.remove) { dialog, _ ->
+                        val listView = (dialog as AlertDialog).listView
+                        if (listView.isItemChecked(1)) {
+                            deleteMangasFromLibrary()
+                        } else {
+                            val mangas = selectedMangas.toList()
+                            presenter.confirmDeletion(mangas, false)
+                        }
                     }
                     .setNegativeButton(android.R.string.cancel, null)
-                    .show()
+                    .show().apply {
+                        disableItems(arrayOf(options.first()))
+                    }
             }
             R.id.action_download_unread -> {
                 presenter.downloadUnread(selectedMangas.toList())
