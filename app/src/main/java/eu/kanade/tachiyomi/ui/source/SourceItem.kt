@@ -26,7 +26,7 @@ class SourceItem(val source: CatalogueSource, header: LangItem? = null, val isPi
     }
 
     override fun isSwipeable(): Boolean {
-        return source.id != LocalSource.ID && header != null
+        return source.id != LocalSource.ID && header != null && header.code != SourcePresenter.LAST_USED_KEY
     }
 
     /**
