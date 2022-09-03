@@ -117,7 +117,7 @@ class EditMangaDialog : DialogController {
                             { LocaleHelper.getSourceDisplayName(it, binding.root.context) },
                         ),
                     )
-                    .filter { it != "all" },
+                    .filter { it != "all" && it != "other" },
             )
             binding.mangaLang.setEntries(
                 languages.map {
