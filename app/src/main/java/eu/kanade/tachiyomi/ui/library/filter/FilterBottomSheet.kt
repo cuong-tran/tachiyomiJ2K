@@ -31,9 +31,11 @@ import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.inflate
+import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -148,6 +150,17 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val activeFilters = hasActiveFiltersFromPref()
         if (activeFilters && sheetBehavior.isHidden() && sheetBehavior?.skipCollapsed == false) {
             sheetBehavior?.collapse()
+            controller.viewScope.launchUI {
+                var hasScrolled = false
+                binding.filterScroll.setOnScrollChangeListener { _, _, _, _, _ ->
+                    hasScrolled = true
+                }
+                delay(2000)
+                if (sheetBehavior.isCollapsed() && !hasScrolled) {
+                    sheetBehavior?.hide()
+                }
+                binding.filterScroll.setOnScrollChangeListener(null)
+            }
         }
 
         post {
