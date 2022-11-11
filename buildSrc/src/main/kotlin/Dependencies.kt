@@ -5,7 +5,7 @@ object AndroidVersions {
     const val versionCode = 97
     const val versionName = "1.5.9"
     const val ndk = "23.1.7779620"
-    const val kotlin = "1.6.21"
+    const val kotlin = "1.7.20"
 }
 
 object Plugins {
