@@ -29,7 +29,7 @@ enum class LibrarySort(
         R.string.category,
         R.drawable.ic_label_outline_24dp,
     ),
-    
+
     ;
 
     val categoryValue: Char

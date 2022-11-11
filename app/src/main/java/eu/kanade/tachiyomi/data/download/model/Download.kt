@@ -56,7 +56,7 @@ class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
         DOWNLOADING,
         DOWNLOADED,
         ERROR,
-        
+
         ;
 
         companion object {
