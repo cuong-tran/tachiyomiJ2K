@@ -21,6 +21,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/view_detail_layout"
             style="@style/Widget.Tachiyomi.Button.OutlinedButton.Icon"
+            android:backgroundTint="?background"
             android:layout_gravity="end"
             android:text="@string/view_detailed_statistics"
             app:icon="@drawable/ic_brief" />
