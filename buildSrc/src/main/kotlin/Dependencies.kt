@@ -17,7 +17,7 @@ object Plugins {
     const val jetbrainsKotlin = "org.jetbrains.kotlin.android"
     const val kotlinSerialization = "org.jetbrains.kotlin.plugin.serialization"
     val gradleVersions = PluginClass("com.github.ben-manes.versions", "0.42.0")
-    val kotlinter = PluginClass("org.jmailen.kotlinter", "3.10.0")
+    val kotlinter = PluginClass("org.jmailen.kotlinter", "3.12.0")
 }
 
 data class PluginClass(val name: String, val version: String) {

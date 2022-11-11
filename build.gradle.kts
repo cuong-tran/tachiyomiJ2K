@@ -26,7 +26,7 @@ subprojects {
 buildscript {
     dependencies {
         classpath("com.android.tools.build:gradle:7.3.1")
-        classpath("com.google.gms:google-services:4.3.13")
+        classpath("com.google.gms:google-services:4.3.14")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${AndroidVersions.kotlin}")
         classpath("com.google.android.gms:oss-licenses-plugin:0.10.5")
         classpath("org.jetbrains.kotlin:kotlin-serialization:${AndroidVersions.kotlin}")
