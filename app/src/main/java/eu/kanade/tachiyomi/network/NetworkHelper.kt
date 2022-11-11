@@ -71,10 +71,10 @@ class NetworkHelper(val context: Context) {
     }
 
     val defaultUserAgent by lazy {
-        preferences.defaultUserAgent().get()
+        preferences.defaultUserAgent().get().replace("\n", " ").trim()
     }
 
     companion object {
-        val DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0"
+        const val DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0"
     }
 }
