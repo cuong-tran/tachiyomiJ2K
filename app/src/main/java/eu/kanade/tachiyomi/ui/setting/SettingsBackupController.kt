@@ -24,7 +24,7 @@ import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.util.system.MiuiUtil
+import eu.kanade.tachiyomi.util.system.DeviceUtil
 import eu.kanade.tachiyomi.util.system.disableItems
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
@@ -54,7 +54,7 @@ class SettingsBackupController : SettingsController() {
             summaryRes = R.string.can_be_used_to_restore
 
             onClick {
-                if (MiuiUtil.isMiui() && MiuiUtil.isMiuiOptimizationDisabled()) {
+                if (DeviceUtil.isMiui && DeviceUtil.isMiuiOptimizationDisabled()) {
                     context.toast(R.string.restore_miui_warning, Toast.LENGTH_LONG)
                 }
 
@@ -73,7 +73,7 @@ class SettingsBackupController : SettingsController() {
             summaryRes = R.string.restore_from_backup_file
 
             onClick {
-                if (MiuiUtil.isMiui() && MiuiUtil.isMiuiOptimizationDisabled()) {
+                if (DeviceUtil.isMiui && DeviceUtil.isMiuiOptimizationDisabled()) {
                     context.toast(R.string.restore_miui_warning, Toast.LENGTH_LONG)
                 }
 

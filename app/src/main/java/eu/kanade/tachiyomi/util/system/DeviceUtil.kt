@@ -1,12 +1,13 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.annotation.SuppressLint
+import android.os.Build
 import timber.log.Timber
 
-object MiuiUtil {
+object DeviceUtil {
 
-    fun isMiui(): Boolean {
-        return getSystemProperty("ro.miui.ui.version.name")?.isNotEmpty() ?: false
+    val isMiui by lazy {
+        getSystemProperty("ro.miui.ui.version.name")?.isNotEmpty() ?: false
     }
 
     @SuppressLint("PrivateApi")
@@ -24,6 +25,16 @@ object MiuiUtil {
             false
         }
     }
+
+    val isSamsung by lazy {
+        Build.MANUFACTURER.equals("samsung", ignoreCase = true)
+    }
+
+    val invalidDefaultBrowsers = listOf(
+        "android",
+        "com.huawei.android.internal.app",
+        "com.zui.resolver",
+    )
 
     @SuppressLint("PrivateApi")
     private fun getSystemProperty(key: String?): String? {
