@@ -211,10 +211,12 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         val updateCategories = categories.get()
         val excludeUpdateCategories = excludeCategories.get()
         box.isVisible = (updateCategories.isNotEmpty() || excludeUpdateCategories.isNotEmpty()) && shouldShow
-        if (shouldShow) box.state = when {
-            updateCategories.any { category?.id == it.toIntOrNull() } -> TriStateCheckBox.State.CHECKED
-            excludeUpdateCategories.any { category?.id == it.toIntOrNull() } -> TriStateCheckBox.State.IGNORE
-            else -> TriStateCheckBox.State.UNCHECKED
+        if (shouldShow) {
+            box.state = when {
+                updateCategories.any { category?.id == it.toIntOrNull() } -> TriStateCheckBox.State.CHECKED
+                excludeUpdateCategories.any { category?.id == it.toIntOrNull() } -> TriStateCheckBox.State.IGNORE
+                else -> TriStateCheckBox.State.UNCHECKED
+            }
         }
     }
 }

@@ -40,8 +40,11 @@ open class ListMatPreference @JvmOverloads constructor(
 
     override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {
         val index = indexOfPref
-        if (entries.isEmpty() || index == -1) ""
-        else tempEntry ?: entries.getOrNull(index) ?: ""
+        if (entries.isEmpty() || index == -1) {
+            ""
+        } else {
+            tempEntry ?: entries.getOrNull(index) ?: ""
+        }
     }
 
     override fun dialog(): MaterialAlertDialogBuilder {

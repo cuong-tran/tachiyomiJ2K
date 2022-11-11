@@ -44,8 +44,12 @@ open class MangaImpl : Manga {
         set(value) { ogGenre = value }
 
     override var status: Int
-        get() = if (favorite) customMangaManager.getManga(this)?.status.takeIf { it != -1 }
-            ?: ogStatus else ogStatus
+        get() = if (favorite) {
+            customMangaManager.getManga(this)?.status.takeIf { it != -1 }
+                ?: ogStatus
+        } else {
+            ogStatus
+        }
         set(value) { ogStatus = value }
 
     override var thumbnail_url: String? = null
@@ -102,7 +106,10 @@ open class MangaImpl : Manga {
     }
 
     override fun hashCode(): Int {
-        return if (::url.isInitialized) url.hashCode()
-        else (id ?: 0L).hashCode()
+        return if (::url.isInitialized) {
+            url.hashCode()
+        } else {
+            (id ?: 0L).hashCode()
+        }
     }
 }

@@ -63,8 +63,11 @@ class MigrationBottomSheetDialog(
             binding.extraSearchParam.layoutParams = params3
         }
         setBottomEdge(
-            if (activity.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) binding.extraSearchParamText
-            else binding.skipStep,
+            if (activity.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                binding.extraSearchParamText
+            } else {
+                binding.skipStep
+            },
             activity,
         )
     }
@@ -118,10 +121,12 @@ class MigrationBottomSheetDialog(
 
         binding.skipStep.isChecked = preferences.skipPreMigration().get()
         binding.skipStep.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) (listener as? Controller)?.activity?.toast(
-                R.string.to_show_again_setting_sources,
-                Toast.LENGTH_LONG,
-            )
+            if (isChecked) {
+                (listener as? Controller)?.activity?.toast(
+                    R.string.to_show_again_setting_sources,
+                    Toast.LENGTH_LONG,
+                )
+            }
         }
     }
 

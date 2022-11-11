@@ -75,8 +75,11 @@ object ImageUtil {
         } else {
             null
         }
-        return if (bitmapResized != null) BitmapDrawable(resources, bitmapResized)
-        else null
+        return if (bitmapResized != null) {
+            BitmapDrawable(resources, bitmapResized)
+        } else {
+            null
+        }
     }
 
     fun getExtensionFromMimeType(mime: String?): String {
@@ -129,7 +132,9 @@ object ImageUtil {
     }
 
     fun autoSetBackground(image: Bitmap?, alwaysUseWhite: Boolean, context: Context): Drawable {
-        val backgroundColor = if (alwaysUseWhite) Color.WHITE else {
+        val backgroundColor = if (alwaysUseWhite) {
+            Color.WHITE
+        } else {
             context.getResourceColor(R.attr.readerBackground)
         }
         if (image == null) return ColorDrawable(backgroundColor)
@@ -274,15 +279,19 @@ object ImageUtil {
         }
         val isLandscape = context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (darkBG) {
-            return if (!isLandscape && image.getPixel(left, bot).isWhite && image.getPixel(right, bot).isWhite) GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor),
-            )
-            else if (!isLandscape && image.getPixel(left, top).isWhite && image.getPixel(right, top).isWhite) GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel),
-            )
-            else ColorDrawable(blackPixel)
+            return if (!isLandscape && image.getPixel(left, bot).isWhite && image.getPixel(right, bot).isWhite) {
+                GradientDrawable(
+                    GradientDrawable.Orientation.TOP_BOTTOM,
+                    intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor),
+                )
+            } else if (!isLandscape && image.getPixel(left, top).isWhite && image.getPixel(right, top).isWhite) {
+                GradientDrawable(
+                    GradientDrawable.Orientation.TOP_BOTTOM,
+                    intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel),
+                )
+            } else {
+                ColorDrawable(blackPixel)
+            }
         }
         if (!isLandscape && (
             topIsBlackStreak || (

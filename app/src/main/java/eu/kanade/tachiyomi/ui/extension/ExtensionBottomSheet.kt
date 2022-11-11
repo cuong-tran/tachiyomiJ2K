@@ -106,50 +106,51 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             extensionFrameLayout?.binding?.recycler?.updatePaddingRelative(bottom = bottomH)
             migrationFrameLayout?.binding?.recycler?.updatePaddingRelative(bottom = bottomH)
         }
-        binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                isExpanding = !sheetBehavior.isExpanded()
-                if (canExpand) {
-                    this@ExtensionBottomSheet.sheetBehavior?.expand()
-                }
-                this@ExtensionBottomSheet.controller.updateTitleAndMenu()
-                when (tab?.position) {
-                    0 -> extensionFrameLayout
-                    else -> migrationFrameLayout
-                }?.binding?.recycler?.isNestedScrollingEnabled = true
-                when (tab?.position) {
-                    0 -> extensionFrameLayout
-                    else -> migrationFrameLayout
-                }?.binding?.recycler?.requestLayout()
-                sheetBehavior?.isDraggable = true
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {
-                when (tab?.position) {
-                    0 -> extensionFrameLayout
-                    else -> migrationFrameLayout
-                }?.binding?.recycler?.isNestedScrollingEnabled = false
-                if (tab?.position == 1) {
-                    presenter.deselectSource()
-                }
-            }
-
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-                isExpanding = !sheetBehavior.isExpanded()
-                this@ExtensionBottomSheet.sheetBehavior?.expand()
-                when (tab?.position) {
-                    0 -> extensionFrameLayout
-                    else -> migrationFrameLayout
-                }?.binding?.recycler?.isNestedScrollingEnabled = true
-                sheetBehavior?.isDraggable = true
-                if (!isExpanding) {
+        binding.tabs.addOnTabSelectedListener(
+            object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    isExpanding = !sheetBehavior.isExpanded()
+                    if (canExpand) {
+                        this@ExtensionBottomSheet.sheetBehavior?.expand()
+                    }
+                    this@ExtensionBottomSheet.controller.updateTitleAndMenu()
                     when (tab?.position) {
                         0 -> extensionFrameLayout
                         else -> migrationFrameLayout
-                    }?.binding?.recycler?.smoothScrollToTop()
+                    }?.binding?.recycler?.isNestedScrollingEnabled = true
+                    when (tab?.position) {
+                        0 -> extensionFrameLayout
+                        else -> migrationFrameLayout
+                    }?.binding?.recycler?.requestLayout()
+                    sheetBehavior?.isDraggable = true
                 }
-            }
-        },
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) {
+                    when (tab?.position) {
+                        0 -> extensionFrameLayout
+                        else -> migrationFrameLayout
+                    }?.binding?.recycler?.isNestedScrollingEnabled = false
+                    if (tab?.position == 1) {
+                        presenter.deselectSource()
+                    }
+                }
+
+                override fun onTabReselected(tab: TabLayout.Tab?) {
+                    isExpanding = !sheetBehavior.isExpanded()
+                    this@ExtensionBottomSheet.sheetBehavior?.expand()
+                    when (tab?.position) {
+                        0 -> extensionFrameLayout
+                        else -> migrationFrameLayout
+                    }?.binding?.recycler?.isNestedScrollingEnabled = true
+                    sheetBehavior?.isDraggable = true
+                    if (!isExpanding) {
+                        when (tab?.position) {
+                            0 -> extensionFrameLayout
+                            else -> migrationFrameLayout
+                        }?.binding?.recycler?.smoothScrollToTop()
+                    }
+                }
+            },
         )
         presenter.onCreate()
         updateExtTitle()
@@ -184,8 +185,11 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     fun updateExtTitle() {
         val extCount = presenter.getExtensionUpdateCount()
-        if (extCount > 0) binding.tabs.getTabAt(0)?.orCreateBadge
-        else binding.tabs.getTabAt(0)?.removeBadge()
+        if (extCount > 0) {
+            binding.tabs.getTabAt(0)?.orCreateBadge
+        } else {
+            binding.tabs.getTabAt(0)?.removeBadge()
+        }
     }
 
     override fun onButtonClick(position: Int) {

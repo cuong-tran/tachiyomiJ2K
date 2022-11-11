@@ -452,8 +452,11 @@ fun Context.isInNightMode(): Boolean {
 }
 
 fun Context.appDelegateNightMode(): Int {
-    return if (isInNightMode()) AppCompatDelegate.MODE_NIGHT_YES
-    else AppCompatDelegate.MODE_NIGHT_NO
+    return if (isInNightMode()) {
+        AppCompatDelegate.MODE_NIGHT_YES
+    } else {
+        AppCompatDelegate.MODE_NIGHT_NO
+    }
 }
 
 fun Context.isOnline(): Boolean {
@@ -497,7 +500,9 @@ val Context.localeContext: Context
         val pref = Injekt.get<PreferencesHelper>()
         val prefsLang = if (pref.appLanguage().isSet()) {
             Locale.forLanguageTag(pref.appLanguage().get())
-        } else null
+        } else {
+            null
+        }
         val configuration = Configuration(resources.configuration)
         configuration.setLocale(
             prefsLang
@@ -519,11 +524,13 @@ val Context.systemLangContext: Context
 
         val systemLocale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             getSystemService<LocaleManager>()?.systemLocales?.get(0)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Resources.getSystem().configuration.locales.get(0)
         } else {
-            return this
-        } ?: Locale.getDefault()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Resources.getSystem().configuration.locales.get(0)
+            } else {
+                return this
+            } ?: Locale.getDefault()
+        }
         configuration.setLocale(systemLocale)
         return createConfigurationContext(configuration)
     }

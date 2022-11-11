@@ -118,13 +118,14 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
 
         binding.themeRecycler.adapter = fastAdapterLight
 
-        binding.themeRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                lastScrollPostionLight =
-                    recyclerView.computeHorizontalScrollOffset()
-            }
-        },
+        binding.themeRecycler.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    lastScrollPostionLight =
+                        recyclerView.computeHorizontalScrollOffset()
+                }
+            },
         )
 
         binding.themeRecyclerDark.setHasFixedSize(true)
@@ -132,13 +133,14 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
 
         binding.themeRecyclerDark.adapter = fastAdapterDark
 
-        binding.themeRecyclerDark.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                lastScrollPostionDark =
-                    recyclerView.computeHorizontalScrollOffset()
-            }
-        },
+        binding.themeRecyclerDark.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    lastScrollPostionDark =
+                        recyclerView.computeHorizontalScrollOffset()
+                }
+            },
         )
 
         if (lastScrollPostionLight != null) {

@@ -59,7 +59,9 @@ class SmartSearchEngine(
         val eligibleManga = supervisorScope {
             val searchQuery = if (extraSearchParams != null) {
                 "$titleNormalized ${extraSearchParams.trim()}"
-            } else titleNormalized
+            } else {
+                titleNormalized
+            }
             val searchResults =
                 source.fetchSearchManga(1, searchQuery, source.getFilterList()).toSingle()
                     .await(Schedulers.io())

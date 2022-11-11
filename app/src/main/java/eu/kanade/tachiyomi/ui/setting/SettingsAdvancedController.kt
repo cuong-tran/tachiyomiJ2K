@@ -100,21 +100,23 @@ class SettingsAdvancedController : SettingsController() {
         }
 
         val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
-        if (pm != null) preference {
-            key = "disable_batt_opt"
-            titleRes = R.string.disable_battery_optimization
-            summaryRes = R.string.disable_if_issues_with_updating
+        if (pm != null) {
+            preference {
+                key = "disable_batt_opt"
+                titleRes = R.string.disable_battery_optimization
+                summaryRes = R.string.disable_if_issues_with_updating
 
-            onClick {
-                val packageName: String = context.packageName
-                if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                    val intent = Intent().apply {
-                        action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                        data = "package:$packageName".toUri()
+                onClick {
+                    val packageName: String = context.packageName
+                    if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                        val intent = Intent().apply {
+                            action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                            data = "package:$packageName".toUri()
+                        }
+                        startActivity(intent)
+                    } else {
+                        context.toast(R.string.battery_optimization_disabled)
                     }
-                    startActivity(intent)
-                } else {
-                    context.toast(R.string.battery_optimization_disabled)
                 }
             }
         }
@@ -383,12 +385,15 @@ class SettingsAdvancedController : SettingsController() {
             launchUI {
                 val activity = activity ?: return@launchUI
                 val cleanupString =
-                    if (foldersCleared == 0) activity.getString(R.string.no_folders_to_cleanup)
-                    else resources!!.getQuantityString(
-                        R.plurals.cleanup_done,
-                        foldersCleared,
-                        foldersCleared,
-                    )
+                    if (foldersCleared == 0) {
+                        activity.getString(R.string.no_folders_to_cleanup)
+                    } else {
+                        resources!!.getQuantityString(
+                            R.plurals.cleanup_done,
+                            foldersCleared,
+                            foldersCleared,
+                        )
+                    }
                 activity.toast(cleanupString, Toast.LENGTH_LONG)
             }
         }

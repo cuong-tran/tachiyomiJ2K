@@ -165,11 +165,13 @@ class MangaDetailsController :
     constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA)) {
         val notificationId = bundle.getInt("notificationId", -1)
         val context = applicationContext ?: return
-        if (notificationId > -1) NotificationReceiver.dismissNotification(
-            context,
-            notificationId,
-            bundle.getInt("groupId", 0),
-        )
+        if (notificationId > -1) {
+            NotificationReceiver.dismissNotification(
+                context,
+                notificationId,
+                bundle.getInt("groupId", 0),
+            )
+        }
     }
 
     private var manga: Manga? = null
@@ -697,7 +699,9 @@ class MangaDetailsController :
                                         (chapterNames.size - (4 - 1)),
                                         (chapterNames.size - (4 - 1)),
                                     )
-                            } else chapterNames.joinToString(", "),
+                            } else {
+                                chapterNames.joinToString(", ")
+                            },
                         ),
                     )
                     .setPositiveButton(R.string.delete) { dialog, _ ->
@@ -733,8 +737,11 @@ class MangaDetailsController :
     }
 
     private fun getHeader(): MangaHeaderHolder? {
-        return if (isTablet) binding.tabletRecycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
-        else binding.recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+        return if (isTablet) {
+            binding.tabletRecycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+        } else {
+            binding.recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+        }
     }
 
     fun updateHeader() {
@@ -913,8 +920,11 @@ class MangaDetailsController :
         bookmarkChapters(listOf(item), !bookmarked)
         snack?.dismiss()
         snack = view?.snack(
-            if (bookmarked) R.string.removed_bookmark
-            else R.string.bookmarked,
+            if (bookmarked) {
+                R.string.removed_bookmark
+            } else {
+                R.string.bookmarked
+            },
             Snackbar.LENGTH_INDEFINITE,
         ) {
             setAction(R.string.undo) {
@@ -935,8 +945,11 @@ class MangaDetailsController :
         presenter.markChaptersRead(listOf(item), !read, false)
         snack?.dismiss()
         snack = view?.snack(
-            if (read) R.string.marked_as_unread
-            else R.string.marked_as_read,
+            if (read) {
+                R.string.marked_as_unread
+            } else {
+                R.string.marked_as_read
+            },
             Snackbar.LENGTH_INDEFINITE,
         ) {
             var undoing = false
@@ -986,7 +999,9 @@ class MangaDetailsController :
                     (firstPos..lastPos).mapNotNull {
                         (adapter?.getItem(it) as? ChapterItem)?.chapter?.id
                     }.toLongArray()
-                } else longArrayOf()
+                } else {
+                    longArrayOf()
+                }
                 returningFromReader = true
                 intent.putExtra(ReaderActivity.VISIBLE_CHAPTERS, chapterRange)
                 startActivity(intent, bundle)
@@ -1029,8 +1044,11 @@ class MangaDetailsController :
         setOnQueryTextChangeListener(searchView) {
             query = it ?: ""
             if (!isTablet) {
-                if (query.isNotEmpty()) getHeader()?.collapse()
-                else getHeader()?.expand()
+                if (query.isNotEmpty()) {
+                    getHeader()?.collapse()
+                } else {
+                    getHeader()?.expand()
+                }
             }
 
             adapter?.setFilter(query)
@@ -1203,12 +1221,15 @@ class MangaDetailsController :
         val context = view?.context ?: return
         context.materialAlertDialog()
             .setMessage(
-                if (isEverything) context.getString(R.string.remove_all_downloads)
-                else context.resources.getQuantityString(
-                    R.plurals.remove_n_chapters,
-                    chapters.size,
-                    chapters.size,
-                ),
+                if (isEverything) {
+                    context.getString(R.string.remove_all_downloads)
+                } else {
+                    context.resources.getQuantityString(
+                        R.plurals.remove_n_chapters,
+                        chapters.size,
+                        chapters.size,
+                    )
+                },
             )
             .setPositiveButton(R.string.remove) { _, _ ->
                 presenter.deleteChapters(chapters, isEverything = isEverything)
@@ -1326,7 +1347,9 @@ class MangaDetailsController :
         val chapterItem = (adapter?.getItem(position) as? ChapterItem) ?: return
         rangeMode = if (chapterItem.status in listOf(Download.State.NOT_DOWNLOADED, Download.State.ERROR)) {
             RangeMode.Download
-        } else RangeMode.RemoveDownload
+        } else {
+            RangeMode.RemoveDownload
+        }
         onItemClick(null, position)
     }
 
@@ -1432,12 +1455,15 @@ class MangaDetailsController :
             globalSearch(content ?: view.text.toString())
             return
         }
-        val actionModeCallback = if (content != null) FloatingMangaDetailsActionModeCallback(
-            content,
-            showCopy = view is Chip,
-            searchSource = searchSource,
-        )
-        else FloatingMangaDetailsActionModeCallback(view, searchSource = searchSource)
+        val actionModeCallback = if (content != null) {
+            FloatingMangaDetailsActionModeCallback(
+                content,
+                showCopy = view is Chip,
+                searchSource = searchSource,
+            )
+        } else {
+            FloatingMangaDetailsActionModeCallback(view, searchSource = searchSource)
+        }
         if (view is Chip) {
             view.isActivated = true
         }
@@ -1653,7 +1679,9 @@ class MangaDetailsController :
         mode?.title = view?.context?.getString(
             if (startingRangeChapterPos == null) {
                 R.string.select_starting_chapter
-            } else R.string.select_ending_chapter,
+            } else {
+                R.string.select_ending_chapter
+            },
         )
         return false
     }
@@ -1699,8 +1727,9 @@ class MangaDetailsController :
             val activity = activity ?: return
             try {
                 val uri = data.data ?: return
-                if (editMangaDialog != null) editMangaDialog?.updateCover(uri)
-                else {
+                if (editMangaDialog != null) {
+                    editMangaDialog?.updateCover(uri)
+                } else {
                     presenter.editCoverWithStream(uri)
                 }
             } catch (error: IOException) {
@@ -1736,7 +1765,7 @@ class MangaDetailsController :
             Download,
             RemoveDownload,
             Read,
-            Unread
+            Unread,
         }
     }
 

@@ -39,7 +39,9 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         val unreadBadgeBackground = if (showTotalChapters) {
             context.contextCompatColor(R.color.total_badge)
-        } else context.getResourceColor(R.attr.colorSecondary)
+        } else {
+            context.getResourceColor(R.attr.colorSecondary)
+        }
 
         with(binding.unreadText) {
             isVisible = unread > 0 || unread == -1 || showTotalChapters
@@ -88,7 +90,9 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                             "drawable",
                             context.packageName,
                         ).takeIf { it != 0 }
-                    } else null
+                    } else {
+                        null
+                    }
                     )
                 if (flagId != null) {
                     setImageResource(flagId)

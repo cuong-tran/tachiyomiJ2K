@@ -44,7 +44,9 @@ class SearchActivity : MainActivity() {
                 ) && rootSearchController !is SmallToolbarInterface
             ) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
-            } else popToRoot()
+            } else {
+                popToRoot()
+            }
         }
         (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
         (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
@@ -95,8 +97,7 @@ class SearchActivity : MainActivity() {
     override fun syncActivityViewWithController(
         to: Controller?,
         from: Controller?,
-        isPush:
-            Boolean,
+        isPush: Boolean,
     ) {
         if (from is DialogController || to is DialogController) {
             return
@@ -109,11 +110,13 @@ class SearchActivity : MainActivity() {
 
     override fun handleIntentAction(intent: Intent): Boolean {
         val notificationId = intent.getIntExtra("notificationId", -1)
-        if (notificationId > -1) NotificationReceiver.dismissNotification(
-            applicationContext,
-            notificationId,
-            intent.getIntExtra("groupId", 0),
-        )
+        if (notificationId > -1) {
+            NotificationReceiver.dismissNotification(
+                applicationContext,
+                notificationId,
+                intent.getIntExtra("groupId", 0),
+            )
+        }
         when (intent.action) {
             Intent.ACTION_SEARCH, Intent.ACTION_SEND, "com.google.android.gms.actions.SEARCH_ACTION" -> {
                 // If the intent match the "standard" Android search intent

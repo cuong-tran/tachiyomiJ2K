@@ -227,7 +227,9 @@ class MigrationListController(bundle: Bundle? = null) :
                                             syncChaptersWithSource(db, chapters, localManga, source)
                                         }
                                         localManga
-                                    } else null
+                                    } else {
+                                        null
+                                    }
                                 } catch (e: CancellationException) {
                                     // Ignore cancellations
                                     throw e
@@ -423,7 +425,9 @@ class MigrationListController(bundle: Bundle? = null) :
                 }
                 router.popCurrentController()
             }
-        } else router.popCurrentController()
+        } else {
+            router.popCurrentController()
+        }
     }
 
     override fun handleBack(): Boolean {

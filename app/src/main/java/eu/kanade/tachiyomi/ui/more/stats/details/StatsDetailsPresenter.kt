@@ -220,7 +220,9 @@ class StatsDetailsPresenter(
                     meanScore = match.getMeanScoreRounded(),
                     chaptersRead = match.sumOf { it.read },
                     totalChapters = match.sumOf { it.totalChapters },
-                    label = if (min == max) min.toString() else {
+                    label = if (min == max) {
+                        min.toString()
+                    } else {
                         listOf(min.toString(), max?.toString()).joinToString("-")
                             .replace("-null", "+")
                     },
@@ -355,7 +357,9 @@ class StatsDetailsPresenter(
         val libraryFormat = if (day == null) {
             historyByDayAndManga.values.flatMap { it.entries }.groupBy { it.key }
                 .mapValues { it.value.flatMap { h -> h.value } }
-        } else historyByDayAndManga[day]
+        } else {
+            historyByDayAndManga[day]
+        }
 
         libraryFormat?.forEach { (manga, history) ->
             currentStats?.add(
@@ -383,32 +387,52 @@ class StatsDetailsPresenter(
     }
 
     private fun List<LibraryManga>.filterBySeriesType(noFilter: Boolean = false): List<LibraryManga> {
-        return if (noFilter || selectedSeriesType.isEmpty()) this else filter { manga ->
-            context.mapSeriesType(manga.seriesType()) in selectedSeriesType
+        return if (noFilter || selectedSeriesType.isEmpty()) {
+            this
+        } else {
+            filter { manga ->
+                context.mapSeriesType(manga.seriesType()) in selectedSeriesType
+            }
         }
     }
 
     private fun List<LibraryManga>.filterByStatus(noFilter: Boolean = false): List<LibraryManga> {
-        return if (noFilter || selectedStatus.isEmpty()) this else filter { manga ->
-            context.mapStatus(manga.status) in selectedStatus
+        return if (noFilter || selectedStatus.isEmpty()) {
+            this
+        } else {
+            filter { manga ->
+                context.mapStatus(manga.status) in selectedStatus
+            }
         }
     }
 
     private fun List<LibraryManga>.filterByLanguage(noFilter: Boolean = false): List<LibraryManga> {
-        return if (noFilter || selectedLanguage.isEmpty()) this else filter { manga ->
-            manga.getLanguage() in selectedLanguage
+        return if (noFilter || selectedLanguage.isEmpty()) {
+            this
+        } else {
+            filter { manga ->
+                manga.getLanguage() in selectedLanguage
+            }
         }
     }
 
     private fun List<LibraryManga>.filterBySource(noFilter: Boolean = false): List<LibraryManga> {
-        return if (noFilter || selectedSource.isEmpty()) this else filter { manga ->
-            manga.source in selectedSource.map { it.id }
+        return if (noFilter || selectedSource.isEmpty()) {
+            this
+        } else {
+            filter { manga ->
+                manga.source in selectedSource.map { it.id }
+            }
         }
     }
 
     private fun List<LibraryManga>.filterByCategory(noFilter: Boolean = false): List<LibraryManga> {
-        return if (noFilter || selectedCategory.isEmpty()) this else filter { manga ->
-            manga.category in selectedCategory.map { it.id }
+        return if (noFilter || selectedCategory.isEmpty()) {
+            this
+        } else {
+            filter { manga ->
+                manga.category in selectedCategory.map { it.id }
+            }
         }
     }
 

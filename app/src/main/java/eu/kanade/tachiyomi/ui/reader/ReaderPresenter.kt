@@ -401,7 +401,9 @@ class ReaderPresenter(
                     init(manga, chapterId)
                 }
             }
-        } else error(context.getString(R.string.unknown_error))
+        } else {
+            error(context.getString(R.string.unknown_error))
+        }
     }
 
     /**

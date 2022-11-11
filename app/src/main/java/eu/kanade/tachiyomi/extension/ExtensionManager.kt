@@ -94,7 +94,9 @@ class ExtensionManager(
             } catch (e: Exception) {
                 null
             }
-        } else null
+        } else {
+            null
+        }
     }
 
     /**

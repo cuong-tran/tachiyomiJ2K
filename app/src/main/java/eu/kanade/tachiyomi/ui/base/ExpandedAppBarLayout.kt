@@ -309,10 +309,14 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
                     -realHeight.toFloat() + top + minTabletHeight,
                     max(
                         smallHeight,
-                        if (offset > realHeight - shortH - tabHeight) smallHeight else min(
-                            -offset.toFloat(),
-                            0f,
-                        ),
+                        if (offset > realHeight - shortH - tabHeight) {
+                            smallHeight
+                        } else {
+                            min(
+                                -offset.toFloat(),
+                                0f,
+                            )
+                        },
                     ) + top.toFloat(),
                 )
             }
@@ -345,7 +349,9 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
         toolbarTextView.setTextColorAlpha(
             (
                 MathUtils.clamp(
-                    (1 - ((if (alpha.isNaN()) 1f else alpha) + 0.95f)) * 2, 0f, 1f,
+                    (1 - ((if (alpha.isNaN()) 1f else alpha) + 0.95f)) * 2,
+                    0f,
+                    1f,
                 ) * 255
                 ).roundToInt(),
         )
@@ -363,8 +369,11 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
             is StatefulNestedScrollView -> if (scrollView.hasStopped) idle else RecyclerView.SCROLL_STATE_DRAGGING
             else -> idle
         }
-        if (if (useSearchToolbar) -y >= height || (state <= idle) || context.isTablet()
-            else mainActivity.currentToolbar == searchToolbar
+        if (if (useSearchToolbar) {
+            -y >= height || (state <= idle) || context.isTablet()
+        } else {
+                mainActivity.currentToolbar == searchToolbar
+            }
         ) {
             useSearchToolbarForMenu(useSearchToolbar)
         }
@@ -380,8 +389,11 @@ class ExpandedAppBarLayout@JvmOverloads constructor(context: Context, attrs: Att
     fun snapAppBarY(controller: Controller?, scrollView: ScrollingView, callback: (() -> Unit)?): Float {
         val halfWay = compactAppBarHeight / 2
         val shortAnimationDuration = resources?.getInteger(
-            if (toolbarMode != ToolbarState.EXPANDED) android.R.integer.config_shortAnimTime
-            else android.R.integer.config_longAnimTime,
+            if (toolbarMode != ToolbarState.EXPANDED) {
+                android.R.integer.config_shortAnimTime
+            } else {
+                android.R.integer.config_longAnimTime
+            },
         ) ?: 0
         val realHeight = preLayoutHeightWhileSearching + paddingTop
         val closerToTop = abs(y) > realHeight - halfWay

@@ -263,9 +263,13 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                         val fullPageBeforeIndex = max(
                             0,
                             (
-                                if (index > -1) (
-                                    items.take(index).indexOfLast { it?.fullPage == true }
-                                    ) else -1
+                                if (index > -1) {
+                                    (
+                                        items.take(index).indexOfLast { it?.fullPage == true }
+                                        )
+                                } else {
+                                    -1
+                                }
                                 ),
                         )
                         // Add a shifted page to the first place there isnt a full page
@@ -313,7 +317,9 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                     if (lastPage == null || (
                         if (it is ChapterTransition.Next) {
                             it.from.chapter.id == lastPage.chapter.chapter.id
-                        } else true
+                        } else {
+                            true
+                        }
                         )
                     ) {
                         subJoinedItems.add(Pair(it, null))

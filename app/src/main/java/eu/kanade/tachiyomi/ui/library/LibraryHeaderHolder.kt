@@ -183,8 +183,11 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
         binding.categorySort.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, sortDrawable, 0)
         binding.categorySort.setText(category.sortRes())
         binding.collapseArrow.setImageResource(
-            if (category.isHidden) R.drawable.ic_expand_more_24dp
-            else R.drawable.ic_expand_less_24dp,
+            if (category.isHidden) {
+                R.drawable.ic_expand_more_24dp
+            } else {
+                R.drawable.ic_expand_less_24dp
+            },
         )
         when {
             adapter.mode == SelectableAdapter.Mode.MULTI -> {
@@ -227,7 +230,9 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
                     "drawable",
                     itemView.context.packageName,
                 ).takeIf { it != 0 }
-            } else null
+            } else {
+                null
+            }
             )
         return flagId
     }
@@ -353,8 +358,11 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
         )
         val tintedDrawable = drawable?.mutate()
         tintedDrawable?.setTint(
-            if (allSelected) contentView.context.getResourceColor(R.attr.colorSecondary)
-            else ContextCompat.getColor(contentView.context, R.color.gray_button),
+            if (allSelected) {
+                contentView.context.getResourceColor(R.attr.colorSecondary)
+            } else {
+                ContextCompat.getColor(contentView.context, R.color.gray_button)
+            },
         )
         binding.checkbox.setImageDrawable(tintedDrawable)
     }

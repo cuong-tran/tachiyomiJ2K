@@ -171,7 +171,9 @@ interface Manga : SManga {
             (sourceName.contains("manhua", true) && currentTags.none { tag -> isMangaTag(tag) })
         ) {
             ReadingModeType.LEFT_TO_RIGHT.flagValue
-        } else 0
+        } else {
+            0
+        }
     }
 
     fun isSeriesTag(tag: String): Boolean {

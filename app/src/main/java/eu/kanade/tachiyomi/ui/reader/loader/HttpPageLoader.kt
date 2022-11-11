@@ -163,7 +163,9 @@ class HttpPageLoader(
             .mapNotNull {
                 if (it.status == Page.QUEUE) {
                     PriorityPage(it, 0).apply { queue.offer(this) }
-                } else null
+                } else {
+                    null
+                }
             }
     }
 

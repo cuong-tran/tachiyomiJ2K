@@ -126,7 +126,7 @@ class LibraryUpdateService(
 
         DETAILS, // Manga metadata
 
-        TRACKING // Tracking metadata
+        TRACKING, // Tracking metadata
     }
 
     /**
@@ -309,7 +309,9 @@ class LibraryUpdateService(
             } else if (MANGA_NON_READ in restrictions && manga.totalChapters > 0 && !manga.hasRead) {
                 skippedUpdates[manga] = getString(R.string.skipped_reason_not_started)
                 false
-            } else true
+            } else {
+                true
+            }
         }
     }
 
@@ -407,8 +409,7 @@ class LibraryUpdateService(
         manga: LibraryManga,
         progress: Int,
         shouldDownload: Boolean,
-    ):
-        Boolean {
+    ): Boolean {
         try {
             var hasDownloads = false
             if (job?.isCancelled == true) {
@@ -440,9 +441,11 @@ class LibraryUpdateService(
                         downloadManager.deleteChapters(removedChapters, manga, source)
                     }
                 }
-                if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
-                    manga,
-                )
+                if (newChapters.first.size + newChapters.second.size > 0) {
+                    listener?.onUpdateManga(
+                        manga,
+                    )
+                }
             }
             return hasDownloads
         } catch (e: Exception) {
@@ -634,10 +637,12 @@ class LibraryUpdateService(
                     putExtra(KEY_TARGET, target)
                     category?.id?.let { id ->
                         putExtra(KEY_CATEGORY, id)
-                        if (mangaToUse != null) putExtra(
-                            KEY_MANGAS,
-                            mangaToUse.mapNotNull { it.id }.toLongArray(),
-                        )
+                        if (mangaToUse != null) {
+                            putExtra(
+                                KEY_MANGAS,
+                                mangaToUse.mapNotNull { it.id }.toLongArray(),
+                            )
+                        }
                     }
                 }
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -647,9 +652,14 @@ class LibraryUpdateService(
                 }
                 true
             } else {
-                if (target == Target.CHAPTERS) category?.id?.let {
-                    if (mangaToUse != null) instance?.addMangaToQueue(it, mangaToUse)
-                    else instance?.addCategory(it)
+                if (target == Target.CHAPTERS) {
+                    category?.id?.let {
+                        if (mangaToUse != null) {
+                            instance?.addMangaToQueue(it, mangaToUse)
+                        } else {
+                            instance?.addCategory(it)
+                        }
+                    }
                 }
                 false
             }

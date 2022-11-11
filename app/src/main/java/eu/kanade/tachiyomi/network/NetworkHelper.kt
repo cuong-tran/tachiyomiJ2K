@@ -28,7 +28,6 @@ class NetworkHelper(val context: Context) {
     private val http103Interceptor by lazy { Http103Interceptor(context) }
     private val cloudflareInterceptor by lazy { CloudflareInterceptor(context) }
 
-
     private val baseClientBuilder: OkHttpClient.Builder
         get() {
             val builder = OkHttpClient.Builder()

@@ -29,18 +29,24 @@ class MigrationMangaDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
             mangaSet,
             mangaSet,
             (
-                if (mangaSkipped > 0) " " + view?.context?.getString(
-                    R.string.skipping_,
-                    mangaSkipped,
-                )
-                else ""
+                if (mangaSkipped > 0) {
+                    " " + view?.context?.getString(
+                        R.string.skipping_,
+                        mangaSkipped,
+                    )
+                } else {
+                    ""
+                }
                 ),
         ) ?: ""
         return activity!!.materialAlertDialog()
             .setMessage(confirmString)
             .setPositiveButton(if (copy) R.string.copy_value else R.string.migrate) { _, _ ->
-                if (copy) (targetController as? MigrationListController)?.copyMangas()
-                else (targetController as? MigrationListController)?.migrateMangas()
+                if (copy) {
+                    (targetController as? MigrationListController)?.copyMangas()
+                } else {
+                    (targetController as? MigrationListController)?.migrateMangas()
+                }
             }
             .setNegativeButton(android.R.string.cancel, null)
             .create()

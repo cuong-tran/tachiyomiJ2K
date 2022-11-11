@@ -389,8 +389,10 @@ class MangaDetailsPresenter(
                 getChapters()
             }
             isLoading = false
-            if (chapterError == null) withContext(Dispatchers.Main) {
-                controller?.updateChapters(this@MangaDetailsPresenter.chapters)
+            if (chapterError == null) {
+                withContext(Dispatchers.Main) {
+                    controller?.updateChapters(this@MangaDetailsPresenter.chapters)
+                }
             }
             if (chapterError != null) {
                 withContext(Dispatchers.Main) {
@@ -399,10 +401,12 @@ class MangaDetailsPresenter(
                     )
                 }
                 return@launch
-            } else if (mangaError != null) withContext(Dispatchers.Main) {
-                controller?.showError(
-                    trimException(mangaError!!),
-                )
+            } else if (mangaError != null) {
+                withContext(Dispatchers.Main) {
+                    controller?.showError(
+                        trimException(mangaError!!),
+                    )
+                }
             }
         }
     }
@@ -441,9 +445,12 @@ class MangaDetailsPresenter(
         return (
             if (e !is SourceNotFoundException &&
                 e.message?.contains(": ") == true
-            ) e.message?.split(": ")?.drop(1)
-                ?.joinToString(": ")
-            else e.message
+            ) {
+                e.message?.split(": ")?.drop(1)
+                    ?.joinToString(": ")
+            } else {
+                e.message
+            }
             ) ?: controller?.view?.context?.getString(R.string.unknown_error) ?: ""
     }
 
@@ -902,7 +909,9 @@ class MangaDetailsPresenter(
                                     syncChaptersWithTrackServiceTwoWay(db, chapters, trackItem, item.service)
                                 }
                                 trackItem
-                            } else item.track
+                            } else {
+                                item.track
+                            }
                         }
                     }
                 asyncList.awaitAll()
@@ -973,7 +982,9 @@ class MangaDetailsPresenter(
             if (binding != null) {
                 withContext(Dispatchers.IO) { db.insertTrack(binding).executeAsBlocking() }
                 fetchTracks()
-            } else trackRefreshDone()
+            } else {
+                trackRefreshDone()
+            }
         }
     }
 

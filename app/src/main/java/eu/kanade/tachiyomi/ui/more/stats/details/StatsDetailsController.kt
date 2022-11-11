@@ -162,7 +162,9 @@ class StatsDetailsController :
                 if (presenter.selectedSeriesType.isNotEmpty()) {
                     presenter.selectedSeriesType = mutableSetOf()
                     chipSeriesType.reset(R.string.series_type)
-                } else chipSeriesType.callOnClick()
+                } else {
+                    chipSeriesType.callOnClick()
+                }
             }
             chipSource.setOnClickListener {
                 (it as Chip).setMultiChoiceItemsDialog(
@@ -176,7 +178,9 @@ class StatsDetailsController :
                 if (presenter.selectedSource.isNotEmpty()) {
                     presenter.selectedSource = mutableSetOf()
                     chipSource.reset(R.string.source)
-                } else chipSource.callOnClick()
+                } else {
+                    chipSource.callOnClick()
+                }
             }
             chipStatus.setOnClickListener {
                 (it as Chip).setMultiChoiceItemsDialog(
@@ -190,7 +194,9 @@ class StatsDetailsController :
                 if (presenter.selectedStatus.isNotEmpty()) {
                     presenter.selectedStatus = mutableSetOf()
                     chipStatus.reset(R.string.status)
-                } else chipStatus.callOnClick()
+                } else {
+                    chipStatus.callOnClick()
+                }
             }
             chipLanguage.setOnClickListener {
                 (it as Chip).setMultiChoiceItemsDialog(
@@ -204,7 +210,9 @@ class StatsDetailsController :
                 if (presenter.selectedLanguage.isNotEmpty()) {
                     presenter.selectedLanguage = mutableSetOf()
                     chipLanguage.reset(R.string.language)
-                } else chipLanguage.callOnClick()
+                } else {
+                    chipLanguage.callOnClick()
+                }
             }
             chipCategory.setOnClickListener {
                 (it as Chip).setMultiChoiceItemsDialog(
@@ -218,7 +226,9 @@ class StatsDetailsController :
                 if (presenter.selectedCategory.isNotEmpty()) {
                     presenter.selectedCategory = mutableSetOf()
                     chipCategory.reset(R.string.category)
-                } else chipCategory.callOnClick()
+                } else {
+                    chipCategory.callOnClick()
+                }
             }
             statSort.setOnClickListener {
                 searchView.clearFocus()
@@ -346,7 +356,9 @@ class StatsDetailsController :
                 }
                 if (daySelected == endDay) {
                     changeReadDurationPeriod(toAdd)
-                } else updateHighlightedValue()
+                } else {
+                    updateHighlightedValue()
+                }
             }
         }
     }
@@ -541,7 +553,10 @@ class StatsDetailsController :
             chipCategory.isVisible = presenter.selectedStat !in listOf(Stats.CATEGORY, Stats.READ_DURATION) &&
                 presenter.categoriesStats.size > 1
             statSort.isVisible = presenter.selectedStat !in listOf(
-                Stats.SCORE, Stats.LENGTH, Stats.START_YEAR, Stats.READ_DURATION,
+                Stats.SCORE,
+                Stats.LENGTH,
+                Stats.START_YEAR,
+                Stats.READ_DURATION,
             )
         }
     }
@@ -602,7 +617,9 @@ class StatsDetailsController :
         val neverSelect = alwaysShowIcon || sizeStat == 0
         setTextColor(if (neverSelect) emptyTextColor else emptyBackColor)
         chipBackgroundColor = ColorStateList.valueOf(if (neverSelect) emptyBackColor else filteredBackColor)
-        closeIcon = if (neverSelect) context.contextCompatDrawable(R.drawable.ic_arrow_drop_down_24dp) else {
+        closeIcon = if (neverSelect) {
+            context.contextCompatDrawable(R.drawable.ic_arrow_drop_down_24dp)
+        } else {
             context.contextCompatDrawable(R.drawable.ic_close_24dp)
         }
         closeIconTint = ColorStateList.valueOf(if (neverSelect) emptyTextColor else emptyBackColor)
@@ -637,7 +654,9 @@ class StatsDetailsController :
         val pieEntries = presenter.currentStats?.map {
             val progress = if (presenter.selectedStatsSort == StatsSort.COUNT_DESC) {
                 it.count
-            } else it.chaptersRead
+            } else {
+                it.chaptersRead
+            }
             PieEntry(progress.toFloat(), it.label)
         }
 

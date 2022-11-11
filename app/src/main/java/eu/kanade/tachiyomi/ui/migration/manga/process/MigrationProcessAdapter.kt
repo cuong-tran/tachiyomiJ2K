@@ -200,8 +200,11 @@ class MigrationProcessAdapter(
 
                         val service = enhancedServices
                             .firstOrNull { it.isTrackFrom(track, prevManga, prevSource) }
-                        if (service != null) service.migrateTrack(track, manga, source)
-                        else track
+                        if (service != null) {
+                            service.migrateTrack(track, manga, source)
+                        } else {
+                            track
+                        }
                     }
                 db.insertTracks(tracksToUpdate).executeAsBlocking()
             }
@@ -211,8 +214,11 @@ class MigrationProcessAdapter(
                 db.updateMangaFavorite(prevManga).executeAsBlocking()
             }
             manga.favorite = true
-            if (replace) manga.date_added = prevManga.date_added
-            else manga.date_added = Date().time
+            if (replace) {
+                manga.date_added = prevManga.date_added
+            } else {
+                manga.date_added = Date().time
+            }
 
             // Update custom cover & info
             if (MigrationFlags.hasCustomMangaInfo(flags)) {

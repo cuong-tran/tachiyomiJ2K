@@ -119,8 +119,11 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             binding.firstButton.isActivated = !binding.firstButton.isActivated
             binding.firstButton.setTextColor(
                 context.getResourceColor(
-                    if (binding.firstButton.isActivated) R.attr.colorOnSecondary
-                    else R.attr.colorOnBackground,
+                    if (binding.firstButton.isActivated) {
+                        R.attr.colorOnSecondary
+                    } else {
+                        R.attr.colorOnBackground
+                    },
                 ),
             )
             listener?.onFilterClicked(
@@ -151,8 +154,11 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         }
         mainButton.setTextColor(
             context.getResourceColor(
-                if (mainButton.isActivated) R.attr.colorOnSecondary
-                else R.attr.colorOnBackground,
+                if (mainButton.isActivated) {
+                    R.attr.colorOnSecondary
+                } else {
+                    R.attr.colorOnBackground
+                },
             ),
         )
     }

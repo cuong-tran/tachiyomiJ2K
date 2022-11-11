@@ -88,31 +88,32 @@ class ClearDatabaseController :
                 )
             },
         )
-        binding.recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            fun updateFastScrollMargins() {
-                if (binding.fastScroller.isFastScrolling) return
-                val activityBinding = activityBinding ?: return
-                val bigToolbarHeight = fullAppBarHeight ?: return
-                val value = max(
-                    0,
-                    bigToolbarHeight + activityBinding.appBar.y.roundToInt(),
-                ) + activityBinding.appBar.paddingTop
-                if (value != binding.fastScroller.marginTop) {
-                    binding.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        topMargin = value
+        binding.recycler.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                fun updateFastScrollMargins() {
+                    if (binding.fastScroller.isFastScrolling) return
+                    val activityBinding = activityBinding ?: return
+                    val bigToolbarHeight = fullAppBarHeight ?: return
+                    val value = max(
+                        0,
+                        bigToolbarHeight + activityBinding.appBar.y.roundToInt(),
+                    ) + activityBinding.appBar.paddingTop
+                    if (value != binding.fastScroller.marginTop) {
+                        binding.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                            topMargin = value
+                        }
                     }
                 }
-            }
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                updateFastScrollMargins()
-            }
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    updateFastScrollMargins()
+                }
 
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                updateFastScrollMargins()
-            }
-        },
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    updateFastScrollMargins()
+                }
+            },
         )
         binding.fab.isInvisible = true
         binding.fab.setOnClickListener {

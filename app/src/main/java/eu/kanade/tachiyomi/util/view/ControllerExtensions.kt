@@ -133,8 +133,11 @@ fun <T> Controller.liftAppbarWith(
     val recycler = recyclerOrNested as? RecyclerView ?: recyclerOrNested as? NestedScrollView ?: return
     if (padView) {
         var appBarHeight = (
-            if ((fullAppBarHeight ?: 0) > 0) fullAppBarHeight!!
-            else activityBinding?.appBar?.attrToolbarHeight ?: 0
+            if ((fullAppBarHeight ?: 0) > 0) {
+                fullAppBarHeight!!
+            } else {
+                activityBinding?.appBar?.attrToolbarHeight ?: 0
+            }
             )
         activityBinding!!.toolbar.post {
             if (fullAppBarHeight!! > 0) {
@@ -244,8 +247,11 @@ fun Controller.scrollViewWith(
     activityBinding?.appBar?.useTabsInPreLayout = includeTabView
     activityBinding?.appBar?.setToolbarModeBy(this@scrollViewWith)
     var appBarHeight = (
-        if ((fullAppBarHeight ?: 0) > 0) fullAppBarHeight!!
-        else activityBinding?.appBar?.preLayoutHeight ?: 0
+        if ((fullAppBarHeight ?: 0) > 0) {
+            fullAppBarHeight!!
+        } else {
+            activityBinding?.appBar?.preLayoutHeight ?: 0
+        }
         )
     swipeRefreshLayout?.setDistanceToTriggerSync(150.dpToPx)
     val swipeCircle = swipeRefreshLayout?.findChild<ImageView>()
@@ -291,10 +297,12 @@ fun Controller.scrollViewWith(
         appBarHeight = fullAppBarHeight!!
         val systemInsets = if (ignoreInsetVisibility) insets.ignoredSystemInsets else insets.getInsets(systemBars())
         val headerHeight = systemInsets.top + appBarHeight
-        if (!customPadding) view.updatePaddingRelative(
-            top = headerHeight,
-            bottom = if (padBottom) systemInsets.bottom else view.paddingBottom,
-        )
+        if (!customPadding) {
+            view.updatePaddingRelative(
+                top = headerHeight,
+                bottom = if (padBottom) systemInsets.bottom else view.paddingBottom,
+            )
+        }
         swipeRefreshLayout?.setProgressViewOffset(
             true,
             headerHeight + (-60).dpToPx,
@@ -502,7 +510,11 @@ fun Controller.scrollViewWith(
             val closerToEdge =
                 if (activityBinding!!.bottomNav?.isVisible == true &&
                     preferences.hideBottomNavOnScroll().get()
-                ) closerToBottom else closerToTop
+                ) {
+                    closerToBottom
+                } else {
+                    closerToTop
+                }
             lastY = activityBinding!!.appBar.snapAppBarY(this@scrollViewWith, recycler) {
                 val activityBinding = activityBinding ?: return@snapAppBarY
                 swipeCircle?.translationY = max(

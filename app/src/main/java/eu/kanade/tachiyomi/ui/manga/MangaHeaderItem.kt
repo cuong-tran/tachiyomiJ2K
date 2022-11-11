@@ -37,8 +37,11 @@ class MangaHeaderItem(val manga: Manga, var startExpanded: Boolean) :
         position: Int,
         payloads: MutableList<Any?>?,
     ) {
-        if (isChapterHeader) holder.bindChapters()
-        else holder.bind(this, manga)
+        if (isChapterHeader) {
+            holder.bindChapters()
+        } else {
+            holder.bind(this, manga)
+        }
     }
 
     override fun equals(other: Any?): Boolean {

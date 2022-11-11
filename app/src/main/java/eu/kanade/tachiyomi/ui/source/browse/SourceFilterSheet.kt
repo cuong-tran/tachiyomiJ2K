@@ -71,14 +71,15 @@ class SourceFilterSheet(val activity: Activity) :
             setCardViewMax(insets)
         }
 
-        (binding.root.parent.parent as? View)?.viewTreeObserver?.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                updateBottomButtons()
-                if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED) {
-                    (binding.root.parent.parent as? View)?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
+        (binding.root.parent.parent as? View)?.viewTreeObserver?.addOnGlobalLayoutListener(
+            object : OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    updateBottomButtons()
+                    if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED) {
+                        (binding.root.parent.parent as? View)?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
+                    }
                 }
-            }
-        },
+            },
         )
 
         binding.filtersRecycler.viewTreeObserver.addOnScrollChangedListener {

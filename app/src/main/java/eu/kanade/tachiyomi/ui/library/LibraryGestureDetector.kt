@@ -62,8 +62,11 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
             val hopperGravity = (controller.binding.categoryHopperFrame.layoutParams as CoordinatorLayout.LayoutParams).gravity
             if (diffX <= 0) {
                 animator.translationX(
-                    if (hopperGravity == Gravity.TOP or Gravity.LEFT) 0f
-                    else (-(controller.view!!.width - controller.binding.categoryHopperFrame.width) / 2).toFloat(),
+                    if (hopperGravity == Gravity.TOP or Gravity.LEFT) {
+                        0f
+                    } else {
+                        (-(controller.view!!.width - controller.binding.categoryHopperFrame.width) / 2).toFloat()
+                    },
                 ).withEndAction {
                     hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                         gravity =
@@ -81,8 +84,11 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
                 }
             } else {
                 animator.translationX(
-                    if (hopperGravity == Gravity.TOP or Gravity.RIGHT) 0f
-                    else ((controller.view!!.width - hopperFrame.width) / 2).toFloat(),
+                    if (hopperGravity == Gravity.TOP or Gravity.RIGHT) {
+                        0f
+                    } else {
+                        ((controller.view!!.width - hopperFrame.width) / 2).toFloat()
+                    },
                 ).withEndAction {
                     hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                         gravity =

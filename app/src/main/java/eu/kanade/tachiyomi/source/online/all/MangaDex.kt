@@ -74,7 +74,9 @@ class MangaDex : DelegatedHttpSource() {
             )
             if (manga != null) {
                 Triple(trueChapter, manga, chapters.orEmpty())
-            } else null
+            } else {
+                null
+            }
         }
     }
 

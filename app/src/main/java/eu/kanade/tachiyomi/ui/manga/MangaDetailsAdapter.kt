@@ -86,8 +86,11 @@ class MangaDetailsAdapter(
                 val volume = ChapterUtil.getGroupNumber(chapter)
                 if (volume != null) {
                     recyclerView.context.getString(
-                        if (scrollType == MangaDetailsPresenter.MULTIPLE_SEASONS) R.string.season_
-                        else R.string.volume_,
+                        if (scrollType == MangaDetailsPresenter.MULTIPLE_SEASONS) {
+                            R.string.season_
+                        } else {
+                            R.string.volume_
+                        },
                         volume,
                     )
                 } else {
@@ -115,8 +118,9 @@ class MangaDetailsAdapter(
 
     private fun get10sRange(value: Float): String {
         val number = value.toInt()
-        return if (number < 10) "0-9"
-        else {
+        return if (number < 10) {
+            "0-9"
+        } else {
             val hundred = number / 10
             "${hundred}0-${hundred + 1}9"
         }

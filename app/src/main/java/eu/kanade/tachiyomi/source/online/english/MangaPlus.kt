@@ -68,7 +68,9 @@ class MangaPlus : DelegatedHttpSource() {
                     },
                     chapters.orEmpty(),
                 )
-            } else null
+            } else {
+                null
+            }
         }
     }
 }

@@ -519,7 +519,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         Downloaded('d', R.string.downloaded),
         Completed('c', R.string.status),
         SeriesType('m', R.string.series_type),
-        Tracked('t', R.string.tracked);
+        Tracked('t', R.string.tracked),
+        ;
 
         companion object {
             val DEFAULT_ORDER = listOf(

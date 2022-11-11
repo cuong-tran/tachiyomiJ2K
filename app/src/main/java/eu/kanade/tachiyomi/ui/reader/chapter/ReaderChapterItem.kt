@@ -47,7 +47,9 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
             binding.chapterTitle.text = if (manga.hideChapterTitle(item.preferences)) {
                 val number = item.decimalFormat.format(item.chapter_number.toDouble())
                 itemView.context.getString(R.string.chapter_, number)
-            } else item.name
+            } else {
+                item.name
+            }
 
             val statuses = mutableListOf<String>()
             ChapterUtil.relativeDate(item)?.let { statuses.add(it) }
@@ -66,8 +68,11 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
             binding.chapterSubtitle.setTextColor(chapterColor)
 
             binding.bookmarkImage.setImageResource(
-                if (item.bookmark) R.drawable.ic_bookmark_24dp
-                else R.drawable.ic_bookmark_border_24dp,
+                if (item.bookmark) {
+                    R.drawable.ic_bookmark_24dp
+                } else {
+                    R.drawable.ic_bookmark_border_24dp
+                },
             )
 
             val drawableColor = ChapterUtil.bookmarkColor(itemView.context, item)

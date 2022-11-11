@@ -564,7 +564,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     enum class ReadingDate {
         Start,
-        Finish
+        Finish,
     }
 
     private fun showDatePicker(trackItem: TrackItem, readingDate: ReadingDate, suggestedDate: Long?) {

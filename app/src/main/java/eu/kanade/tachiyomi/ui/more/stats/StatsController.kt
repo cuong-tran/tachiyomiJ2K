@@ -68,7 +68,9 @@ class StatsController : BaseController<StatsControllerBinding>() {
             statsMangaMeanScoreText.text = if (scoresList.isEmpty()) {
                 statsMangaMeanScoreText.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
                 activity?.getString(R.string.none)
-            } else scoresList.average().roundToTwoDecimal().toString()
+            } else {
+                scoresList.average().roundToTwoDecimal().toString()
+            }
             statsMangaMeanScoreLayout.compatToolTipText = activity?.getString(R.string.mean_score_info)
             statsTrackedMangaText.text = mangaTracks.count { it.second.isNotEmpty() }.toString()
             statsChaptersDownloadedText.text = mangaDistinct.sumOf { presenter.getDownloadCount(it) }.toString()

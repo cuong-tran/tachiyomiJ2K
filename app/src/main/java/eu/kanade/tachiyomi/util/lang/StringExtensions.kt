@@ -134,7 +134,9 @@ fun String.asButton(context: Context, disabled: Boolean = false): SpannedString 
         }
         if (disabled) {
             color(context.getColor(R.color.material_on_surface_disabled), buttonSpan)
-        } else buttonSpan()
+        } else {
+            buttonSpan()
+        }
     }
 }
 

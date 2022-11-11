@@ -235,7 +235,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             val intent = newIntent(activity, manga, chapter)
             intent.putExtra(TRANSITION_NAME, sharedElement.transitionName)
             val activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                activity, sharedElement, sharedElement.transitionName,
+                activity,
+                sharedElement,
+                sharedElement.transitionName,
             )
             return intent to activityOptions.toBundle()
         }
@@ -440,8 +442,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             }
             compatToolTipText =
                 getString(
-                    if (enabled) R.string.remove_crop
-                    else R.string.crop_borders,
+                    if (enabled) {
+                        R.string.remove_crop
+                    } else {
+                        R.string.crop_borders
+                    },
                 )
         }
     }
@@ -586,8 +591,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         return MaterialContainerTransform(this, entering).apply {
             duration = (
                 resources?.getInteger(
-                    if (entering) android.R.integer.config_longAnimTime
-                    else android.R.integer.config_mediumAnimTime,
+                    if (entering) {
+                        android.R.integer.config_longAnimTime
+                    } else {
+                        android.R.integer.config_mediumAnimTime
+                    },
                 ) ?: 500
                 ).toLong()
             addTarget(android.R.id.content)
@@ -642,7 +650,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 val pref =
                     if ((viewer as? WebtoonViewer)?.hasMargins == true ||
                         (viewer is PagerViewer)
-                    ) preferences.cropBorders() else preferences.cropBordersWebtoon()
+                    ) {
+                        preferences.cropBorders()
+                    } else {
+                        preferences.cropBordersWebtoon()
+                    }
                 pref.toggle()
             }
 
@@ -756,17 +768,18 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         val readerNavGestureDetector = ReaderNavGestureDetector(this)
         val gestureDetector = GestureDetectorCompat(this, readerNavGestureDetector)
         with(binding.readerNav) {
-            binding.readerNav.pageSeekbar.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
-                override fun onStartTrackingTouch(slider: Slider) {
-                    readerNavGestureDetector.lockVertical = false
-                    readerNavGestureDetector.hasScrollHorizontal = true
-                    isScrollingThroughPagesOrChapters = true
-                }
+            binding.readerNav.pageSeekbar.addOnSliderTouchListener(
+                object : Slider.OnSliderTouchListener {
+                    override fun onStartTrackingTouch(slider: Slider) {
+                        readerNavGestureDetector.lockVertical = false
+                        readerNavGestureDetector.hasScrollHorizontal = true
+                        isScrollingThroughPagesOrChapters = true
+                    }
 
-                override fun onStopTrackingTouch(slider: Slider) {
-                    isScrollingThroughPagesOrChapters = false
-                }
-            },
+                    override fun onStopTrackingTouch(slider: Slider) {
+                        isScrollingThroughPagesOrChapters = false
+                    }
+                },
             )
             listOf(root, leftChapter, rightChapter, pageSeekbar).forEach {
                 it.setOnTouchListener { _, event ->
@@ -1537,7 +1550,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                         ColorUtils.setAlphaComponent(
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 || isInNightMode()) {
                                 getResourceColor(R.attr.colorSurface)
-                            } else Color.BLACK,
+                            } else {
+                                Color.BLACK
+                            },
                             if (binding.root.rootWindowInsetsCompat?.hasSideNavBar() == true) {
                                 255
                             } else {

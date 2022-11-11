@@ -338,7 +338,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     continueSwitchingTabs = true
                     this@MainActivity.nav.selectedItemId = id
                 }
-                ) return@setOnItemSelectedListener false
+                ) {
+                    return@setOnItemSelectedListener false
+                }
             }
             continueSwitchingTabs = false
             val currentRoot = router.backstack.firstOrNull()
@@ -381,7 +383,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 rootSearchController !is SmallToolbarInterface
             ) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
-            } else onBackPressedDispatcher.onBackPressed()
+            } else {
+                onBackPressedDispatcher.onBackPressed()
+            }
         }
 
         binding.searchToolbar.searchItem?.setOnActionExpandListener(
@@ -429,7 +433,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding.searchToolbar.setOnMenuItemClickListener {
             if (router.backstack.lastOrNull()?.controller?.onOptionsItemSelected(it) == true) {
                 return@setOnMenuItemClickListener true
-            } else return@setOnMenuItemClickListener onOptionsItemSelected(it)
+            } else {
+                return@setOnMenuItemClickListener onOptionsItemSelected(it)
+            }
         }
 
         nav.isVisible = !hideBottomNav
@@ -559,8 +565,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         setSearchTBLongClick()
         val showSearchBar = (show || showSearchAnyway) && onSearchController
         val isAppBarVisible = binding.appBar.isVisible
-        val needsAnim = if (showSearchBar) !binding.cardFrame.isVisible || binding.cardFrame.alpha < 1f
-        else binding.cardFrame.isVisible || binding.cardFrame.alpha > 0f
+        val needsAnim = if (showSearchBar) {
+            !binding.cardFrame.isVisible || binding.cardFrame.alpha < 1f
+        } else {
+            binding.cardFrame.isVisible || binding.cardFrame.alpha > 0f
+        }
         if (this::router.isInitialized && needsAnim && binding.appBar.useLargeToolbar && !onSmallerController &&
             (showSearchAnyway || isAppBarVisible)
         ) {
@@ -672,10 +681,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val duration = resources.getInteger(android.R.integer.config_mediumAnimTime) * scale
             delay(duration.toLong())
             delay(100)
-            if (Color.alpha(window?.statusBarColor ?: Color.BLACK) >= 255) window?.statusBarColor =
-                getResourceColor(
-                    android.R.attr.statusBarColor,
-                )
+            if (Color.alpha(window?.statusBarColor ?: Color.BLACK) >= 255) {
+                window?.statusBarColor =
+                    getResourceColor(
+                        android.R.attr.statusBarColor,
+                    )
+            }
         }
         super.onSupportActionModeFinished(mode)
     }
@@ -803,11 +814,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     protected open fun handleIntentAction(intent: Intent): Boolean {
         val notificationId = intent.getIntExtra("notificationId", -1)
-        if (notificationId > -1) NotificationReceiver.dismissNotification(
-            applicationContext,
-            notificationId,
-            intent.getIntExtra("groupId", 0),
-        )
+        if (notificationId > -1) {
+            NotificationReceiver.dismissNotification(
+                applicationContext,
+                notificationId,
+                intent.getIntExtra("groupId", 0),
+            )
+        }
         when (intent.action) {
             SHORTCUT_LIBRARY -> nav.selectedItemId = R.id.nav_library
             SHORTCUT_RECENTLY_UPDATED, SHORTCUT_RECENTLY_READ -> {
@@ -1184,8 +1197,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             alphaAnimation.doOnEnd {
                 nav.isVisible = !hideBottomNav
                 binding.bottomView?.visibility =
-                    if (hideBottomNav) View.GONE else binding.bottomView?.visibility
-                        ?: View.GONE
+                    if (hideBottomNav) {
+                        View.GONE
+                    } else {
+                        binding.bottomView?.visibility
+                            ?: View.GONE
+                    }
             }
             alphaAnimation.duration = 200
             alphaAnimation.startDelay = 50

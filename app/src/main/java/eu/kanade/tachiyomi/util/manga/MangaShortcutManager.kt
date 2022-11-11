@@ -86,7 +86,9 @@ class MangaShortcutManager(
                                     } else {
                                         Icon.createWithBitmap(bitmap)
                                     }
-                                    else Icon.createWithResource(context, R.drawable.ic_book_24dp),
+                                    else {
+                                        Icon.createWithResource(context, R.drawable.ic_book_24dp)
+                                    },
                                 )
                                 .setIntent(
                                     SearchActivity.openMangaIntent(context, item.id, true)

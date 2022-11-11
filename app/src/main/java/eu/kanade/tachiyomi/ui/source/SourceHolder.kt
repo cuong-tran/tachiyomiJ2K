@@ -40,14 +40,20 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
         binding.sourcePin.apply {
             imageTintList = ColorStateList.valueOf(
                 context.getResourceColor(
-                    if (isPinned) R.attr.colorSecondary
-                    else android.R.attr.textColorSecondary,
+                    if (isPinned) {
+                        R.attr.colorSecondary
+                    } else {
+                        android.R.attr.textColorSecondary
+                    },
                 ),
             )
             compatToolTipText = context.getString(if (isPinned) R.string.unpin else R.string.pin)
             setImageResource(
-                if (isPinned) R.drawable.ic_pin_24dp
-                else R.drawable.ic_pin_outline_24dp,
+                if (isPinned) {
+                    R.drawable.ic_pin_24dp
+                } else {
+                    R.drawable.ic_pin_outline_24dp
+                },
             )
         }
 

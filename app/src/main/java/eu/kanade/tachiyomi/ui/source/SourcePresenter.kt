@@ -108,8 +108,11 @@ class SourcePresenter(
         return (sourceManager.get(value) as? CatalogueSource)?.let { source ->
             val pinnedCatalogues = preferences.pinnedCatalogues().get()
             val isPinned = source.id.toString() in pinnedCatalogues
-            if (isPinned) null
-            else SourceItem(source, LangItem(LAST_USED_KEY), isPinned)
+            if (isPinned) {
+                null
+            } else {
+                SourceItem(source, LangItem(LAST_USED_KEY), isPinned)
+            }
         }
     }
 

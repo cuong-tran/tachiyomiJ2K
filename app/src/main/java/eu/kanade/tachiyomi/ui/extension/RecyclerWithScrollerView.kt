@@ -18,18 +18,19 @@ class RecyclerWithScrollerView @JvmOverloads constructor(context: Context, attrs
         binding.recycler.setHasFixedSize(true)
         binding.recycler.addItemDecoration(ExtensionDividerItemDecoration(context))
         binding.recycler.updatePaddingRelative(bottom = height)
-        binding.recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE ||
-                    newState == RecyclerView.SCROLL_STATE_SETTLING
-                ) {
-                    sheet.sheetBehavior?.isDraggable = true
-                } else {
-                    sheet.sheetBehavior?.isDraggable = !recyclerView.canScrollVertically(-1)
+        binding.recycler.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE ||
+                        newState == RecyclerView.SCROLL_STATE_SETTLING
+                    ) {
+                        sheet.sheetBehavior?.isDraggable = true
+                    } else {
+                        sheet.sheetBehavior?.isDraggable = !recyclerView.canScrollVertically(-1)
+                    }
                 }
-            }
-        },
+            },
         )
 
         this.binding = binding

@@ -141,8 +141,11 @@ class SettingsSourcesController : SettingsController(), FloatingSearchInterface 
                     val current = preferences.hiddenSources().get()
 
                     preferences.hiddenSources().set(
-                        if (checked) current - id
-                        else current + id,
+                        if (checked) {
+                            current - id
+                        } else {
+                            current + id
+                        },
                     )
 
                     group.removeAll()
@@ -167,14 +170,23 @@ class SettingsSourcesController : SettingsController(), FloatingSearchInterface 
      */
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.settings_sources, menu)
-        if (sorting == SourcesSort.Alpha) menu.findItem(R.id.action_sort_alpha).isChecked = true
-        else menu.findItem(R.id.action_sort_enabled).isChecked = true
+        if (sorting == SourcesSort.Alpha) {
+            menu.findItem(R.id.action_sort_alpha).isChecked = true
+        } else {
+            menu.findItem(R.id.action_sort_enabled).isChecked = true
+        }
 
         val useSearchTB = showFloatingBar()
-        val searchItem = if (useSearchTB) activityBinding?.searchToolbar?.searchItem
-        else (menu.findItem(R.id.action_search))
-        val searchView = if (useSearchTB) activityBinding?.searchToolbar?.searchView
-        else searchItem?.actionView as? SearchView
+        val searchItem = if (useSearchTB) {
+            activityBinding?.searchToolbar?.searchItem
+        } else {
+            (menu.findItem(R.id.action_search))
+        }
+        val searchView = if (useSearchTB) {
+            activityBinding?.searchToolbar?.searchView
+        } else {
+            searchItem?.actionView as? SearchView
+        }
         if (!useSearchTB) {
             searchView?.maxWidth = Int.MAX_VALUE
         }

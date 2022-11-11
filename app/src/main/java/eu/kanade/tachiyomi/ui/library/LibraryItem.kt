@@ -168,7 +168,9 @@ class LibraryItem(
             if (constraint.contains(",")) {
                 val genres = manga.genre?.split(", ")
                 constraint.split(",").all { containsGenre(it.trim(), genres) }
-            } else containsGenre(constraint, manga.genre?.split(", "))
+            } else {
+                containsGenre(constraint, manga.genre?.split(", "))
+            }
     }
 
     private fun containsGenre(tag: String, genres: List<String>?): Boolean {

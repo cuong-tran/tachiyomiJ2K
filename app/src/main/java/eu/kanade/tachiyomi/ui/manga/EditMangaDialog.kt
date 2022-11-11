@@ -226,7 +226,9 @@ class EditMangaDialog : DialogController {
             if (this.text.isNullOrBlank()) {
                 this.append(originalText ?: "")
                 true
-            } else false
+            } else {
+                false
+            }
         }
     }
 
@@ -321,8 +323,9 @@ class EditMangaDialog : DialogController {
             .toTypedArray()
 
     private fun resetTags() {
-        if (manga.genre.isNullOrBlank() || manga.isLocal()) setGenreTags(emptyList())
-        else {
+        if (manga.genre.isNullOrBlank() || manga.isLocal()) {
+            setGenreTags(emptyList())
+        } else {
             setGenreTags(manga.getOriginalGenres().orEmpty())
             binding.seriesType.setSelection(manga.seriesType(true) - 1)
             binding.resetsReadingMode.isVisible = false

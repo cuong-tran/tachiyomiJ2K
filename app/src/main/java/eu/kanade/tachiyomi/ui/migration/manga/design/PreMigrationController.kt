@@ -159,8 +159,11 @@ class PreMigrationController(bundle: Bundle? = null) :
     fun isEnabled(id: String): Boolean {
         val sourcesSaved = prefs.migrationSources().get()
         val hiddenCatalogues = prefs.hiddenSources().get()
-        return if (sourcesSaved.isEmpty()) id !in hiddenCatalogues
-        else sourcesSaved.split("/").contains(id)
+        return if (sourcesSaved.isEmpty()) {
+            id !in hiddenCatalogues
+        } else {
+            sourcesSaved.split("/").contains(id)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
