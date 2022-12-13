@@ -7,25 +7,12 @@
     android:layout_height="match_parent"
     tools:context="eu.kanade.tachiyomi.ui.more.stats.details.StatsDetailsController">
 
-    <eu.kanade.tachiyomi.widget.EmptyView
-        android:id="@+id/no_chart_data"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_gravity="center"
-        android:visibility="gone" />
-
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/filter_constraint_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/stats_details_scroll_view"
         app:layout_constraintStart_toStartOf="parent">
 
         <HorizontalScrollView
@@ -288,6 +275,17 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
+
+    <eu.kanade.tachiyomi.widget.EmptyView
+        android:id="@+id/no_chart_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/chart_linear_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_gravity="center"
+        android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/stats_recycler_view"

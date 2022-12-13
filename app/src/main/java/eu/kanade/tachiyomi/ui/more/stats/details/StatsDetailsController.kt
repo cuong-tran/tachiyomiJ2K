@@ -368,10 +368,7 @@ class StatsDetailsController :
      * @param toAdd whether to add or remove
      */
     private fun changeReadDurationPeriod(toAdd: Int) {
-        val millionSeconds = presenter.endDate.timeInMillis - presenter.startDate.timeInMillis
-        val days = TimeUnit.MILLISECONDS.toDays(millionSeconds) + 1
-        presenter.startDate.add(Calendar.DAY_OF_YEAR, toAdd * days.toInt())
-        presenter.updateReadDurationPeriod(presenter.startDate.timeInMillis, days.toInt())
+        presenter.changeReadDurationPeriod(toAdd)
         binding.progress.isVisible = true
         jobReadDuration = viewScope.launchIO {
             presenter.updateMangaHistory()
@@ -498,7 +495,6 @@ class StatsDetailsController :
             progress.isVisible = true
             scrollView.isInvisible = true
             scrollView.scrollTo(0, 0)
-            chartLinearLayout?.isVisible = false
             statsPieChart.isVisible = false
             statsBarChart.isVisible = false
             statsLineChart.isVisible = false
@@ -521,7 +517,6 @@ class StatsDetailsController :
                 binding.noChartData.show(R.drawable.ic_heart_off_24dp, R.string.no_data_for_filters)
                 presenter.currentStats?.removeAll { it.count == 0 }
                 handleNoChartLayout()
-                chartLinearLayout?.isVisible = false
                 statsPieChart.isVisible = false
                 statsBarChart.isVisible = false
                 statsLineChart.isVisible = false
@@ -758,7 +753,6 @@ class StatsDetailsController :
             statsPieChart.clear()
             statsPieChart.invalidate()
 
-            chartLinearLayout?.isVisible = true
             statsPieChart.isVisible = true
             statsBarChart.isVisible = false
             statsLineChart.isVisible = false
@@ -795,7 +789,6 @@ class StatsDetailsController :
             statsBarChart.axisLeft.resetAxisMinimum()
             statsBarChart.axisLeft.resetAxisMaximum()
 
-            chartLinearLayout?.isVisible = true
             statsPieChart.isVisible = false
             statsBarChart.isVisible = true
             statsLineChart.isVisible = false
@@ -908,7 +901,6 @@ class StatsDetailsController :
             statsLineChart.clear()
             statsLineChart.invalidate()
 
-            chartLinearLayout?.isVisible = true
             statsPieChart.isVisible = false
             statsBarChart.isVisible = false
             statsLineChart.isVisible = true

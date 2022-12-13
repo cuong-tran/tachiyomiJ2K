@@ -68,6 +68,7 @@ class StatsDetailsPresenter(
         timeInMillis = startDate.timeInMillis - 1
         add(Calendar.WEEK_OF_YEAR, 1)
     }
+    private var daysRange = getDaysRange()
     var history = getMangaHistoryGroupedByDay()
     var historyByDayAndManga = emptyMap<Calendar, Map<Manga, List<History>>>()
 
@@ -555,9 +556,7 @@ class StatsDetailsPresenter(
             timeInMillis = startDate.timeInMillis
         }
 
-        val millionSeconds = endDate.timeInMillis - startDate.timeInMillis
-        val days = TimeUnit.MILLISECONDS.toDays(millionSeconds)
-        return (0..days).associate { _ ->
+        return (0 until daysRange).associate { _ ->
             Calendar.getInstance().apply { timeInMillis = calendar.timeInMillis } to history.filter {
                 val calH = Calendar.getInstance().apply { timeInMillis = it.history.last_read }
                 calH.get(Calendar.DAY_OF_YEAR) == calendar.get(Calendar.DAY_OF_YEAR) &&
@@ -578,27 +577,18 @@ class StatsDetailsPresenter(
         } ?: context.getString(R.string.unknown)
     }
 
+    fun changeReadDurationPeriod(toAdd: Int) {
+        startDate.add(Calendar.DAY_OF_YEAR, toAdd * daysRange.toInt())
+        endDate.add(Calendar.DAY_OF_YEAR, toAdd * daysRange.toInt())
+    }
+
+    private fun getDaysRange(): Long {
+        return TimeUnit.MILLISECONDS.toDays(endDate.timeInMillis - startDate.timeInMillis) + 1
+    }
+
     /**
-     * Update the start date and end date according to time selected and fetch the history of the period
+     * Update the start date and end date according to time selected
      */
-    fun updateReadDurationPeriod(millis: Long, days: Int) {
-        startDate = Calendar.getInstance().apply {
-            timeInMillis = millis
-            set(Calendar.HOUR_OF_DAY, 0)
-            clear(Calendar.MINUTE)
-            clear(Calendar.SECOND)
-            clear(Calendar.MILLISECOND)
-        }
-        endDate = Calendar.getInstance().apply {
-            timeInMillis = startDate.timeInMillis - 1
-            add(Calendar.DAY_OF_YEAR, days)
-        }
-    }
-
-    fun updateMangaHistory() {
-        history = getMangaHistoryGroupedByDay()
-    }
-
     fun updateReadDurationPeriod(startMillis: Long, endMillis: Long) {
         startDate = Calendar.getInstance().apply {
             timeInMillis = startMillis
@@ -616,6 +606,11 @@ class StatsDetailsPresenter(
             add(Calendar.DAY_OF_YEAR, 1)
             timeInMillis -= 1
         }
+        daysRange = getDaysRange()
+    }
+
+    fun updateMangaHistory() {
+        history = getMangaHistoryGroupedByDay()
     }
 
     fun convertCalendarToLongString(calendar: Calendar): String {
