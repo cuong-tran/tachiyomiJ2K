@@ -144,7 +144,7 @@ internal object ExtensionLoader {
         if (signatureHash == null) {
             return LoadResult.Error("Package $pkgName isn't signed")
         } else if (signatureHash !in trustedSignatures) {
-            val extension = Extension.Untrusted(extName, pkgName, versionName, versionCode, signatureHash)
+            val extension = Extension.Untrusted(extName, pkgName, versionName, versionCode, libVersion, signatureHash)
             Timber.w("Extension $pkgName isn't trusted")
             return LoadResult.Untrusted(extension)
         }
@@ -192,14 +192,15 @@ internal object ExtensionLoader {
         }
 
         val extension = Extension.Installed(
-            extName,
-            pkgName,
-            versionName,
-            versionCode,
-            lang,
-            isNsfw,
-            hasReadme,
-            hasChangelog,
+            name = extName,
+            pkgName = pkgName,
+            versionName = versionName,
+            versionCode = versionCode,
+            libVersion = libVersion,
+            lang = lang,
+            isNsfw = isNsfw,
+            hasReadme = hasReadme,
+            hasChangelog = hasChangelog,
             sources = sources,
             pkgFactory = appInfo.metaData.getString(METADATA_SOURCE_FACTORY),
             isUnofficial = signatureHash != officialSignature,
