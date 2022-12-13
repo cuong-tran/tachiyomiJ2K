@@ -233,6 +233,12 @@ class MangaDetailsPresenter(
         return chapterSort.getChaptersSorted(chapterList)
     }
 
+    fun getChapterUrl(chapter: Chapter): String? {
+        val source = source as? HttpSource ?: return null
+        val chapterUrl = source.getChapterUrl(chapter)
+        return chapterUrl.takeIf { it.isNotEmpty() } ?: source.getChapterUrl(manga, chapter)
+    }
+
     private fun getScrollType(chapters: List<ChapterItem>) {
         scrollType = when {
             ChapterUtil.hasMultipleVolumes(chapters) -> MULTIPLE_VOLUMES

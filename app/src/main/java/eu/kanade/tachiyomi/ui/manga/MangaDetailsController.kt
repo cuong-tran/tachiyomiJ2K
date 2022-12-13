@@ -831,7 +831,7 @@ class MangaDetailsController :
         val adapter = adapter ?: return
         val item = (adapter.getItem(position) as? ChapterItem) ?: return
         val descending = presenter.sortDescending()
-        val items = listOf(
+        var items = mutableListOf(
             MaterialMenuSheet.MenuSheetItem(
                 0,
                 if (descending) R.drawable.ic_eye_down_24dp else R.drawable.ic_eye_up_24dp,
@@ -853,33 +853,27 @@ class MangaDetailsController :
                 R.string.mark_range_as_unread,
             ),
         )
+        if (presenter.getChapterUrl(item.chapter) != null) {
+            items.add(
+                0,
+                MaterialMenuSheet.MenuSheetItem(
+                    4,
+                    R.drawable.ic_open_in_webview_24dp,
+                    R.string.open_in_webview,
+                ),
+            )
+        }
         val menuSheet = MaterialMenuSheet(activity!!, items, item.name) { _, itemPos ->
             when (itemPos) {
                 0 -> markPreviousAs(item, true)
                 1 -> markPreviousAs(item, false)
                 2 -> startReadRange(position, RangeMode.Read)
                 3 -> startReadRange(position, RangeMode.Unread)
+                4 -> openChapterInWebView(item)
             }
             true
         }
         menuSheet.show()
-//        val popup = PopupMenu(itemView.context, itemView)
-//        chapterPopupMenu = position to popup
-//
-//        // Inflate our menu resource into the PopupMenu's Menu
-//        popup.menuInflater.inflate(R.menu.chapter_single, popup.menu)
-//
-//        popup.setOnMenuItemClickListener { menuItem ->
-//            when (menuItem.itemId) {
-//                R.id.action_mark_previous_as_read -> markPreviousAs(item, true)
-//                R.id.action_mark_previous_as_unread -> markPreviousAs(item, false)
-//            }
-//            chapterPopupMenu = null
-//            true
-//        }
-//
-//        // Finally show the PopupMenu
-//        popup.show()
     }
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
@@ -1161,7 +1155,7 @@ class MangaDetailsController :
         val source = presenter.source as? HttpSource ?: return
         val stream = cover?.getUriCompat(context)
         try {
-            val url = source.mangaDetailsRequest(presenter.manga).url.toString()
+            val url = source.getMangaUrl(presenter.manga)
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/*"
                 putExtra(Intent.EXTRA_TEXT, url)
@@ -1185,6 +1179,22 @@ class MangaDetailsController :
         } catch (e: Exception) {
             return
         }
+
+        val activity = activity ?: return
+        val intent = WebViewActivity.newIntent(
+            activity.applicationContext,
+            source.id,
+            url,
+            presenter.manga
+                .title,
+        )
+        startActivity(intent)
+    }
+
+    fun openChapterInWebView(item: ChapterItem) {
+        if (isNotOnline()) return
+        val source = presenter.source as? HttpSource ?: return
+        val url = presenter.getChapterUrl(item.chapter) ?: return
 
         val activity = activity ?: return
         val intent = WebViewActivity.newIntent(

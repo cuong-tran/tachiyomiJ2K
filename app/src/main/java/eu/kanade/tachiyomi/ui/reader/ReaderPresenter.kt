@@ -39,7 +39,6 @@ import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterRead
 import eu.kanade.tachiyomi.util.isLocal
-import eu.kanade.tachiyomi.util.lang.getUrlWithoutDomain
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -670,39 +669,8 @@ class ReaderPresenter(
         val manga = manga ?: return null
         val source = getSource() ?: return null
         val chapter = getCurrentChapter()?.chapter ?: return null
-
-        val chapterUrl = chapter.url.getUrlWithoutDomain()
-        val mangaUrl = source.mangaDetailsRequest(manga).url.toString()
-        return if (chapterUrl.isBlank()) {
-            mangaUrl
-        } else {
-            source.fullChapterUrl(mangaUrl, chapterUrl, chapter)
-        }
-    }
-
-    /** Helper method to handle guya-like sources */
-    private fun HttpSource.fullChapterUrl(mangaUrl: String, chapterUrl: String, chapter: Chapter): String {
-        val lowerUrl = baseUrl.lowercase()
-        return when {
-            chapter.url.startsWith("http") -> {
-                chapter.url
-            }
-            lowerUrl.contains("guya") || lowerUrl.contains("danke") ||
-                lowerUrl.contains("hachirumi") || lowerUrl.contains("mahoushoujobu") ||
-                (lowerUrl.contains("cubari") && !mangaUrl.contains("imgur")) -> {
-                // cubari links would have double / without the trim end
-                mangaUrl.trimEnd('/') + "/" + chapter.chapter_number.fmt().replace(".", "-")
-            }
-            else -> baseUrl + chapterUrl
-        }
-    }
-
-    private fun Float.fmt(): String {
-        return if (this == toLong().toFloat()) {
-            String.format("%d", toLong())
-        } else {
-            String.format("%s", this)
-        }
+        val chapterUrl = source.getChapterUrl(chapter)
+        return chapterUrl.takeIf { it.isNotEmpty() } ?: source.getChapterUrl(manga, chapter)
     }
 
     fun getSource() = manga?.source?.let { sourceManager.getOrStub(it) } as? HttpSource

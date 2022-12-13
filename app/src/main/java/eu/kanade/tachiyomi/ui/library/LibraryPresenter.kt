@@ -937,7 +937,7 @@ class LibraryPresenter(
     fun getMangaUrls(mangas: List<Manga>): List<String> {
         return mangas.mapNotNull { manga ->
             val source = sourceManager.get(manga.source) as? HttpSource ?: return@mapNotNull null
-            source.mangaDetailsRequest(manga).url.toString()
+            source.getMangaUrl(manga)
         }
     }
 

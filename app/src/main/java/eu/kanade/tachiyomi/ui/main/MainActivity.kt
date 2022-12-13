@@ -890,7 +890,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             is MangaDetailsController -> {
                 val source = controller.presenter.source as? HttpSource ?: return
                 val url = try {
-                    source.mangaDetailsRequest(controller.presenter.manga).url.toString()
+                    source.getMangaUrl(controller.presenter.manga)
                 } catch (e: Exception) {
                     return
                 }
