@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.UnmeteredSource
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.UpdateStrategy
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithTrackServiceTwoWay
@@ -300,18 +301,24 @@ class LibraryUpdateService(
     private fun filterMangaToUpdate(mangaToAdd: List<LibraryManga>): List<LibraryManga> {
         val restrictions = preferences.libraryUpdateMangaRestriction().get()
         return mangaToAdd.filter { manga ->
-            return@filter if (MANGA_NON_COMPLETED in restrictions && manga.status == SManga.COMPLETED) {
-                skippedUpdates[manga] = getString(R.string.skipped_reason_completed)
-                false
-            } else if (MANGA_HAS_UNREAD in restrictions && manga.unread != 0) {
-                skippedUpdates[manga] = getString(R.string.skipped_reason_not_caught_up)
-                false
-            } else if (MANGA_NON_READ in restrictions && manga.totalChapters > 0 && !manga.hasRead) {
-                skippedUpdates[manga] = getString(R.string.skipped_reason_not_started)
-                false
-            } else {
-                true
+            when {
+                MANGA_NON_COMPLETED in restrictions && manga.status == SManga.COMPLETED -> {
+                    skippedUpdates[manga] = getString(R.string.skipped_reason_completed)
+                }
+                MANGA_HAS_UNREAD in restrictions && manga.unread != 0 -> {
+                    skippedUpdates[manga] = getString(R.string.skipped_reason_not_caught_up)
+                }
+                MANGA_NON_READ in restrictions && manga.totalChapters > 0 && !manga.hasRead -> {
+                    skippedUpdates[manga] = getString(R.string.skipped_reason_not_started)
+                }
+                manga.update_strategy != UpdateStrategy.ALWAYS_UPDATE -> {
+                    skippedUpdates[manga] = getString(R.string.skipped_reason_not_always_update)
+                }
+                else -> {
+                    return@filter true
+                }
             }
+            return@filter false
         }
     }
 

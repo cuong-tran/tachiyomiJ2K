@@ -46,6 +46,8 @@ object MangaTable {
 
     const val COL_FILTERED_SCANLATORS = "filtered_scanlators"
 
+    const val COL_UPDATE_STRATEGY = "update_strategy"
+
     val createTableQuery: String
         get() =
             """CREATE TABLE $TABLE(
@@ -66,7 +68,8 @@ object MangaTable {
             $COL_HIDE_TITLE INTEGER NOT NULL,
             $COL_CHAPTER_FLAGS INTEGER NOT NULL,
             $COL_DATE_ADDED LONG,
-            $COL_FILTERED_SCANLATORS TEXT
+            $COL_FILTERED_SCANLATORS TEXT,
+            $COL_UPDATE_STRATEGY INTEGER AS UpdateStrategy NOT NULL DEFAULT 0
 
             )"""
 
@@ -85,4 +88,7 @@ object MangaTable {
 
     val addFilteredScanlators: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_FILTERED_SCANLATORS TEXT"
+
+    val addUpdateStrategy: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_UPDATE_STRATEGY INTEGER NOT NULL DEFAULT 0"
 }

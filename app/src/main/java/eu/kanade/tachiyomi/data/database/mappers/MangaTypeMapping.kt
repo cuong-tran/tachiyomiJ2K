@@ -27,9 +27,11 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SOURCE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_STATUS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_THUMBNAIL_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_TITLE
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_UPDATE_STRATEGY
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_VIEWER
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.TABLE
+import eu.kanade.tachiyomi.data.database.updateStrategyAdapter
 
 class MangaTypeMapping : SQLiteTypeMapping<Manga>(
     MangaPutResolver(),
@@ -68,6 +70,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_CHAPTER_FLAGS, obj.chapter_flags)
         put(COL_DATE_ADDED, obj.date_added)
         put(COL_FILTERED_SCANLATORS, obj.filtered_scanlators)
+        put(COL_UPDATE_STRATEGY, obj.update_strategy.let(updateStrategyAdapter::encode))
     }
 }
 
@@ -91,6 +94,9 @@ interface BaseMangaGetResolver {
         hide_title = cursor.getInt(cursor.getColumnIndex(COL_HIDE_TITLE)) == 1
         date_added = cursor.getLong(cursor.getColumnIndex(COL_DATE_ADDED))
         filtered_scanlators = cursor.getString(cursor.getColumnIndex(COL_FILTERED_SCANLATORS))
+        update_strategy = cursor.getInt(cursor.getColumnIndex(COL_UPDATE_STRATEGY)).let(
+            updateStrategyAdapter::decode,
+        )
     }
 }
 
