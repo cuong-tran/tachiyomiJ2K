@@ -77,6 +77,7 @@ internal class DownloadNotifier(private val context: Context) {
                 setSmallIcon(android.R.drawable.stat_sys_download)
                 setAutoCancel(false)
                 clearActions()
+                setOngoing(true)
                 // Open download manager when clicked
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
                 color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
@@ -129,6 +130,7 @@ internal class DownloadNotifier(private val context: Context) {
                 setSmallIcon(android.R.drawable.stat_sys_download)
                 setAutoCancel(false)
                 clearActions()
+                setOngoing(true)
                 // Open download manager when clicked
                 color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
@@ -174,6 +176,7 @@ internal class DownloadNotifier(private val context: Context) {
             setContentText(context.getString(R.string.download_paused))
             setSmallIcon(R.drawable.ic_pause_24dp)
             setAutoCancel(false)
+            setOngoing(false)
             setProgress(0, 0, false)
             color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
             clearActions()
@@ -212,6 +215,7 @@ internal class DownloadNotifier(private val context: Context) {
             setContentText(reason)
             color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
             setSmallIcon(R.drawable.ic_warning_white_24dp)
+            setOngoing(false)
             setAutoCancel(true)
             clearActions()
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
@@ -278,6 +282,7 @@ internal class DownloadNotifier(private val context: Context) {
             )
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setCategory(NotificationCompat.CATEGORY_ERROR)
+            setOngoing(false)
             clearActions()
             setAutoCancel(true)
             if (customIntent != null) {
