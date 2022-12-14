@@ -22,7 +22,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -82,13 +81,11 @@ class ExtensionInstallService(
         instance = this
 
         val list = intent.getParcelableArrayListExtra<ExtensionInfo>(KEY_EXTENSION)?.filter {
-            (
-                extensionManager.installedExtensions.find { installed ->
-                    installed.pkgName == it.pkgName
-                }?.versionCode ?: 0
-                ) < it.versionCode
-        }
-            ?: return START_NOT_STICKY
+            val installedExt = extensionManager.installedExtensions.find { installed ->
+                installed.pkgName == it.pkgName
+            } ?: return@filter false
+            installedExt.versionCode < it.versionCode || installedExt.libVersion < it.libVersion
+        } ?: return START_NOT_STICKY
 
         activeInstalls = list.map { it.pkgName }.toMutableList()
         serviceScope.launch {
