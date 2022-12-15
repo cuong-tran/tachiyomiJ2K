@@ -147,7 +147,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         sheetBehavior?.isGestureInsetBottomIgnored = true
 
-        val activeFilters = hasActiveFiltersFromPref()
+        val activeFilters = hasActiveFiltersFromPref() && !controller.isSubClass
         if (activeFilters && sheetBehavior.isHidden() && sheetBehavior?.skipCollapsed == false) {
             sheetBehavior?.collapse()
             controller.viewScope.launchUI {
@@ -415,7 +415,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     override fun onFilterClicked(view: FilterTagGroup, index: Int, updatePreference: Boolean) {
-        if (updatePreference) {
+        if (updatePreference && controller?.isSubClass != true) {
             when (view) {
                 trackers -> {
                     FILTER_TRACKER = view.nameOf(index) ?: ""
@@ -523,7 +523,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         const val STATE_EXCLUDE = 2
 
         var FILTER_TRACKER = ""
-            private set
     }
 
     enum class Filters(val value: Char, @StringRes val stringRes: Int) {

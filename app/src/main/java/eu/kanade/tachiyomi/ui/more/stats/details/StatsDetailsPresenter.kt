@@ -36,7 +36,7 @@ import kotlin.math.roundToInt
 class StatsDetailsPresenter(
     private val db: DatabaseHelper = Injekt.get(),
     prefs: PreferencesHelper = Injekt.get(),
-    private val trackManager: TrackManager = Injekt.get(),
+    val trackManager: TrackManager = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
 ) : BaseCoroutinePresenter<StatsDetailsController>() {
 
@@ -141,6 +141,7 @@ class StatsDetailsPresenter(
                     totalChapters = mangaList.sumOf { it.totalChapters },
                     label = context.mapSeriesType(seriesType).uppercase(),
                     readDuration = mangaList.getReadDuration(),
+                    casedLabel = context.mapSeriesType(seriesType),
                 ),
             )
         }
@@ -161,6 +162,7 @@ class StatsDetailsPresenter(
                     totalChapters = mangaList.sumOf { it.totalChapters },
                     label = context.mapStatus(status).uppercase(),
                     readDuration = mangaList.getReadDuration(),
+                    casedLabel = context.mapStatus(status),
                 ),
             )
         }
@@ -256,6 +258,8 @@ class StatsDetailsPresenter(
                     iconRes = service?.getLogo(),
                     iconBGColor = service?.getLogoColor(),
                     readDuration = mangaAndTrack.map { it.first }.getReadDuration(),
+                    id = service?.id?.toLong(),
+                    casedLabel = label,
                 ),
             )
         }
@@ -279,6 +283,7 @@ class StatsDetailsPresenter(
                     label = sourceName.uppercase(),
                     icon = source?.icon(),
                     readDuration = mangaList.getReadDuration(),
+                    casedLabel = source?.name,
                 ),
             )
         }
@@ -310,8 +315,12 @@ class StatsDetailsPresenter(
     private fun setupTags() {
         currentStats = ArrayList()
         val mangaFiltered = mangasDistinct.filterByChip()
-        val tags = mangaFiltered.flatMap { it.getTags() }.distinct()
-        val libraryFormat = tags.map { tag -> tag to mangaFiltered.filter { tag in it.getTags() } }
+        val tags = mangaFiltered.flatMap { it.getTags() }.distinctBy { it.uppercase() }
+        val libraryFormat = tags.map { tag ->
+            tag to mangaFiltered.filter {
+                it.getTags().any { mangaTag -> mangaTag.equals(tag, true) }
+            }
+        }
 
         libraryFormat.forEach { (tag, mangaList) ->
             currentStats?.add(
@@ -323,6 +332,7 @@ class StatsDetailsPresenter(
                     totalChapters = mangaList.sumOf { it.totalChapters },
                     label = tag.uppercase(),
                     readDuration = mangaList.getReadDuration(),
+                    casedLabel = tag,
                 ),
             )
         }
@@ -370,7 +380,7 @@ class StatsDetailsPresenter(
                     label = manga.title,
                     subLabel = sources.find { it.id == manga.source }?.toString(),
                     readDuration = history.sumOf { it.time_read },
-                    mangaId = manga.id,
+                    id = manga.id,
                 ),
             )
         }
@@ -457,7 +467,7 @@ class StatsDetailsPresenter(
     }
 
     private fun Manga.getTags(): List<String> {
-        return getGenres()?.map { it.uppercase() } ?: emptyList()
+        return getGenres() ?: emptyList()
     }
 
     /**
@@ -669,6 +679,7 @@ class StatsDetailsPresenter(
         var icon: Drawable? = null,
         var subLabel: String? = null,
         var readDuration: Long = 0,
-        var mangaId: Long? = null,
+        var id: Long? = null,
+        var casedLabel: String? = null,
     )
 }

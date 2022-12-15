@@ -52,7 +52,7 @@ class StatsDetailsAdapter(
 
     override fun getItemId(position: Int): Long {
         return when (stat) {
-            Stats.READ_DURATION -> list[position].mangaId
+            Stats.READ_DURATION -> list[position].id
             else -> list[position].label?.hashCode()?.toLong()
         } ?: 0L
     }
@@ -64,12 +64,18 @@ class StatsDetailsAdapter(
             Stats.READ_DURATION -> handleDurationLayout(holder, position)
             else -> handleLayout(holder, position)
         }
-        list[position].mangaId?.let { mangaId ->
-            holder.itemView.setOnClickListener {
-                listener?.onItemClicked(mangaId)
-            }
+        holder.itemView.setOnClickListener {
+            val item = list[position]
+            listener?.onItemClicked(item.id, item.casedLabel ?: item.label)
         }
-        holder.itemView.isClickable = list[position].mangaId != null
+        holder.itemView.isClickable = stat in arrayOf(
+            Stats.SERIES_TYPE,
+            Stats.STATUS,
+            Stats.READ_DURATION,
+            Stats.SOURCE,
+            Stats.TRACKER,
+            Stats.TAG,
+        )
     }
 
     override fun getItemCount(): Int {
@@ -231,7 +237,7 @@ class StatsDetailsAdapter(
     }
 
     fun interface OnItemClickedListener {
-        fun onItemClicked(mangaId: Long)
+        fun onItemClicked(id: Long?, label: String?)
     }
 
     override fun getItemViewType(position: Int): Int {

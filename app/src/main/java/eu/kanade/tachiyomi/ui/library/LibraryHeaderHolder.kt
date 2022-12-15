@@ -196,7 +196,7 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
                 binding.updateButton.isVisible = false
                 setSelection()
             }
-            (category.id ?: -1) < 0 -> {
+            (category.id ?: -1) < 0 || adapter.libraryListener is FilteredLibraryController -> {
                 binding.collapseArrow.isVisible = false
                 binding.checkbox.isVisible = false
                 setRefreshing(false)

@@ -103,6 +103,9 @@ class LibraryPresenter(
     private val libraryIsGrouped
         get() = groupType != UNGROUPED
 
+    private val controllerIsSubClass
+        get() = controller?.isSubClass == true
+
     var hasActiveFilters: Boolean = run {
         val filterDownloaded = preferences.filterDownloaded().get()
 
@@ -119,17 +122,22 @@ class LibraryPresenter(
 
     /** Save the current list to speed up loading later */
     override fun onDestroy() {
+        val isSubController = controllerIsSubClass
         super.onDestroy()
-        lastLibraryItems = libraryItems
-        lastCategories = categories
+        if (!isSubController) {
+            lastLibraryItems = libraryItems
+            lastCategories = categories
+        }
     }
 
     override fun onCreate() {
         super.onCreate()
-        lastLibraryItems?.let { libraryItems = it }
-        lastCategories?.let { categories = it }
-        lastCategories = null
-        lastLibraryItems = null
+        if (!controllerIsSubClass) {
+            lastLibraryItems?.let { libraryItems = it }
+            lastCategories?.let { categories = it }
+            lastCategories = null
+            lastLibraryItems = null
+        }
         getLibrary()
         if (preferences.showLibrarySearchSuggestions().isNotSet()) {
             DelayedLibrarySuggestionsJob.setupTask(context, true)
@@ -261,15 +269,16 @@ class LibraryPresenter(
      * @param items the items to filter.
      */
     private fun applyFilters(items: List<LibraryItem>): List<LibraryItem> {
-        val filterDownloaded = preferences.filterDownloaded().get()
+        val customFilters = controller as? FilteredLibraryController
+        val filterDownloaded = customFilters?.filterDownloaded ?: preferences.filterDownloaded().get()
 
-        val filterUnread = preferences.filterUnread().get()
+        val filterUnread = customFilters?.filterUnread ?: preferences.filterUnread().get()
 
         val filterCompleted = preferences.filterCompleted().get()
 
-        val filterTracked = preferences.filterTracked().get()
+        val filterTracked = customFilters?.filterTracked ?: preferences.filterTracked().get()
 
-        val filterMangaType = preferences.filterMangaType().get()
+        val filterMangaType = customFilters?.filterMangaType ?: preferences.filterMangaType().get()
 
         val showEmptyCategoriesWhileFiltering = preferences.showEmptyCategoriesWhileFiltering().get()
 
@@ -295,6 +304,7 @@ class LibraryPresenter(
                             filterTracked,
                             filterMangaType,
                             filterTrackers,
+                            customFilters?.filterStatus,
                         )
                     }
                 }
@@ -314,6 +324,7 @@ class LibraryPresenter(
                 filterTracked,
                 filterMangaType,
                 filterTrackers,
+                customFilters?.filterStatus,
             )
             if (matches) {
                 missingCategorySet.remove(item.manga.category)
@@ -336,6 +347,7 @@ class LibraryPresenter(
         filterTracked: Int,
         filterMangaType: Int,
         filterTrackers: String,
+        filterStatus: Int? = null,
     ): Boolean {
         if (filterUnread == STATE_INCLUDE && item.manga.unread == 0) return false
         if (filterUnread == STATE_EXCLUDE && item.manga.unread > 0) return false
@@ -355,9 +367,13 @@ class LibraryPresenter(
             }
         }
 
-        // Filter for completed status of manga
-        if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED) return false
-        if (filterCompleted == STATE_EXCLUDE && item.manga.status == SManga.COMPLETED) return false
+        if (filterStatus != null) {
+            if (filterStatus != item.manga.status) return false
+        } else {
+            // Filter for completed status of manga
+            if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED) return false
+            if (filterCompleted == STATE_EXCLUDE && item.manga.status == SManga.COMPLETED) return false
+        }
 
         // Filter for tracked (or per tracked service)
         if (filterTracked != STATE_IGNORE) {
@@ -615,7 +631,7 @@ class LibraryPresenter(
                 LibraryItem(it, headerItem, viewContext)
             }.toMutableList()
 
-            val categoriesHidden = if (forceShowAllCategories) {
+            val categoriesHidden = if (forceShowAllCategories || controllerIsSubClass) {
                 emptySet()
             } else {
                 preferences.collapsedCategories().get().mapNotNull { it.toIntOrNull() }.toSet()
@@ -786,7 +802,11 @@ class LibraryPresenter(
             }
         }.flatten().toMutableList()
 
-        val hiddenDynamics = preferences.collapsedDynamicCategories().get()
+        val hiddenDynamics = if (controllerIsSubClass) {
+            emptySet()
+        } else {
+            preferences.collapsedDynamicCategories().get()
+        }
         var headers = tagItems.map { item ->
             Category.createCustom(
                 item.key,

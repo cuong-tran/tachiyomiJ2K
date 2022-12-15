@@ -32,6 +32,8 @@ import eu.kanade.tachiyomi.databinding.StatsDetailsChartBinding
 import eu.kanade.tachiyomi.databinding.StatsDetailsControllerBinding
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
+import eu.kanade.tachiyomi.ui.library.FilteredLibraryController
+import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
 import eu.kanade.tachiyomi.ui.more.stats.details.StatsDetailsPresenter.Stats
@@ -580,14 +582,64 @@ class StatsDetailsController :
                 concatAdapter.addAdapter(0, headAdapter)
             }
             binding.statsRecyclerView.adapter = concatAdapter
-            statsAdapter.listener = StatsDetailsAdapter.OnItemClickedListener { mangaId ->
-                router.pushController(MangaDetailsController(mangaId).withFadeTransaction())
-            }
+            statsAdapter.listener = StatsDetailsAdapter.OnItemClickedListener(::onItemClicked)
         } else {
             updateStatsAdapter(onlyUpdateDetails)
             concatAdapter?.notifyDataSetChanged()
         }
         if (query.isNotBlank()) statsAdapter?.filter(query)
+    }
+
+    fun onItemClicked(id: Long?, name: String?) {
+        name ?: return
+        when (presenter.selectedStat) {
+            Stats.SERIES_TYPE -> {
+                val seriesType = presenter.seriesTypeStats.indexOf(name) + 1
+                if (seriesType > 0) {
+                    router.pushController(
+                        FilteredLibraryController(name, filterMangaType = seriesType)
+                            .withFadeTransaction(),
+                    )
+                }
+            }
+            Stats.STATUS -> {
+                val status = presenter.statusStats.indexOf(name) + 1
+                router.pushController(
+                    FilteredLibraryController(name, filterStatus = status)
+                        .withFadeTransaction(),
+                )
+            }
+            Stats.SOURCE, Stats.TAG -> {
+                router.pushController(
+                    FilteredLibraryController(name, queryText = name).withFadeTransaction(),
+                )
+            }
+            Stats.TRACKER -> {
+                if (id != null) {
+                    val loggedServices = presenter.trackManager.services.filter { it.isLogged }
+                    val service = loggedServices.find { it.id == id.toInt() } ?: return
+                    val serviceName = binding.root.context.getString(service.nameRes())
+                    router.pushController(
+                        FilteredLibraryController(
+                            serviceName,
+                            filterTracked = FilterBottomSheet.STATE_INCLUDE,
+                            filterTrackerName = serviceName,
+                        ).withFadeTransaction(),
+                    )
+                } else {
+                    router.pushController(
+                        FilteredLibraryController(
+                            name,
+                            filterTracked = FilterBottomSheet.STATE_EXCLUDE,
+                        ).withFadeTransaction(),
+                    )
+                }
+            }
+            Stats.READ_DURATION -> id?.let {
+                router.pushController(MangaDetailsController(id).withFadeTransaction())
+            }
+            else -> return
+        }
     }
 
     private fun updateStatsAdapter(onlyUpdateDetails: Boolean) {
