@@ -379,11 +379,11 @@ fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
         .any { className == it.service.className }
 }
 
-fun Context.openInBrowser(url: String, @ColorInt toolbarColor: Int? = null) {
+fun Context.openInBrowser(url: String, @ColorInt toolbarColor: Int? = null, forceBrowser: Boolean = false) {
     this.openInBrowser(url.toUri(), toolbarColor)
 }
 
-fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
+fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null, forceBrowser: Boolean = false) {
     try {
         val intent = CustomTabsIntent.Builder()
             .setDefaultColorSchemeParams(
@@ -392,6 +392,11 @@ fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
                     .build(),
             )
             .build()
+        if (forceBrowser) {
+            val packages = getCustomTabsPackages().maxByOrNull { it.preferredOrder }
+            val processName = packages?.activityInfo?.processName ?: return
+            intent.intent.`package` = processName
+        }
         intent.launchUrl(this, uri)
     } catch (e: Exception) {
         toast(e.message)
@@ -401,27 +406,47 @@ fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
 /**
  * Opens a URL in a custom tab.
  */
-fun Context.openInBrowser(url: String, forceBrowser: Boolean): Boolean {
+fun Context.openInBrowser(url: String, forceBrowser: Boolean, fullBrowser: Boolean = true): Boolean {
     try {
         val parsedUrl = url.toUri()
-        val intent = CustomTabsIntent.Builder()
-            .setDefaultColorSchemeParams(
-                CustomTabColorSchemeParams.Builder()
-                    .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
-                    .build(),
-            )
-            .build()
-        if (forceBrowser) {
-            val packages = getCustomTabsPackages().maxByOrNull { it.preferredOrder }
-            val processName = packages?.activityInfo?.processName ?: return false
-            intent.intent.`package` = processName
+        if (forceBrowser && fullBrowser) {
+            val intent = Intent(Intent.ACTION_VIEW, parsedUrl).apply {
+                defaultBrowserPackageName()?.let { setPackage(it) }
+            }
+            startActivity(intent)
+        } else {
+            val intent = CustomTabsIntent.Builder()
+                .setDefaultColorSchemeParams(
+                    CustomTabColorSchemeParams.Builder()
+                        .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
+                        .build(),
+                )
+                .build()
+            if (forceBrowser) {
+                val packages = getCustomTabsPackages().maxByOrNull { it.preferredOrder }
+                val processName = packages?.activityInfo?.processName ?: return false
+                intent.intent.`package` = processName
+            }
+            intent.launchUrl(this, parsedUrl)
         }
-        intent.launchUrl(this, parsedUrl)
         return true
     } catch (e: Exception) {
         toast(e.message)
         return false
     }
+}
+
+fun Context.defaultBrowserPackageName(): String? {
+    val browserIntent = Intent(Intent.ACTION_VIEW, "http://".toUri())
+    val resolveInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        packageManager.resolveActivity(browserIntent, PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong()))
+    } else {
+        @Suppress("DEPRECATION")
+        packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+    }
+    return resolveInfo
+        ?.activityInfo?.packageName
+        ?.takeUnless { it in DeviceUtil.invalidDefaultBrowsers }
 }
 
 /**

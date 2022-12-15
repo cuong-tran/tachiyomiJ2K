@@ -173,6 +173,6 @@ open class WebViewActivity : BaseWebViewActivity() {
     }
 
     private fun openInBrowser() {
-        binding.webview.url?.let { openInBrowser(it) }
+        binding.webview.url?.let { openInBrowser(it, forceBrowser = true, fullBrowser = true) }
     }
 }
