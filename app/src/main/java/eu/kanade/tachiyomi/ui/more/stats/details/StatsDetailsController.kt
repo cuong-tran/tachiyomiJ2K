@@ -374,7 +374,7 @@ class StatsDetailsController :
                 selectedValues.addAll(tempValues)
                 setState(selectedValues, resourceId, resourceIdPlural, isCategory)
                 binding.progress.isVisible = true
-                resetAndSetup(resetReadDuration = false, keepAdapter = true)
+                resetAndSetup(keepAdapter = true)
             }
             .show()
     }
@@ -386,7 +386,6 @@ class StatsDetailsController :
      */
     private fun resetAndSetup(
         updateChipsVisibility: Boolean = true,
-        resetReadDuration: Boolean = true,
         keepAdapter: Boolean = false,
     ) {
         resetLayout(updateChipsVisibility, keepAdapter)
@@ -398,7 +397,7 @@ class StatsDetailsController :
      * @param resourceId string resource of the stat name
      */
     private fun Chip.reset(resourceId: Int) {
-        resetAndSetup(resetReadDuration = false, keepAdapter = true)
+        resetAndSetup(keepAdapter = true)
         this.setColors(0)
         this.text = activity?.getString(resourceId)
     }
