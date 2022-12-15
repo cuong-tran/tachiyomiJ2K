@@ -127,6 +127,7 @@ class LibraryPresenter(
         if (!isSubController) {
             lastLibraryItems = libraryItems
             lastCategories = categories
+            lastAllLibraryItems = allLibraryItems
         }
     }
 
@@ -135,8 +136,10 @@ class LibraryPresenter(
         if (!controllerIsSubClass) {
             lastLibraryItems?.let { libraryItems = it }
             lastCategories?.let { categories = it }
+            lastAllLibraryItems?.let { allLibraryItems = it }
             lastCategories = null
             lastLibraryItems = null
+            lastAllLibraryItems = null
         }
         getLibrary()
         if (preferences.showLibrarySearchSuggestions().isNotSet()) {
@@ -1262,6 +1265,7 @@ class LibraryPresenter(
     companion object {
         private var lastLibraryItems: List<LibraryItem>? = null
         private var lastCategories: List<Category>? = null
+        private var lastAllLibraryItems: List<LibraryItem>? = null
         private const val sourceSplitter = "◘•◘"
         private const val langSplitter = "⨼⨦⨠"
         private const val dynamicCategorySplitter = "▄╪\t▄╪\t▄"
@@ -1277,6 +1281,7 @@ class LibraryPresenter(
         fun onLowMemory() {
             lastLibraryItems = null
             lastCategories = null
+            lastAllLibraryItems = null
         }
 
         suspend fun setSearchSuggestion(
