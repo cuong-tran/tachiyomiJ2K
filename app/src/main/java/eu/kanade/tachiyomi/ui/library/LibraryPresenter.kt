@@ -782,7 +782,7 @@ class LibraryPresenter(
                         ),
                     )
                 }
-                else /* BY_STATUS */ -> listOf(LibraryItem(manga, makeOrGetHeader(context.mapStatus(manga.status)), viewContext))
+                else -> listOf(LibraryItem(manga, makeOrGetHeader(context.mapStatus(manga.status)), viewContext)) // BY_STATUS
             }
         }.flatten().toMutableList()
 

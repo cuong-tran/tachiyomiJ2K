@@ -231,7 +231,7 @@ class DownloadService : Service() {
      */
     private fun listenDownloaderState() {
         subscriptions += downloadManager.runningRelay
-            .doOnError { /* Swallow wakelock error */ }
+            .doOnError { } // Swallow wakelock error
             .subscribe { running ->
                 if (running) {
                     wakeLock.acquireIfNeeded()
