@@ -20,15 +20,41 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 
 class StatsDetailsAdapter(
-    private val context: Context,
-    var list: MutableList<StatsData>,
-    private val stat: Stats,
-    private val listCopy: MutableList<StatsData> = list,
+    internal val context: Context,
+    var stat: Stats,
+    statList: MutableList<StatsData>,
 ) : RecyclerView.Adapter<StatsDetailsAdapter.StatsDetailsHolder>() {
+
+    var listener: OnItemClickedListener? = null
+
+    var list = statList.filterEmpty()
+        private set
+    var mainList: MutableList<StatsData> = statList.filterEmpty()
+        set(value) {
+            val filtered = value.filterEmpty()
+            field = filtered
+            list = filtered
+        }
+
+    private fun Iterable<StatsData>.filterEmpty(): MutableList<StatsData> {
+        return filter {
+            when (stat) {
+                Stats.SCORE, Stats.LENGTH -> it.count > 0
+                else -> true
+            }
+        }.toMutableList()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StatsDetailsHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_stats_details, parent, false)
         return StatsDetailsHolder(view)
+    }
+
+    override fun getItemId(position: Int): Long {
+        return when (stat) {
+            Stats.READ_DURATION -> list[position].mangaId
+            else -> list[position].label?.hashCode()?.toLong()
+        } ?: 0L
     }
 
     override fun onBindViewHolder(holder: StatsDetailsHolder, position: Int) {
@@ -38,6 +64,12 @@ class StatsDetailsAdapter(
             Stats.READ_DURATION -> handleDurationLayout(holder, position)
             else -> handleLayout(holder, position)
         }
+        list[position].mangaId?.let { mangaId ->
+            holder.itemView.setOnClickListener {
+                listener?.onItemClicked(mangaId)
+            }
+        }
+        holder.itemView.isClickable = list[position].mangaId != null
     }
 
     override fun getItemCount(): Int {
@@ -46,99 +78,114 @@ class StatsDetailsAdapter(
 
     private fun handleLayout(holder: StatsDetailsHolder, position: Int) {
         val item = list[position]
-        holder.statsRankLayout.isVisible = false
-        holder.statsDataLayout.isVisible = true
-        holder.statsScoreStarImage.isVisible = true
-        holder.statsSublabelText.isVisible = false
+        with(holder.binding) {
+            statsRankLayout.isVisible = false
+            statsDataLayout.isVisible = true
+            statsScoreStarImage.isVisible = true
+            statsSublabelText.isVisible = false
 
-        holder.statsLabelText.setTextColor(
-            item.color ?: context.getResourceColor(R.attr.colorOnBackground),
-        )
-        holder.statsLabelText.text = item.label
-        if (item.iconRes != null) {
-            holder.statslogoContainer.isVisible = true
-            item.iconBGColor?.let { holder.statslogoContainer.setCardBackgroundColor(it) }
-            val padding =
-                if (Color.alpha(item.iconBGColor ?: Color.TRANSPARENT) == 0) 0 else 2.dpToPx
-            holder.statslogoIcon.setPadding(padding)
-            holder.statslogoIcon.setImageResource(item.iconRes!!)
-        } else {
-            holder.statslogoContainer.isVisible = false
+            statsLabelText.setTextColor(
+                item.color ?: context.getResourceColor(R.attr.colorOnBackground),
+            )
+            statsLabelText.text = item.label
+            if (item.iconRes != null) {
+                logoContainer.isVisible = true
+                item.iconBGColor?.let { logoContainer.setCardBackgroundColor(it) }
+                val padding =
+                    if (Color.alpha(item.iconBGColor ?: Color.TRANSPARENT) == 0) 0 else 2.dpToPx
+                logoIcon.setPadding(padding)
+                logoIcon.setImageResource(item.iconRes!!)
+            } else {
+                logoContainer.isVisible = false
+            }
+            statsCountText.text = getCountText(item)
+            statsCountPercentageText.text = getCountPercentageText(item)
+            statsProgressText.text = getProgressText(item)
+            statsProgressPercentageText.text = getProgressPercentageString(item)
+            val score = item.meanScore?.roundToTwoDecimal()?.toString() ?: ""
+            statsMeanScoreLayout.isVisible = score.isNotBlank()
+            statsScoreText.text = score
+            statsReadDurationText.text =
+                item.readDuration.getReadDuration(context.getString(R.string.none))
         }
-        holder.statsCountText.text = getCountText(item)
-        holder.statsCountPercentageText.text = getCountPercentageText(item)
-        holder.statsProgressText.text = getProgressText(item)
-        holder.statsProgressPercentageText.text = getProgressPercentageString(item)
-        val score = item.meanScore?.roundToTwoDecimal()?.toString() ?: ""
-        holder.statsMeanScoreLayout.isVisible = score.isNotBlank()
-        holder.statsScoreText.text = score
-        holder.statsReadDurationText.text = item.readDuration.getReadDuration(context.getString(R.string.none))
     }
 
     private fun handleScoreLayout(holder: StatsDetailsHolder, position: Int) {
         val item = list[position]
-        holder.statsRankLayout.isVisible = false
-        holder.statsMeanScoreLayout.isVisible = false
-        holder.statsDataLayout.isVisible = true
-        holder.statsScoreStarImage.isVisible = true
-        holder.statsSublabelText.isVisible = false
+        with(holder.binding) {
+            statsRankLayout.isVisible = false
+            statsMeanScoreLayout.isVisible = false
+            statsDataLayout.isVisible = true
+            statsScoreStarImage.isVisible = true
+            statsSublabelText.isVisible = false
+            logoContainer.isVisible = false
 
-        holder.statsLabelText.setTextColor(
-            item.color ?: context.getResourceColor(R.attr.colorOnBackground),
-        )
-        holder.statsLabelText.text = item.label
-        holder.statsCountText.text = getCountText(item)
-        holder.statsCountPercentageText.text = getCountPercentageText(item)
-        holder.statsProgressText.text = getProgressText(item)
-        holder.statsProgressPercentageText.text = getProgressPercentageString(item)
-        holder.statsReadDurationText.text = item.readDuration.getReadDuration(context.getString(R.string.none))
+            statsLabelText.setTextColor(
+                item.color ?: context.getResourceColor(R.attr.colorOnBackground),
+            )
+            statsLabelText.text = item.label
+            statsCountText.text = getCountText(item)
+            statsCountPercentageText.text = getCountPercentageText(item)
+            statsProgressText.text = getProgressText(item)
+            statsProgressPercentageText.text = getProgressPercentageString(item)
+            statsReadDurationText.text =
+                item.readDuration.getReadDuration(context.getString(R.string.none))
+        }
     }
 
     private fun handleRankedLayout(holder: StatsDetailsHolder, position: Int) {
         val item = list[position]
-        holder.statsRankLayout.isVisible = true
-        holder.statsDataLayout.isVisible = true
-        holder.statsScoreStarImage.isVisible = true
-        holder.statsSublabelText.isVisible = false
+        with(holder.binding) {
+            statsRankLayout.isVisible = true
+            statsDataLayout.isVisible = true
+            statsScoreStarImage.isVisible = true
+            statsSublabelText.isVisible = false
+            logoContainer.isVisible = false
 
-        holder.statsRankText.text = String.format("%02d.", position + 1)
-        holder.statsLabelText.setTextColor(
-            item.color ?: context.getResourceColor(R.attr.colorOnBackground),
-        )
-        holder.statsLabelText.text = item.label
-        if (item.icon != null) {
-            holder.statslogoContainer.isVisible = true
-            holder.statslogoContainer.setCardBackgroundColor(Color.TRANSPARENT)
-            holder.statslogoIcon.setImageDrawable(item.icon!!)
-            holder.statslogoIcon.setPadding(0)
-        } else {
-            holder.statslogoContainer.isVisible = false
+            statsRankText.text = String.format("%02d.", position + 1)
+            statsLabelText.setTextColor(
+                item.color ?: context.getResourceColor(R.attr.colorOnBackground),
+            )
+            statsLabelText.text = item.label
+            if (item.icon != null) {
+                logoContainer.isVisible = true
+                logoContainer.setCardBackgroundColor(Color.TRANSPARENT)
+                logoIcon.setImageDrawable(item.icon!!)
+                logoIcon.setPadding(0)
+            } else {
+                logoContainer.isVisible = false
+            }
+            statsCountText.text = getCountText(item)
+            statsCountPercentageText.text = getCountPercentageText(item)
+            statsProgressText.text = getProgressText(item)
+            statsProgressPercentageText.text = getProgressPercentageString(item)
+            val score = item.meanScore?.roundToTwoDecimal()?.toString() ?: ""
+            statsMeanScoreLayout.isVisible = score.isNotBlank()
+            statsScoreText.text = score
+            statsReadDurationText.text =
+                item.readDuration.getReadDuration(context.getString(R.string.none))
         }
-        holder.statsCountText.text = getCountText(item)
-        holder.statsCountPercentageText.text = getCountPercentageText(item)
-        holder.statsProgressText.text = getProgressText(item)
-        holder.statsProgressPercentageText.text = getProgressPercentageString(item)
-        val score = item.meanScore?.roundToTwoDecimal()?.toString() ?: ""
-        holder.statsMeanScoreLayout.isVisible = score.isNotBlank()
-        holder.statsScoreText.text = score
-        holder.statsReadDurationText.text = item.readDuration.getReadDuration(context.getString(R.string.none))
     }
 
     private fun handleDurationLayout(holder: StatsDetailsHolder, position: Int) {
         val item = list[position]
-        holder.statsRankLayout.isVisible = true
-        holder.statsMeanScoreLayout.isVisible = true
-        holder.statsDataLayout.isVisible = false
-        holder.statsScoreStarImage.isVisible = false
+        with(holder.binding) {
+            statsRankLayout.isVisible = true
+            statsMeanScoreLayout.isVisible = true
+            statsDataLayout.isVisible = false
+            statsScoreStarImage.isVisible = false
+            logoContainer.isVisible = false
 
-        holder.statsRankText.text = String.format("%02d.", position + 1)
-        holder.statsLabelText.setTextColor(
-            item.color ?: context.getResourceColor(R.attr.colorOnBackground),
-        )
-        holder.statsLabelText.text = item.label
-        holder.statsScoreText.text = item.readDuration.getReadDuration(context.getString(R.string.none))
-        holder.statsSublabelText.isVisible = !item.subLabel.isNullOrBlank()
-        holder.statsSublabelText.text = item.subLabel
+            statsRankText.text = String.format("%02d.", position + 1)
+            statsLabelText.setTextColor(
+                item.color ?: context.getResourceColor(R.attr.colorOnBackground),
+            )
+            statsLabelText.text = item.label
+            statsScoreText.text =
+                item.readDuration.getReadDuration(context.getString(R.string.none))
+            statsSublabelText.isVisible = !item.subLabel.isNullOrBlank()
+            statsSublabelText.text = item.subLabel
+        }
     }
 
     private fun getCountText(item: StatsData): SpannableStringBuilder {
@@ -164,32 +211,30 @@ class StatsDetailsAdapter(
     }
 
     fun filter(text: String) {
+        val oldCount = list.size
         list = if (text.isEmpty()) {
-            listCopy
+            mainList
         } else {
-            listCopy.filter { it.label?.contains(text, true) == true }.toMutableList()
+            mainList.filter { it.label?.contains(text, true) == true }.toMutableList()
         }
-        notifyDataSetChanged()
+        val newCount = list.size
+        if (oldCount > newCount) {
+            notifyItemRangeRemoved(newCount, oldCount - newCount)
+        } else if (oldCount < newCount) {
+            notifyItemRangeInserted(oldCount, newCount - oldCount)
+        }
+        notifyItemRangeChanged(0, newCount)
     }
 
     class StatsDetailsHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val binding = ListStatsDetailsBinding.bind(view)
+    }
 
-        private val binding = ListStatsDetailsBinding.bind(view)
+    fun interface OnItemClickedListener {
+        fun onItemClicked(mangaId: Long)
+    }
 
-        val statsRankLayout = binding.statsRankLayout
-        val statsRankText = binding.statsRankText
-        val statsLabelText = binding.statsLabelText
-        val statsCountText = binding.statsCountText
-        val statsCountPercentageText = binding.statsCountPercentageText
-        val statsProgressText = binding.statsProgressText
-        val statsProgressPercentageText = binding.statsProgressPercentageText
-        val statsMeanScoreLayout = binding.statsMeanScoreLayout
-        val statsScoreText = binding.statsScoreText
-        val statsReadDurationText = binding.statsReadDurationText
-        val statsDataLayout = binding.statsDataLayout
-        val statsScoreStarImage = binding.statsScoreStarImage
-        val statsSublabelText = binding.statsSublabelText
-        val statslogoContainer = binding.logoContainer
-        val statslogoIcon = binding.logoIcon
+    override fun getItemViewType(position: Int): Int {
+        return R.layout.list_stats_details
     }
 }

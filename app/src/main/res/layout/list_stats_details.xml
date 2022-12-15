@@ -141,7 +141,7 @@
                 android:layout_height="14dp"
                 android:layout_gravity="center"
                 android:layout_marginStart="2dp"
-                android:contentDescription="@string/mean_score"
+                android:contentDescription="@string/mean_tracking_score"
                 android:src="@drawable/ic_star_12dp"
                 app:tint="?attr/colorOnBackground" />
 

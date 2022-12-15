@@ -148,7 +148,7 @@
                     android:layout_gravity="bottom|center_horizontal"
                     android:layout_marginTop="@dimen/marginClose"
                     android:gravity="center"
-                    android:text="@string/mean_score" />
+                    android:text="@string/mean_tracking_score" />
 
             </LinearLayout>
 

@@ -103,7 +103,7 @@ class StatsDetailsPresenter(
     /**
      * Get the data of the selected stat
      */
-    fun getStatisticData() {
+    fun getStatisticData(keepAdapter: Boolean = false) {
         if (selectedStat == null || selectedStatsSort == null) {
             return
         }
@@ -123,7 +123,7 @@ class StatsDetailsPresenter(
                 Stats.READ_DURATION -> setupReadDuration()
                 else -> {}
             }
-            withUIContext { controller?.updateStats() }
+            withUIContext { controller?.updateStats(keepAdapter = keepAdapter) }
         }
     }
 
@@ -370,6 +370,7 @@ class StatsDetailsPresenter(
                     label = manga.title,
                     subLabel = sources.find { it.id == manga.source }?.toString(),
                     readDuration = history.sumOf { it.time_read },
+                    mangaId = manga.id,
                 ),
             )
         }
@@ -652,7 +653,7 @@ class StatsDetailsPresenter(
     enum class StatsSort(val resourceId: Int) {
         COUNT_DESC(R.string.most_entries),
         PROGRESS_DESC(R.string.chapters_read),
-        MEAN_SCORE_DESC(R.string.mean_score),
+        MEAN_SCORE_DESC(R.string.mean_tracking_score),
     }
 
     class StatsData(
@@ -668,5 +669,6 @@ class StatsDetailsPresenter(
         var icon: Drawable? = null,
         var subLabel: String? = null,
         var readDuration: Long = 0,
+        var mangaId: Long? = null,
     )
 }

@@ -981,8 +981,7 @@
     <string name="statistics_details">Statistics details</string>
     <string name="titles_in_library">Titles in library</string>
     <string name="chapters_read">Read chapters</string>
-    <string name="mean_score">Mean score</string>
-    <string name="mean_score_info">Average trackers score for each manga</string>
+    <string name="mean_tracking_score">Mean tracking score</string>
     <string name="tracked_titles">Tracked titles</string>
     <string name="downloaded_chapters">Downloaded chapters</string>
     <string name="tags">Tags</string>

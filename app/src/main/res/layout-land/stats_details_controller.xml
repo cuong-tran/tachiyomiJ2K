@@ -152,7 +152,7 @@
             app:drawableEndCompat="@drawable/ic_sort_24dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
+    <include layout="@layout/stats_details_chart"
         android:id="@+id/chart_linear_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/filter_constraint_layout"
@@ -162,119 +162,7 @@
         android:layout_height="0dp"
         android:orientation="vertical"
         app:layout_constraintVertical_bias="0.0"
-        app:layout_constraintHeight_max="700dp">
-
-        <RelativeLayout
-            android:id="@+id/stats_date_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            tools:visibility="visible">
-
-            <ImageView
-                android:id="@+id/stats_date_start_arrow"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:layout_alignParentStart="true"
-                android:layout_marginStart="20dp"
-                android:contentDescription="@string/mean_score"
-                android:src="@drawable/ic_arrow_start_24dp"
-                app:tint="?attr/colorOnBackground" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/stats_date_text"
-                style="?textAppearanceLabelLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_gravity="center_vertical"
-                android:layout_toStartOf="@id/stats_date_end_arrow"
-                android:layout_toEndOf="@id/stats_date_start_arrow"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:includeFontPadding="false"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                android:textSize="16sp"
-                tools:text="August 6" />
-
-            <ImageView
-                android:id="@+id/stats_date_end_arrow"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="20dp"
-                android:contentDescription="@string/mean_score"
-                android:src="@drawable/ic_arrow_end_24dp"
-                app:tint="?attr/colorOnBackground" />
-
-        </RelativeLayout>
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/total_duration_stats_text"
-            style="?textAppearanceLabelLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            android:textColor="?attr/colorSecondary"
-            android:textSize="18sp"
-            android:visibility="gone"
-            tools:text="15h27"
-            tools:visibility="visible" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/stats_chart_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginStart="@dimen/marginNormal"
-            android:layout_marginTop="@dimen/marginNormal"
-            android:layout_marginEnd="@dimen/marginNormal"
-            android:maxWidth="600dp">
-
-            <com.github.mikephil.charting.charts.PieChart
-                android:id="@+id/stats_pie_chart"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constrainedHeight="true"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintDimensionRatio="@fraction/chartRatio"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
-            <com.github.mikephil.charting.charts.BarChart
-                android:id="@+id/stats_bar_chart"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constrainedHeight="true"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintDimensionRatio="@fraction/chartRatio"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:visibility="gone" />
-
-            <com.github.mikephil.charting.charts.LineChart
-                android:id="@+id/stats_line_chart"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constrainedHeight="true"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintDimensionRatio="@fraction/chartRatio"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:visibility="gone" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </LinearLayout>
+        app:layout_constraintHeight_max="700dp" />
 
     <eu.kanade.tachiyomi.widget.EmptyView
         android:id="@+id/no_chart_data"

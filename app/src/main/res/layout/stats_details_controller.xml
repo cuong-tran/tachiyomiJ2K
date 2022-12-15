@@ -18,12 +18,31 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/stats_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/stats_horizontal_scroll"
+        android:clipToPadding="false"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:elevation="30dp" />
+
     <HorizontalScrollView
         android:id="@+id/stats_horizontal_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/stats_details_scroll_view"
+        app:layout_constraintBottom_toTopOf="@id/stats_recycler_view"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:clipToPadding="false"
@@ -110,10 +129,10 @@
                     android:text="@string/series_type"
                     app:chipIcon="@drawable/ic_style_24dp" />
 
-                 <com.google.android.material.chip.Chip
+                <com.google.android.material.chip.Chip
                     android:id="@+id/chip_language"
-                     style="@style/Widget.Tachiyomi.Chip.Stat"
-                     android:layout_width="wrap_content"
+                    style="@style/Widget.Tachiyomi.Chip.Stat"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/language"
                     app:chipIcon="@drawable/ic_translate_24dp" />
@@ -121,166 +140,5 @@
         </LinearLayout>
 
     </HorizontalScrollView>
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/stats_details_scroll_view"
-        android:layout_width="match_parent"
-        android:clipToPadding="false"
-        android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/stats_horizontal_scroll">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/stat_sort"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
-                android:background="@drawable/square_ripple"
-                android:clickable="true"
-                android:drawablePadding="6dp"
-                android:alpha=".8"
-                app:drawableTint="?android:textColorPrimary"
-                android:ellipsize="start"
-                android:focusable="true"
-                android:gravity="center|end"
-                android:maxLines="2"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp"
-                android:layout_gravity="end"
-                android:textAlignment="textEnd"
-                style="?textAppearanceBodyMedium"
-                android:textColor="?android:attr/textColorPrimary"
-                tools:text="Title Count"
-                app:drawableEndCompat="@drawable/ic_sort_24dp" />
-
-            <RelativeLayout
-                android:id="@+id/stats_date_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:visibility="gone"
-                tools:visibility="visible">
-
-                <ImageView
-                    android:id="@+id/stats_date_start_arrow"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:padding="12dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_marginStart="20dp"
-                    android:contentDescription="@string/mean_score"
-                    android:src="@drawable/ic_arrow_start_24dp"
-                    app:tint="?attr/colorOnBackground" />
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/stats_date_text"
-                    style="?textAppearanceLabelLarge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:layout_gravity="center_vertical"
-                    android:layout_toStartOf="@id/stats_date_end_arrow"
-                    android:layout_toEndOf="@id/stats_date_start_arrow"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:includeFontPadding="false"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
-                    android:textSize="16sp"
-                    tools:text="August 6" />
-
-                <ImageView
-                    android:id="@+id/stats_date_end_arrow"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:padding="12dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="20dp"
-                    android:contentDescription="@string/mean_score"
-                    android:src="@drawable/ic_arrow_end_24dp"
-                    app:tint="?attr/colorOnBackground" />
-
-            </RelativeLayout>
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/total_duration_stats_text"
-                style="?textAppearanceLabelLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
-                android:textColor="?attr/colorSecondary"
-                android:textSize="18sp"
-                android:visibility="gone"
-                tools:text="15h27"
-                tools:visibility="visible" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/stats_chart_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginStart="@dimen/marginNormal"
-                android:layout_marginTop="@dimen/marginNormal"
-                android:layout_marginEnd="@dimen/marginNormal"
-                android:maxWidth="600dp">
-
-                <com.github.mikephil.charting.charts.PieChart
-                    android:id="@+id/stats_pie_chart"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:visibility="gone"
-                    app:layout_constraintDimensionRatio="@fraction/chartRatio"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <com.github.mikephil.charting.charts.BarChart
-                    android:id="@+id/stats_bar_chart"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:visibility="gone"
-                    app:layout_constraintDimensionRatio="@fraction/chartRatio"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <com.github.mikephil.charting.charts.LineChart
-                    android:id="@+id/stats_line_chart"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:visibility="gone"
-                    app:layout_constraintDimensionRatio="@fraction/chartRatio"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/stats_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:nestedScrollingEnabled="false"
-                android:layout_marginTop="@dimen/marginNormal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
-        </LinearLayout>
-
-    </androidx.core.widget.NestedScrollView>
-
-    <ProgressBar
-        android:id="@+id/progress"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:elevation="30dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
