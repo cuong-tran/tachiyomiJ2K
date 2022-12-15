@@ -583,10 +583,6 @@ class LibraryController(
             imm!!.hideSoftInputFromWindow(searchView.windowToken, 0)
             false
         }
-        binding.categoryRecycler.onShowAllClicked = { isChecked ->
-            preferences.showAllCategories().set(isChecked)
-            presenter.getLibrary()
-        }
         setupFilterSheet()
         setUpHopper()
         setPreferenceFlows()

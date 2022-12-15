@@ -20,7 +20,6 @@ class CategoryRecyclerView @JvmOverloads constructor(
     val manager = LinearLayoutManager(context)
     private val fastAdapter: FastAdapter<CategoryItem>
     var onCategoryClicked: (Int) -> Unit = { _ -> }
-    var onShowAllClicked: (Boolean) -> Unit = { }
     private val itemAdapter = ItemAdapter<CategoryItem>()
     var selectedCategory: Int = 0
 
