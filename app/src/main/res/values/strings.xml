@@ -808,6 +808,7 @@
     <string name="network">Network</string>
     <string name="doh">DNS over HTTPS</string>
     <string name="user_agent_string">Default user agent string</string>
+    <string name="error_user_agent_string_invalid">Invalid user agent string</string>
     <string name="disabled">Disabled</string>
     <string name="cloudflare" translatable="false">Cloudflare</string>
     <string name="google" translatable="false">Google</string>

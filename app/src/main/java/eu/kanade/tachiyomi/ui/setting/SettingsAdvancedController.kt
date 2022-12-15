@@ -54,6 +54,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import okhttp3.Headers
 import rikka.sui.Sui
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -274,6 +275,14 @@ class SettingsAdvancedController : SettingsController() {
                 titleRes = R.string.user_agent_string
 
                 onChange {
+                    it as String
+                    try {
+                        // OkHttp checks for valid values internally
+                        Headers.Builder().add("User-Agent", it)
+                    } catch (_: IllegalArgumentException) {
+                        context.toast(R.string.error_user_agent_string_invalid)
+                        return@onChange false
+                    }
                     activity?.toast(R.string.requires_app_restart)
                     true
                 }

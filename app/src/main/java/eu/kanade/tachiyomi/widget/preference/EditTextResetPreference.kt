@@ -40,20 +40,22 @@ class EditTextResetPreference @JvmOverloads constructor(
             textView?.append(sharedPreferences?.getString(key, defValue))
             this.setView(view)
             this.setNeutralButton(R.string.reset) { _, _ ->
-                sharedPreferences?.edit { remove(key) }
-                callChangeListener(defValue)
-                notifyChanged()
+                if (callChangeListener(defValue)) {
+                    sharedPreferences?.edit { remove(key) }
+                    notifyChanged()
+                }
             }
             this.setPositiveButton(android.R.string.ok) { _, _ ->
-                sharedPreferences?.edit {
-                    if (textView.text.isNullOrBlank()) {
-                        remove(key)
-                    } else {
-                        putString(key, textView.text.toString())
+                if (callChangeListener(textView.text.toString())) {
+                    sharedPreferences?.edit {
+                        if (textView.text.isNullOrBlank()) {
+                            remove(key)
+                        } else {
+                            putString(key, textView.text.toString())
+                        }
                     }
+                    notifyChanged()
                 }
-                callChangeListener(textView.text.toString())
-                notifyChanged()
             }
             a.recycle()
         }
