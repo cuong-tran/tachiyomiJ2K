@@ -382,6 +382,7 @@ class MangaDetailsController :
     }
 
     /** Set adapter, insets, and scroll listener for recycler view */
+    @SuppressLint("ClickableViewAccessibility")
     private fun setRecycler(view: View) {
         adapter = MangaDetailsAdapter(this)
 
