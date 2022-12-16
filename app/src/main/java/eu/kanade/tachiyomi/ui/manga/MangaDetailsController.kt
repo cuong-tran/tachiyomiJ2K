@@ -371,6 +371,7 @@ class MangaDetailsController :
         binding.tabletRecycler.isVisible = isTablet
         binding.tabletDivider.isVisible = isTablet
         if (isTablet) {
+            binding.tabletRecycler.itemAnimator = null
             binding.recycler.updateLayoutParams<ViewGroup.LayoutParams> { width = 0 }
             tabletAdapter = MangaDetailsAdapter(this)
             binding.tabletRecycler.adapter = tabletAdapter
