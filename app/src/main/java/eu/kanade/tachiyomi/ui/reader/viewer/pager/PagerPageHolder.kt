@@ -18,6 +18,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -120,6 +121,11 @@ class PagerPageHolder(
 
     init {
         addView(progressBar)
+        if (viewer.config.hingeGapSize > 0) {
+            progressBar.updateLayoutParams<MarginLayoutParams> {
+                marginStart = ((context.resources.displayMetrics.widthPixels) / 2 + viewer.config.hingeGapSize) / 2
+            }
+        }
         scope = CoroutineScope(Job() + Default)
         observeStatus()
         setBackgroundColor(
@@ -566,6 +572,7 @@ class PagerPageHolder(
                 isSplitScreen = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && viewer.activity.isInMultiWindowMode,
                 insets = viewer.activity.window.decorView.rootWindowInsets,
             ),
+            hingeGapSize = viewer.config.hingeGapSize,
         )
 
     private suspend fun setBG(bytesArray: ByteArray): Drawable {
@@ -771,18 +778,18 @@ class PagerPageHolder(
                     imageBytes.inputStream()
                 }
             }
-            return imageStream
+            return supportHingeIfThere(imageStream)
         }
-        if (page.fullPage == true) return imageStream
+        if (page.fullPage == true) return supportHingeIfThere(imageStream)
         if (ImageUtil.isAnimatedAndSupported(imageStream)) {
             page.fullPage = true
             splitDoublePages()
             return imageStream
-        } else if (ImageUtil.isAnimatedAndSupported(imageStream)) {
+        } else if (ImageUtil.isAnimatedAndSupported(imageStream2)) {
             page.isolatedPage = true
             extraPage?.fullPage = true
             splitDoublePages()
-            return imageStream
+            return supportHingeIfThere(imageStream)
         }
         val imageBytes = imageStream.readBytes()
         val imageBitmap = try {
@@ -804,7 +811,7 @@ class PagerPageHolder(
             imageStream.close()
             page.fullPage = true
             splitDoublePages()
-            return imageBytes.inputStream()
+            return supportHingeIfThere(imageBytes.inputStream())
         }
 
         val imageBytes2 = imageStream2.readBytes()
@@ -829,7 +836,7 @@ class PagerPageHolder(
             extraPage?.fullPage = true
             page.isolatedPage = true
             splitDoublePages()
-            return imageBytes.inputStream()
+            return supportHingeIfThere(imageBytes.inputStream())
         }
         val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
         val bg = if (viewer.config.readerTheme >= 2 || viewer.config.readerTheme == 0) {
@@ -840,7 +847,7 @@ class PagerPageHolder(
 
         imageStream.close()
         imageStream2.close()
-        return ImageUtil.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, bg, viewer.config.hingeGapSize) {
+        return ImageUtil.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, bg, viewer.config.hingeGapSize, context) {
             scope?.launchUI {
                 if (it == 100) {
                     progressBar.completeAndFadeOut()
@@ -849,6 +856,38 @@ class PagerPageHolder(
                 }
             }
         }
+    }
+
+    private fun supportHingeIfThere(imageStream: InputStream): InputStream {
+        if (viewer.config.hingeGapSize > 0 && !ImageUtil.isAnimatedAndSupported(imageStream)) {
+            val imageBytes = imageStream.readBytes()
+            val imageBitmap = try {
+                BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            } catch (e: Exception) {
+                imageStream.close()
+                val wasNotFullPage = page.fullPage != true
+                page.fullPage = true
+                if (wasNotFullPage) {
+                    splitDoublePages()
+                }
+                return imageBytes.inputStream()
+            }
+            val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
+            val bg = if (viewer.config.readerTheme >= 2 || viewer.config.readerTheme == 0) {
+                Color.WHITE
+            } else {
+                Color.BLACK
+            }
+            return ImageUtil.padSingleImage(
+                imageBitmap = imageBitmap,
+                isLTR = isLTR,
+                atBeginning = if (viewer.config.doublePages) page.index == 0 else null,
+                background = bg,
+                hingeGap = viewer.config.hingeGapSize,
+                context = context,
+            )
+        }
+        return imageStream
     }
 
     private fun splitDoublePages() {

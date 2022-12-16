@@ -312,6 +312,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
         val zoomStartPosition: PagerConfig.ZoomType = PagerConfig.ZoomType.Center,
         val landscapeZoom: Boolean = false,
         val insetInfo: InsetInfo? = null,
+        val hingeGapSize: Int = 0,
     )
 
     data class InsetInfo(

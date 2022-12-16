@@ -17,6 +17,7 @@ import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.Menu
@@ -29,6 +30,7 @@ import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
@@ -326,12 +328,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             }
         reEnableBackPressedCallBack()
         lifecycleScope.launchUI {
-            // The block passed to repeatOnLifecycle is executed when the lifecycle
-            // is at least STARTED and is cancelled when the lifecycle is STOPPED.
-            // It automatically restarts the block when the lifecycle is STARTED again.
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Safely collects from windowInfoRepository when the lifecycle is
-                // STARTED and stops collection when the lifecycle is STOPPED.
                 WindowInfoTracker.getOrCreate(this@ReaderActivity).windowLayoutInfo(this@ReaderActivity)
                     .collect { newLayoutInfo ->
                         hingeGapSize = 0
@@ -342,10 +339,20 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                                 hingeGapSize = displayFeature.bounds.width()
                             }
                         }
-//                        newLayoutInfo.displayFeatures.
-                        // Check newLayoutInfo.displayFeatures to see if the
-                        // feature list includes a FoldingFeature, then check
-                        // the feature's data.
+                        if (hingeGapSize > 0) {
+                            binding.navLayout.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                                gravity = Gravity.TOP or Gravity.CENTER
+                                anchorGravity = Gravity.TOP or Gravity.CENTER
+                                width = (binding.root.width - hingeGapSize) / 2 - 24.dpToPx
+                            }
+                            binding.chaptersSheet.root.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                                gravity = Gravity.END
+                                width = (binding.root.width - hingeGapSize) / 2
+                            }
+                            binding.pleaseWait.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                                marginStart = binding.root.width / 2 + hingeGapSize
+                            }
+                        }
                     }
             }
         }
@@ -1322,6 +1329,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
 
         val totalPages = pages.size.toString()
+        if (hingeGapSize > 0) {
+            binding.pageNumber.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                marginStart = (binding.root.width) / 2 + hingeGapSize
+            }
+        }
         binding.pageNumber.text = if (resources.isLTR) "$currentPage/$totalPages" else "$totalPages/$currentPage"
         if (viewer is R2LPagerViewer) {
             binding.readerNav.rightPageText.text = currentPage

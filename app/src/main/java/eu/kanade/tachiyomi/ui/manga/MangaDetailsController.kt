@@ -19,6 +19,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
@@ -26,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
@@ -68,6 +70,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
+import eu.kanade.tachiyomi.ui.main.HingeSupportedController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterHolder
@@ -104,6 +107,7 @@ import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.findChild
 import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.previousController
@@ -134,6 +138,7 @@ class MangaDetailsController :
     ActionMode.Callback,
     MangaDetailsAdapter.MangaDetailsInterface,
     SmallToolbarInterface,
+    HingeSupportedController,
     FlexibleAdapter.OnItemMoveListener {
 
     constructor(
@@ -370,6 +375,30 @@ class MangaDetailsController :
             tabletAdapter = MangaDetailsAdapter(this)
             binding.tabletRecycler.adapter = tabletAdapter
             binding.tabletRecycler.layoutManager = LinearLayoutManager(view.context)
+            updateForHinge()
+        }
+    }
+
+    override fun updateForHinge() {
+        if (isTablet) {
+            val hingeGapSize = (activity as? MainActivity)?.hingeGapSize?.takeIf { it > 0 }
+            if (hingeGapSize != null) {
+                binding.tabletDivider.updateLayoutParams<ViewGroup.LayoutParams> {
+                    width = hingeGapSize
+                }
+                binding.tabletRecycler.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    matchConstraintPercentWidth = 1f
+                    width = 0
+                    matchConstraintDefaultWidth =
+                        ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_SPREAD
+                }
+                val swipeCircle = binding.swipeRefresh.findChild<ImageView>()
+                swipeCircle?.translationX =
+                    (activity!!.window.decorView.width / 2 + hingeGapSize) /
+                    2f
+            } else {
+                binding.tabletRecycler.updateLayoutParams<ConstraintLayout.LayoutParams> { matchConstraintPercentWidth = 0.4f }
+            }
         }
     }
 
@@ -439,6 +468,12 @@ class MangaDetailsController :
         binding.touchView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 finishFloatingActionMode()
+                val hingeGapSize = (activity as? MainActivity)?.hingeGapSize?.takeIf { it > 0 }
+                if (hingeGapSize != null) {
+                    val swipeCircle = binding.swipeRefresh.findChild<ImageView>()
+                    swipeCircle?.translationX = (binding.root.width / 2 + hingeGapSize) / 2 *
+                        (if (event.x > binding.root.width / 2) 1 else -1).toFloat()
+                }
             }
             false
         }
