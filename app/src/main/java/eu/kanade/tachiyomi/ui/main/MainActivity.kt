@@ -43,7 +43,12 @@ import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.window.layout.DisplayFeature
+import androidx.window.layout.FoldingFeature
+import androidx.window.layout.WindowInfoTracker
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -152,6 +157,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     private var overflowDialog: Dialog? = null
     var currentToolbar: Toolbar? = null
     var ogWidth: Int = Int.MAX_VALUE
+    var hingeGapSize = 0
+        private set
 
     private val actionButtonSize: Pair<Int, Int> by lazy {
         val attrs = intArrayOf(android.R.attr.minWidth, android.R.attr.minHeight)
@@ -522,6 +529,25 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 }
             }
         setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller), changeBG = false)
+
+        lifecycleScope.launchUI {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                WindowInfoTracker.getOrCreate(this@MainActivity).windowLayoutInfo(this@MainActivity)
+                    .collect { newLayoutInfo ->
+                        hingeGapSize = 0
+                        for (displayFeature: DisplayFeature in newLayoutInfo.displayFeatures) {
+                            if (displayFeature is FoldingFeature && displayFeature.occlusionType == FoldingFeature.OcclusionType.FULL &&
+                                displayFeature.isSeparating && displayFeature.orientation == FoldingFeature.Orientation.VERTICAL
+                            ) {
+                                hingeGapSize = displayFeature.bounds.width()
+                            }
+                        }
+                        if (hingeGapSize > 0) {
+                            (router.backstack.lastOrNull()?.controller as? HingeSupportedController)?.updateForHinge()
+                        }
+                    }
+            }
+        }
     }
 
     fun reEnableBackPressedCallBack() {
@@ -1387,6 +1413,10 @@ interface RootSearchInterface {
 }
 
 interface TabbedInterface
+
+interface HingeSupportedController {
+    fun updateForHinge()
+}
 
 interface FloatingSearchInterface {
     fun searchTitle(title: String?): String? {

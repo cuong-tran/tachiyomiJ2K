@@ -190,8 +190,7 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
     }
 
     override fun cancel() {
-        super.cancel()
-        thumbView.alpha = 1f
+        animateBack()
     }
 
     override fun dismiss() {

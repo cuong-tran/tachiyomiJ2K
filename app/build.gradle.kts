@@ -136,6 +136,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.8.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
+    implementation("androidx.window:window:1.0.0")
 
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
@@ -144,7 +145,7 @@ dependencies {
     implementation("com.google.firebase:firebase-core:21.1.0")
     implementation("com.google.firebase:firebase-analytics-ktx:21.1.0")
 
-    val lifecycleVersion = "2.4.0-rc01"
+    val lifecycleVersion = "2.5.1"
     kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-process:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")

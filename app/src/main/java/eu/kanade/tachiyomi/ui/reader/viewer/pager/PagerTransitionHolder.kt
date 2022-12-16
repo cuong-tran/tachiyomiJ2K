@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,7 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.view.updatePaddingRelative
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -59,6 +61,12 @@ class PagerTransitionHolder(
 
         transitionView.bind(transition, viewer.downloadManager, viewer.activity.presenter.manga)
         transition.to?.let { observeStatus(it) }
+
+        if (viewer.config.hingeGapSize > 0) {
+            val fullWidth = (context as? Activity)?.window?.decorView?.width
+                ?: context.resources.displayMetrics.widthPixels
+            updatePaddingRelative(start = sidePadding + fullWidth / 2 + viewer.config.hingeGapSize)
+        }
     }
 
     /**

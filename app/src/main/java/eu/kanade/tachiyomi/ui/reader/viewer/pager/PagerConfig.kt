@@ -64,6 +64,8 @@ class PagerConfig(
             }
         }
 
+    var hingeGapSize = 0
+
     var invertDoublePages = false
 
     var autoDoublePages = preferences.pageLayout().get() == PageLayout.AUTOMATIC.value
