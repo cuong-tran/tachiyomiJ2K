@@ -51,10 +51,7 @@ class StatsDetailsAdapter(
     }
 
     override fun getItemId(position: Int): Long {
-        return when (stat) {
-            Stats.READ_DURATION -> list[position].id
-            else -> list[position].label?.hashCode()?.toLong()
-        } ?: 0L
+        return list[position].id ?: list[position].label?.hashCode()?.toLong() ?: 0L
     }
 
     override fun onBindViewHolder(holder: StatsDetailsHolder, position: Int) {
@@ -65,8 +62,7 @@ class StatsDetailsAdapter(
             else -> handleLayout(holder, position)
         }
         holder.itemView.setOnClickListener {
-            val item = list[position]
-            listener?.onItemClicked(item.id, item.casedLabel ?: item.label)
+            list[position].let { item -> listener?.onItemClicked(item.id, item.label) }
         }
         holder.itemView.isClickable = stat in arrayOf(
             Stats.SERIES_TYPE,
@@ -96,7 +92,7 @@ class StatsDetailsAdapter(
             statsLabelText.setTextColor(
                 item.color ?: context.getResourceColor(R.attr.colorOnBackground),
             )
-            statsLabelText.text = item.label
+            statsLabelText.text = item.label?.uppercase()
             if (item.iconRes != null) {
                 logoContainer.isVisible = true
                 item.iconBGColor?.let { logoContainer.setCardBackgroundColor(it) }
@@ -132,7 +128,8 @@ class StatsDetailsAdapter(
             statsLabelText.setTextColor(
                 item.color ?: context.getResourceColor(R.attr.colorOnBackground),
             )
-            statsLabelText.text = item.label
+            val formattedScore = item.label?.uppercase() + if (item.label?.toIntOrNull() != null) "★" else ""
+            statsLabelText.text = formattedScore
             statsCountText.text = getCountText(item)
             statsCountPercentageText.text = getCountPercentageText(item)
             statsProgressText.text = getProgressText(item)
@@ -155,7 +152,7 @@ class StatsDetailsAdapter(
             statsLabelText.setTextColor(
                 item.color ?: context.getResourceColor(R.attr.colorOnBackground),
             )
-            statsLabelText.text = item.label
+            statsLabelText.text = item.label?.uppercase()
             if (item.icon != null) {
                 logoContainer.isVisible = true
                 logoContainer.setCardBackgroundColor(Color.TRANSPARENT)
@@ -189,7 +186,7 @@ class StatsDetailsAdapter(
             statsLabelText.setTextColor(
                 item.color ?: context.getResourceColor(R.attr.colorOnBackground),
             )
-            statsLabelText.text = item.label
+            statsLabelText.text = item.label?.uppercase()
             statsScoreText.text =
                 item.readDuration.getReadDuration(context.getString(R.string.none))
             statsSublabelText.isVisible = !item.subLabel.isNullOrBlank()

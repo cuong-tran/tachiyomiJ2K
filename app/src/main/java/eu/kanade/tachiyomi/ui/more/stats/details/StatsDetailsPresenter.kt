@@ -146,9 +146,8 @@ class StatsDetailsPresenter(
                     meanScore = mangaList.getMeanScoreRounded(),
                     chaptersRead = mangaList.sumOf { it.read },
                     totalChapters = mangaList.sumOf { it.totalChapters },
-                    label = context.mapSeriesType(seriesType).uppercase(),
+                    label = context.mapSeriesType(seriesType),
                     readDuration = mangaList.getReadDuration(),
-                    casedLabel = context.mapSeriesType(seriesType),
                 ),
             )
         }
@@ -167,9 +166,8 @@ class StatsDetailsPresenter(
                     meanScore = mangaList.getMeanScoreRounded(),
                     chaptersRead = mangaList.sumOf { it.read },
                     totalChapters = mangaList.sumOf { it.totalChapters },
-                    label = context.mapStatus(status).uppercase(),
+                    label = context.mapStatus(status),
                     readDuration = mangaList.getReadDuration(),
-                    casedLabel = context.mapStatus(status),
                 ),
             )
         }
@@ -190,9 +188,8 @@ class StatsDetailsPresenter(
                     meanScore = score?.toDouble() ?: 0.0,
                     chaptersRead = mangaList?.sumOf { it.read } ?: 0,
                     totalChapters = mangaList?.sumOf { it.totalChapters } ?: 0,
-                    label = score?.toString() ?: context.getString(R.string.not_rated).uppercase(),
+                    label = score?.toString() ?: context.getString(R.string.not_rated),
                     readDuration = mangaList?.getReadDuration() ?: 0L,
-                    casedLabel = score?.toString() ?: context.getString(R.string.not_rated),
                     id = score?.toLong(),
                 ),
             )
@@ -211,9 +208,8 @@ class StatsDetailsPresenter(
                     meanScore = mangaList.getMeanScoreRounded(),
                     chaptersRead = mangaList.sumOf { it.read },
                     totalChapters = mangaList.sumOf { it.totalChapters },
-                    label = language.uppercase(),
+                    label = language,
                     readDuration = mangaList.getReadDuration(),
-                    casedLabel = language,
                 ),
             )
         }
@@ -264,12 +260,11 @@ class StatsDetailsPresenter(
                     meanScore = mangaAndTrack.map { it.second }.getMeanScoreByTracker()?.roundToTwoDecimal(),
                     chaptersRead = mangaAndTrack.sumOf { it.first.read },
                     totalChapters = mangaAndTrack.sumOf { it.first.totalChapters },
-                    label = label.uppercase(),
+                    label = label,
                     iconRes = service?.getLogo(),
                     iconBGColor = service?.getLogoColor(),
                     readDuration = mangaAndTrack.map { it.first }.getReadDuration(),
                     id = service?.id?.toLong(),
-                    casedLabel = label,
                 ),
             )
         }
@@ -290,10 +285,9 @@ class StatsDetailsPresenter(
                     meanScore = mangaList.getMeanScoreRounded(),
                     chaptersRead = mangaList.sumOf { it.read },
                     totalChapters = mangaList.sumOf { it.totalChapters },
-                    label = source.nameBasedOnEnabledLanguages(isMultiLingual, extensionManager).uppercase(),
+                    label = source.nameBasedOnEnabledLanguages(isMultiLingual, extensionManager),
                     icon = source.icon(),
                     readDuration = mangaList.getReadDuration(),
-                    casedLabel = source?.name,
                     id = sourceId,
                 ),
             )
@@ -315,7 +309,7 @@ class StatsDetailsPresenter(
                     meanScore = mangaList.getMeanScoreRounded(),
                     chaptersRead = mangaList.sumOf { it.read },
                     totalChapters = mangaList.sumOf { it.totalChapters },
-                    label = label.uppercase(),
+                    label = label,
                     readDuration = mangaList.getReadDuration(),
                 ),
             )
@@ -341,9 +335,8 @@ class StatsDetailsPresenter(
                     meanScore = mangaList.getMeanScoreRounded(),
                     chaptersRead = mangaList.sumOf { it.read },
                     totalChapters = mangaList.sumOf { it.totalChapters },
-                    label = tag.uppercase(),
+                    label = tag,
                     readDuration = mangaList.getReadDuration(),
-                    casedLabel = tag,
                 ),
             )
         }
@@ -363,7 +356,7 @@ class StatsDetailsPresenter(
                     meanScore = mangaList.getMeanScoreRounded(),
                     chaptersRead = mangaList.sumOf { it.read },
                     totalChapters = mangaList.sumOf { it.totalChapters },
-                    label = year?.toString() ?: context.getString(R.string.not_started).uppercase(),
+                    label = year?.toString() ?: context.getString(R.string.not_started),
                     readDuration = mangaList.getReadDuration(),
                     id = year?.toLong(),
                 ),
@@ -692,6 +685,5 @@ class StatsDetailsPresenter(
         var subLabel: String? = null,
         var readDuration: Long = 0,
         var id: Long? = null,
-        var casedLabel: String? = null,
     )
 }
