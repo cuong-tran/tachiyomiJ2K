@@ -438,13 +438,7 @@ class MangaHeaderHolder(
                 .filterNot { it == "all" }
 
             text = buildSpannedString {
-                append(
-                    if (enabledLanguages.size > 1 && presenter.extension?.lang == "all") {
-                        presenter.source.toString()
-                    } else {
-                        presenter.source.name
-                    },
-                )
+                append(presenter.source.nameBasedOnEnabledLanguages(enabledLanguages.size > 1))
                 if (presenter.source is SourceManager.StubSource &&
                     presenter.source.name != presenter.source.id.toString()
                 ) {

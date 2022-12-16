@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.system.awaitSingle
 import rx.Observable
 import uy.kohesive.injekt.Injekt
@@ -85,6 +86,18 @@ interface Source {
     @Suppress("DEPRECATION")
     suspend fun getPageList(chapter: SChapter): List<Page> {
         return fetchPageList(chapter).awaitSingle()
+    }
+
+    fun includeLangInName(isMultiLingual: Boolean, extensionManager: ExtensionManager? = null): Boolean {
+        val httpSource = this as? HttpSource ?: return true
+        val extManager = extensionManager ?: Injekt.get()
+        val allExt = httpSource.getExtension(extManager)?.lang == "all"
+        val onlyAll = httpSource.extOnlyHasAllLanguage(extManager)
+        return (isMultiLingual && allExt) || (lang == "all" && !onlyAll)
+    }
+
+    fun nameBasedOnEnabledLanguages(isMultiLingual: Boolean, extensionManager: ExtensionManager? = null): String {
+        return if (includeLangInName(isMultiLingual, extensionManager)) toString() else name
     }
 }
 

@@ -32,9 +32,8 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
         val underPinnedSection = item.header?.code?.equals(SourcePresenter.PINNED_KEY) ?: false
         val underLastUsedSection = item.header?.code?.equals(SourcePresenter.LAST_USED_KEY) ?: false
         val isPinned = item.isPinned ?: underPinnedSection
-        // Set source name
-        val sourceName =
-            if (adapter.isMultiLanguage && (underPinnedSection || underLastUsedSection)) source.toString() else source.name
+        val showLanguage = source.includeLangInName(adapter.isMultiLingual, adapter.extensionManager)
+        val sourceName = if (showLanguage && (underPinnedSection || underLastUsedSection)) source.toString() else source.name
         binding.title.text = sourceName
 
         binding.sourcePin.apply {

@@ -20,8 +20,10 @@ class SourceAdapter(val controller: BrowseController) :
 
     val sourceListener: SourceListener = controller
 
-    val isMultiLanguage =
+    val isMultiLingual =
         Injekt.get<PreferencesHelper>().enabledLanguages().get().filterNot { it == "all" }.size > 1
+
+    val extensionManager = controller.presenter.extensionManager
 
     override fun onItemSwiped(position: Int, direction: Int) {
         super.onItemSwiped(position, direction)

@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -28,6 +29,7 @@ import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import eu.kanade.tachiyomi.util.system.withUIContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import java.util.Calendar
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -35,7 +37,7 @@ import kotlin.math.roundToInt
 
 class StatsDetailsPresenter(
     private val db: DatabaseHelper = Injekt.get(),
-    prefs: PreferencesHelper = Injekt.get(),
+    private val prefs: PreferencesHelper = Injekt.get(),
     val trackManager: TrackManager = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
 ) : BaseCoroutinePresenter<StatsDetailsController>() {
@@ -48,6 +50,7 @@ class StatsDetailsPresenter(
         }
     private var mangasDistinct = libraryMangas.distinct()
     val sources = getEnabledSources()
+    val extensionManager by injectLazy<ExtensionManager>()
 
     var selectedStat: Stats? = null
     var selectedSeriesType = mutableSetOf<String>()
@@ -272,10 +275,10 @@ class StatsDetailsPresenter(
     private fun setupSources() {
         currentStats = ArrayList()
         val libraryFormat = mangasDistinct.filterByChip().groupBy { it.source }
+        val isMultiLingual = prefs.enabledLanguages().get().filterNot { it == "all" }.size > 1
 
         libraryFormat.forEach { (sourceId, mangaList) ->
-            val source = sources.find { it.id == sourceId }
-            val sourceName = source?.toString() ?: sourceId.toString()
+            val source = sourceManager.getOrStub(sourceId)
             currentStats?.add(
                 StatsData(
                     color = pieColorList[1],
@@ -283,8 +286,8 @@ class StatsDetailsPresenter(
                     meanScore = mangaList.getMeanScoreRounded(),
                     chaptersRead = mangaList.sumOf { it.read },
                     totalChapters = mangaList.sumOf { it.totalChapters },
-                    label = sourceName.uppercase(),
-                    icon = source?.icon(),
+                    label = source.nameBasedOnEnabledLanguages(isMultiLingual, extensionManager).uppercase(),
+                    icon = source.icon(),
                     readDuration = mangaList.getReadDuration(),
                     casedLabel = source?.name,
                     id = sourceId,

@@ -95,9 +95,11 @@ abstract class HttpSource : CatalogueSource {
             }
     }
 
-    fun getExtension(): Extension.Installed? {
-        return Injekt.get<ExtensionManager>().installedExtensions.find { it.sources.contains(this) }
-    }
+    fun getExtension(extensionManager: ExtensionManager? = null): Extension.Installed? =
+        (extensionManager ?: Injekt.get()).installedExtensions.find { it.sources.contains(this) }
+
+    fun extOnlyHasAllLanguage(extensionManager: ExtensionManager? = null) =
+        getExtension(extensionManager)?.sources?.all { it.lang == "all" } ?: true
 
     /**
      * Returns the request for the popular manga given the page.
