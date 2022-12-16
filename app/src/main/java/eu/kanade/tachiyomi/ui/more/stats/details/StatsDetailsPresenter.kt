@@ -42,7 +42,8 @@ class StatsDetailsPresenter(
     private val sourceManager: SourceManager = Injekt.get(),
 ) : BaseCoroutinePresenter<StatsDetailsController>() {
 
-    private var context = prefs.context
+    private val context
+        get() = controller?.view?.context ?: prefs.context
     var libraryMangas = getLibrary()
         set(value) {
             field = value
@@ -76,32 +77,35 @@ class StatsDetailsPresenter(
     var historyByDayAndManga = emptyMap<Calendar, Map<Manga, List<History>>>()
 
     var currentStats: ArrayList<StatsData>? = null
-    val seriesTypeStats = arrayOf(
-        context.getString(R.string.manga),
-        context.getString(R.string.manhwa),
-        context.getString(R.string.manhua),
-        context.getString(R.string.comic),
-        context.getString(R.string.webtoon),
-    )
-    val statusStats = arrayOf(
-        context.getString(R.string.ongoing),
-        context.getString(R.string.completed),
-        context.getString(R.string.licensed),
-        context.getString(R.string.publishing_finished),
-        context.getString(R.string.cancelled),
-        context.getString(R.string.on_hiatus),
-    )
-    private val defaultCategory =
-        if (libraryMangas.any { it.category == 0 }) arrayOf(Category.createDefault(context)) else emptyArray()
-    val categoriesStats = defaultCategory + getCategories().toTypedArray()
-    val languagesStats = prefs.enabledLanguages().get()
-        .associateWith { lang -> LocaleHelper.getSourceDisplayName(lang, context) }.toSortedMap()
-
-    private val pieColorList = StatsHelper.PIE_CHART_COLOR_LIST
-
-    override fun onCreate() {
-        super.onCreate()
+    val seriesTypeStats by lazy {
+        arrayOf(
+            context.getString(R.string.manga),
+            context.getString(R.string.manhwa),
+            context.getString(R.string.manhua),
+            context.getString(R.string.comic),
+            context.getString(R.string.webtoon),
+        )
     }
+    val statusStats by lazy {
+        arrayOf(
+            context.getString(R.string.ongoing),
+            context.getString(R.string.completed),
+            context.getString(R.string.licensed),
+            context.getString(R.string.publishing_finished),
+            context.getString(R.string.cancelled),
+            context.getString(R.string.on_hiatus),
+        )
+    }
+    private val defaultCategory by lazy {
+        if (libraryMangas.any { it.category == 0 }) arrayOf(Category.createDefault(context)) else emptyArray()
+    }
+    val categoriesStats by lazy { defaultCategory + getCategories().toTypedArray() }
+    val languagesStats by lazy {
+        prefs.enabledLanguages().get()
+            .associateWith { lang -> LocaleHelper.getSourceDisplayName(lang, context) }
+            .toSortedMap()
+    }
+    private val pieColorList = StatsHelper.PIE_CHART_COLOR_LIST
 
     /**
      * Get the data of the selected stat
