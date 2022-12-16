@@ -12,15 +12,15 @@ import uy.kohesive.injekt.api.get
 class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bundle) {
 
     private var queryText: String? = null
-    var filterDownloaded: Int = 0
-        private set
-    var filterUnread: Int = 0
-        private set
-    var filterStatus: Int? = null
+    var filterStatus = emptyArray<Int>()
         private set
     var filterTracked: Int = 0
         private set
-    var filterMangaType: Int = 0
+    var filterMangaType = emptyArray<Int>()
+        private set
+    var filterSources = emptyArray<Long>()
+        private set
+    var filterLanguages = emptyArray<String>()
         private set
 
     private var customTitle: String? = null
@@ -32,22 +32,22 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
     constructor(
         title: String,
         queryText: String? = null,
-        filterDownloaded: Int = 0,
-        filterUnread: Int = 0,
-        filterStatus: Int? = null,
+        filterStatus: Array<Int> = emptyArray(),
+        filterSources: Array<Long> = emptyArray(),
+        filterMangaType: Array<Int> = emptyArray(),
+        filterLanguages: Array<String> = emptyArray(),
         filterTracked: Int = 0,
         filterTrackerName: String? = null,
-        filterMangaType: Int = 0,
     ) : this() {
         customTitle = title
-        this.filterDownloaded = filterDownloaded
-        this.filterUnread = filterUnread
         this.filterStatus = filterStatus
+        this.filterLanguages = filterLanguages
+        this.filterSources = filterSources
         this.filterTracked = filterTracked
+        this.filterMangaType = filterMangaType
         if (filterTracked != 0 && filterTrackerName != null) {
             FilterBottomSheet.FILTER_TRACKER = filterTrackerName
         }
-        this.filterMangaType = filterMangaType
         this.queryText = queryText
     }
 
@@ -72,7 +72,8 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
         return false
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) { }
-    override fun toggleCategoryVisibility(position: Int) { }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {}
+    override fun toggleCategoryVisibility(position: Int) {}
     override fun hasActiveFiltersFromPref(): Boolean = false
+    override fun manageCategory(position: Int) {}
 }

@@ -1401,7 +1401,9 @@ open class LibraryController(
         showAllCategoriesView?.isSelected = presenter.forceShowAllCategories
         if (this.query.isNotBlank()) {
             searchItem.string = this.query
-            if (adapter.scrollableHeaders.isEmpty()) { adapter.addScrollableHeader(searchItem) }
+            if (adapter.scrollableHeaders.isEmpty() && !isSubClass) {
+                adapter.addScrollableHeader(searchItem)
+            }
         } else if (this.query.isBlank() && adapter.scrollableHeaders.isNotEmpty()) {
             adapter.removeAllScrollableHeaders()
         }

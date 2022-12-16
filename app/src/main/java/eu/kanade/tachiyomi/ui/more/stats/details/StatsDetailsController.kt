@@ -194,7 +194,7 @@ class StatsDetailsController :
             }
             chipLanguage.setOnClickListener {
                 (it as Chip).setMultiChoiceItemsDialog(
-                    presenter.languagesStats,
+                    presenter.languagesStats.values.toTypedArray(),
                     presenter.selectedLanguage,
                     R.string.language,
                     R.plurals._languages,
@@ -592,48 +592,56 @@ class StatsDetailsController :
 
     fun onItemClicked(id: Long?, name: String?) {
         name ?: return
-        when (presenter.selectedStat) {
-            Stats.SERIES_TYPE -> {
-                val seriesType = presenter.seriesTypeStats.indexOf(name) + 1
-                if (seriesType > 0) {
-                    router.pushController(
-                        FilteredLibraryController(name, filterMangaType = seriesType)
-                            .withFadeTransaction(),
-                    )
-                }
-            }
-            Stats.STATUS -> {
-                val status = presenter.statusStats.indexOf(name) + 1
+        val statuses = presenter.selectedStatus.map { presenter.statusStats.indexOf(it) + 1 }.toTypedArray()
+        val seriesTypes = presenter.selectedSeriesType.map { presenter.seriesTypeStats.indexOf(it) + 1 }.toTypedArray()
+        val languages = presenter.selectedLanguage.mapNotNull { presenter.languagesStats[it] }.toTypedArray()
+        val sources = presenter.selectedSource.map { it.id }.toTypedArray()
+        when (val selectedStat = presenter.selectedStat) {
+            Stats.SOURCE, Stats.TAG, Stats.STATUS, Stats.SERIES_TYPE -> {
                 router.pushController(
-                    FilteredLibraryController(name, filterStatus = status)
-                        .withFadeTransaction(),
-                )
-            }
-            Stats.SOURCE, Stats.TAG -> {
-                router.pushController(
-                    FilteredLibraryController(name, queryText = name).withFadeTransaction(),
+                    FilteredLibraryController(
+                        name,
+                        queryText = if (selectedStat == Stats.TAG) name else null,
+                        filterMangaType = if (selectedStat == Stats.SERIES_TYPE) {
+                            arrayOf(presenter.seriesTypeStats.indexOf(name) + 1)
+                        } else {
+                            seriesTypes
+                        },
+                        filterStatus = if (selectedStat == Stats.STATUS) {
+                            arrayOf(presenter.statusStats.indexOf(name) + 1)
+                        } else {
+                            statuses
+                        },
+                        filterSources = if (presenter.selectedStat != Stats.SOURCE) {
+                            sources
+                        } else {
+                            arrayOf(id!!)
+                        },
+                        filterLanguages = languages,
+                    ).withFadeTransaction(),
                 )
             }
             Stats.TRACKER -> {
-                if (id != null) {
+                val serviceName: String? = id?.let {
                     val loggedServices = presenter.trackManager.services.filter { it.isLogged }
                     val service = loggedServices.find { it.id == id.toInt() } ?: return
-                    val serviceName = binding.root.context.getString(service.nameRes())
-                    router.pushController(
-                        FilteredLibraryController(
-                            serviceName,
-                            filterTracked = FilterBottomSheet.STATE_INCLUDE,
-                            filterTrackerName = serviceName,
-                        ).withFadeTransaction(),
-                    )
-                } else {
-                    router.pushController(
-                        FilteredLibraryController(
-                            name,
-                            filterTracked = FilterBottomSheet.STATE_EXCLUDE,
-                        ).withFadeTransaction(),
-                    )
+                    return@let binding.root.context.getString(service.nameRes())
                 }
+                router.pushController(
+                    FilteredLibraryController(
+                        serviceName ?: name,
+                        filterMangaType = seriesTypes,
+                        filterStatus = statuses,
+                        filterSources = sources,
+                        filterLanguages = languages,
+                        filterTracked = if (serviceName == null) {
+                            FilterBottomSheet.STATE_EXCLUDE
+                        } else {
+                            FilterBottomSheet.STATE_INCLUDE
+                        },
+                        filterTrackerName = serviceName,
+                    ).withFadeTransaction(),
+                )
             }
             Stats.READ_DURATION -> id?.let {
                 router.pushController(MangaDetailsController(id).withFadeTransaction())

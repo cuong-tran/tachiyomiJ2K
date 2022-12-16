@@ -91,8 +91,8 @@ class StatsDetailsPresenter(
     private val defaultCategory =
         if (libraryMangas.any { it.category == 0 }) arrayOf(Category.createDefault(context)) else emptyArray()
     val categoriesStats = defaultCategory + getCategories().toTypedArray()
-    val languagesStats = prefs.enabledLanguages().get().map { lang -> LocaleHelper.getSourceDisplayName(lang, context) }
-        .sorted().toTypedArray()
+    val languagesStats = prefs.enabledLanguages().get()
+        .associateWith { lang -> LocaleHelper.getSourceDisplayName(lang, context) }.toSortedMap()
 
     private val pieColorList = StatsHelper.PIE_CHART_COLOR_LIST
 
@@ -284,6 +284,7 @@ class StatsDetailsPresenter(
                     icon = source?.icon(),
                     readDuration = mangaList.getReadDuration(),
                     casedLabel = source?.name,
+                    id = sourceId,
                 ),
             )
         }

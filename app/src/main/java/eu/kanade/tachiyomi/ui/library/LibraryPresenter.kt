@@ -272,23 +272,22 @@ class LibraryPresenter(
      * @param items the items to filter.
      */
     private fun applyFilters(items: List<LibraryItem>): List<LibraryItem> {
-        val customFilters = controller as? FilteredLibraryController
-        val filterDownloaded = customFilters?.filterDownloaded ?: preferences.filterDownloaded().get()
+        val filterDownloaded = preferences.filterDownloaded().get()
 
-        val filterUnread = customFilters?.filterUnread ?: preferences.filterUnread().get()
+        val filterUnread = preferences.filterUnread().get()
 
         val filterCompleted = preferences.filterCompleted().get()
 
-        val filterTracked = customFilters?.filterTracked ?: preferences.filterTracked().get()
+        val filterTracked = preferences.filterTracked().get()
 
-        val filterMangaType = customFilters?.filterMangaType ?: preferences.filterMangaType().get()
+        val filterMangaType = preferences.filterMangaType().get()
 
         val showEmptyCategoriesWhileFiltering = preferences.showEmptyCategoriesWhileFiltering().get()
 
         val filterTrackers = FilterBottomSheet.FILTER_TRACKER
 
-        val filtersOff =
-            filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0
+        val filtersOff = controller?.isSubClass != true &&
+            (filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0)
         hasActiveFilters = !filtersOff
         val missingCategorySet = categories.mapNotNull { it.id }.toMutableSet()
         val filteredItems = items.filter f@{ item ->
@@ -307,7 +306,6 @@ class LibraryPresenter(
                             filterTracked,
                             filterMangaType,
                             filterTrackers,
-                            customFilters?.filterStatus,
                         )
                     }
                 }
@@ -327,7 +325,6 @@ class LibraryPresenter(
                 filterTracked,
                 filterMangaType,
                 filterTrackers,
-                customFilters?.filterStatus,
             )
             if (matches) {
                 missingCategorySet.remove(item.manga.category)
@@ -350,8 +347,11 @@ class LibraryPresenter(
         filterTracked: Int,
         filterMangaType: Int,
         filterTrackers: String,
-        filterStatus: Int? = null,
     ): Boolean {
+        (controller as? FilteredLibraryController)?.let {
+            return matchesCustomFilters(item, it, filterTrackers)
+        }
+
         if (filterUnread == STATE_INCLUDE && item.manga.unread == 0) return false
         if (filterUnread == STATE_EXCLUDE && item.manga.unread > 0) return false
 
@@ -370,14 +370,54 @@ class LibraryPresenter(
             }
         }
 
-        if (filterStatus != null) {
-            if (filterStatus != item.manga.status) return false
-        } else {
-            // Filter for completed status of manga
-            if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED) return false
-            if (filterCompleted == STATE_EXCLUDE && item.manga.status == SManga.COMPLETED) return false
-        }
+        // Filter for completed status of manga
+        if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED) return false
+        if (filterCompleted == STATE_EXCLUDE && item.manga.status == SManga.COMPLETED) return false
 
+        if (!matchesFilterTracking(item, filterTracked, filterTrackers)) return false
+
+        // Filter for downloaded manga
+        if (filterDownloaded != STATE_IGNORE) {
+            val isDownloaded = when {
+                item.manga.isLocal() -> true
+                item.downloadCount != -1 -> item.downloadCount > 0
+                else -> downloadManager.getDownloadCount(item.manga) > 0
+            }
+            return if (filterDownloaded == STATE_INCLUDE) isDownloaded else !isDownloaded
+        }
+        return true
+    }
+
+    private fun matchesCustomFilters(
+        item: LibraryItem,
+        customFilters: FilteredLibraryController,
+        filterTrackers: String,
+    ): Boolean {
+        val statuses = customFilters.filterStatus
+        if (statuses.isNotEmpty()) {
+            if (item.manga.status !in statuses) return false
+        }
+        val seriesTypes = customFilters.filterMangaType
+        if (seriesTypes.isNotEmpty()) {
+            if (item.manga.seriesType(sourceManager = sourceManager) !in seriesTypes) return false
+        }
+        val languages = customFilters.filterLanguages
+        if (languages.isNotEmpty()) {
+            if (getLanguage(item.manga) !in languages) return false
+        }
+        val sources = customFilters.filterSources
+        if (sources.isNotEmpty()) {
+            if (item.manga.source !in sources) return false
+        }
+        if (!matchesFilterTracking(item, customFilters.filterTracked, filterTrackers)) return false
+        return true
+    }
+
+    private fun matchesFilterTracking(
+        item: LibraryItem,
+        filterTracked: Int,
+        filterTrackers: String,
+    ): Boolean {
         // Filter for tracked (or per tracked service)
         if (filterTracked != STATE_IGNORE) {
             val tracks = db.getTracks(item.manga).executeAsBlocking()
@@ -398,7 +438,7 @@ class LibraryPresenter(
                     if (service != null) {
                         val hasServiceTrack = tracks.any { it.sync_id == service.id }
                         if (!hasServiceTrack) return false
-                        if (filterTracked == STATE_EXCLUDE && hasServiceTrack) return false
+                        if (filterTracked == STATE_EXCLUDE) return false
                     }
                 }
             } else if (filterTracked == STATE_EXCLUDE) {
@@ -410,15 +450,6 @@ class LibraryPresenter(
                     }
                 }
             }
-        }
-        // Filter for downloaded manga
-        if (filterDownloaded != STATE_IGNORE) {
-            val isDownloaded = when {
-                item.manga.isLocal() -> true
-                item.downloadCount != -1 -> item.downloadCount > 0
-                else -> downloadManager.getDownloadCount(item.manga) > 0
-            }
-            return if (filterDownloaded == STATE_INCLUDE) isDownloaded else !isDownloaded
         }
         return true
     }
