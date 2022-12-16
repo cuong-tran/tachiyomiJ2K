@@ -82,7 +82,7 @@ class LibraryPresenter(
     var categories: List<Category> = emptyList()
         private set
 
-    var removeArticles: Boolean = preferences.removeArticles().get()
+    private var removeArticles: Boolean = preferences.removeArticles().get()
 
     /** All categories of the library, in case they are hidden because of hide categories is on */
     var allCategories: List<Category> = emptyList()
@@ -197,8 +197,6 @@ class LibraryPresenter(
         db.insertCategories(sortedCategories).executeAsBlocking()
     }
 
-    fun getCurrentCategory() = categories.find { it.id == currentCategory }
-
     fun switchSection(order: Int) {
         preferences.lastUsedCategory().set(order)
         val category = categories.find { it.order == order }?.id ?: return
@@ -294,7 +292,7 @@ class LibraryPresenter(
             if (!showEmptyCategoriesWhileFiltering && item.manga.isHidden()) {
                 val subItems = sectionedLibraryItems[item.manga.category]?.takeUnless { it.size <= 1 }
                     ?: hiddenLibraryItems.filter { it.manga.category == item.manga.category }
-                if (subItems.isNullOrEmpty()) {
+                if (subItems.isEmpty()) {
                     return@f filtersOff
                 } else {
                     return@f subItems.any {
@@ -514,7 +512,7 @@ class LibraryPresenter(
         val sortFn: (LibraryItem, LibraryItem) -> Int = { i1, i2 ->
             if (i1.header.category.id == i2.header.category.id) {
                 val category = i1.header.category
-                if (category.mangaOrder.isNullOrEmpty() && category.mangaSort == null) {
+                if (category.mangaOrder.isEmpty() && category.mangaSort == null) {
                     category.changeSortTo(preferences.librarySortingMode().get())
                     if (category.id == 0) {
                         preferences.defaultMangaOrder()
@@ -597,7 +595,7 @@ class LibraryPresenter(
 
     /** Gets the category by id
      *
-     * @param categoryId id of the categoty to get
+     * @param categoryId id of the category to get
      */
     private fun getCategory(categoryId: Int): Category {
         val category = categories.find { categoryId == it.id } ?: createDefaultCategory()
@@ -941,7 +939,7 @@ class LibraryPresenter(
         }
     }
 
-    fun requestBadgeUpdate(badgeUpdate: (List<LibraryItem>) -> Unit) {
+    private fun requestBadgeUpdate(badgeUpdate: (List<LibraryItem>) -> Unit) {
         presenterScope.launch {
             val mangaMap = allLibraryItems
             badgeUpdate(mangaMap)
@@ -974,18 +972,6 @@ class LibraryPresenter(
             mangaMap = applySort(mangaMap)
             sectionLibrary(mangaMap)
         }
-    }
-
-    /**
-     * Returns the common categories for the given list of manga.
-     *
-     * @param mangas the list of manga.
-     */
-    fun getCommonCategories(mangas: List<Manga>): Collection<Category> {
-        if (mangas.isEmpty()) return emptyList()
-        return mangas.toSet()
-            .map { db.getCategoriesForManga(it).executeAsBlocking() }
-            .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
     }
 
     fun getMangaUrls(mangas: List<Manga>): List<String> {
@@ -1046,24 +1032,6 @@ class LibraryPresenter(
             getLibrary()
             mangaToAdd.forEach { db.insertManga(it).executeAsBlocking() }
         }
-    }
-
-    /**
-     * Move the given list of manga to categories.
-     *
-     * @param categories the selected categories.
-     * @param mangas the list of manga to move.
-     */
-    fun moveMangasToCategories(categories: List<Category>, mangas: List<Manga>) {
-        val mc = ArrayList<MangaCategory>()
-
-        for (manga in mangas) {
-            for (cat in categories) {
-                mc.add(MangaCategory.create(manga, cat))
-            }
-        }
-        db.setMangaCategories(mc, mangas)
-        getLibrary()
     }
 
     /** Returns first unread chapter of a manga */
@@ -1229,9 +1197,9 @@ class LibraryPresenter(
     fun downloadUnread(mangaList: List<Manga>) {
         presenterScope.launch {
             withContext(Dispatchers.IO) {
-                mangaList.forEach {
-                    val chapters = db.getChapters(it).executeAsBlocking().filter { !it.read }
-                    downloadManager.downloadChapters(it, chapters)
+                mangaList.forEach { list ->
+                    val chapters = db.getChapters(list).executeAsBlocking().filter { !it.read }
+                    downloadManager.downloadChapters(list, chapters)
                 }
             }
             if (preferences.downloadBadge().get()) {
@@ -1304,9 +1272,11 @@ class LibraryPresenter(
         private val randomTags = arrayOf(0, 1, 2)
         private const val randomSource = 4
         private const val randomTitle = 3
+        @Suppress("unused")
         private const val randomTag = 0
         private val randomGroupOfTags = arrayOf(1, 2)
         private const val randomGroupOfTagsNormal = 1
+        @Suppress("unused")
         private const val randomGroupOfTagsNegate = 2
 
         fun onLowMemory() {
