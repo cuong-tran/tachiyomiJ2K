@@ -353,7 +353,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     }
 
     private fun Source.isLangEnabled(langs: Set<String>? = null): Boolean {
-        return (lang in langs ?: preferences.enabledLanguages().get())
+        return lang in (langs ?: preferences.enabledLanguages().get())
     }
 
     private fun Extension.getPreferenceKey(): String = "extension_$pkgName"
