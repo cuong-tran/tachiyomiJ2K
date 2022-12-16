@@ -879,8 +879,8 @@
     <string name="open_log">Ireki erregistroa</string>
     <string name="top">Goian</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d kapitulu</item>
-        <item quantity="other">%1$d kapituluak</item>
+        <item quantity="one">%1$s kapitulu</item>
+        <item quantity="other">%1$s kapituluak</item>
     </plurals>
     <plurals name="pages_left">
         <item quantity="one">Orri %1$d geratzen da</item>

@@ -12,8 +12,8 @@
     <string name="lock_with_biometrics">I-lock gamit ang biometrics</string>
     <string name="lock_when_idle">Isara kung nakatambay</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d kabanata</item>
-        <item quantity="other">%1$d (na) kabanata</item>
+        <item quantity="one">%1$s kabanata</item>
+        <item quantity="other">%1$s (na) kabanata</item>
     </plurals>
     <string name="unread">Di pa nabasa</string>
     <string name="chapter_">Kabanata %1$s</string>

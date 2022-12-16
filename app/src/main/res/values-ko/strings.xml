@@ -490,7 +490,7 @@
     <string name="add_x_to">%1$s 추가…</string>
     <string name="move_x_to">이동 %1$s위치…</string>
     <plurals name="chapters_plural">
-        <item quantity="other">%1$d장</item>
+        <item quantity="other">%1$s장</item>
     </plurals>
     <string name="comic">코믹</string>
     <string name="not_started">시작되지 않음</string>

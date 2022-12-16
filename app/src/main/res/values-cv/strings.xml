@@ -298,8 +298,8 @@
     <string name="default_category">Яланхилле пухмӑш</string>
     <string name="categories">Пухмӑшсем</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d сыпӑк</item>
-        <item quantity="other">%1$d сыпӑк</item>
+        <item quantity="one">%1$s сыпӑк</item>
+        <item quantity="other">%1$s сыпӑк</item>
     </plurals>
     <string name="lock_when_idle">Кӗтмелли тытӑмра ҫаклатса лартмалла</string>
     <string name="lock_with_biometrics">Алӑ йӗрпе ҫаклатса ларт</string>

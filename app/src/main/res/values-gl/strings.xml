@@ -18,8 +18,8 @@
     <string name="loading">Cargando…</string>
     <string name="history">Historial</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d Capítulo</item>
-        <item quantity="other">%1$d Capítulos</item>
+        <item quantity="one">%1$s Capítulo</item>
+        <item quantity="other">%1$s Capítulos</item>
     </plurals>
     <string name="categories">Categorías</string>
     <string name="browse">Explorar</string>

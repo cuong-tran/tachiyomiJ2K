@@ -647,7 +647,7 @@
     <string name="hide_unread_badges">隐藏未读徽章</string>
     <string name="category">类别</string>
     <plurals name="chapters_plural">
-        <item quantity="other">%1$d 章</item>
+        <item quantity="other">%1$s 章</item>
     </plurals>
     <string name="backup_and_restore">备份和还原</string>
     <string name="progress">进度</string>

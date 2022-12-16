@@ -449,10 +449,10 @@
         <item quantity="other">הסר %1$d פרקים מההורדות\?</item>
     </plurals>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d פרק</item>
-        <item quantity="two">%1$d פרקים</item>
-        <item quantity="many">%1$d פרקים</item>
-        <item quantity="other">%1$d פרקים</item>
+        <item quantity="one">%1$s פרק</item>
+        <item quantity="two">%1$s פרקים</item>
+        <item quantity="many">%1$s פרקים</item>
+        <item quantity="other">%1$s פרקים</item>
     </plurals>
     <plurals name="pages_left">
         <item quantity="one">דף %1$d נותר</item>

@@ -49,10 +49,10 @@
         <item quantity="other">Usunąć %1$d pobranych rozdziałów?</item>
     </plurals>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d rozdział</item>
-        <item quantity="few">%1$d rozdziały</item>
-        <item quantity="many">%1$d rozdziałów</item>
-        <item quantity="other">%1$d rozdziałów</item>
+        <item quantity="one">%1$s rozdział</item>
+        <item quantity="few">%1$s rozdziały</item>
+        <item quantity="many">%1$s rozdziałów</item>
+        <item quantity="other">%1$s rozdziałów</item>
     </plurals>
     <plurals name="pages_left">
         <item quantity="one">Pozostała %1$d strona</item>

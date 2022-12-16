@@ -602,8 +602,8 @@
     <string name="hide_unread_badges">Piilota lukemattomien merkit</string>
     <string name="category">Kategoria</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d luku</item>
-        <item quantity="other">%1$d lukua</item>
+        <item quantity="one">%1$s luku</item>
+        <item quantity="other">%1$s lukua</item>
     </plurals>
     <string name="progress">Edistyminen</string>
     <string name="complete">Valmis</string>

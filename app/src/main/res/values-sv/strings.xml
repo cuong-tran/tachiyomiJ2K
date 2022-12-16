@@ -431,8 +431,8 @@
         <item quantity="other">%1$d sidor kvar</item>
     </plurals>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d kapitel</item>
-        <item quantity="other">%1$d kapitel</item>
+        <item quantity="one">%1$s kapitel</item>
+        <item quantity="other">%1$s kapitel</item>
     </plurals>
     <plurals name="remove_n_chapters">
         <item quantity="one">Ta bort %1$d nerladdade kapitel\?</item>

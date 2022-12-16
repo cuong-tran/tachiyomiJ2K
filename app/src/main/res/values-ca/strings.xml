@@ -482,8 +482,8 @@
     <string name="move_x_to">Mou %1$s a…</string>
     <string name="add_x_to">Afegeix %1$s a…</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d capítol</item>
-        <item quantity="other">%1$d capítols</item>
+        <item quantity="one">%1$s capítol</item>
+        <item quantity="other">%1$s capítols</item>
     </plurals>
     <string name="all_files_permission_required">Calen permisos de fitxers</string>
     <string name="category_deleted">Categoria suprimida</string>

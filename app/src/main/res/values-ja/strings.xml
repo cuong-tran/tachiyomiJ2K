@@ -625,7 +625,7 @@
     <string name="no_recent_read_updated_manga">最近読んだり更新したりしたマンガはありません</string>
     <string name="no_recent_chapters">新しい章はありません</string>
     <plurals name="chapters_plural">
-        <item quantity="other">%1$d章</item>
+        <item quantity="other">%1$s章</item>
     </plurals>
     <string name="auto_refresh_covers_summary">ライブラリを更新する時に、ライブラリのカバーも更新する</string>
     <string name="group_chapters_together">章をグループ化する</string>

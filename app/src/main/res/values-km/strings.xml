@@ -205,7 +205,7 @@
     <string name="on_hiatus">ត្រូវបានផ្អាកការចេញផ្សាយ</string>
     <string name="chapter_">ភាគទី %1$s</string>
     <plurals name="chapters_plural">
-        <item quantity="other">%1$d ភាគ</item>
+        <item quantity="other">%1$s ភាគ</item>
     </plurals>
     <string name="chapter_x_of_y">ភាគទី %1$d នៃ %2$d ភាគ</string>
     <plurals name="pages_left">

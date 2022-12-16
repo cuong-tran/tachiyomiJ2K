@@ -399,9 +399,9 @@
         <item quantity="other">%1$d pagini rămase</item>
     </plurals>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d capitol</item>
-        <item quantity="few">%1$d capitole</item>
-        <item quantity="other">%1$d capitole</item>
+        <item quantity="one">%1$s capitol</item>
+        <item quantity="few">%1$s capitole</item>
+        <item quantity="other">%1$s capitole</item>
     </plurals>
     <plurals name="remove_n_chapters">
         <item quantity="one">Eliminați %1$d capitolul descărcat\?</item>

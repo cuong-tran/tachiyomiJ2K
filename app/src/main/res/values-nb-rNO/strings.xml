@@ -527,8 +527,8 @@
         <item quantity="other">%1$d sider igjen</item>
     </plurals>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d kapittel</item>
-        <item quantity="other">%1$d kapitler</item>
+        <item quantity="one">%1$s kapittel</item>
+        <item quantity="other">%1$s kapitler</item>
     </plurals>
     <string name="pad_cutout_areas">Legg til luft rundt utklippsområder</string>
     <string name="confirm_category_deletion_message">Manga i denne kategorien vil bli flyttet inn i den forvalgte kategorien.</string>

@@ -670,8 +670,8 @@
     <string name="add_edit_categories">Annanghe/modìfica sas categorias</string>
     <string name="category">Categoria</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d capìtulu</item>
-        <item quantity="other">%1$d capìtulos</item>
+        <item quantity="one">%1$s capìtulu</item>
+        <item quantity="other">%1$s capìtulos</item>
     </plurals>
     <string name="hide_bottom_nav">Cua automaticamente su butone de navigatzione</string>
     <string name="custom_manga_info">Informatziones personalizadas de su manga</string>

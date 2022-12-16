@@ -858,9 +858,9 @@
     <string name="_per_row">%d po redu</string>
     <string name="show_unread_count">Pokaži broj nepročitanih</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d poglavlje</item>
-        <item quantity="few">%1$d poglavlja</item>
-        <item quantity="other">%1$d poglavlja</item>
+        <item quantity="one">%1$s poglavlje</item>
+        <item quantity="few">%1$s poglavlja</item>
+        <item quantity="other">%1$s poglavlja</item>
     </plurals>
     <plurals name="for_n_titles">
         <item quantity="one">Za %d naslov</item>

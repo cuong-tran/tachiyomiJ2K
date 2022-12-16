@@ -206,9 +206,9 @@
         <item quantity="other">Palikušas %1$d lapas</item>
     </plurals>
     <plurals name="chapters_plural">
-        <item quantity="zero">%1$d nodaļas</item>
-        <item quantity="one">%1$d nodaļa</item>
-        <item quantity="other">%1$d nodaļas</item>
+        <item quantity="zero">%1$s nodaļas</item>
+        <item quantity="one">%1$s nodaļa</item>
+        <item quantity="other">%1$s nodaļas</item>
     </plurals>
     <string name="by_update_date">Pēc augšupielādes datuma</string>
     <string name="by_chapter_number">Pēc nodaļas numura</string>

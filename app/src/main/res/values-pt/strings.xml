@@ -495,9 +495,8 @@
     <string name="hide_category_hopper">Esconder seletor de categorias</string>
     <string name="category_cannot_be_blank">O nome da categoria não pode ficar vazio</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d capítulo</item>
-        <item quantity="many">%1$d capítulos</item>
-        <item quantity="other">%1$d capítulos</item>
+        <item quantity="one">%1$s capítulo</item>
+        <item quantity="other">%1$s capítulos</item>
     </plurals>
     <string name="add_x_to">Adicionar %1$s a…</string>
     <string name="move_x_to">Mover %1$s para…</string>

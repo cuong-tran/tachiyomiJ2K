@@ -45,8 +45,8 @@
         <item quantity="other">Entferne %1$d heruntergeladene Kapitel?</item>
     </plurals>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d Kapitel</item>
-        <item quantity="other">%1$d Kapitel</item>
+        <item quantity="one">%1$s Kapitel</item>
+        <item quantity="other">%1$s Kapitel</item>
     </plurals>
     <plurals name="pages_left">
         <item quantity="one">%1$d Seite übrig</item>

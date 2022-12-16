@@ -12,9 +12,9 @@
     <string name="lock_with_biometrics">Zaključaj pomoću biometrije</string>
     <string name="lock_when_idle">Zaključaj prilikom mirovanja</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d poglavlje</item>
-        <item quantity="few">%1$d poglavlja</item>
-        <item quantity="other">%1$d poglavlja</item>
+        <item quantity="one">%1$s poglavlje</item>
+        <item quantity="few">%1$s poglavlja</item>
+        <item quantity="other">%1$s poglavlja</item>
     </plurals>
     <string name="unread">Nepročitano</string>
     <string name="chapter_">Poglavlje %1$s</string>

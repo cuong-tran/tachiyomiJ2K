@@ -754,8 +754,8 @@
     <string name="new_category">Νέα κατηγορία</string>
     <string name="category">Κατηγορία</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d κεφάλαιο</item>
-        <item quantity="other">%1$d κεφάλαια</item>
+        <item quantity="one">%1$s κεφάλαιο</item>
+        <item quantity="other">%1$s κεφάλαια</item>
     </plurals>
     <string name="no_pages_found">Δεν βρέθηκαν σελίδες</string>
     <string name="add_x_to">Προσθήκη %1$s σε…</string>

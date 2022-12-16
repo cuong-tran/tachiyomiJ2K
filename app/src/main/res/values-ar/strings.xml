@@ -687,12 +687,12 @@
     <string name="landscape">افقي</string>
     <string name="portrait">رأسي</string>
     <plurals name="chapters_plural">
-        <item quantity="zero">%1$d فصل</item>
+        <item quantity="zero">%1$s فصل</item>
         <item quantity="one">فصل واحد</item>
         <item quantity="two">فصلان</item>
-        <item quantity="few">%1$d فصول</item>
-        <item quantity="many">%1$d فصول</item>
-        <item quantity="other">%1$d فصول</item>
+        <item quantity="few">%1$s فصول</item>
+        <item quantity="many">%1$s فصول</item>
+        <item quantity="other">%1$s فصول</item>
     </plurals>
     <string name="category">فئة</string>
     <string name="new_category">فئة جديدة</string>

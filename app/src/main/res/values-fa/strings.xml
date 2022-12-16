@@ -299,8 +299,8 @@
     <string name="default_category">دسته بندی پیشفرض</string>
     <string name="categories">دسته بندی ها</string>
     <plurals name="chapters_plural">
-        <item quantity="one">قسمت%1$d</item>
-        <item quantity="other">قسمت ها%1$d</item>
+        <item quantity="one">قسمت%1$s</item>
+        <item quantity="other">قسمت ها%1$s</item>
     </plurals>
     <string name="lock_when_idle">قفل صفحه هنگام بیکاری</string>
     <string name="lock_with_biometrics">با بیومتریک قفل کنید</string>

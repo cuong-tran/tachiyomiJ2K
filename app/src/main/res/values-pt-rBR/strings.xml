@@ -43,17 +43,14 @@
     <string name="chapters_removed">Capítulos removidos.</string>
     <plurals name="remove_n_chapters">
         <item quantity="one">Remover %1$d capítulo baixado\?</item>
-        <item quantity="many">Remover %1$d capítulos baixados\?</item>
         <item quantity="other">Remover %1$d capítulos baixados\?</item>
     </plurals>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d capítulo</item>
-        <item quantity="many">%1$d capítulos</item>
-        <item quantity="other">%1$d capítulos</item>
+        <item quantity="one">%1$s capítulo</item>
+        <item quantity="other">%1$s capítulos</item>
     </plurals>
     <plurals name="pages_left">
         <item quantity="one">%1$d página restante</item>
-        <item quantity="many">%1$d páginas restantes</item>
         <item quantity="other">%1$d páginas restantes</item>
     </plurals>
     <!-- Category -->

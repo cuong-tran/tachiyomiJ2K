@@ -488,8 +488,8 @@
     <string name="by_source_order">स्त्रोत के क्रम के अनुसार</string>
     <string name="category">श्रेणी</string>
     <plurals name="chapters_plural">
-        <item quantity="one">अध्याय %1$d</item>
-        <item quantity="other">अध्यायों %1$d</item>
+        <item quantity="one">अध्याय %1$s</item>
+        <item quantity="other">अध्यायों %1$s</item>
     </plurals>
     <plurals name="pages_left">
         <item quantity="one">%1$d पृष्ठ बाकि</item>

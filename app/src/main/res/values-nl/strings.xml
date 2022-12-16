@@ -678,8 +678,8 @@
     <string name="add_edit_categories">Categorieën toevoegen / bewerken</string>
     <string name="category">Categorie</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d hoofdstuk</item>
-        <item quantity="other">%1$d hoofdstukken</item>
+        <item quantity="one">%1$s hoofdstuk</item>
+        <item quantity="other">%1$s hoofdstukken</item>
     </plurals>
     <string name="selection">Selectie</string>
     <string name="preview">Voorbeeld</string>

@@ -749,7 +749,7 @@
     <string name="adding_category_to_queue">Đang thêm %1$s vào hàng đợi cập nhật</string>
     <string name="category">Danh mục</string>
     <plurals name="chapters_plural">
-        <item quantity="other">%1$d chương</item>
+        <item quantity="other">%1$s chương</item>
     </plurals>
     <string name="no_chapters_to_delete">Không có chương để xóa</string>
     <string name="remove_all_downloads">Xoá tất cả những gì tải xuống\?</string>

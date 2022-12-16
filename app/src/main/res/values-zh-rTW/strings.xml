@@ -485,7 +485,7 @@
     <string name="log_out_from_">登出 %1$s？</string>
     <string name="category">分類</string>
     <plurals name="chapters_plural">
-        <item quantity="other">共 %1$d 章</item>
+        <item quantity="other">共 %1$s 章</item>
     </plurals>
     <plurals name="pages_left">
         <item quantity="other">餘 %1$d 頁</item>

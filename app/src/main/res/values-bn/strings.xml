@@ -618,8 +618,8 @@
     <string name="could_not_install_update">আপডেট ইনস্টল করা যায়নি</string>
     <string name="when_grouping_by_sources_tags">উত্স, স্থিতি, ইত্যাদি দ্বারা লাইব্রেরি গ্রুপ করার সময়।</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$dটি অধ্যায়</item>
-        <item quantity="other">%1$d গুলি অধ্যায়</item>
+        <item quantity="one">%1$sটি অধ্যায়</item>
+        <item quantity="other">%1$s গুলি অধ্যায়</item>
     </plurals>
     <string name="getting_started_guide">শুরু হওয়ার গাইড</string>
     <string name="scanlators">স্ক্যানলেটর</string>

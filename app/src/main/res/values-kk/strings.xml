@@ -440,8 +440,8 @@
     <string name="no_pages_found">Еш бет табылмады</string>
     <string name="remove_all_downloads">Барлық жүктеп алғандарды жою керек пе\?</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d тарау</item>
-        <item quantity="other">%1$d тарау</item>
+        <item quantity="one">%1$s тарау</item>
+        <item quantity="other">%1$s тарау</item>
     </plurals>
     <plurals name="remove_n_chapters">
         <item quantity="one">%1$d жүктелген тарауды жою керек пе\?</item>

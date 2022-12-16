@@ -75,8 +75,8 @@
         <item quantity="other">Remove %1$d downloaded chapters?</item>
     </plurals>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d chapter</item>
-        <item quantity="other">%1$d chapters</item>
+        <item quantity="one">%1$s chapter</item>
+        <item quantity="other">%1$s chapters</item>
     </plurals>
     <plurals name="pages_left">
         <item quantity="one">%1$d page left</item>

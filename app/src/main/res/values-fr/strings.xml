@@ -726,9 +726,9 @@
     <string name="add_edit_categories">Ajouter/Modifier des catégories</string>
     <string name="category">Catégorie</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d chapitre</item>
-        <item quantity="many">%1$d chapitres</item>
-        <item quantity="other">%1$d chapitres</item>
+        <item quantity="one">%1$s chapitre</item>
+        <item quantity="many">%1$s chapitres</item>
+        <item quantity="other">%1$s chapitres</item>
     </plurals>
     <string name="restore_in_progress">Restauration déjà en cours</string>
     <string name="selection">Sélection</string>

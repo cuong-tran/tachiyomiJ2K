@@ -627,7 +627,7 @@
     <string name="hide_unread_badges">Sembunyi Lambang belum dibaca</string>
     <string name="category">Kategori</string>
     <plurals name="chapters_plural">
-        <item quantity="other">%1$d bab</item>
+        <item quantity="other">%1$s bab</item>
     </plurals>
     <string name="complete">Selesai</string>
     <string name="crash_logs">Log kerosakan</string>

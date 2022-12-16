@@ -47,7 +47,7 @@
         <item quantity="other">စာမျက်နှာ %1$d ခုကျန်သေးသည်</item>
     </plurals>
     <plurals name="chapters_plural">
-        <item quantity="other">%1$d ပိုင်း</item>
+        <item quantity="other">%1$s ပိုင်း</item>
     </plurals>
     <plurals name="remove_n_chapters">
         <item quantity="other">ဒေါင်းလုဒ်ဆွဲထားတဲ့အပိုင်း %1$d ပိုင်းကိုဖျက်ပစ်မှာလား</item>

@@ -357,9 +357,9 @@
         <item quantity="other">Zbývá %1$d stránek</item>
     </plurals>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d kapitola</item>
-        <item quantity="few">%1$d kapitoly</item>
-        <item quantity="other">%1$d kapitol</item>
+        <item quantity="one">%1$s kapitola</item>
+        <item quantity="few">%1$s kapitoly</item>
+        <item quantity="other">%1$s kapitol</item>
     </plurals>
     <plurals name="remove_n_chapters">
         <item quantity="one">Odstranit %1$d staženou kapitolu\?</item>

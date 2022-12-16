@@ -570,7 +570,7 @@
     <string name="whats_new_this_release">มีอะไรใหม่ในรุ่นนี้</string>
     <string name="_must_be_enabled_first">จำเป็นต้องเปิดใช้งาน %1$s ก่อน</string>
     <plurals name="chapters_plural">
-        <item quantity="other">%1$d ตอน</item>
+        <item quantity="other">%1$s ตอน</item>
     </plurals>
     <string name="release_page">หน้ารีลีส</string>
     <string name="sort_by_source_s_order">เรียงตามที่แหล่งที่มาจัดไว้</string>

@@ -495,9 +495,9 @@
     <string name="publishing_finished">Publikovanie ukončené</string>
     <string name="cancelled">Zrušené</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d kapitola</item>
-        <item quantity="few">%1$d kapitoly</item>
-        <item quantity="other">%1$d kapitol</item>
+        <item quantity="one">%1$s kapitola</item>
+        <item quantity="few">%1$s kapitoly</item>
+        <item quantity="other">%1$s kapitol</item>
     </plurals>
     <string name="chapter_not_found">Kapitola sa nenašla</string>
     <string name="on_hiatus">Prestávka</string>

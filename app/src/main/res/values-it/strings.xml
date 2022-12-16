@@ -700,9 +700,8 @@
     <string name="add_edit_categories">Aggiungi/Modifica categorie</string>
     <string name="category">Categoria</string>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d capitolo</item>
-        <item quantity="many">%1$d capitoli</item>
-        <item quantity="other">%1$d capitoli</item>
+        <item quantity="one">%1$s capitolo</item>
+        <item quantity="other">%1$s capitoli</item>
     </plurals>
     <string name="backup_in_progress">Il backup è già in corso</string>
     <string name="next">Successivo</string>

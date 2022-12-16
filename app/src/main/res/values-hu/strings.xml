@@ -248,8 +248,8 @@
         <item quantity="other">%1$d oldalak hátra</item>
     </plurals>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d fejezet</item>
-        <item quantity="other">%1$d fejezetek</item>
+        <item quantity="one">%1$s fejezet</item>
+        <item quantity="other">%1$s fejezetek</item>
     </plurals>
     <plurals name="remove_n_chapters">
         <item quantity="one">Eltávolítasz %1$d letöltött fejezetet\?</item>

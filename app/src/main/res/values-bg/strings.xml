@@ -413,8 +413,8 @@
         <item quantity="other">%1$d страници останали</item>
     </plurals>
     <plurals name="chapters_plural">
-        <item quantity="one">%1$d глава</item>
-        <item quantity="other">%1$d глави</item>
+        <item quantity="one">%1$s глава</item>
+        <item quantity="other">%1$s глави</item>
     </plurals>
     <plurals name="remove_n_chapters">
         <item quantity="one">Изтри %1$d изтеглената глава\?</item>
