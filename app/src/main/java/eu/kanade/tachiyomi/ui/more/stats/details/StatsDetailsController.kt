@@ -594,30 +594,40 @@ class StatsDetailsController :
         name ?: return
         val statuses = presenter.selectedStatus.map { presenter.statusStats.indexOf(it) + 1 }.toTypedArray()
         val seriesTypes = presenter.selectedSeriesType.map { presenter.seriesTypeStats.indexOf(it) + 1 }.toTypedArray()
-        val languages = presenter.selectedLanguage.mapNotNull { presenter.languagesStats[it] }.toTypedArray()
+        val languages = presenter.selectedLanguage.mapNotNull { lang ->
+            presenter.languagesStats.firstNotNullOfOrNull { if (it.value == lang) it.key else null }
+        }.toTypedArray()
         val sources = presenter.selectedSource.map { it.id }.toTypedArray()
         when (val selectedStat = presenter.selectedStat) {
-            Stats.SOURCE, Stats.TAG, Stats.STATUS, Stats.SERIES_TYPE -> {
+            Stats.SOURCE, Stats.TAG, Stats.STATUS, Stats.SERIES_TYPE, Stats.SCORE, Stats.START_YEAR, Stats.LANGUAGE -> {
                 router.pushController(
                     FilteredLibraryController(
                         name,
                         queryText = if (selectedStat == Stats.TAG) name else null,
-                        filterMangaType = if (selectedStat == Stats.SERIES_TYPE) {
-                            arrayOf(presenter.seriesTypeStats.indexOf(name) + 1)
-                        } else {
-                            seriesTypes
+                        filterMangaType = when (selectedStat) {
+                            Stats.SERIES_TYPE -> arrayOf(presenter.seriesTypeStats.indexOf(name) + 1)
+                            else -> seriesTypes
                         },
-                        filterStatus = if (selectedStat == Stats.STATUS) {
-                            arrayOf(presenter.statusStats.indexOf(name) + 1)
-                        } else {
-                            statuses
+                        filterStatus = when (selectedStat) {
+                            Stats.STATUS -> arrayOf(presenter.statusStats.indexOf(name) + 1)
+                            else -> statuses
                         },
-                        filterSources = if (presenter.selectedStat != Stats.SOURCE) {
-                            sources
-                        } else {
-                            arrayOf(id!!)
+                        filterSources = when (selectedStat) {
+                            Stats.SOURCE -> arrayOf(id!!)
+                            Stats.LANGUAGE -> emptyArray()
+                            else -> sources
                         },
-                        filterLanguages = languages,
+                        filterLanguages = when (selectedStat) {
+                            Stats.LANGUAGE -> {
+                                val language = presenter.languagesStats.firstNotNullOfOrNull {
+                                    if (it.value == name) it.key else null
+                                }
+                                listOfNotNull(language).toTypedArray()
+                            }
+                            else -> languages
+                        },
+                        filterTrackingScore = if (selectedStat == Stats.SCORE) id?.toInt() ?: -1 else 0,
+                        filterStartYear = if (selectedStat == Stats.START_YEAR) id?.toInt() ?: -1 else 0,
                     ).withFadeTransaction(),
                 )
             }
@@ -643,10 +653,14 @@ class StatsDetailsController :
                     ).withFadeTransaction(),
                 )
             }
-            Stats.READ_DURATION -> id?.let {
-                router.pushController(MangaDetailsController(id).withFadeTransaction())
+            Stats.READ_DURATION -> {
+                id?.let {
+                    router.pushController(MangaDetailsController(id).withFadeTransaction())
+                }
             }
-            else -> return
+            else -> {
+                return
+            }
         }
     }
 

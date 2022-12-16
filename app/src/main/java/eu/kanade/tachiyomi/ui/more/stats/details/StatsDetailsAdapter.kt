@@ -72,9 +72,12 @@ class StatsDetailsAdapter(
             Stats.SERIES_TYPE,
             Stats.STATUS,
             Stats.READ_DURATION,
+            Stats.SCORE,
+            Stats.LANGUAGE,
             Stats.SOURCE,
             Stats.TRACKER,
             Stats.TAG,
+            Stats.START_YEAR,
         )
     }
 

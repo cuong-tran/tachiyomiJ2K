@@ -185,6 +185,8 @@ class StatsDetailsPresenter(
                     totalChapters = mangaList?.sumOf { it.totalChapters } ?: 0,
                     label = score?.toString() ?: context.getString(R.string.not_rated).uppercase(),
                     readDuration = mangaList?.getReadDuration() ?: 0L,
+                    casedLabel = score?.toString() ?: context.getString(R.string.not_rated),
+                    id = score?.toLong(),
                 ),
             )
         }
@@ -204,6 +206,7 @@ class StatsDetailsPresenter(
                     totalChapters = mangaList.sumOf { it.totalChapters },
                     label = language.uppercase(),
                     readDuration = mangaList.getReadDuration(),
+                    casedLabel = language,
                 ),
             )
         }
@@ -355,6 +358,7 @@ class StatsDetailsPresenter(
                     totalChapters = mangaList.sumOf { it.totalChapters },
                     label = year?.toString() ?: context.getString(R.string.not_started).uppercase(),
                     readDuration = mangaList.getReadDuration(),
+                    id = year?.toLong(),
                 ),
             )
         }
