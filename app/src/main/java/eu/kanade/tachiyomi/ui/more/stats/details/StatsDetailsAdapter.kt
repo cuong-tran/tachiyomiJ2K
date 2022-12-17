@@ -64,7 +64,6 @@ class StatsDetailsAdapter(
         holder.itemView.setOnClickListener {
             list[position].let { item -> listener?.onItemClicked(item.id, item.label) }
         }
-        holder.itemView.isClickable = stat != Stats.CATEGORY
     }
 
     override fun getItemCount(): Int {

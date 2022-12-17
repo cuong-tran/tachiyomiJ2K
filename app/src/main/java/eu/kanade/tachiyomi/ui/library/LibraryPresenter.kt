@@ -431,6 +431,10 @@ class LibraryPresenter(
         if (mangaLength != null) {
             if (item.manga.totalChapters !in mangaLength) return false
         }
+        val categories = customFilters.filterCategories
+        if (categories.isNotEmpty()) {
+            if (item.manga.category !in categories) return false
+        }
         return true
     }
 

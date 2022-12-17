@@ -7,7 +7,6 @@ import android.view.View
 import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.util.view.collapse
-import uy.kohesive.injekt.api.get
 
 class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bundle) {
 
@@ -28,6 +27,8 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
         private set
     var filterLength: IntRange? = null
         private set
+    var filterCategories = emptyArray<Int>()
+        private set
 
     private var customTitle: String? = null
 
@@ -42,6 +43,7 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
         filterSources: Array<Long> = emptyArray(),
         filterMangaType: Array<Int> = emptyArray(),
         filterLanguages: Array<String> = emptyArray(),
+        filterCategories: Array<Int> = emptyArray(),
         filterTracked: Int = 0,
         filterTrackerName: String? = null,
         filterTrackingScore: Int = 0,
@@ -54,6 +56,7 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
         this.filterSources = filterSources
         this.filterTracked = filterTracked
         this.filterMangaType = filterMangaType
+        this.filterCategories = filterCategories
         if (filterTracked != 0 && filterTrackerName != null) {
             FilterBottomSheet.FILTER_TRACKER = filterTrackerName
         }

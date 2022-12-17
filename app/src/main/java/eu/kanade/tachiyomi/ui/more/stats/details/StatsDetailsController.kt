@@ -597,9 +597,10 @@ class StatsDetailsController :
         val languages = presenter.selectedLanguage.mapNotNull { lang ->
             presenter.languagesStats.firstNotNullOfOrNull { if (it.value == lang) it.key else null }
         }.toTypedArray()
+        val categories = presenter.selectedCategory.mapNotNull { it.id }.toTypedArray()
         val sources = presenter.selectedSource.map { it.id }.toTypedArray()
         when (val selectedStat = presenter.selectedStat) {
-            Stats.SOURCE, Stats.TAG, Stats.STATUS, Stats.SERIES_TYPE, Stats.SCORE, Stats.START_YEAR, Stats.LANGUAGE -> {
+            Stats.SOURCE, Stats.TAG, Stats.STATUS, Stats.SERIES_TYPE, Stats.SCORE, Stats.START_YEAR, Stats.LANGUAGE, Stats.CATEGORY -> {
                 router.pushController(
                     FilteredLibraryController(
                         if (selectedStat == Stats.SCORE) {
@@ -630,6 +631,10 @@ class StatsDetailsController :
                             }
                             else -> languages
                         },
+                        filterCategories = when (selectedStat) {
+                            Stats.CATEGORY -> arrayOf(id!!.toInt())
+                            else -> categories
+                        },
                         filterTrackingScore = if (selectedStat == Stats.SCORE) id?.toInt() ?: -1 else 0,
                         filterStartYear = if (selectedStat == Stats.START_YEAR) id?.toInt() ?: -1 else 0,
                     ).withFadeTransaction(),
@@ -648,6 +653,7 @@ class StatsDetailsController :
                         filterStatus = statuses,
                         filterSources = sources,
                         filterLanguages = languages,
+                        filterCategories = categories,
                         filterTracked = if (serviceName == null) {
                             FilterBottomSheet.STATE_EXCLUDE
                         } else {
@@ -674,6 +680,7 @@ class StatsDetailsController :
                         filterStatus = statuses,
                         filterSources = sources,
                         filterLanguages = languages,
+                        filterCategories = categories,
                         filterLength = range,
                     ).withFadeTransaction(),
                 )

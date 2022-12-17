@@ -313,6 +313,7 @@ class StatsDetailsPresenter(
                     totalChapters = mangaList.sumOf { it.totalChapters },
                     label = label,
                     readDuration = mangaList.getReadDuration(),
+                    id = category.toLong(),
                 ),
             )
         }
