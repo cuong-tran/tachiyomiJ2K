@@ -602,7 +602,11 @@ class StatsDetailsController :
             Stats.SOURCE, Stats.TAG, Stats.STATUS, Stats.SERIES_TYPE, Stats.SCORE, Stats.START_YEAR, Stats.LANGUAGE -> {
                 router.pushController(
                     FilteredLibraryController(
-                        name,
+                        if (selectedStat == Stats.SCORE) {
+                            name + if (name.toIntOrNull() != null) "★" else ""
+                        } else {
+                            name
+                        },
                         queryText = if (selectedStat == Stats.TAG) name else null,
                         filterMangaType = when (selectedStat) {
                             Stats.SERIES_TYPE -> arrayOf(presenter.seriesTypeStats.indexOf(name) + 1)
@@ -650,6 +654,27 @@ class StatsDetailsController :
                             FilterBottomSheet.STATE_INCLUDE
                         },
                         filterTrackerName = serviceName,
+                    ).withFadeTransaction(),
+                )
+            }
+            Stats.LENGTH -> {
+                val range: IntRange = if (name.contains("-")) {
+                    val values = name.split("-").map { it.toInt() }
+                    IntRange(values.min(), values.max())
+                } else if (name.contains("+")) {
+                    val values = name.split("+").mapNotNull { it.toIntOrNull() }
+                    IntRange(values[0], Int.MAX_VALUE)
+                } else {
+                    IntRange(name.toInt(), name.toInt())
+                }
+                router.pushController(
+                    FilteredLibraryController(
+                        binding.root.resources.getQuantityString(R.plurals.chapters_plural, range.last, name),
+                        filterMangaType = seriesTypes,
+                        filterStatus = statuses,
+                        filterSources = sources,
+                        filterLanguages = languages,
+                        filterLength = range,
                     ).withFadeTransaction(),
                 )
             }

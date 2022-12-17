@@ -26,6 +26,8 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
         private set
     var filterStartYear: Int = 0
         private set
+    var filterLength: IntRange? = null
+        private set
 
     private var customTitle: String? = null
 
@@ -44,6 +46,7 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
         filterTrackerName: String? = null,
         filterTrackingScore: Int = 0,
         filterStartYear: Int = 0,
+        filterLength: IntRange? = null,
     ) : this() {
         customTitle = title
         this.filterStatus = filterStatus
@@ -56,6 +59,7 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
         }
         this.filterTrackingScore = filterTrackingScore
         this.filterStartYear = filterStartYear
+        this.filterLength = filterLength
         this.queryText = queryText
     }
 

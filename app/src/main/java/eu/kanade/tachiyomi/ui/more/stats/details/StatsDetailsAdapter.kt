@@ -64,17 +64,7 @@ class StatsDetailsAdapter(
         holder.itemView.setOnClickListener {
             list[position].let { item -> listener?.onItemClicked(item.id, item.label) }
         }
-        holder.itemView.isClickable = stat in arrayOf(
-            Stats.SERIES_TYPE,
-            Stats.STATUS,
-            Stats.READ_DURATION,
-            Stats.SCORE,
-            Stats.LANGUAGE,
-            Stats.SOURCE,
-            Stats.TRACKER,
-            Stats.TAG,
-            Stats.START_YEAR,
-        )
+        holder.itemView.isClickable = stat != Stats.CATEGORY
     }
 
     override fun getItemCount(): Int {
@@ -92,7 +82,15 @@ class StatsDetailsAdapter(
             statsLabelText.setTextColor(
                 item.color ?: context.getResourceColor(R.attr.colorOnBackground),
             )
-            statsLabelText.text = item.label?.uppercase()
+            val label = item.label?.let {
+                if (stat == Stats.LENGTH) {
+                    val max = item.id?.toInt() ?: 0
+                    root.resources.getQuantityString(R.plurals.chapters_plural, max, it)
+                } else {
+                    it
+                }
+            } ?: ""
+            statsLabelText.text = label.uppercase()
             if (item.iconRes != null) {
                 logoContainer.isVisible = true
                 item.iconBGColor?.let { logoContainer.setCardBackgroundColor(it) }

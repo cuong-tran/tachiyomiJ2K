@@ -70,14 +70,14 @@ object StatsHelper {
     )
 
     val STATS_LENGTH = arrayListOf(
-        0 to 0,
-        1 to 1,
-        2 to 10,
-        11 to 25,
-        26 to 50,
-        51 to 100,
-        101 to 200,
-        201 to null,
+        0..0,
+        1..1,
+        2..10,
+        11..25,
+        26..50,
+        51..100,
+        101..200,
+        201..Int.MAX_VALUE,
     )
 
     fun Long.getReadDuration(blankValue: String = "0"): String {

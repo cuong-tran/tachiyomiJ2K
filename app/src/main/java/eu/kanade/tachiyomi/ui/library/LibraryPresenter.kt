@@ -427,6 +427,10 @@ class LibraryPresenter(
             val mangaStartingYear = item.manga.getStartYear()
             if (mangaStartingYear != startingYear) return false
         }
+        val mangaLength = customFilters.filterLength
+        if (mangaLength != null) {
+            if (item.manga.totalChapters !in mangaLength) return false
+        }
         return true
     }
 

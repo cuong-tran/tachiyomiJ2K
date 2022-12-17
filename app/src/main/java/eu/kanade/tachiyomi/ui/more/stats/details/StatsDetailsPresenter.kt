@@ -219,8 +219,9 @@ class StatsDetailsPresenter(
     private fun setupLength() {
         currentStats = ArrayList()
         var mangaFiltered = mangasDistinct.filterByChip()
-        StatsHelper.STATS_LENGTH.forEach { (min, max) ->
-            val (match, unmatch) = mangaFiltered.partition { it.totalChapters >= min && (max == null || it.totalChapters <= max) }
+        StatsHelper.STATS_LENGTH.forEach { range ->
+            val (min, max) = range.first to range.last.takeIf { it != Int.MAX_VALUE }
+            val (match, unmatch) = mangaFiltered.partition { it.totalChapters in range }
             mangaFiltered = unmatch
             currentStats?.add(
                 StatsData(
@@ -236,6 +237,7 @@ class StatsDetailsPresenter(
                             .replace("-null", "+")
                     },
                     readDuration = match.getReadDuration(),
+                    id = range.last.toLong(),
                 ),
             )
         }
