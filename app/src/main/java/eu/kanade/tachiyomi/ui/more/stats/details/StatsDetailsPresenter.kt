@@ -399,11 +399,11 @@ class StatsDetailsPresenter(
      * Filter the stat data according to the chips selected
      */
     private fun List<LibraryManga>.filterByChip(): List<LibraryManga> {
-        return this.filterBySeriesType(selectedStat == Stats.SERIES_TYPE)
+        return this.filterByCategory(selectedStat == Stats.CATEGORY)
+            .filterBySeriesType(selectedStat == Stats.SERIES_TYPE)
             .filterByStatus(selectedStat == Stats.STATUS)
             .filterByLanguage(selectedStat == Stats.LANGUAGE || (selectedStat != Stats.SOURCE && selectedSource.isNotEmpty()))
             .filterBySource(selectedStat in listOf(Stats.SOURCE, Stats.LANGUAGE) || selectedLanguage.isNotEmpty())
-            .filterByCategory(selectedStat == Stats.CATEGORY)
     }
 
     private fun List<LibraryManga>.filterBySeriesType(noFilter: Boolean = false): List<LibraryManga> {
@@ -450,9 +450,9 @@ class StatsDetailsPresenter(
         return if (noFilter || selectedCategory.isEmpty()) {
             this
         } else {
-            filter { manga ->
+            libraryMangas.filter { manga ->
                 manga.category in selectedCategory.map { it.id }
-            }
+            }.distinct()
         }
     }
 
