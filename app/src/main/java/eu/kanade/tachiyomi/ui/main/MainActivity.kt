@@ -26,6 +26,7 @@ import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.annotation.IdRes
+import androidx.appcompat.view.ActionMode
 import androidx.appcompat.view.menu.ActionMenuItemView
 import androidx.appcompat.view.menu.MenuItemImpl
 import androidx.appcompat.widget.ActionMenuView
@@ -189,6 +190,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     val toolbarHeight: Int
         get() = max(binding.toolbar.height, binding.cardFrame.height, binding.appBar.attrToolbarHeight)
 
+    private var actionMode: ActionMode? = null
     var backPressedCallback: OnBackPressedCallback? = null
     private val backCallback = {
         pressingBack()
@@ -552,7 +554,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     fun reEnableBackPressedCallBack() {
         val returnToStart = preferences.backReturnsToStart().get() && this !is SearchActivity
-        backPressedCallback?.isEnabled =
+        backPressedCallback?.isEnabled = actionMode != null ||
             (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) ||
             router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
     }
@@ -692,12 +694,16 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
     }
 
-    override fun startSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {
+    override fun startSupportActionMode(callback: ActionMode.Callback): ActionMode? {
         window?.statusBarColor = getResourceColor(R.attr.colorPrimaryVariant)
-        return super.startSupportActionMode(callback)
+        actionMode = super.startSupportActionMode(callback)
+        reEnableBackPressedCallBack()
+        return actionMode
     }
 
-    override fun onSupportActionModeFinished(mode: androidx.appcompat.view.ActionMode) {
+    override fun onSupportActionModeFinished(mode: ActionMode) {
+        actionMode = null
+        reEnableBackPressedCallBack()
         launchUI {
             val scale = Settings.Global.getFloat(
                 contentResolver,
@@ -942,6 +948,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     private fun pressingBack() {
+        if (actionMode != null) {
+            actionMode?.finish()
+            return
+        }
         if (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) {
             binding.searchToolbar.collapseActionView()
             return
