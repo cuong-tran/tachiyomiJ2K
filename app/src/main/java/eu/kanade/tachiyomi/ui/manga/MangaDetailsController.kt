@@ -1831,7 +1831,7 @@ class MangaDetailsController :
                 menu,
             )
             menu?.findItem(R.id.action_copy)?.isVisible = showCopy
-            val sourceMenuItem = menu?.findItem(R.id.action_source_search)
+            var sourceMenuItem = menu?.findItem(R.id.action_source_search)
             sourceMenuItem?.isVisible = searchSource && presenter.source is CatalogueSource
             val context = view?.context ?: return false
             val localItem = menu?.findItem(R.id.action_local_search) ?: return true
@@ -1840,6 +1840,11 @@ class MangaDetailsController :
             localItem.title = context.getString(R.string.search_, library)
             sourceMenuItem?.title = context.getString(R.string.search_, presenter.source.name)
             if (searchSource) {
+                if (previousController is BrowseSourceController) {
+                    menu.removeItem(R.id.action_source_search)
+                    sourceMenuItem = menu.add(0, R.id.action_source_search, 1, sourceMenuItem?.title)
+                    sourceMenuItem?.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+                }
                 sourceMenuItem?.icon = presenter.source.icon()
             }
             return true

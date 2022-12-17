@@ -5,24 +5,28 @@
     <item
         android:id="@+id/action_copy"
         android:icon="@drawable/ic_done_all_24dp"
+        android:orderInCategory="0"
         android:title="@string/copy_value"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_local_search"
         android:icon="@drawable/ic_search_24dp"
+        android:orderInCategory="2"
         android:title="@string/search"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_source_search"
         android:icon="@drawable/ic_extension_update_24dp"
+        android:orderInCategory="3"
         android:title="@string/search"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_global_search"
         android:icon="@drawable/ic_open_in_webview_24dp"
+        android:orderInCategory="4"
         android:title="@string/label_global_search"
         app:showAsAction="ifRoom" />
 </menu>
