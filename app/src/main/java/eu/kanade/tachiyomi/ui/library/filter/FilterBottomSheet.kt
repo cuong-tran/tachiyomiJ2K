@@ -235,7 +235,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     fun setExpandText(allExpanded: Boolean?, animated: Boolean = true) {
-        binding.expandCategories.isVisible = allExpanded != null
+        binding.expandCategories.isVisible = controller?.isSubClass != true && allExpanded != null
         allExpanded ?: return
         binding.expandCategories.setText(
             if (!allExpanded) {
