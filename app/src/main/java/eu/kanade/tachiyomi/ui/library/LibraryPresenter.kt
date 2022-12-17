@@ -1078,7 +1078,7 @@ class LibraryPresenter(
     }
 
     /** Undo the removal of the manga once in library */
-    fun reAddMangas(mangas: List<Manga) {
+    fun reAddMangas(mangas: List<Manga>) {
         presenterScope.launch {
             val mangaToAdd = mangas.distinctBy { it.id }
             mangaToAdd.forEach { it.favorite = true }
