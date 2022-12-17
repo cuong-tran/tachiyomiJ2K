@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.more.stats.details
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -30,6 +31,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.databinding.StatsDetailsChartBinding
 import eu.kanade.tachiyomi.databinding.StatsDetailsControllerBinding
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.library.FilteredLibraryController
@@ -266,14 +268,29 @@ class StatsDetailsController :
      */
     private fun initializeChips() {
         with(binding) {
-            chipStat.text = activity?.getString(presenter.selectedStat?.resourceId ?: defaultStat.resourceId)
+            chipStat.text =
+                activity?.getString(presenter.selectedStat?.resourceId ?: defaultStat.resourceId)
             chipStat.setColors((presenter.selectedStat != defaultStat).toInt())
-            chipSeriesType.setState(presenter.selectedSeriesType, R.string.series_type, R.plurals._series_types)
+            chipSeriesType.setState(
+                presenter.selectedSeriesType,
+                R.string.series_type,
+                R.plurals._series_types,
+            )
             chipSource.setState(presenter.selectedSource, R.string.source, R.plurals._sources)
             chipStatus.setState(presenter.selectedStatus, R.string.status, R.plurals._statuses)
-            chipLanguage.setState(presenter.selectedLanguage, R.string.language, R.plurals._languages)
-            chipCategory.setState(presenter.selectedCategory, R.string.category, R.plurals.category_plural, true)
-            statsSortTextView?.text = activity?.getString(presenter.selectedStatsSort?.resourceId ?: defaultSort.resourceId)
+            chipLanguage.setState(
+                presenter.selectedLanguage,
+                R.string.language,
+                R.plurals._languages,
+            )
+            chipCategory.setState(
+                presenter.selectedCategory,
+                R.string.category,
+                R.plurals.category_plural,
+            )
+            statsSortTextView?.text = activity?.getString(
+                presenter.selectedStatsSort?.resourceId ?: defaultSort.resourceId,
+            )
         }
     }
 
@@ -349,13 +366,19 @@ class StatsDetailsController :
         statsList: Array<T>,
         selectedValues: MutableSet<T>,
         resourceId: Int,
-        @PluralsRes
-        resourceIdPlural: Int,
+        @PluralsRes resourceIdPlural: Int,
     ) {
         val tempValues = selectedValues.toMutableSet()
-        val isCategory = statsList.isArrayOf<Category>()
-        val items = statsList.map { if (isCategory) (it as Category).name else it.toString() }
-            .toTypedArray()
+        val items = statsList.map {
+            when (it) {
+                is Category -> it.name
+                is Source -> it.nameBasedOnEnabledLanguages(
+                    presenter.isMultiLingual,
+                    presenter.extensionManager,
+                )
+                else -> it.toString()
+            }
+        }.toTypedArray()
         searchView.clearFocus()
         activity!!.materialAlertDialog()
             .setTitle(resourceId)
@@ -374,7 +397,7 @@ class StatsDetailsController :
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 selectedValues.clear()
                 selectedValues.addAll(tempValues)
-                setState(selectedValues, resourceId, resourceIdPlural, isCategory)
+                setState(selectedValues, resourceId, resourceIdPlural)
                 binding.progress.isVisible = true
                 resetAndSetup(keepAdapter = true)
             }
@@ -384,7 +407,6 @@ class StatsDetailsController :
     /**
      * Reset the layout and setup the chart to display
      * @param updateChipsVisibility whether to update the chips visibility
-     * @param resetReadDuration whether to reset the read duration values
      */
     private fun resetAndSetup(
         updateChipsVisibility: Boolean = true,
@@ -407,7 +429,6 @@ class StatsDetailsController :
     /**
      * Reset the layout to the default state
      * @param updateChipsVisibility whether to update the chips visibility
-     * @param resetReadDuration whether to reset the read duration values
      */
     private fun resetLayout(
         updateChipsVisibility: Boolean = false,
@@ -486,12 +507,20 @@ class StatsDetailsController :
         resourceId: Int,
         @PluralsRes
         resourceIdPlural: Int,
-        isCategory: Boolean = false,
     ) {
         this.setColors(selectedValues.size)
         this.text = when (selectedValues.size) {
             0 -> activity?.getString(resourceId)
-            1 -> if (isCategory) (selectedValues.first() as Category).name else selectedValues.first().toString()
+            1 -> {
+                when (val firstValue = selectedValues.first()) {
+                    is Category -> firstValue.name
+                    is Source -> firstValue.nameBasedOnEnabledLanguages(
+                        presenter.isMultiLingual,
+                        presenter.extensionManager,
+                    )
+                    else -> firstValue.toString()
+                }
+            }
             else -> activity?.resources?.getQuantityString(resourceIdPlural, selectedValues.size, selectedValues.size)
         }
     }
@@ -563,6 +592,7 @@ class StatsDetailsController :
         assignAdapter(false)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun assignAdapter(onlyUpdateDetails: Boolean) {
         if (concatAdapter == null) {
             val statsAdapter = StatsDetailsAdapter(
@@ -696,6 +726,7 @@ class StatsDetailsController :
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun updateStatsAdapter(onlyUpdateDetails: Boolean) {
         val oldCount = statsAdapter?.list?.size ?: 0
         statsAdapter?.stat = presenter.selectedStat!!

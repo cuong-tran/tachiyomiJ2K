@@ -52,6 +52,7 @@ class StatsDetailsPresenter(
     private var mangasDistinct = libraryMangas.distinct()
     val sources = getEnabledSources()
     val extensionManager by injectLazy<ExtensionManager>()
+    val isMultiLingual = prefs.enabledLanguages().get().filterNot { it == "all" }.size > 1
 
     var selectedStat: Stats? = null
     var selectedSeriesType = mutableSetOf<String>()
@@ -276,7 +277,6 @@ class StatsDetailsPresenter(
     private fun setupSources() {
         currentStats = ArrayList()
         val libraryFormat = mangasDistinct.filterByChip().groupBy { it.source }
-        val isMultiLingual = prefs.enabledLanguages().get().filterNot { it == "all" }.size > 1
 
         libraryFormat.forEach { (sourceId, mangaList) ->
             val source = sourceManager.getOrStub(sourceId)
