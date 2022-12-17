@@ -3,13 +3,15 @@ package eu.kanade.tachiyomi.ui.library
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
-import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.more.stats.details.StatsDetailsController
-import eu.kanade.tachiyomi.util.view.collapse
+import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.previousController
 
 class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bundle) {
@@ -72,23 +74,46 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        binding.filterBottomSheet.root.sheetBehavior?.isHideable = false
-        binding.filterBottomSheet.root.sheetBehavior?.collapse()
-        binding.filterBottomSheet.filterScroll.isVisible = false
-        binding.filterBottomSheet.secondLayout.isVisible = false
-        binding.filterBottomSheet.viewOptions.isVisible = false
-        binding.filterBottomSheet.pill.isVisible = false
+        binding.filterBottomSheet.root.sheetBehavior?.hide()
+        binding.swipeRefresh.isEnabled = false
         queryText?.let { search(it) }
     }
 
     override fun showFloatingBar() = false
 
-    override fun handleBack(): Boolean {
-        if (binding.recyclerCover.isClickable) {
-            showCategories(false)
-            return true
+    override fun showCategories(show: Boolean, closeSearch: Boolean, category: Int) {
+        super.showCategories(show, closeSearch, category)
+        binding.swipeRefresh.isEnabled = false
+    }
+
+    override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        super.onActionStateChanged(viewHolder, actionState)
+        binding.swipeRefresh.isEnabled = false
+    }
+
+    override fun onItemReleased(position: Int) {
+        super.onItemReleased(position)
+        binding.swipeRefresh.isEnabled = false
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.filtered_library, menu)
+        val groupItem = menu.findItem(R.id.action_group_by)
+        groupItem?.setIcon(LibraryGroup.groupTypeDrawableRes(presenter.groupType))
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_group_by -> showGroupOptions()
+            R.id.display_options -> showDisplayOptions()
+            else -> return super.onOptionsItemSelected(item)
         }
-        return false
+        return true
+    }
+
+    override fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean) {
+        super.onNextLibraryUpdate(mangaMap, freshStart)
+        activity?.invalidateOptionsMenu()
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -96,6 +121,7 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
         if (type == ControllerChangeType.POP_ENTER) {
             updateStatsPage()
         }
+        binding.filterBottomSheet.root.sheetBehavior?.hide()
     }
 
     override fun deleteMangasFromLibrary() {
@@ -107,8 +133,10 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
         (previousController as? StatsDetailsController)?.updateLibrary()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {}
+    override fun showSheet() { }
+    override fun toggleSheet() {
+        closeTip()
+    }
     override fun toggleCategoryVisibility(position: Int) {}
-    override fun hasActiveFiltersFromPref(): Boolean = false
     override fun manageCategory(position: Int) {}
 }

@@ -515,7 +515,7 @@ open class LibraryController(
         }
     }
 
-    private fun showGroupOptions() {
+    internal fun showGroupOptions() {
         val groupItems = mutableListOf(BY_DEFAULT, BY_TAG, BY_SOURCE, BY_STATUS, BY_AUTHOR)
         if (presenter.isLoggedIntoTracking) {
             groupItems.add(BY_TRACK_STATUS)
@@ -547,14 +547,14 @@ open class LibraryController(
         }.show()
     }
 
-    private fun showDisplayOptions() {
-        if (displaySheet == null && !isSubClass) {
+    internal fun showDisplayOptions() {
+        if (displaySheet == null) {
             displaySheet = TabbedLibraryDisplaySheet(this)
             displaySheet?.show()
         }
     }
 
-    private fun closeTip() {
+    internal fun closeTip() {
         if (filterTooltip != null) {
             filterTooltip?.close()
             filterTooltip = null
@@ -753,10 +753,12 @@ open class LibraryController(
                 3 -> showGroupOptions()
                 2 -> showDisplayOptions()
                 1 -> if (canCollapseOrExpandCategory() != null) presenter.toggleAllCategoryVisibility()
-                else -> activityBinding?.searchToolbar?.menu?.performIdentifierAction(
-                    R.id.action_search,
-                    0,
-                )
+                else -> if (!isSubClass) {
+                    activityBinding?.searchToolbar?.menu?.performIdentifierAction(
+                        R.id.action_search,
+                        0,
+                    )
+                }
             }
             true
         }
@@ -832,14 +834,9 @@ open class LibraryController(
             (listOfYs.minOrNull() ?: binding.filterBottomSheet.filterBottomSheet.y) +
             hopperOffset +
             binding.libraryGridRecycler.recycler.translationY
-        val bottom = if (isSubClass) {
-            binding.filterBottomSheet.root.height + binding.jumperCategoryText.height + 12.dpToPx
-        } else {
-            insetBottom
-        }
-        if (view.height - bottom < binding.categoryHopperFrame.y) {
+        if (view.height - insetBottom < binding.categoryHopperFrame.y) {
             binding.jumperCategoryText.translationY =
-                -(binding.categoryHopperFrame.y - (view.height - bottom)) +
+                -(binding.categoryHopperFrame.y - (view.height - insetBottom)) +
                 binding.libraryGridRecycler.recycler.translationY
         } else {
             binding.jumperCategoryText.translationY = binding.libraryGridRecycler.recycler.translationY
@@ -1087,7 +1084,7 @@ open class LibraryController(
         super.onDestroyView(view)
     }
 
-    fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean = false) {
+    open fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean = false) {
         view ?: return
         destroyActionModeIfNeeded()
         if (mangaMap.isNotEmpty()) {
@@ -1257,7 +1254,7 @@ open class LibraryController(
             .setDuration(duration)
     }
 
-    internal fun showCategories(show: Boolean, closeSearch: Boolean = false, category: Int = -1) {
+    open fun showCategories(show: Boolean, closeSearch: Boolean = false, category: Int = -1) {
         binding.recyclerCover.isClickable = show
         binding.recyclerCover.isFocusable = show
         (activity as? MainActivity)?.apply {
@@ -1761,7 +1758,7 @@ open class LibraryController(
      * null = is in single category mode
      */
     fun canCollapseOrExpandCategory(): Boolean? {
-        if (singleCategory || !presenter.showAllCategories) {
+        if (singleCategory || !presenter.showAllCategories || isSubClass) {
             return null
         }
         return presenter.allCategoriesExpanded()
@@ -2146,14 +2143,5 @@ open class LibraryController(
             presenter.getLibrary()
             destroyActionModeIfNeeded()
         }
-    }
-
-    open fun hasActiveFiltersFromPref(): Boolean {
-        return preferences.filterDownloaded().get() > 0 ||
-            preferences.filterUnread().get() > 0 ||
-            preferences.filterCompleted().get() > 0 ||
-            preferences.filterTracked().get() > 0 ||
-            preferences.filterMangaType().get() > 0 ||
-            FilterBottomSheet.FILTER_TRACKER.isNotEmpty()
     }
 }

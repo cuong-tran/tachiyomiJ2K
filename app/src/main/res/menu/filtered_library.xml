@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:tint="@android:color/black"
+    tools:context=".MainActivity">
+
+    <item
+        android:id="@+id/action_group_by"
+        android:icon="@drawable/ic_label_outline_24dp"
+        android:title="@string/group_library_by"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/display_options"
+        android:icon="@drawable/ic_tune_24dp"
+        android:title="@string/display_options"
+        app:showAsAction="ifRoom" />
+</menu>
