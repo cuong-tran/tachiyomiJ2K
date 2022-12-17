@@ -231,6 +231,10 @@ class StatsDetailsController :
         }
     }
 
+    fun updateLibrary() {
+        presenter.libraryMangas = presenter.getLibrary()
+    }
+
     /** Set the toolbar to fully transparent or colored and translucent */
     private fun colorToolbar(isColor: Boolean) {
         if (isColor == toolbarIsColored) return

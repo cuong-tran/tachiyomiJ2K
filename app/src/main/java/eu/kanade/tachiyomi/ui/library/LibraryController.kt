@@ -2109,7 +2109,7 @@ open class LibraryController(
         startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
     }
 
-    private fun deleteMangasFromLibrary() {
+    open fun deleteMangasFromLibrary() {
         val mangas = selectedMangas.toList()
         presenter.removeMangaFromLibrary(mangas)
         destroyActionModeIfNeeded()

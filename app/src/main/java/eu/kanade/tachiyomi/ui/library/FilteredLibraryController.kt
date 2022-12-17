@@ -5,8 +5,12 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import androidx.core.view.isVisible
+import com.bluelinelabs.conductor.ControllerChangeHandler
+import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
+import eu.kanade.tachiyomi.ui.more.stats.details.StatsDetailsController
 import eu.kanade.tachiyomi.util.view.collapse
+import eu.kanade.tachiyomi.util.view.previousController
 
 class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bundle) {
 
@@ -85,6 +89,22 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
             return true
         }
         return false
+    }
+
+    override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
+        super.onChangeStarted(handler, type)
+        if (type == ControllerChangeType.POP_ENTER) {
+            updateStatsPage()
+        }
+    }
+
+    override fun deleteMangasFromLibrary() {
+        super.deleteMangasFromLibrary()
+        updateStatsPage()
+    }
+
+    fun updateStatsPage() {
+        (previousController as? StatsDetailsController)?.updateLibrary()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {}
