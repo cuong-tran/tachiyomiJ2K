@@ -160,9 +160,10 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
         binding.rearView.updatePadding(top = binding.categoryTitle.marginTop - 6)
         val category = item.category
 
-        val categoryName = if (category.isAlone && !category.isDynamic ||
-            (adapter.libraryListener as? FilteredLibraryController)?.filterCategories?.size == 1
-        ) {
+        val isFilteredList = (adapter.libraryListener as? FilteredLibraryController)?.let {
+            it.filterCategories.size == 1 && it.getTitle() == category.name
+        } ?: false
+        val categoryName = if ((category.isAlone || isFilteredList) && !category.isDynamic) {
             ""
         } else {
             category.name
