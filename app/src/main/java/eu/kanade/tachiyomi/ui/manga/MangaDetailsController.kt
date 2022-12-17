@@ -68,6 +68,7 @@ import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.ui.library.FilteredLibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.HingeSupportedController
@@ -1449,24 +1450,7 @@ class MangaDetailsController :
     }
 
     override fun localSearch(text: String) {
-        if (router.backstackSize < 2) {
-            return
-        }
-
-        when (val previousController = router.backstack[router.backstackSize - 2].controller) {
-            is LibraryController -> {
-                router.handleBack()
-                previousController.search(text)
-            }
-            is RecentsController -> {
-                // Manually navigate to LibraryController
-                router.handleBack()
-                (activity as? MainActivity)?.goToTab(R.id.nav_library)
-                val controller =
-                    router.getControllerWithTag(R.id.nav_library.toString()) as LibraryController
-                controller.search(text)
-            }
-        }
+        router.pushController(FilteredLibraryController(text, queryText = text).withFadeTransaction())
     }
 
     fun sourceSearch(text: String) {
@@ -1851,10 +1835,7 @@ class MangaDetailsController :
             sourceMenuItem?.isVisible = searchSource && presenter.source is CatalogueSource
             val context = view?.context ?: return false
             val localItem = menu?.findItem(R.id.action_local_search) ?: return true
-            localItem.isVisible = when (previousController) {
-                is LibraryController, is RecentsController -> true
-                else -> false
-            }
+            localItem.isVisible = previousController !is FilteredLibraryController
             val library = context.getString(R.string.library).lowercase(Locale.getDefault())
             localItem.title = context.getString(R.string.search_, library)
             sourceMenuItem?.title = context.getString(R.string.search_, presenter.source.name)
