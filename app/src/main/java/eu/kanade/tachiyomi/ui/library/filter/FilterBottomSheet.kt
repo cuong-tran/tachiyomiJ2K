@@ -307,19 +307,24 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         withIOContext {
             val libraryManga = controller?.presenter?.allLibraryItems ?: return@withIOContext
             checked = true
-            val types = mutableListOf<Int>()
-            if (libraryManga.any { it.manga.seriesType(sourceManager = sourceManager) == Manga.TYPE_MANHWA }) types.add(R.string.manhwa)
-            if (libraryManga.any { it.manga.seriesType(sourceManager = sourceManager) == Manga.TYPE_MANHUA }) types.add(R.string.manhua)
-            if (libraryManga.any { it.manga.seriesType(sourceManager = sourceManager) == Manga.TYPE_COMIC }) types.add(R.string.comic)
+            var types = mutableSetOf<Int>()
+            libraryManga.forEach {
+                when (it.manga.seriesType(sourceManager = sourceManager)) {
+                    Manga.TYPE_MANHWA, Manga.TYPE_WEBTOON -> types.add(R.string.manhwa)
+                    Manga.TYPE_MANHUA -> types.add(R.string.manhua)
+                    Manga.TYPE_COMIC -> types.add(R.string.comic)
+                }
+                if (types.size == 3) return@forEach
+            }
+            val sortedTypes = arrayOf(R.string.manhwa, R.string.manhua, R.string.comic)
+            types = types.sortedBy { sortedTypes.indexOf(it) }.toMutableSet()
             if (types.isNotEmpty()) {
                 launchUI {
                     val mangaType = inflate(R.layout.filter_tag_group) as FilterTagGroup
                     mangaType.setup(
                         this@FilterBottomSheet,
                         R.string.manga,
-                        types.first(),
-                        types.getOrNull(1),
-                        types.getOrNull(2),
+                        *types.toTypedArray(),
                     )
                     this@FilterBottomSheet.mangaType = mangaType
                     reorderFilters()

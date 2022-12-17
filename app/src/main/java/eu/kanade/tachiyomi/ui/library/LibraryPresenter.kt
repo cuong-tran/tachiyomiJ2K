@@ -362,7 +362,7 @@ class LibraryPresenter(
 
         if (filterMangaType > 0) {
             if (if (filterMangaType == Manga.TYPE_MANHWA) {
-                (filterMangaType != item.manga.seriesType(sourceManager = sourceManager) && filterMangaType != Manga.TYPE_WEBTOON)
+                item.manga.seriesType(sourceManager = sourceManager) !in arrayOf(filterMangaType, Manga.TYPE_WEBTOON)
             } else {
                     filterMangaType != item.manga.seriesType(sourceManager = sourceManager)
                 }
