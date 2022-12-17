@@ -110,7 +110,7 @@ jobs:
             tachiyomij2k-arm64-v8a-${{ env.VERSION_TAG }}.apk
             tachiyomij2k-armeabi-v7a-${{ env.VERSION_TAG }}.apk
             tachiyomij2k-x86-${{ env.VERSION_TAG }}.apk
-            tachiyomi-x86_64-${{ env.VERSION_TAG }}.apk
+            tachiyomij2k-x86_64-${{ env.VERSION_TAG }}.apk
           draft: true
           prerelease: false
         env:
