@@ -78,6 +78,8 @@ open class App : Application(), DefaultLifecycleObserver {
         setupAcra()
         setupNotificationChannels()
 
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+
         MangaCoverMetadata.load()
         preferences.nightMode()
             .asImmediateFlow { AppCompatDelegate.setDefaultNightMode(it) }
