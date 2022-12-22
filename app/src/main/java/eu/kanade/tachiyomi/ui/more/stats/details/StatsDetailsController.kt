@@ -642,7 +642,6 @@ class StatsDetailsController :
                         } else {
                             name
                         },
-                        queryText = if (selectedStat == Stats.TAG) name else null,
                         filterMangaType = when (selectedStat) {
                             Stats.SERIES_TYPE -> arrayOf(presenter.seriesTypeStats.indexOf(name) + 1)
                             else -> seriesTypes
@@ -669,6 +668,7 @@ class StatsDetailsController :
                             Stats.CATEGORY -> arrayOf(id!!.toInt())
                             else -> categories
                         },
+                        filterTags = if (selectedStat == Stats.TAG) arrayOf(name) else emptyArray(),
                         filterTrackingScore = if (selectedStat == Stats.SCORE) id?.toInt() ?: -1 else 0,
                         filterStartYear = if (selectedStat == Stats.START_YEAR) id?.toInt() ?: -1 else 0,
                     ).withFadeTransaction(),

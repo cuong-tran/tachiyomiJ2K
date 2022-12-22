@@ -1449,8 +1449,14 @@ class MangaDetailsController :
         }
     }
 
-    override fun localSearch(text: String) {
-        router.pushController(FilteredLibraryController(text, queryText = text).withFadeTransaction())
+    fun localSearch(text: String, isTag: Boolean) {
+        router.pushController(
+            FilteredLibraryController(
+                text,
+                queryText = text.takeIf { !isTag },
+                filterTags = arrayOf(text).takeIf { isTag } ?: emptyArray(),
+            ).withFadeTransaction(),
+        )
     }
 
     fun sourceSearch(text: String) {
@@ -1474,15 +1480,15 @@ class MangaDetailsController :
         }
     }
 
-    override fun globalSearch(text: String) {
+    fun globalSearch(text: String) {
         if (isNotOnline()) return
         router.pushController(GlobalSearchController(text).withFadeTransaction())
     }
 
-    override fun showFloatingActionMode(view: TextView, content: String?, searchSource: Boolean) {
+    override fun showFloatingActionMode(view: TextView, content: String?, isTag: Boolean) {
         finishFloatingActionMode()
         val previousController = previousController
-        if (!searchSource && previousController !is LibraryController && previousController !is RecentsController) {
+        if (!isTag && previousController !is LibraryController && previousController !is RecentsController) {
             globalSearch(content ?: view.text.toString())
             return
         }
@@ -1490,10 +1496,10 @@ class MangaDetailsController :
             FloatingMangaDetailsActionModeCallback(
                 content,
                 showCopy = view is Chip,
-                searchSource = searchSource,
+                searchSource = isTag,
             )
         } else {
-            FloatingMangaDetailsActionModeCallback(view, searchSource = searchSource)
+            FloatingMangaDetailsActionModeCallback(view, isTag = isTag)
         }
         if (view is Chip) {
             view.isActivated = true
@@ -1803,7 +1809,7 @@ class MangaDetailsController :
     inner class FloatingMangaDetailsActionModeCallback(
         private val textView: TextView?,
         private val showCopy: Boolean = true,
-        private val searchSource: Boolean = false,
+        private val isTag: Boolean = false,
         private val closeMode: Boolean = true,
     ) : android.view.ActionMode.Callback {
         constructor(
@@ -1827,19 +1833,19 @@ class MangaDetailsController :
             }
         override fun onCreateActionMode(mode: android.view.ActionMode?, menu: Menu?): Boolean {
             mode?.menuInflater?.inflate(
-                if (searchSource) R.menu.manga_details_tag else R.menu.manga_details_title,
+                if (isTag) R.menu.manga_details_tag else R.menu.manga_details_title,
                 menu,
             )
             menu?.findItem(R.id.action_copy)?.isVisible = showCopy
             var sourceMenuItem = menu?.findItem(R.id.action_source_search)
-            sourceMenuItem?.isVisible = searchSource && presenter.source is CatalogueSource
+            sourceMenuItem?.isVisible = isTag && presenter.source is CatalogueSource
             val context = view?.context ?: return false
             val localItem = menu?.findItem(R.id.action_local_search) ?: return true
             localItem.isVisible = previousController !is FilteredLibraryController
             val library = context.getString(R.string.library).lowercase(Locale.getDefault())
             localItem.title = context.getString(R.string.search_, library)
             sourceMenuItem?.title = context.getString(R.string.search_, presenter.source.name)
-            if (searchSource) {
+            if (isTag) {
                 if (previousController is BrowseSourceController) {
                     menu.removeItem(R.id.action_source_search)
                     sourceMenuItem = menu.add(0, R.id.action_source_search, 1, sourceMenuItem?.title)
@@ -1862,7 +1868,7 @@ class MangaDetailsController :
                 R.id.action_copy -> copyToClipboard(text, null)
                 R.id.action_global_search -> globalSearch(text)
                 R.id.action_source_search -> sourceSearch(text)
-                R.id.action_local_search -> localSearch(text)
+                R.id.action_local_search -> localSearch(text, isTag)
                 else -> return false
             }
             if (closeMode) {

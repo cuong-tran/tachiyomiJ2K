@@ -523,7 +523,7 @@ class MangaHeaderHolder(
                     chip.setTextColor(textColor)
                     chip.text = genreText
                     chip.setOnClickListener {
-                        adapter.delegate.showFloatingActionMode(chip, searchSource = true)
+                        adapter.delegate.showFloatingActionMode(chip, isTag = true)
                     }
                     chip.setOnLongClickListener {
                         adapter.delegate.copyToClipboard(genreText, genreText)

@@ -435,6 +435,11 @@ class LibraryPresenter(
         if (categories.isNotEmpty()) {
             if (item.manga.category !in categories) return false
         }
+        val tags = customFilters.filterTags
+        if (tags.isNotEmpty()) {
+            val genres = item.manga.getGenres() ?: return false
+            if (tags.none { tag -> genres.any { it.equals(tag, true) } }) return false
+        }
         return true
     }
 

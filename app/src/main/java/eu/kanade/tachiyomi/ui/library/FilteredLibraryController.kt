@@ -29,6 +29,8 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
         private set
     var filterLanguages = emptyArray<String>()
         private set
+    var filterTags = emptyArray<String>()
+        private set
     var filterTrackingScore: Int = 0
         private set
     var filterStartYear: Int = 0
@@ -52,6 +54,7 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
         filterMangaType: Array<Int> = emptyArray(),
         filterLanguages: Array<String> = emptyArray(),
         filterCategories: Array<Int> = emptyArray(),
+        filterTags: Array<String> = emptyArray(),
         filterTracked: Int = 0,
         filterTrackerName: String? = null,
         filterTrackingScore: Int = 0,
@@ -65,6 +68,7 @@ class FilteredLibraryController(bundle: Bundle? = null) : LibraryController(bund
         this.filterTracked = filterTracked
         this.filterMangaType = filterMangaType
         this.filterCategories = filterCategories
+        this.filterTags = filterTags
         if (filterTracked != 0 && filterTrackerName != null) {
             FilterBottomSheet.FILTER_TRACKER = filterTrackerName
         }
