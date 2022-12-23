@@ -208,7 +208,7 @@ object Notifications {
             NotificationChannel(
                 CHANNEL_UPDATED,
                 context.getString(R.string.update_completed),
-                NotificationManager.IMPORTANCE_DEFAULT,
+                NotificationManager.IMPORTANCE_HIGH,
             ).apply {
                 setShowBadge(false)
             },

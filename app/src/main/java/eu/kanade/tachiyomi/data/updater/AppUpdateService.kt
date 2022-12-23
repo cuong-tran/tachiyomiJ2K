@@ -22,12 +22,15 @@ import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
+import eu.kanade.tachiyomi.util.system.launchNow
 import eu.kanade.tachiyomi.util.system.localeContext
+import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.internal.http2.ErrorCode
@@ -184,8 +187,7 @@ class AppUpdateService : Service() {
                 data.copyTo(packageInSession)
             }
             if (notifyOnInstall) {
-                val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-                prefs.edit {
+                PreferenceManager.getDefaultSharedPreferences(this).edit {
                     putBoolean(NOTIFY_ON_INSTALL_KEY, true)
                 }
             }
@@ -199,10 +201,29 @@ class AppUpdateService : Service() {
             val statusReceiver = pendingIntent.intentSender
             session.commit(statusReceiver)
             data.close()
+
+            val hasNotification by lazy {
+                notificationManager.activeNotifications.any { it.id == Notifications.ID_UPDATER }
+            }
+            launchNow {
+                delay(5000)
+                // If the package manager crashes for whatever reason (china phone) set a timeout
+                // and let the user manually install
+                if (packageInstaller.getSessionInfo(sessionId) == null && !hasNotification) {
+                    notifier.onDownloadFinished(file.getUriCompat(this@AppUpdateService))
+                    PreferenceManager.getDefaultSharedPreferences(this@AppUpdateService).edit {
+                        remove(NOTIFY_ON_INSTALL_KEY)
+                    }
+                }
+            }
         } catch (error: Exception) {
             // Either install package can't be found (probably bots) or there's a security exception
             // with the download manager. Nothing we can workaround.
             toast(error.message)
+            notifier.onDownloadFinished(file.getUriCompat(this))
+            PreferenceManager.getDefaultSharedPreferences(this).edit {
+                remove(NOTIFY_ON_INSTALL_KEY)
+            }
         }
     }
 
@@ -222,7 +243,6 @@ class AppUpdateService : Service() {
         /**
          * Returns the status of the service.
          *
-         * @param context the application context.
          * @return true if the service is running, false otherwise.
          */
         fun isRunning(): Boolean = instance != null

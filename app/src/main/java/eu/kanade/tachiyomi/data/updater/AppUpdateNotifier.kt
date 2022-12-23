@@ -230,6 +230,7 @@ internal class AppUpdateNotifier(private val context: Context) {
 
     fun onInstallError(uri: Uri) {
         with(notificationBuilder) {
+            setContentTitle(context.getString(R.string.app_name))
             setContentText(context.getString(R.string.could_not_install_update))
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setOnlyAlertOnce(false)
