@@ -6,7 +6,6 @@ import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Handler
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -350,18 +349,16 @@ class NotificationReceiver : BroadcastReceiver() {
             groupId: Int? =
                 null,
         ) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                val groupKey = context.notificationManager.activeNotifications.find {
-                    it.id == notificationId
-                }?.groupKey
-                if (groupId != null && groupId != 0 && groupKey != null && groupKey.isNotEmpty()) {
-                    val notifications = context.notificationManager.activeNotifications.filter {
-                        it.groupKey == groupKey
-                    }
-                    if (notifications.size == 2) {
-                        context.notificationManager.cancel(groupId)
-                        return
-                    }
+            val groupKey = context.notificationManager.activeNotifications.find {
+                it.id == notificationId
+            }?.groupKey
+            if (groupId != null && groupId != 0 && groupKey != null && groupKey.isNotEmpty()) {
+                val notifications = context.notificationManager.activeNotifications.filter {
+                    it.groupKey == groupKey
+                }
+                if (notifications.size == 2) {
+                    context.notificationManager.cancel(groupId)
+                    return
                 }
             }
             context.notificationManager.cancel(notificationId)
