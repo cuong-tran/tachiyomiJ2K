@@ -53,8 +53,8 @@ object ImageUtil {
     }
 
     fun findImageType(stream: InputStream): ImageType? {
-        try {
-            return when (getImageType(stream)?.format) {
+        return try {
+            when (getImageType(stream)?.format) {
                 Format.Avif -> ImageType.AVIF
                 Format.Gif -> ImageType.GIF
                 Format.Heif -> ImageType.HEIF
@@ -65,8 +65,8 @@ object ImageUtil {
                 else -> null
             }
         } catch (e: Exception) {
+            null
         }
-        return null
     }
 
     fun resizeBitMapDrawable(drawable: Drawable, resources: Resources?, size: Int): Drawable? {

@@ -492,7 +492,7 @@ class PagerPageHolder(
             .fromCallable {
                 val stream = streamFn().buffered(16)
 
-                val stream2 = if (extraPage != null) streamFn2?.invoke()?.buffered(16) else null
+                val stream2 = streamFn2?.invoke()?.buffered(16)
                 openStream = this@PagerPageHolder.mergeOrSplitPages(stream, stream2)
                 ImageUtil.isAnimatedAndSupported(stream) ||
                     if (stream2 != null) ImageUtil.isAnimatedAndSupported(stream2) else false
@@ -781,16 +781,6 @@ class PagerPageHolder(
             return supportHingeIfThere(imageStream)
         }
         if (page.fullPage == true) return supportHingeIfThere(imageStream)
-        if (ImageUtil.isAnimatedAndSupported(imageStream)) {
-            page.fullPage = true
-            splitDoublePages()
-            return imageStream
-        } else if (ImageUtil.isAnimatedAndSupported(imageStream2)) {
-            page.isolatedPage = true
-            extraPage?.fullPage = true
-            splitDoublePages()
-            return supportHingeIfThere(imageStream)
-        }
         val imageBytes = imageStream.readBytes()
         val imageBitmap = try {
             BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
@@ -800,7 +790,7 @@ class PagerPageHolder(
             page.fullPage = true
             splitDoublePages()
             Timber.e("Cannot combine pages ${e.message}")
-            return imageBytes.inputStream()
+            return supportHingeIfThere(imageBytes.inputStream())
         }
         scope?.launchUI { progressBar.setProgress(96) }
         val height = imageBitmap.height
@@ -824,7 +814,7 @@ class PagerPageHolder(
             page.isolatedPage = true
             splitDoublePages()
             Timber.e("Cannot combine pages ${e.message}")
-            return imageBytes.inputStream()
+            return supportHingeIfThere(imageBytes.inputStream())
         }
         scope?.launchUI { progressBar.setProgress(97) }
         val height2 = imageBitmap2.height
