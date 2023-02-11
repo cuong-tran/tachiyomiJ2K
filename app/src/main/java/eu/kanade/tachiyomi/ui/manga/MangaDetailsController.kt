@@ -1213,7 +1213,7 @@ class MangaDetailsController :
         if (isNotOnline()) return
         val source = presenter.source as? HttpSource ?: return
         val url = try {
-            source.mangaDetailsRequest(presenter.manga).url.toString()
+            source.getMangaUrl(presenter.manga)
         } catch (e: Exception) {
             return
         }
