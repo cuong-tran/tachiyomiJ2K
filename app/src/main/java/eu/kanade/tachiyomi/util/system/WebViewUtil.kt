@@ -9,7 +9,7 @@ import android.webkit.WebView
 import timber.log.Timber
 
 object WebViewUtil {
-    const val MINIMUM_WEBVIEW_VERSION = 95
+    const val MINIMUM_WEBVIEW_VERSION = 105
 
     fun supportsWebView(context: Context): Boolean {
         try {
