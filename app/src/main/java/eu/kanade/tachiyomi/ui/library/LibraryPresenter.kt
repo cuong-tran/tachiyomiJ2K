@@ -283,6 +283,8 @@ class LibraryPresenter(
 
         val filterMangaType = preferences.filterMangaType().get()
 
+        val filterBookmarked = preferences.filterBookmarked().get()
+
         val showEmptyCategoriesWhileFiltering = preferences.showEmptyCategoriesWhileFiltering().get()
 
         val filterTrackers = FilterBottomSheet.FILTER_TRACKER
@@ -306,6 +308,7 @@ class LibraryPresenter(
                             filterCompleted,
                             filterTracked,
                             filterMangaType,
+                            filterBookmarked,
                             filterTrackers,
                         )
                     }
@@ -325,6 +328,7 @@ class LibraryPresenter(
                 filterCompleted,
                 filterTracked,
                 filterMangaType,
+                filterBookmarked,
                 filterTrackers,
             )
             if (matches) {
@@ -347,6 +351,7 @@ class LibraryPresenter(
         filterCompleted: Int,
         filterTracked: Int,
         filterMangaType: Int,
+        filterBookmarked: Int,
         filterTrackers: String,
     ): Boolean {
         (controller as? FilteredLibraryController)?.let {
@@ -359,6 +364,9 @@ class LibraryPresenter(
         // Filter for unread chapters
         if (filterUnread == 3 && !(item.manga.unread > 0 && !item.manga.hasRead)) return false
         if (filterUnread == 4 && !(item.manga.unread > 0 && item.manga.hasRead)) return false
+
+        if (filterBookmarked == STATE_INCLUDE && item.manga.bookmarkCount == 0) return false
+        if (filterBookmarked == STATE_EXCLUDE && item.manga.bookmarkCount > 0) return false
 
         if (filterMangaType > 0) {
             if (if (filterMangaType == Manga.TYPE_MANHWA) {

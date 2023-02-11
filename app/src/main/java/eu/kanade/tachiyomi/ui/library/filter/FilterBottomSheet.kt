@@ -71,6 +71,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private lateinit var completed: FilterTagGroup
 
+    private lateinit var bookmarked: FilterTagGroup
+
     private var tracked: FilterTagGroup? = null
 
     private var trackers: FilterTagGroup? = null
@@ -89,6 +91,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         list.add(unread)
         list.add(downloaded)
         list.add(completed)
+        list.add(bookmarked)
         if (hasTracking) {
             tracked?.let { list.add(it) }
         }
@@ -273,6 +276,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             preferences.filterCompleted().get() > 0 ||
             preferences.filterTracked().get() > 0 ||
             preferences.filterMangaType().get() > 0 ||
+            preferences.filterBookmarked().get() > 0 ||
             FILTER_TRACKER.isNotEmpty()
     }
 
@@ -288,6 +292,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         unread = inflate(R.layout.filter_tag_group) as FilterTagGroup
         unread.setup(this, R.string.unread, R.string.read)
+
+        bookmarked = inflate(R.layout.filter_tag_group) as FilterTagGroup
+        bookmarked.setup(this, R.string.bookmarked, R.string.not_bookmarked)
 
         if (hasTracking) {
             tracked = inflate(R.layout.filter_tag_group) as FilterTagGroup
@@ -375,10 +382,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         withContext(Dispatchers.Main) {
             downloaded.setState(preferences.filterDownloaded())
             completed.setState(preferences.filterCompleted())
+            bookmarked.setState(preferences.filterBookmarked())
             val unreadP = preferences.filterUnread().get()
             if (unreadP <= 2) {
                 unread.state = unreadP - 1
-            } else if (unreadP >= 3) {
+            } else {
                 unreadProgress.state = unreadP - 3
             }
             tracked?.setState(preferences.filterTracked())
@@ -395,7 +403,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 filterItems.add(it)
             }
         }
-        listOfNotNull(unreadProgress, unread, downloaded, completed, mangaType, tracked)
+        listOfNotNull(unreadProgress, unread, downloaded, completed, mangaType, bookmarked, tracked)
             .forEach {
                 if (!filterItems.contains(it)) {
                     filterItems.add(it)
@@ -414,6 +422,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             Filters.Downloaded -> downloaded
             Filters.Completed -> completed
             Filters.SeriesType -> mangaType
+            Filters.Bookmarked -> bookmarked
             Filters.Tracked -> if (hasTracking) tracked else null
             else -> null
         }
@@ -442,6 +451,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 }
                 downloaded -> preferences.filterDownloaded()
                 completed -> preferences.filterCompleted()
+                bookmarked -> preferences.filterBookmarked()
                 tracked -> preferences.filterTracked()
                 mangaType -> {
                     val newIndex = when (view.nameOf(index)) {
@@ -479,10 +489,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         binding.groupBy.setIconResource(LibraryGroup.groupTypeDrawableRes(groupType))
     }
 
-    fun clearFilters() {
+    private fun clearFilters() {
         preferences.filterDownloaded().set(0)
         preferences.filterUnread().set(0)
         preferences.filterCompleted().set(0)
+        preferences.filterBookmarked().set(0)
         preferences.filterTracked().set(0)
         preferences.filterMangaType().set(0)
         FILTER_TRACKER = ""
@@ -536,6 +547,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         Downloaded('d', R.string.downloaded),
         Completed('c', R.string.status),
         SeriesType('m', R.string.series_type),
+        Bookmarked('b', R.string.bookmarked),
         Tracked('t', R.string.tracked),
         ;
 
@@ -546,6 +558,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 Downloaded,
                 Completed,
                 SeriesType,
+                Bookmarked,
                 Tracked,
             ).joinToString("") { it.value.toString() }
 
