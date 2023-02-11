@@ -380,7 +380,7 @@ fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
 }
 
 fun Context.openInBrowser(url: String, @ColorInt toolbarColor: Int? = null, forceBrowser: Boolean = false) {
-    this.openInBrowser(url.toUri(), toolbarColor)
+    this.openInBrowser(url.toUri(), toolbarColor, forceBrowser)
 }
 
 fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null, forceBrowser: Boolean = false) {
@@ -394,8 +394,10 @@ fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null, forceBr
             .build()
         if (forceBrowser) {
             val packages = getCustomTabsPackages().maxByOrNull { it.preferredOrder }
-            val processName = packages?.activityInfo?.processName ?: return
-            intent.intent.`package` = processName
+            val processName = packages?.activityInfo?.processName
+            if (processName == null) {
+                intent.intent.`package` = processName
+            }
         }
         intent.launchUrl(this, uri)
     } catch (e: Exception) {
