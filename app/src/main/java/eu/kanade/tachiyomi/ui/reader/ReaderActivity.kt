@@ -223,6 +223,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             field = value
             (viewer as? PagerViewer)?.config?.hingeGapSize = value
         }
+    val decimalFormat by lazy {
+        DecimalFormat(
+            "#.###",
+            DecimalFormatSymbols()
+                .apply { decimalSeparator = '.' },
+        )
+    }
 
     companion object {
 
@@ -1239,7 +1246,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         viewer?.setChapters(viewerChapters)
         intentPageNumber?.let { moveToPageIndex(it) }
         intentPageNumber = null
-        binding.toolbar.subtitle = viewerChapters.currChapter.chapter.name
+        binding.toolbar.subtitle = if (presenter.manga!!.hideChapterTitle(preferences)) {
+            val number = decimalFormat.format(viewerChapters.currChapter.chapter.chapter_number.toDouble())
+            getString(R.string.chapter_, number)
+        } else {
+            viewerChapters.currChapter.chapter.name
+        }
         if (viewerChapters.nextChapter == null && viewerChapters.prevChapter == null) {
             binding.readerNav.leftChapter.isVisible = false
             binding.readerNav.rightChapter.isVisible = false
