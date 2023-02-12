@@ -39,6 +39,7 @@ import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
@@ -948,6 +949,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     private fun pressingBack() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val insets = window.decorView.rootWindowInsets
+            if (insets?.isVisible(WindowInsetsCompat.Type.ime()) == true) {
+                val vic = WindowInsetsControllerCompat(window, binding.root)
+                vic.hide(WindowInsetsCompat.Type.ime())
+                return
+            }
+        }
         if (actionMode != null) {
             actionMode?.finish()
             return
