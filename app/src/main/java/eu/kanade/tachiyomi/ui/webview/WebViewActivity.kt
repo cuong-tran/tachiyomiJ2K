@@ -72,7 +72,6 @@ open class WebViewActivity : BaseWebViewActivity() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     invalidateOptionsMenu()
-                    title = view?.title
                     binding.swipeRefresh.isEnabled = true
                     binding.swipeRefresh.isRefreshing = false
                 }

@@ -137,6 +137,11 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                     }
                     super.onProgressChanged(view, newProgress)
                 }
+
+                override fun onReceivedTitle(view: WebView?, title: String?) {
+                    super.onReceivedTitle(view, title)
+                    this@BaseWebViewActivity.title = title
+                }
             }
             val marginB = binding.webview.marginBottom
             ViewCompat.setOnApplyWindowInsetsListener(binding.swipeRefresh) { v, insets ->
