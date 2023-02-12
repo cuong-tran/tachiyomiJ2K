@@ -82,7 +82,7 @@ class Shikimori(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun add(track: Track): Track {
         track.score = DEFAULT_SCORE.toFloat()
         track.status = DEFAULT_STATUS
-        updateNewTrackInfo(track, PLAN_TO_READ)
+        updateNewTrackInfo(track)
         return api.addLibManga(track, getUsername())
     }
     override suspend fun bind(track: Track): Track {

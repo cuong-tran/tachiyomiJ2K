@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.network
 
+import coil.network.HttpException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -59,26 +60,25 @@ fun Call.asObservable(): Observable<Response> {
 }
 
 // Based on https://github.com/gildor/kotlin-coroutines-okhttp
-suspend fun Call.await(): Response {
+private suspend fun Call.await(callStack: Array<StackTraceElement>): Response {
     return suspendCancellableCoroutine { continuation ->
-        enqueue(
+        val callback =
             object : Callback {
                 override fun onResponse(call: Call, response: Response) {
-                    if (!response.isSuccessful) {
-                        continuation.resumeWithException(Exception("HTTP error ${response.code}"))
-                        return
+                    continuation.resume(response) {
+                        response.body.close()
                     }
-
-                    continuation.resume(response)
                 }
 
                 override fun onFailure(call: Call, e: IOException) {
                     // Don't bother with resuming the continuation if it is already cancelled.
                     if (continuation.isCancelled) return
-                    continuation.resumeWithException(e)
+                    val exception = IOException(e.message, e).apply { stackTrace = callStack }
+                    continuation.resumeWithException(exception)
                 }
-            },
-        )
+            }
+
+        enqueue(callback)
 
         continuation.invokeOnCancellation {
             try {
@@ -88,6 +88,21 @@ suspend fun Call.await(): Response {
             }
         }
     }
+}
+
+suspend fun Call.await(): Response {
+    val callStack = Exception().stackTrace.run { copyOfRange(1, size) }
+    return await(callStack)
+}
+
+suspend fun Call.awaitSuccess(): Response {
+    val callStack = Exception().stackTrace.run { copyOfRange(1, size) }
+    val response = await(callStack)
+    if (!response.isSuccessful) {
+        response.close()
+        throw HttpException(response.code).apply { stackTrace = callStack }
+    }
+    return response
 }
 
 fun Call.asObservableSuccess(): Observable<Response> {
@@ -121,3 +136,5 @@ inline fun <reified T> Response.parseAs(): T {
         return json.decodeFromString(responseBody)
     }
 }
+
+class HttpException(val code: Int) : IllegalStateException("HTTP error $code")

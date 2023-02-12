@@ -22,6 +22,8 @@ interface EnhancedTrackService {
      */
     fun getAcceptedSources(): List<String>
 
+    fun loginNoop()
+
     /**
      * match is similar to TrackService.search, but only return zero or one match.
      */
@@ -30,10 +32,16 @@ interface EnhancedTrackService {
     /**
      * Checks whether the provided source/track/manga triplet is from this TrackService
      */
-    fun isTrackFrom(track: Track, manga: Manga, source: Source?): Boolean
+    fun isTrackFrom(track: Track, manga: Manga, source: Source?): Boolean =
+        track.tracking_url == manga.url && source?.let { accept(it) } == true
 
     /**
      * Migrates the given track for the manga to the newSource, if possible
      */
-    fun migrateTrack(track: Track, manga: Manga, newSource: Source): Track?
+    fun migrateTrack(track: Track, manga: Manga, newSource: Source): Track? =
+        if (accept(newSource)) {
+            track.also { track.tracking_url = manga.url }
+        } else {
+            null
+        }
 }

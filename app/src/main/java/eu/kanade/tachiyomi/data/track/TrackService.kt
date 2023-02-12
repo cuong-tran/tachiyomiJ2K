@@ -109,7 +109,7 @@ abstract class TrackService(val id: Int) {
     }
 }
 
-suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
+suspend fun TrackService.updateNewTrackInfo(track: Track) {
     val manga = db.getManga(track.manga_id).executeOnIO()
     val allRead = manga?.isOneShotOrCompleted(db) == true &&
         db.getChapters(track.manga_id).executeOnIO().all { it.read }
@@ -121,7 +121,7 @@ suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
         it == 0f && allRead
     } ?: 1f
     if (track.last_chapter_read == 0f) {
-        track.status = planningStatus
+        track.status = planningStatus()
     }
     if (allRead) {
         track.status = completedStatus()

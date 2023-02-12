@@ -620,6 +620,8 @@
     <string name="shikimori" translatable="false">Shikimori</string>
     <string name="manga_updates" translatable="false">MangaUpdates</string>
     <string name="komga" translatable="false">Komga</string>
+    <string name="kavita" translatable="false">Kavita</string>
+    <string name="suwayomi" translatable="false">Suwayomi</string>
     <string name="update_tracking_scoring_type">Update %1$s\'s scoring type</string>
     <string name="scoring_type_updated">Scoring type updated</string>
     <string name="could_not_update_scoring_">Could not update scoring type: %1$s</string>

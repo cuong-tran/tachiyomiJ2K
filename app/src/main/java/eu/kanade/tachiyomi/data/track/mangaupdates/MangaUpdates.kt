@@ -82,7 +82,7 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun add(track: Track): Track {
         track.score = DEFAULT_SCORE.toFloat()
         track.status = DEFAULT_STATUS
-        updateNewTrackInfo(track, WISH_LIST)
+        updateNewTrackInfo(track)
         api.addSeriesToList(track)
         return track
     }

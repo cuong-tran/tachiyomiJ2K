@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
-import eu.kanade.tachiyomi.network.await
+import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.PkceUtil
 import eu.kanade.tachiyomi.util.system.withIOContext
@@ -44,7 +44,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 .add("grant_type", "authorization_code")
                 .build()
             client.newCall(POST("$baseOAuthUrl/token", body = formBody))
-                .await()
+                .awaitSuccess()
                 .parseAs()
         }
     }
@@ -56,7 +56,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 .get()
                 .build()
             authClient.newCall(request)
-                .await()
+                .awaitSuccess()
                 .parseAs<JsonObject>()
                 .let { it["name"]!!.jsonPrimitive.content }
         }
@@ -70,7 +70,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 .appendQueryParameter("nsfw", "true")
                 .build()
             authClient.newCall(GET(url.toString()))
-                .await()
+                .awaitSuccess()
                 .parseAs<JsonObject>()
                 .let {
                     it["data"]!!.jsonArray
@@ -92,7 +92,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 .appendQueryParameter("fields", "id,title,synopsis,num_chapters,main_picture,status,media_type,start_date")
                 .build()
             authClient.newCall(GET(url.toString()))
-                .await()
+                .awaitSuccess()
                 .parseAs<JsonObject>()
                 .let {
                     val obj = it.jsonObject
@@ -135,7 +135,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 .put(formBodyBuilder.build())
                 .build()
             authClient.newCall(request)
-                .await()
+                .awaitSuccess()
                 .parseAs<JsonObject>()
                 .let { parseMangaItem(it, track) }
         }
@@ -148,7 +148,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 .appendQueryParameter("fields", "num_chapters,my_list_status{start_date,finish_date}")
                 .build()
             authClient.newCall(GET(uri.toString()))
-                .await()
+                .awaitSuccess()
                 .parseAs<JsonObject>()
                 .let { obj ->
                     track.total_chapters = obj["num_chapters"]!!.jsonPrimitive.int
@@ -200,7 +200,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 .get()
                 .build()
             authClient.newCall(request)
-                .await()
+                .awaitSuccess()
                 .parseAs()
         }
     }
@@ -250,7 +250,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                     .url(mangaUrl(track.media_id).toString())
                     .delete()
                     .build()
-                authClient.newCall(request).await()
+                authClient.newCall(request).awaitSuccess()
                 true
             } catch (e: Exception) {
                 Timber.w(e)

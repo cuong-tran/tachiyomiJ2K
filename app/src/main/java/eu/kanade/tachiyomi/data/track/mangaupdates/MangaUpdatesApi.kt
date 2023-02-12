@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.network.DELETE
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.PUT
-import eu.kanade.tachiyomi.network.await
+import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.parseAs
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -48,7 +48,7 @@ class MangaUpdatesApi(
                     url = "$baseUrl/v1/lists/series/${track.media_id}",
                 ),
             )
-                .await()
+                .awaitSuccess()
                 .parseAs<ListItem>()
 
         val rating = getSeriesRating(track)
@@ -64,7 +64,7 @@ class MangaUpdatesApi(
                 body = body.toString().toRequestBody(contentType),
             ),
         )
-            .await()
+            .awaitSuccess()
     }
 
     suspend fun removeSeriesFromList(track: Track): Boolean {
@@ -77,7 +77,7 @@ class MangaUpdatesApi(
                 body = body.toString().toRequestBody(contentType),
             ),
         )
-            .await()
+            .awaitSuccess()
             .let { return it.code == 200 }
     }
 
@@ -89,7 +89,7 @@ class MangaUpdatesApi(
                 body = body.toString().toRequestBody(contentType),
             ),
         )
-            .await()
+            .awaitSuccess()
 
         updateSeriesRating(track)
     }
@@ -113,7 +113,7 @@ class MangaUpdatesApi(
                     url = "$baseUrl/v1/series/${track.media_id}/rating",
                 ),
             )
-                .await()
+                .awaitSuccess()
                 .parseAs<Rating>()
         } catch (e: Exception) {
             null
@@ -131,14 +131,14 @@ class MangaUpdatesApi(
                     body = body.toString().toRequestBody(contentType),
                 ),
             )
-                .await()
+                .awaitSuccess()
         } else {
             authClient.newCall(
                 DELETE(
                     url = "$baseUrl/v1/series/${track.media_id}/rating",
                 ),
             )
-                .await()
+                .awaitSuccess()
         }
     }
 
@@ -159,7 +159,7 @@ class MangaUpdatesApi(
                 body = body.toString().toRequestBody(contentType),
             ),
         )
-            .await()
+            .awaitSuccess()
             .parseAs<JsonObject>()
             .let { obj ->
                 obj["results"]?.jsonArray?.map { element ->
@@ -180,7 +180,7 @@ class MangaUpdatesApi(
                 body = body.toString().toRequestBody(contentType),
             ),
         )
-            .await()
+            .awaitSuccess()
             .parseAs<JsonObject>()
             .let { obj ->
                 try {

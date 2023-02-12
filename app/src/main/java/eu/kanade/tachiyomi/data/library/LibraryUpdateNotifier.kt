@@ -29,7 +29,6 @@ import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import okhttp3.internal.toImmutableMap
 import uy.kohesive.injekt.injectLazy
 import java.util.ArrayList
 
@@ -166,7 +165,7 @@ class LibraryUpdateNotifier(private val context: Context) {
      */
     fun showResultNotification(newUpdates: Map<LibraryManga, Array<Chapter>>) {
         // create a copy of the list since it will be cleared by the time it is used
-        val updates = newUpdates.toImmutableMap()
+        val updates = newUpdates.toMap()
         GlobalScope.launch {
             val notifications = ArrayList<Pair<Notification, Int>>()
             if (!preferences.hideNotificationContent()) {
