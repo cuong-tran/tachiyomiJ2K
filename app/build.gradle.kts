@@ -164,7 +164,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
     implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
     implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:$okhttpVersion")
-    implementation("com.squareup.okio:okio:3.0.0")
+    implementation("com.squareup.okio:okio:3.3.0")
 
     // Chucker
     val chuckerVersion = "3.5.2"
@@ -175,9 +175,10 @@ dependencies {
     implementation(kotlin("reflect", version = AndroidVersions.kotlin))
 
     // JSON
-    val kotlinSerialization =  "1.3.3"
+    val kotlinSerialization =  "1.4.0"
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinSerialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${kotlinSerialization}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-okio:${kotlinSerialization}")
 
     // JavaScript engine
     implementation("app.cash.quickjs:quickjs-android:0.9.2")
@@ -188,7 +189,7 @@ dependencies {
     implementation("com.github.junrar:junrar:7.5.0")
 
     // HTML parser
-    implementation("org.jsoup:jsoup:1.14.3")
+    implementation("org.jsoup:jsoup:1.15.3")
 
     // Job scheduling
     implementation("androidx.work:work-runtime-ktx:2.6.0")

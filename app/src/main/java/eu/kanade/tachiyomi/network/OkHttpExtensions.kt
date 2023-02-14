@@ -1,9 +1,12 @@
 package eu.kanade.tachiyomi.network
 
-import coil.network.HttpException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.okio.decodeFromBufferedSource
+import kotlinx.serialization.serializer
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -14,10 +17,9 @@ import rx.Observable
 import rx.Producer
 import rx.Subscription
 import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.fullType
+import uy.kohesive.injekt.api.get
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 val jsonMime = "application/json; charset=utf-8".toMediaType()
@@ -38,9 +40,9 @@ fun Call.asObservable(): Observable<Response> {
                         subscriber.onNext(response)
                         subscriber.onCompleted()
                     }
-                } catch (error: Exception) {
+                } catch (e: Exception) {
                     if (!subscriber.isUnsubscribed) {
-                        subscriber.onError(error)
+                        subscriber.onError(e)
                     }
                 }
             }
@@ -60,6 +62,7 @@ fun Call.asObservable(): Observable<Response> {
 }
 
 // Based on https://github.com/gildor/kotlin-coroutines-okhttp
+@OptIn(ExperimentalCoroutinesApi::class)
 private suspend fun Call.await(callStack: Array<StackTraceElement>): Response {
     return suspendCancellableCoroutine { continuation ->
         val callback =
@@ -109,18 +112,18 @@ fun Call.asObservableSuccess(): Observable<Response> {
     return asObservable().doOnNext { response ->
         if (!response.isSuccessful) {
             response.close()
-            throw Exception("HTTP error ${response.code}")
+            throw HttpException(response.code)
         }
     }
 }
 
-fun OkHttpClient.newCallWithProgress(request: Request, listener: ProgressListener): Call {
+fun OkHttpClient.newCachelessCallWithProgress(request: Request, listener: ProgressListener): Call {
     val progressClient = newBuilder()
         .cache(null)
         .addNetworkInterceptor { chain ->
             val originalResponse = chain.proceed(chain.request())
             originalResponse.newBuilder()
-                .body(ProgressResponseBody(originalResponse.body!!, listener))
+                .body(ProgressResponseBody(originalResponse.body, listener))
                 .build()
         }
         .build()
@@ -129,11 +132,13 @@ fun OkHttpClient.newCallWithProgress(request: Request, listener: ProgressListene
 }
 
 inline fun <reified T> Response.parseAs(): T {
-    // Avoiding Injekt.get<Json>() due to compiler issues
-    val json = Injekt.getInstance<Json>(fullType<Json>().type)
-    this.use {
-        val responseBody = it.body?.string().orEmpty()
-        return json.decodeFromString(responseBody)
+    return decodeFromJsonResponse(serializer(), this)
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+fun <T> decodeFromJsonResponse(deserializer: DeserializationStrategy<T>, response: Response): T {
+    return response.body.source().use {
+        Injekt.get<Json>().decodeFromBufferedSource(deserializer, it)
     }
 }
 

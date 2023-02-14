@@ -19,7 +19,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
     override fun initGeneralPreferences() {
         with(binding) {
             scaleType.bindToPreference(preferences.imageScaleType(), 1) {
-                val mangaViewer = (context as? ReaderActivity)?.presenter?.getMangaReadingMode() ?: 0
+                val mangaViewer = (context as? ReaderActivity)?.viewModel?.getMangaReadingMode() ?: 0
                 val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)
                 updatePagedGroup(!isWebtoonView)
                 landscapeZoom.isVisible = it == SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE - 1
@@ -33,7 +33,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             pagerInvert.bindToPreference(preferences.pagerNavInverted())
             extendPastCutout.bindToPreference(preferences.pagerCutoutBehavior())
             pageLayout.bindToPreference(preferences.pageLayout()) {
-                val mangaViewer = (context as? ReaderActivity)?.presenter?.getMangaReadingMode() ?: 0
+                val mangaViewer = (context as? ReaderActivity)?.viewModel?.getMangaReadingMode() ?: 0
                 val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)
                 updatePagedGroup(!isWebtoonView)
             }
@@ -42,7 +42,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
 
             pageLayout.title = pageLayout.title.toString().addBetaTag(context)
 
-            val mangaViewer = (context as? ReaderActivity)?.presenter?.getMangaReadingMode() ?: 0
+            val mangaViewer = (context as? ReaderActivity)?.viewModel?.getMangaReadingMode() ?: 0
             val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)
             val hasMargins = mangaViewer == ReadingModeType.CONTINUOUS_VERTICAL.flagValue
             cropBordersWebtoon.bindToPreference(if (hasMargins) preferences.cropBorders() else preferences.cropBordersWebtoon())
@@ -61,7 +61,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     fun updatePrefs() {
-        val mangaViewer = activity.presenter.getMangaReadingMode()
+        val mangaViewer = activity.viewModel.getMangaReadingMode()
         val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)
         val hasMargins = mangaViewer == ReadingModeType.CONTINUOUS_VERTICAL.flagValue
         binding.cropBordersWebtoon.bindToPreference(if (hasMargins) preferences.cropBorders() else preferences.cropBordersWebtoon())

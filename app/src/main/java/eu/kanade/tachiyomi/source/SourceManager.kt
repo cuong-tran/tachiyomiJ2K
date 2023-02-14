@@ -121,7 +121,7 @@ open class SourceManager(private val context: Context) {
             return name
         }
 
-        private fun getSourceNotInstalledException(): Exception {
+        fun getSourceNotInstalledException(): Exception {
             return SourceNotFoundException(
                 context.getString(
                     R.string.source_not_installed_,

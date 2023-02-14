@@ -346,11 +346,14 @@ class Downloader(
         val pageListObservable = if (download.pages == null) {
             // Pull page list from network and add them to download object
             download.source.fetchPageList(download.chapter)
-                .doOnNext { pages ->
+                .map { pages ->
                     if (pages.isEmpty()) {
                         throw Exception(context.getString(R.string.no_pages_found))
                     }
-                    download.pages = pages
+                    // Don't trust index from source
+                    val reIndexedPages = pages.mapIndexed { index, page -> Page(index, page.url, page.imageUrl, page.uri) }
+                    download.pages = reIndexedPages
+                    reIndexedPages
                 }
         } else {
             // Or if the page list already exists, start from the file
@@ -434,13 +437,13 @@ class Downloader(
                 page.uri = file.uri
                 page.progress = 100
                 download.downloadedImages++
-                page.status = Page.READY
+                page.status = Page.State.READY
             }
             .map { page }
             // Mark this page as error and allow to download the remaining
             .onErrorReturn {
                 page.progress = 0
-                page.status = Page.ERROR
+                page.status = Page.State.ERROR
                 notifier.onError(it.message, download.chapter.name, download.manga.title)
                 page
             }
@@ -460,13 +463,13 @@ class Downloader(
         tmpDir: UniFile,
         filename: String,
     ): Observable<UniFile> {
-        page.status = Page.DOWNLOAD_IMAGE
+        page.status = Page.State.DOWNLOAD_IMAGE
         page.progress = 0
         return source.fetchImage(page)
             .map { response ->
                 val file = tmpDir.createFile("$filename.tmp")
                 try {
-                    response.body!!.source().saveTo(file.openOutputStream())
+                    response.body.source().saveTo(file.openOutputStream())
                     val extension = getImageExtension(response, file)
                     file.renameTo("$filename.$extension")
                 } catch (e: Exception) {
@@ -515,7 +518,7 @@ class Downloader(
      */
     private fun getImageExtension(response: Response, file: UniFile): String {
         // Read content type if available.
-        val mime = response.body?.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
+        val mime = response.body.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
             // Else guess from the uri.
             ?: context.contentResolver.getType(file.uri)
             // Else read magic numbers.

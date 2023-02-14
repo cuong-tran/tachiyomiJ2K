@@ -30,6 +30,7 @@ import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
+import androidx.activity.viewModels
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
@@ -64,18 +65,17 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.toggle
 import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
-import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
+import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
+import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.AddToLibraryFirst
+import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Error
+import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -104,12 +104,14 @@ import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
@@ -123,17 +125,17 @@ import eu.kanade.tachiyomi.widget.doOnStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import nucleus.factory.RequiresPresenter
 import timber.log.Timber
-import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -144,17 +146,13 @@ import kotlin.math.roundToInt
 
 /**
  * Activity containing the reader of Tachiyomi. This activity is mostly a container of the
- * viewers, to which calls from the presenter or UI events are delegated.
+ * viewers, to which calls from the view model or UI events are delegated.
  */
-@RequiresPresenter(ReaderPresenter::class)
-class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
+class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
-    lateinit var binding: ReaderActivityBinding
+    val viewModel by viewModels<ReaderViewModel>()
 
-    /**
-     * Preferences helper.
-     */
-    private val preferences by injectLazy<PreferencesHelper>()
+    val scope = lifecycleScope
 
     /**
      * Viewer used to display the pages (pager, webtoon, ...).
@@ -263,7 +261,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     }
 
     /**
-     * Called when the activity is created. Initializes the presenter and configuration.
+     * Called when the activity is created. Initializes the view model and configuration.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         // Setup shared element transitions
@@ -300,7 +298,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         )
 
         backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
-        if (presenter.needsInit()) {
+        if (viewModel.needsInit()) {
             fromUrl = handleIntentAction(intent)
             if (!fromUrl) {
                 val manga = intent.extras!!.getLong("manga", -1)
@@ -309,7 +307,15 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                     finish()
                     return
                 }
-                presenter.init(manga, chapter)
+                lifecycleScope.launchNonCancellable {
+                    val initResult = viewModel.init(manga, chapter)
+                    if (!initResult.getOrDefault(false)) {
+                        val exception = initResult.exceptionOrNull() ?: IllegalStateException("Unknown err")
+                        withUIContext {
+                            setInitialChapterError(exception)
+                        }
+                    }
+                }
             } else {
                 binding.pleaseWait.isVisible = true
             }
@@ -334,6 +340,58 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 SecureActivityDelegate.setSecure(this)
             }
         reEnableBackPressedCallBack()
+
+        viewModel.state
+            .map { it.isLoadingAdjacentChapter }
+            .distinctUntilChanged()
+            .onEach(::setProgressDialog)
+            .launchIn(lifecycleScope)
+
+        viewModel.state
+            .map { it.manga }
+            .distinctUntilChanged()
+            .filterNotNull()
+            .onEach(::setManga)
+            .launchIn(lifecycleScope)
+
+        val viewerChapters = viewModel.state.value.viewerChapters
+        viewModel.state
+            .map { it.viewerChapters }
+            .distinctUntilChanged()
+//            .drop(if (viewerChapters != null) 1 else 0)
+            .filterNotNull()
+            .onEach(::setChapters)
+            .launchIn(lifecycleScope)
+        viewerChapters?.currChapter?.let { currChapter ->
+            currChapter.requestedPage = currChapter.chapter.last_page_read
+        }
+
+        viewModel.eventFlow
+            .onEach { event ->
+                when (event) {
+                    ReaderViewModel.Event.ReloadMangaAndChapters -> {
+                        viewModel.manga?.let(::setManga)
+                        viewModel.state.value.viewerChapters?.let(::setChapters)
+                    }
+                    ReaderViewModel.Event.ReloadViewerChapters -> {
+                        viewModel.state.value.viewerChapters?.let(::setChapters)
+                    }
+                    is ReaderViewModel.Event.SetOrientation -> {
+                        setOrientation(event.orientation)
+                    }
+                    is ReaderViewModel.Event.SavedImage -> {
+                        onSaveImageResult(event.result)
+                    }
+                    is ReaderViewModel.Event.ShareImage -> {
+                        onShareImageResult(event.file, event.page)
+                    }
+                    is ReaderViewModel.Event.SetCoverResult -> {
+                        onSetAsCoverResult(event.result)
+                    }
+                }
+            }
+            .launchIn(lifecycleScope)
+
         lifecycleScope.launchUI {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 WindowInfoTracker.getOrCreate(this@ReaderActivity).windowLayoutInfo(this@ReaderActivity)
@@ -397,7 +455,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             }
         }
         if (!isChangingConfigurations) {
-            presenter.onSaveInstanceStateNonConfigurationChange()
+            viewModel.onSaveInstanceStateNonConfigurationChange()
+        } else {
+            viewModel.onSave()
         }
         super.onSaveInstanceState(outState)
     }
@@ -541,7 +601,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     private fun shiftDoublePages() {
         (viewer as? PagerViewer)?.config?.let { config ->
             config.shiftDoublePage = !config.shiftDoublePage
-            presenter.viewerChapters?.let {
+            viewModel.state.value.viewerChapters?.let {
                 (viewer as? PagerViewer)?.updateShifting()
                 (viewer as? PagerViewer)?.setChaptersDoubleShift(it)
                 invalidateOptionsMenu()
@@ -570,13 +630,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         if (didTransistionFromChapter && visibleChapterRange.isNotEmpty() && MainActivity.chapterIdToExitTo !in visibleChapterRange) {
             finish()
         } else {
-            presenter.onBackPressed()
+            viewModel.onBackPressed()
             super.finishAfterTransition()
         }
     }
 
     override fun finish() {
-        presenter.onBackPressed()
+        viewModel.onBackPressed()
         super.finish()
     }
 
@@ -670,7 +730,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
 
         binding.toolbar.setOnClickListener {
-            presenter.manga?.id?.let { id ->
+            viewModel.manga?.id?.let { id ->
                 val intent = SearchActivity.openMangaIntent(this, id)
                 startActivity(intent)
             }
@@ -712,12 +772,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 setOnClickListener {
                     popupMenu(
                         items = OrientationType.values().map { it.flagValue to it.stringRes },
-                        selectedItemId = presenter.manga?.orientationType
+                        selectedItemId = viewModel.manga?.orientationType
                             ?: preferences.defaultOrientationType().get(),
                     ) {
                         val newOrientation = OrientationType.fromPreference(itemId)
 
-                        presenter.setMangaOrientationType(newOrientation.flagValue)
+                        viewModel.setMangaOrientationType(newOrientation.flagValue)
 
                         updateOrientationShortcut(newOrientation.flagValue)
                     }
@@ -740,9 +800,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             readingMode.setOnClickListener { readingMode ->
                 readingMode.popupMenu(
                     items = ReadingModeType.values().map { it.flagValue to it.stringRes },
-                    selectedItemId = presenter.manga?.readingModeType,
+                    selectedItemId = viewModel.manga?.readingModeType,
                 ) {
-                    presenter.setMangaReadingMode(itemId)
+                    viewModel.setMangaReadingMode(itemId)
                 }
             }
         }
@@ -757,53 +817,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         binding.chaptersSheet.shiftPageButton.setOnClickListener {
             shiftDoublePages()
         }
-        binding.readerNav.leftChapter.setOnClickListener {
-            if (isLoading) {
-                return@setOnClickListener
-            }
-            isScrollingThroughPagesOrChapters = true
-            val result = if (viewer is R2LPagerViewer) {
-                presenter.loadNextChapter()
-            } else {
-                presenter.loadPreviousChapter()
-            }
-            if (result) {
-                binding.readerNav.leftChapter.isInvisible = true
-                binding.readerNav.leftProgress.isVisible = true
-            } else {
-                toast(
-                    if (viewer is R2LPagerViewer) {
-                        R.string.theres_no_next_chapter
-                    } else {
-                        R.string.theres_no_previous_chapter
-                    },
-                )
-            }
-        }
 
-        binding.readerNav.rightChapter.setOnClickListener {
-            if (isLoading) {
-                return@setOnClickListener
-            }
-            isScrollingThroughPagesOrChapters = true
-            val result = if (viewer !is R2LPagerViewer) {
-                presenter.loadNextChapter()
-            } else {
-                presenter.loadPreviousChapter()
-            }
-            if (result) {
-                binding.readerNav.rightChapter.isInvisible = true
-                binding.readerNav.rightProgress.isVisible = true
-            } else {
-                toast(
-                    if (viewer !is R2LPagerViewer) {
-                        R.string.theres_no_next_chapter
-                    } else {
-                        R.string.theres_no_previous_chapter
-                    },
-                )
-            }
-        }
+        binding.readerNav.leftChapter.setOnClickListener { loadAdjacentChapter(false) }
+        binding.readerNav.rightChapter.setOnClickListener { loadAdjacentChapter(true) }
 
         binding.touchView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
@@ -874,7 +890,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             val pageNumber = (value + 1).roundToInt()
             (viewer as? PagerViewer)?.let {
                 if (it.config.doublePages || it.config.splitPages) {
-                    if (it.hasExtraPage(value.roundToInt(), presenter.getCurrentChapter())) {
+                    if (it.hasExtraPage(value.roundToInt(), viewModel.getCurrentChapter())) {
                         val invertDoublePage = (viewer as? PagerViewer)?.config?.invertDoublePages ?: false
                         return@setLabelFormatter if (!binding.readerNav.pageSeekbar.isRTL.xor(invertDoublePage)) {
                             "$pageNumber-${pageNumber + 1}"
@@ -949,6 +965,47 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 }
             }
         }
+    }
+
+    private fun loadAdjacentChapter(rightButton: Boolean) {
+        if (isLoading) {
+            return
+        }
+        isScrollingThroughPagesOrChapters = true
+        lifecycleScope.launch {
+            val getNextChapter = (viewer is R2LPagerViewer).xor(rightButton)
+            val adjChapter = viewModel.adjacentChapter(getNextChapter)
+            if (adjChapter != null) {
+                if (rightButton) {
+                    binding.readerNav.rightChapter.isInvisible = true
+                    binding.readerNav.rightProgress.isVisible = true
+                } else {
+                    binding.readerNav.leftChapter.isInvisible = true
+                    binding.readerNav.leftProgress.isVisible = true
+                }
+                loadChapter(adjChapter)
+            } else {
+                toast(
+                    if (getNextChapter) {
+                        R.string.theres_no_next_chapter
+                    } else {
+                        R.string.theres_no_previous_chapter
+                    },
+                )
+            }
+        }
+    }
+
+    suspend fun loadChapter(chapter: Chapter) {
+        loadChapter(ReaderChapter(chapter))
+    }
+
+    private suspend fun loadChapter(chapter: ReaderChapter) {
+        val lastPage = viewModel.loadChapter(chapter) ?: return
+        launchUI {
+            moveToPageIndex(lastPage, false, chapterChange = true)
+        }
+        refreshChapters()
     }
 
     fun setNavColor(insets: WindowInsetsCompat) {
@@ -1079,13 +1136,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     }
 
     /**
-     * Called from the presenter when a manga is ready. Used to instantiate the appropriate viewer
+     * Called from the view model when a manga is ready. Used to instantiate the appropriate viewer
      * and the binding.toolbar title.
      */
     fun setManga(manga: Manga) {
         val prevViewer = viewer
         val noDefault = manga.viewer_flags == -1
-        val mangaViewer = presenter.getMangaReadingMode()
+        val mangaViewer = viewModel.getMangaReadingMode()
         val newViewer = when (mangaViewer) {
             ReadingModeType.LEFT_TO_RIGHT.flagValue -> L2RPagerViewer(this)
             ReadingModeType.VERTICAL.flagValue -> VerticalPagerViewer(this)
@@ -1094,8 +1151,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             else -> R2LPagerViewer(this)
         }
 
-        if (noDefault && presenter.manga?.readingModeType!! > 0 &&
-            presenter.manga?.readingModeType!! != preferences.defaultReadingMode()
+        if (noDefault && viewModel.manga?.readingModeType!! > 0 &&
+            viewModel.manga?.readingModeType!! != preferences.defaultReadingMode()
         ) {
             snackbar = binding.readerLayout.snack(
                 getString(
@@ -1112,7 +1169,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 4000,
             ) {
                 setAction(R.string.use_default) {
-                    presenter.setMangaReadingMode(0)
+                    viewModel.setMangaReadingMode(0)
                 }
             }
         }
@@ -1122,10 +1179,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         ) {
             // Wait until transition is complete to avoid crash on API 26
             window.sharedElementEnterTransition.addListener(
-                onEnd = { setOrientation(presenter.getMangaOrientationType()) },
+                onEnd = { setOrientation(viewModel.getMangaOrientationType()) },
             )
         } else {
-            setOrientation(presenter.getMangaOrientationType())
+            setOrientation(viewModel.getMangaOrientationType())
         }
 
         // Destroy previous viewer if there was one
@@ -1161,7 +1218,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             },
         )
 
-        binding.toolbar.title = manga.title
+        supportActionBar?.title = manga.title
 
         binding.readerNav.pageSeekbar.isRTL = newViewer is R2LPagerViewer
 
@@ -1170,19 +1227,19 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         invalidateOptionsMenu()
         updateCropBordersShortcut()
         updateBottomShortcuts()
-        val viewerMode = ReadingModeType.fromPreference(presenter?.manga?.readingModeType ?: 0)
+        val viewerMode = ReadingModeType.fromPreference(viewModel.state.value.manga?.readingModeType ?: 0)
         binding.chaptersSheet.readingMode.setImageResource(viewerMode.iconRes)
         startPostponedEnterTransition()
     }
 
     override fun onPause() {
-        presenter.saveCurrentChapterReadingProgress()
+        viewModel.saveCurrentChapterReadingProgress()
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
-        presenter.setReadStartTime()
+        viewModel.setReadStartTime()
     }
 
     fun reloadChapters(doublePages: Boolean, force: Boolean = false) {
@@ -1196,7 +1253,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 pViewer.config.splitPages = preferences.automaticSplitsPage().get() && !pViewer.config.doublePages
             }
         }
-        val currentChapter = presenter.getCurrentChapter()
+        val currentChapter = viewModel.getCurrentChapter()
         if (doublePages) {
             // If we're moving from singe to double, we want the current page to be the first page
             pViewer.config.shiftDoublePage = (
@@ -1207,14 +1264,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                         )
                 ) % 2 != 0
         }
-        presenter.viewerChapters?.let {
+        viewModel.state.value.viewerChapters?.let {
             pViewer.setChaptersDoubleShift(it)
         }
         invalidateOptionsMenu()
     }
 
     /**
-     * Called from the presenter whenever a new [viewerChapters] have been set. It delegates the
+     * Called from the view model whenever a new [viewerChapters] have been set. It delegates the
      * method to the current viewer, but also set the subtitle on the binding.toolbar.
      */
     fun setChapters(viewerChapters: ViewerChapters) {
@@ -1246,7 +1303,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         viewer?.setChapters(viewerChapters)
         intentPageNumber?.let { moveToPageIndex(it) }
         intentPageNumber = null
-        binding.toolbar.subtitle = if (presenter.manga!!.hideChapterTitle(preferences)) {
+        binding.toolbar.subtitle = if (viewModel.manga!!.hideChapterTitle(preferences)) {
             val number = decimalFormat.format(viewerChapters.currChapter.chapter.chapter_number.toDouble())
             getString(R.string.chapter_, number)
         } else {
@@ -1268,7 +1325,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     }
 
     /**
-     * Called from the presenter if the initial load couldn't load the pages of the chapter. In
+     * Called from the view model if the initial load couldn't load the pages of the chapter. In
      * this case the activity is closed and a toast is shown to the user.
      */
     fun setInitialChapterError(error: Throwable) {
@@ -1278,7 +1335,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     }
 
     /**
-     * Called from the presenter whenever it's loading the next or previous chapter. It shows or
+     * Called from the view model whenever it's loading the next or previous chapter. It shows or
      * dismisses a non-cancellable dialog to prevent user interaction according to the value of
      * [show]. This is only used when the next/previous buttons on the binding.toolbar are clicked; the
      * other cases are handled with chapter transitions on the viewers and chapter preloading.
@@ -1308,7 +1365,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      */
     fun moveToPageIndex(index: Int, animated: Boolean = true, chapterChange: Boolean = false) {
         val viewer = viewer ?: return
-        val currentChapter = presenter.getCurrentChapter() ?: return
+        val currentChapter = viewModel.getCurrentChapter() ?: return
         val page = currentChapter.pages?.getOrNull(index) ?: return
         viewer.moveToPage(page, animated)
         if (chapterChange) {
@@ -1322,11 +1379,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
     /**
      * Called from the viewer whenever a [page] is marked as active. It updates the values of the
-     * bottom menu and delegates the change to the presenter.
+     * bottom menu and delegates the change to the view model.
      */
     @SuppressLint("SetTextI18n")
     fun onPageSelected(page: ReaderPage, hasExtraPage: Boolean) {
-        presenter.onPageSelected(page, hasExtraPage)
+        viewModel.onPageSelected(page, hasExtraPage)
         val pages = page.chapter.pages ?: return
 
         val currentPage = if (hasExtraPage) {
@@ -1449,9 +1506,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                                 Color.BLACK
                             }
                         if (item == 6) {
-                            presenter.shareImages(page, secondPage, isLTR, bg)
+                            viewModel.shareImages(page, secondPage, isLTR, bg)
                         } else {
-                            presenter.saveImages(page, secondPage, isLTR, bg)
+                            viewModel.saveImages(page, secondPage, isLTR, bg)
                         }
                     }
                 }
@@ -1468,7 +1525,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * the viewer is reaching the beginning or end of a chapter or the transition page is active.
      */
     fun requestPreloadChapter(chapter: ReaderChapter) {
-        presenter.preloadChapter(chapter)
+        lifecycleScope.launch {
+            viewModel.preloadChapter(chapter)
+        }
     }
 
     /**
@@ -1489,15 +1548,15 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     }
 
     /**
-     * Called from the page sheet. It delegates the call to the presenter to do some IO, which
+     * Called from the page sheet. It delegates the call to the view model to do some IO, which
      * will call [onShareImageResult] with the path the image was saved on when it's ready.
      */
     private fun shareImage(page: ReaderPage) {
-        presenter.shareImage(page)
+        viewModel.shareImage(page)
     }
 
     private fun showSetCoverPrompt(page: ReaderPage) {
-        if (page.status != Page.READY) return
+        if (page.status != Page.State.READY) return
 
         materialAlertDialog()
             .setMessage(R.string.use_image_as_cover)
@@ -1509,11 +1568,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     }
 
     /**
-     * Called from the presenter when a page is ready to be shared. It shows Android's default
+     * Called from the view model when a page is ready to be shared. It shows Android's default
      * sharing tool.
      */
     fun onShareImageResult(file: File, page: ReaderPage, secondPage: ReaderPage? = null) {
-        val manga = presenter.manga ?: return
+        val manga = viewModel.manga ?: return
         val chapter = page.chapter.chapter
 
         val decimalFormat =
@@ -1544,28 +1603,28 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
     override fun onProvideAssistContent(outContent: AssistContent) {
         super.onProvideAssistContent(outContent)
-        val chapterUrl = presenter.getChapterUrl() ?: return
+        val chapterUrl = viewModel.getChapterUrl() ?: return
         outContent.webUri = Uri.parse(chapterUrl)
     }
 
     /**
      * Called from the page sheet. It delegates saving the image of the given [page] on external
-     * storage to the presenter.
+     * storage to the viewModel.
      */
     private fun saveImage(page: ReaderPage) {
-        presenter.saveImage(page)
+        viewModel.saveImage(page)
     }
 
     /**
-     * Called from the presenter when a page is saved or fails. It shows a message or logs the
+     * Called from the view model when a page is saved or fails. It shows a message or logs the
      * event depending on the [result].
      */
-    fun onSaveImageResult(result: ReaderPresenter.SaveImageResult) {
+    fun onSaveImageResult(result: ReaderViewModel.SaveImageResult) {
         when (result) {
-            is ReaderPresenter.SaveImageResult.Success -> {
+            is ReaderViewModel.SaveImageResult.Success -> {
                 toast(R.string.picture_saved)
             }
-            is ReaderPresenter.SaveImageResult.Error -> {
+            is ReaderViewModel.SaveImageResult.Error -> {
                 Timber.e(result.error)
             }
         }
@@ -1573,17 +1632,17 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
     /**
      * Called from the page sheet. It delegates setting the image of the given [page] as the
-     * cover to the presenter.
+     * cover to the viewModel.
      */
     private fun setAsCover(page: ReaderPage) {
-        presenter.setAsCover(page)
+        viewModel.setAsCover(page)
     }
 
     /**
-     * Called from the presenter when a page is set as cover or fails. It shows a different message
+     * Called from the view model when a page is set as cover or fails. It shows a different message
      * depending on the [result].
      */
-    fun onSetAsCoverResult(result: ReaderPresenter.SetAsCoverResult) {
+    fun onSetAsCoverResult(result: ReaderViewModel.SetAsCoverResult) {
         toast(
             when (result) {
                 Success -> R.string.cover_updated
@@ -1662,7 +1721,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
     private fun handleIntentAction(intent: Intent): Boolean {
         val uri = intent.data ?: return false
-        if (!presenter.canLoadUrl(uri)) {
+        if (!viewModel.canLoadUrl(uri)) {
             openInBrowser(intent.data!!.toString(), true)
             finishAfterTransition()
             return true
@@ -1670,8 +1729,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         setMenuVisibility(visible = false, animate = true)
         scope.launch(Dispatchers.IO) {
             try {
-                intentPageNumber = presenter.intentPageNumber(uri)
-                presenter.loadChapterURL(uri)
+                intentPageNumber = viewModel.intentPageNumber(uri)
+                viewModel.loadChapterURL(uri)
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     setInitialChapterError(e)
@@ -1682,14 +1741,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     }
 
     private fun openMangaInBrowser() {
-        val source = presenter.getSource() ?: return
-        val chapterUrl = presenter.getChapterUrl() ?: return
+        val source = viewModel.getSource() ?: return
+        val chapterUrl = viewModel.getChapterUrl() ?: return
 
         val intent = WebViewActivity.newIntent(
             applicationContext,
             source.id,
             chapterUrl,
-            presenter.manga!!.title,
+            viewModel.manga!!.title,
         )
         startActivity(intent)
     }
@@ -1719,7 +1778,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 .drop(1)
                 .onEach {
                     delay(250)
-                    setOrientation(presenter.getMangaOrientationType())
+                    setOrientation(viewModel.getMangaOrientationType())
                 }
                 .launchIn(scope)
 

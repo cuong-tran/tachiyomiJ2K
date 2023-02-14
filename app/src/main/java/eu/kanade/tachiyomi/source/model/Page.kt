@@ -2,8 +2,12 @@ package eu.kanade.tachiyomi.source.model
 
 import android.net.Uri
 import eu.kanade.tachiyomi.network.ProgressListener
-import rx.subjects.Subject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
+@Serializable
 open class Page(
     val index: Int,
     val url: String = "",
@@ -14,24 +18,27 @@ open class Page(
     val number: Int
         get() = index + 1
 
-    @Transient @Volatile
-    var status: Int = 0
+    @Transient
+    private val _statusFlow = MutableStateFlow(State.QUEUE)
+
+    @Transient
+    val statusFlow = _statusFlow.asStateFlow()
+    var status: State
+        get() = _statusFlow.value
         set(value) {
-            field = value
-            statusSubject?.onNext(value)
-            statusCallback?.invoke(this)
+            _statusFlow.value = value
         }
 
-    @Transient @Volatile
-    var progress: Int = 0
+    @Transient
+    private val _progressFlow = MutableStateFlow(0)
+
+    @Transient
+    val progressFlow = _progressFlow.asStateFlow()
+    var progress: Int
+        get() = _progressFlow.value
         set(value) {
-            field = value
-            statusCallback?.invoke(this)
+            _progressFlow.value = value
         }
-
-    @Transient private var statusSubject: Subject<Int, Int>? = null
-
-    @Transient private var statusCallback: ((Page) -> Unit)? = null
 
     override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
         progress = if (contentLength > 0) {
@@ -41,19 +48,11 @@ open class Page(
         }
     }
 
-    fun setStatusSubject(subject: Subject<Int, Int>?) {
-        this.statusSubject = subject
-    }
-
-    fun setStatusCallback(f: ((Page) -> Unit)?) {
-        statusCallback = f
-    }
-
-    companion object {
-        const val QUEUE = 0
-        const val LOAD_PAGE = 1
-        const val DOWNLOAD_IMAGE = 2
-        const val READY = 3
-        const val ERROR = 4
+    enum class State {
+        QUEUE,
+        LOAD_PAGE,
+        DOWNLOAD_IMAGE,
+        READY,
+        ERROR,
     }
 }

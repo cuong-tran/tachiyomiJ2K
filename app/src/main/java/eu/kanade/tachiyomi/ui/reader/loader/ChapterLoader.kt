@@ -1,66 +1,64 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
+import android.content.Context
 import com.github.junrar.exception.UnsupportedRarV5Exception
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
-import rx.Completable
-import rx.Observable
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
+import eu.kanade.tachiyomi.util.system.withIOContext
 import timber.log.Timber
 
 /**
  * Loader used to retrieve the [PageLoader] for a given chapter.
  */
 class ChapterLoader(
+    private val context: Context,
     private val downloadManager: DownloadManager,
+    private val downloadProvider: DownloadProvider,
     private val manga: Manga,
     private val source: Source,
 ) {
 
     /**
-     * Returns a completable that assigns the page loader and loads the its pages. It just
-     * completes if the chapter is already loaded.
+     * Assigns the chapter's page loader and loads the its pages. Returns immediately if the chapter
+     * is already loaded.
      */
-    fun loadChapter(chapter: ReaderChapter): Completable {
+    suspend fun loadChapter(chapter: ReaderChapter) {
         if (chapterIsReady(chapter)) {
-            return Completable.complete()
+            return
         }
 
-        return Observable.just(chapter)
-            .doOnNext { chapter.state = ReaderChapter.State.Loading }
-            .observeOn(Schedulers.io())
-            .flatMap { readerChapter ->
-                Timber.d("Loading pages for ${chapter.chapter.name}")
-
-                val loader = getPageLoader(readerChapter)
+        chapter.state = ReaderChapter.State.Loading
+        withIOContext {
+            Timber.d("Loading pages for ${chapter.chapter.name}")
+            try {
+                val loader = getPageLoader(chapter)
                 chapter.pageLoader = loader
 
-                loader.getPages().take(1).doOnNext { pages ->
-                    pages.forEach { it.chapter = chapter }
-                }
-            }
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext { pages ->
-                if (pages.isEmpty()) {
-                    throw Exception(downloadManager.context.getString(R.string.no_pages_found))
-                }
+                val pages = loader.getPages()
+                    .onEach { it.chapter = chapter }
 
-                chapter.state = ReaderChapter.State.Loaded(pages)
+                if (pages.isEmpty()) {
+                    throw Exception(context.getString(R.string.no_pages_found))
+                }
 
                 // If the chapter is partially read, set the starting page to the last the user read
                 // otherwise use the requested page.
                 if (!chapter.chapter.read) {
                     chapter.requestedPage = chapter.chapter.last_page_read
                 }
+
+                chapter.state = ReaderChapter.State.Loaded(pages)
+            } catch (e: Throwable) {
+                chapter.state = ReaderChapter.State.Error(e)
+                throw e
             }
-            .toCompletable()
-            .doOnError { chapter.state = ReaderChapter.State.Error(it) }
+        }
     }
 
     /**
@@ -74,9 +72,10 @@ class ChapterLoader(
      * Returns the page loader to use for this [chapter].
      */
     private fun getPageLoader(chapter: ReaderChapter): PageLoader {
-        val isDownloaded = downloadManager.isChapterDownloaded(chapter.chapter, manga, true)
+        val dbChapter = chapter.chapter
+        val isDownloaded = downloadManager.isChapterDownloaded(dbChapter, manga, skipCache = true)
         return when {
-            isDownloaded -> DownloadPageLoader(chapter, manga, source, downloadManager)
+            isDownloaded -> DownloadPageLoader(chapter, manga, source, downloadManager, downloadProvider)
             source is HttpSource -> HttpPageLoader(chapter, source)
             source is LocalSource -> source.getFormat(chapter.chapter).let { format ->
                 when (format) {
@@ -85,12 +84,12 @@ class ChapterLoader(
                     is LocalSource.Format.Rar -> try {
                         RarPageLoader(format.file)
                     } catch (e: UnsupportedRarV5Exception) {
-                        error(downloadManager.context.getString(R.string.loader_rar5_error))
+                        error(context.getString(R.string.loader_rar5_error))
                     }
                     is LocalSource.Format.Epub -> EpubPageLoader(format.file)
                 }
             }
-            else -> error(downloadManager.context.getString(R.string.source_not_installed))
+            else -> error(context.getString(R.string.source_not_installed))
         }
     }
 }

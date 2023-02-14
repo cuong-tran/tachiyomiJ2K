@@ -59,7 +59,7 @@ class PagerTransitionHolder(
         addView(transitionView)
         addView(pagesContainer)
 
-        transitionView.bind(transition, viewer.downloadManager, viewer.activity.presenter.manga)
+        transitionView.bind(transition, viewer.downloadManager, viewer.activity.viewModel.state.value.manga)
         transition.to?.let { observeStatus(it) }
 
         if (viewer.config.hingeGapSize > 0) {
