@@ -1,7 +1,6 @@
-package eu.kanade.tachiyomi.ui.source.latest
+package eu.kanade.tachiyomi.ui.source.browse
 
 import eu.kanade.tachiyomi.source.CatalogueSource
-import eu.kanade.tachiyomi.ui.source.browse.Pager
 import eu.kanade.tachiyomi.util.system.awaitSingle
 
 /**

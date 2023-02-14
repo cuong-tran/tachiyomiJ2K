@@ -30,7 +30,6 @@ import eu.kanade.tachiyomi.ui.source.filter.TriStateSectionItem
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
@@ -50,6 +49,7 @@ import uy.kohesive.injekt.api.get
 open class BrowseSourcePresenter(
     private val sourceId: Long,
     searchQuery: String? = null,
+    var useLatest: Boolean = false,
     val sourceManager: SourceManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     val prefs: PreferencesHelper = Injekt.get(),
@@ -108,6 +108,7 @@ open class BrowseSourcePresenter(
         source = sourceManager.get(sourceId) as? CatalogueSource ?: return
 
         sourceFilters = source.getFilterList()
+        filtersChanged = false
 
         if (savedState != null) {
             query = savedState.getString(::query.name, "")
@@ -266,11 +267,17 @@ open class BrowseSourcePresenter(
      * @param filters a list of active filters.
      */
     fun setSourceFilter(filters: FilterList) {
+        filtersChanged = true
         restartPager(filters = filters)
     }
 
     open fun createPager(query: String, filters: FilterList): Pager {
-        return BrowseSourcePager(source, query, filters)
+        return if (useLatest && query.isBlank() && !filtersChanged) {
+            LatestUpdatesPager(source)
+        } else {
+            useLatest = false
+            BrowseSourcePager(source, query, filters)
+        }
     }
 
     private fun FilterList.toItems(): List<IFlexible<*>> {

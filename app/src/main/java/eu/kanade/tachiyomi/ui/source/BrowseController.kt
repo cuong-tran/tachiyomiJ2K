@@ -43,7 +43,6 @@ import eu.kanade.tachiyomi.ui.setting.SettingsBrowseController
 import eu.kanade.tachiyomi.ui.setting.SettingsSourcesController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.globalsearch.GlobalSearchController
-import eu.kanade.tachiyomi.ui.source.latest.LatestUpdatesController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -563,7 +562,7 @@ class BrowseController :
      */
     override fun onLatestClick(position: Int) {
         val item = adapter?.getItem(position) as? SourceItem ?: return
-        openCatalogue(item.source, LatestUpdatesController(item.source))
+        openCatalogue(item.source, BrowseSourceController(item.source, useLatest = true))
     }
 
     /**

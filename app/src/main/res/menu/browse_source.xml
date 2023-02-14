@@ -11,6 +11,13 @@
         app:showAsAction="collapseActionView|ifRoom" />
 
     <item
+        android:id="@+id/action_popular_latest"
+        android:title="@string/popular"
+        android:icon="@drawable/ic_heart_24dp"
+        app:iconTint="?colorOnSurface"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_display_mode"
         android:title="@string/display_as"
         app:showAsAction="ifRoom" />
