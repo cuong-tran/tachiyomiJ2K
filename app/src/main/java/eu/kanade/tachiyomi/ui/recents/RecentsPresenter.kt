@@ -425,11 +425,12 @@ class RecentsPresenter(
     fun deleteChapter(chapter: Chapter, manga: Manga, update: Boolean = true) {
         val source = Injekt.get<SourceManager>().getOrStub(manga.source)
         launchIO {
-            downloadManager.deleteChapters(listOf(chapter), manga, source)
+            downloadManager.deleteChapters(listOf(chapter), manga, source, true)
         }
         if (update) {
             val item = recentItems.find { it.chapter.id == chapter.id } ?: return
             item.apply {
+                if (chapter.bookmark && !preferences.removeBookmarkedChapters().get()) return@apply
                 status = Download.State.NOT_DOWNLOADED
                 download = null
             }

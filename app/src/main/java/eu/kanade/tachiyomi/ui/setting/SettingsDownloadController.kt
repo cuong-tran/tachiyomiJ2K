@@ -79,6 +79,10 @@ class SettingsDownloadController : SettingsController() {
                 entryRange = -1..4
                 defaultValue = -1
             }
+            switchPreference {
+                bindTo(preferences.removeBookmarkedChapters())
+                titleRes = R.string.allow_deleting_bookmarked_chapters
+            }
         }
 
         val dbCategories = db.getCategories().executeAsBlocking()

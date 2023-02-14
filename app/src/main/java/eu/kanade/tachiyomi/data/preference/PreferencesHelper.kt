@@ -393,6 +393,8 @@ class PreferencesHelper(val context: Context) {
 
     fun deleteRemovedChapters() = flowPrefs.getInt(Keys.deleteRemovedChapters, 0)
 
+    fun removeBookmarkedChapters() = flowPrefs.getBoolean("pref_remove_bookmarked", false)
+
     fun showAllCategories() = flowPrefs.getBoolean("show_all_categories", true)
 
     fun showAllCategoriesWhenSearchingSingleCategory() = flowPrefs.getBoolean("show_all_categories_when_searching_single_category", false)

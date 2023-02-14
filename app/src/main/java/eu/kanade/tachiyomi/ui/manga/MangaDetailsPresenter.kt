@@ -280,8 +280,9 @@ class MangaDetailsPresenter(
      * @param chapter the chapter to delete.
      */
     fun deleteChapter(chapter: ChapterItem) {
-        downloadManager.deleteChapters(listOf(chapter), manga, source)
+        downloadManager.deleteChapters(listOf(chapter), manga, source, true)
         this.chapters.find { it.id == chapter.id }?.apply {
+            if (chapter.chapter.bookmark && !preferences.removeBookmarkedChapters().get()) return@apply
             status = Download.State.QUEUE
             download = null
         }
@@ -303,6 +304,7 @@ class MangaDetailsPresenter(
         }
         chapters.forEach { chapter ->
             this.chapters.find { it.id == chapter.id }?.apply {
+                if (chapter.chapter.bookmark && !preferences.removeBookmarkedChapters().get() && !isEverything) return@apply
                 status = Download.State.QUEUE
                 download = null
             }
