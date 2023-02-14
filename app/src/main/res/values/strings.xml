@@ -1042,6 +1042,10 @@
     <!-- Do not translate "WebView" -->
     <string name="webview_is_required">WebView is required for Tachiyomi</string>
 
+    <!-- App widget -->
+    <string name="appwidget_updates_description">See your recently updated library entries</string>
+    <string name="appwidget_unavailable_locked">Widget not available when app lock is enabled</string>
+
     <!-- Miscellaneous -->
     <string name="add">Add</string>
     <string name="add_to_">Add to %1$s</string>

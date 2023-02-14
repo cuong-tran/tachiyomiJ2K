@@ -792,7 +792,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         saveExtras()
     }
 
-    fun saveExtras() {
+    private fun saveExtras() {
         mangaShortcutManager.updateShortcuts(this)
         MangaCoverMetadata.savePrefs()
     }
@@ -1396,6 +1396,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         private const val SWIPE_THRESHOLD = 100
         private const val SWIPE_VELOCITY_THRESHOLD = 100
+
+        const val MAIN_ACTIVITY = "eu.kanade.tachiyomi.ui.main.MainActivity"
 
         // Shortcut actions
         const val SHORTCUT_LIBRARY = "eu.kanade.tachiyomi.SHOW_LIBRARY"

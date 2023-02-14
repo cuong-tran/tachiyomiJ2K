@@ -10,6 +10,7 @@ import android.graphics.drawable.Icon
 import coil.Coil
 import coil.request.ImageRequest
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.appwidget.TachiyomiWidgetManager
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -35,13 +36,14 @@ class MangaShortcutManager(
 ) {
 
     fun updateShortcuts(context: Context) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
-            if (!preferences.showSeriesInShortcuts() && !preferences.showSourcesInShortcuts()) {
-                val shortcutManager = context.getSystemService(ShortcutManager::class.java)
-                shortcutManager.removeAllDynamicShortcuts()
-                return
-            }
-            launchIO {
+        launchIO {
+            with(TachiyomiWidgetManager()) { context.init() }
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
+                if (!preferences.showSeriesInShortcuts() && !preferences.showSourcesInShortcuts()) {
+                    val shortcutManager = context.getSystemService(ShortcutManager::class.java)
+                    shortcutManager.removeAllDynamicShortcuts()
+                    return@launchIO
+                }
                 val shortcutManager = context.getSystemService(ShortcutManager::class.java)
 
                 val recentManga = if (preferences.showSeriesInShortcuts()) {
@@ -78,8 +80,14 @@ class MangaShortcutManager(
                                 context,
                                 "Manga-${item.id?.toString() ?: item.title}",
                             )
-                                .setShortLabel(item.title.takeUnless { it.isBlank() } ?: context.getString(R.string.manga))
-                                .setLongLabel(item.title.takeUnless { it.isBlank() } ?: context.getString(R.string.manga))
+                                .setShortLabel(
+                                    item.title.takeUnless { it.isBlank() }
+                                        ?: context.getString(R.string.manga),
+                                )
+                                .setLongLabel(
+                                    item.title.takeUnless { it.isBlank() }
+                                        ?: context.getString(R.string.manga),
+                                )
                                 .setIcon(
                                     if (bitmap != null) if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                                         Icon.createWithAdaptiveBitmap(bitmap.toSquare())

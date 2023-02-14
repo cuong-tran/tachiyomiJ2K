@@ -85,6 +85,12 @@ android {
 
     buildFeatures {
         viewBinding = true
+        compose = true
+
+        // Disable some unused things
+        aidl = false
+        renderScript = false
+        shaders = false
     }
 
     flavorDimensions.add("default")
@@ -105,6 +111,10 @@ android {
         checkReleaseBuilds = false
     }
 
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.2"
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -116,6 +126,20 @@ android {
 }
 
 dependencies {
+    // Compose
+    implementation("androidx.activity:activity-compose:1.6.1")
+    implementation("androidx.compose.foundation:foundation:1.3.1")
+    implementation("androidx.compose.animation:animation:1.3.3")
+    implementation("androidx.compose.ui:ui:1.3.3")
+    implementation("androidx.compose.material:material:1.3.1")
+    implementation("androidx.compose.material3:material3:1.0.1")
+    implementation("com.google.android.material:compose-theme-adapter-3:1.1.1")
+    implementation("androidx.compose.material:material-icons-extended:1.3.1")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.3.3")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.3.3")
+    implementation("com.google.accompanist:accompanist-webview:0.28.0")
+    implementation("androidx.glance:glance-appwidget:1.0.0-alpha03")
+
     // Modified dependencies
     implementation("com.github.jays2kings:subsampling-scale-image-view:756849e") {
         exclude(module = "image-decoder")

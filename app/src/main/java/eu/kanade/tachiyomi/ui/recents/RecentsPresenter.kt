@@ -38,6 +38,7 @@ import java.util.Date
 import java.util.TreeMap
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class RecentsPresenter(
     val preferences: PreferencesHelper = Injekt.get(),
@@ -115,12 +116,23 @@ class RecentsPresenter(
         }
     }
 
+    /**
+     * Gets a set of recent entries based on preferred view type, unless changed by [customViewType]
+     *
+     * @param oldQuery used to determine while running this method the query has changed, and to cancel this
+     * @param updatePageCount make true when fetching for more pages in the pagination scroll, otherwise make false to restart the list
+     * @param retryCount used to not burden the db with infinite calls, should not be set as its a recursive param
+     * @param itemCount also used in recursion to know how many items have been collected so far
+     * @param limit used by the companion method to not recursively call this method, since the first batch is good enough
+     * @param customViewType used to decide to use another view type instead of the one saved by preferences
+     * @param includeReadAnyway also used by companion method to include the read manga, by default only unread manga is used
+     */
     private suspend fun runRecents(
         oldQuery: String = "",
         updatePageCount: Boolean = false,
         retryCount: Int = 0,
         itemCount: Int = 0,
-        limit: Boolean = false,
+        limit: Int = -1,
         customViewType: Int? = null,
         includeReadAnyway: Boolean = false,
     ) {
@@ -137,13 +149,13 @@ class RecentsPresenter(
         }
         val viewType = customViewType ?: viewType
 
-        val showRead = ((preferences.showReadInAllRecents().get() || query.isNotEmpty()) && !limit) || includeReadAnyway
+        val showRead = ((preferences.showReadInAllRecents().get() || query.isNotEmpty()) && limit != 0) || includeReadAnyway
         val isUngrouped = viewType > VIEW_TYPE_GROUP_ALL || query.isNotEmpty()
         val groupChaptersUpdates = preferences.groupChaptersUpdates().get()
         val groupChaptersHistory = preferences.groupChaptersHistory().get()
 
         val isCustom = customViewType != null
-        val isEndless = isUngrouped && !limit
+        val isEndless = isUngrouped && limit != 0
         val cReading = when {
             viewType <= VIEW_TYPE_UNGROUP_ALL -> {
                 db.getAllRecentsTypes(
@@ -320,11 +332,14 @@ class RecentsPresenter(
         }
         val newCount = itemCount + newItems.size
         val hasNewItems = newItems.isNotEmpty()
-        if (updatePageCount && newCount < 25 && (viewType != VIEW_TYPE_GROUP_ALL || query.isNotEmpty()) && !limit) {
+        if (updatePageCount && (newCount < if (limit > 0) limit else 25) &&
+            (viewType != VIEW_TYPE_GROUP_ALL || query.isNotEmpty()) &&
+            limit != 0
+        ) {
             runRecents(oldQuery, true, retryCount + (if (hasNewItems) 0 else 1), newCount)
             return
         }
-        if (!limit) {
+        if (limit == -1) {
             setDownloadedChapters(recentItems)
             if (customViewType == null) {
                 withContext(Dispatchers.Main) {
@@ -549,13 +564,19 @@ class RecentsPresenter(
         var SHORT_LIMIT = 25
             private set
 
-        suspend fun getRecentManga(includeRead: Boolean = false): List<Pair<Manga, Long>> {
+        suspend fun getRecentManga(includeRead: Boolean = false, customAmount: Int = 0): List<Pair<Manga, Long>> {
             val presenter = RecentsPresenter()
             presenter.viewType = 1
-            SHORT_LIMIT = if (includeRead) 50 else 25
-            presenter.runRecents(limit = true, includeReadAnyway = includeRead)
+            SHORT_LIMIT = when {
+                customAmount > 0 -> (customAmount * 1.5).roundToInt()
+                includeRead -> 50
+                else -> 25
+            }
+            presenter.runRecents(limit = customAmount, includeReadAnyway = includeRead)
             SHORT_LIMIT = 25
-            return presenter.recentItems.filter { it.mch.manga.id != null }.map { it.mch.manga to it.mch.history.last_read }
+            return presenter.recentItems
+                .filter { it.mch.manga.id != null }
+                .map { it.mch.manga to it.mch.history.last_read }
         }
     }
 }
