@@ -41,8 +41,8 @@ class ChapterFilter(val preferences: PreferencesHelper = Injekt.get(), val downl
     /** filter chapters for the reader */
     fun <T : Chapter> filterChaptersForReader(chapters: List<T>, manga: Manga, selectedChapter: T? = null): List<T> {
         var filteredChapters = filterChaptersByScanlators(chapters, manga)
-        // if neither preference is enabled don't even filter
-        if (!preferences.skipRead() && !preferences.skipFiltered()) {
+        // if filter prefs aren't enabled don't even filter
+        if (!preferences.skipRead() && !preferences.skipFiltered() && !preferences.skipDupe().get()) {
             return filteredChapters
         }
 
@@ -52,6 +52,23 @@ class ChapterFilter(val preferences: PreferencesHelper = Injekt.get(), val downl
         if (preferences.skipFiltered()) {
             filteredChapters = filterChapters(filteredChapters, manga)
         }
+        if (preferences.skipDupe().get()) {
+            filteredChapters = filteredChapters.groupBy { it.chapter_number }
+                .map { (_, chapters) ->
+                    chapters.find { it.id == selectedChapter?.id }
+                        ?: chapters.find { it.scanlator == selectedChapter?.scanlator }
+                        ?: chapters.find {
+                            val mainScans = it.scanlator?.split(ChapterUtil.scanlatorSeparator)
+                                ?: return@find false
+                            val currScans =
+                                selectedChapter?.scanlator?.split(ChapterUtil.scanlatorSeparator)
+                                    ?: return@find false
+                            mainScans.any { scanlator -> currScans.contains(scanlator) }
+                        }
+                        ?: chapters.first()
+                }
+        }
+
         // add the selected chapter to the list in case it was filtered out
         if (selectedChapter?.id != null) {
             val find = filteredChapters.find { it.id == selectedChapter.id }

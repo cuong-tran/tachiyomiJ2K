@@ -143,7 +143,7 @@ class ChapterUtil {
             return chapters.size > 20
         }
 
-        private const val scanlatorSeparator = " & "
+        const val scanlatorSeparator = " & "
 
         fun getScanlators(scanlators: String?): List<String> {
             if (scanlators.isNullOrBlank()) return emptyList()
