@@ -157,13 +157,17 @@ class ReaderViewModel(
     }
 
     init {
+        var secondRun = false
         // To save state
         state.map { it.viewerChapters?.currChapter }
             .distinctUntilChanged()
             .filterNotNull()
             .onEach { currentChapter ->
                 chapterId = currentChapter.chapter.id!!
-                currentChapter.requestedPage = currentChapter.chapter.last_page_read
+                if (secondRun || !currentChapter.chapter.read) {
+                    currentChapter.requestedPage = currentChapter.chapter.last_page_read
+                }
+                secondRun = true
             }
             .launchIn(viewModelScope)
     }
@@ -224,7 +228,9 @@ class ReaderViewModel(
                 val manga = db.getManga(mangaId).executeAsBlocking()
                 if (manga != null) {
                     mutableState.update { it.copy(manga = manga) }
-                    if (chapterId == -1L) chapterId = initialChapterId
+                    if (chapterId == -1L) {
+                        chapterId = initialChapterId
+                    }
 
                     checkTrackers(manga)
 
@@ -417,21 +423,18 @@ class ReaderViewModel(
         val loader = loader ?: return -1
 
         Timber.d("Loading adjacent ${chapter.chapter.url}")
-        var lastPage: Int? = null
+        var lastPage: Int? = if (chapter.chapter.pages_left <= 1) 0 else chapter.chapter.last_page_read
         mutableState.update { it.copy(isLoadingAdjacentChapter = true) }
         try {
             withIOContext {
                 loadChapter(loader, chapter)
-                lastPage =
-                    if (chapter.chapter.pages_left <= 1) 0 else chapter.chapter.last_page_read
-                withUIContext {
-                }
             }
         } catch (e: Throwable) {
             if (e is CancellationException) {
                 throw e
             }
             Timber.e(e)
+            lastPage = null
         } finally {
             mutableState.update { it.copy(isLoadingAdjacentChapter = false) }
         }
