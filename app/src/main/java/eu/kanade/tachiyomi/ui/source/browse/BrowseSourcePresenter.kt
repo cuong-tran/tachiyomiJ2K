@@ -145,7 +145,11 @@ open class BrowseSourcePresenter(
         pagerSubscription?.let { remove(it) }
         pagerSubscription = pager.results()
             .observeOn(Schedulers.io())
-            .map { (first, second) -> first to second.map { networkToLocalManga(it, sourceId) } }
+            .map { (first, second) ->
+                first to second
+                    .map { networkToLocalManga(it, sourceId) }
+                    .filter { !prefs.hideInLibraryItems().get() || !it.favorite }
+            }
             .doOnNext { initializeMangas(it.second) }
             .map { (first, second) -> first to second.map { BrowseSourceItem(it, browseAsList, sourceListType, outlineCovers) } }
             .observeOn(AndroidSchedulers.mainThread())

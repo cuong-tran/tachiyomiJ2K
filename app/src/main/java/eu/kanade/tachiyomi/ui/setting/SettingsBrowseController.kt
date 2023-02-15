@@ -30,6 +30,13 @@ class SettingsBrowseController : SettingsController() {
         titleRes = R.string.browse
 
         preferenceCategory {
+            switchPreference {
+                bindTo(preferences.hideInLibraryItems())
+                titleRes = R.string.hide_in_library_items
+            }
+        }
+
+        preferenceCategory {
             titleRes = R.string.extensions
             switchPreference {
                 key = PreferenceKeys.automaticExtUpdates
