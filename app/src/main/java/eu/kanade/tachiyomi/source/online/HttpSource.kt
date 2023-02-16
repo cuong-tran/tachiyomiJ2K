@@ -398,7 +398,7 @@ abstract class HttpSource : CatalogueSource {
         manga ?: return null
 
         val chapterUrl = chapter.url.getUrlWithoutDomain()
-        val mangaUrl = mangaDetailsRequest(manga).url.toString()
+        val mangaUrl = getMangaUrl(manga)
         return if (chapterUrl.isBlank()) {
             mangaUrl
         } else {

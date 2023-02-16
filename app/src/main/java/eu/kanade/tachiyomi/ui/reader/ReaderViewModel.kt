@@ -637,8 +637,8 @@ class ReaderViewModel(
         val manga = manga ?: return null
         val source = getSource() ?: return null
         val chapter = getCurrentChapter()?.chapter ?: return null
-        val chapterUrl = source.getChapterUrl(chapter)
-        return chapterUrl.takeIf { it.isNotEmpty() } ?: source.getChapterUrl(manga, chapter)
+        val chapterUrl = try { source.getChapterUrl(chapter) } catch (_: Exception) { null }
+        return chapterUrl.takeIf { !it.isNullOrBlank() } ?: source.getChapterUrl(manga, chapter)
     }
 
     fun getSource() = manga?.source?.let { sourceManager.getOrStub(it) } as? HttpSource
