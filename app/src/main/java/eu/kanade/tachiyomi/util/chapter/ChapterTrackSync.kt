@@ -85,28 +85,43 @@ suspend fun updateTrackChapterRead(
     mangaId: Long?,
     newChapterRead: Float,
     retryWhenOnline: Boolean = false,
-) {
+): List<Pair<TrackService, String?>> {
     val trackManager = Injekt.get<TrackManager>()
     val trackList = db.getTracks(mangaId).executeAsBlocking()
+    val failures = mutableListOf<Pair<TrackService, String?>>()
     trackList.map { track ->
         val service = trackManager.getService(track.sync_id)
         if (service != null && service.isLogged && newChapterRead > track.last_chapter_read) {
             if (retryWhenOnline && !preferences.context.isOnline()) {
-                val trackings = preferences.trackingsToAddOnline().get().toMutableSet()
-                val currentTracking = trackings.find { it.startsWith("$mangaId:${track.sync_id}:") }
-                trackings.remove(currentTracking)
-                trackings.add("$mangaId:${track.sync_id}:$newChapterRead")
-                preferences.trackingsToAddOnline().set(trackings)
-                DelayedTrackingUpdateJob.setupTask(preferences.context)
+                delayTrackingUpdate(preferences, mangaId, newChapterRead, track)
             } else if (preferences.context.isOnline()) {
                 try {
-                    track.last_chapter_read = newChapterRead.toFloat()
+                    track.last_chapter_read = newChapterRead
                     service.update(track, true)
                     db.insertTrack(track).executeAsBlocking()
                 } catch (e: Exception) {
                     Timber.e(e)
+                    failures.add(service to e.localizedMessage)
+                    if (retryWhenOnline) {
+                        delayTrackingUpdate(preferences, mangaId, newChapterRead, track)
+                    }
                 }
             }
         }
     }
+    return failures
+}
+
+private fun delayTrackingUpdate(
+    preferences: PreferencesHelper,
+    mangaId: Long?,
+    newChapterRead: Float,
+    track: Track,
+) {
+    val trackings = preferences.trackingsToAddOnline().get().toMutableSet()
+    val currentTracking = trackings.find { it.startsWith("$mangaId:${track.sync_id}:") }
+    trackings.remove(currentTracking)
+    trackings.add("$mangaId:${track.sync_id}:$newChapterRead")
+    preferences.trackingsToAddOnline().set(trackings)
+    DelayedTrackingUpdateJob.setupTask(preferences.context)
 }
