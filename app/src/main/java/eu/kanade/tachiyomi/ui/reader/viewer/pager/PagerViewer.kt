@@ -487,4 +487,11 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         }
         return false
     }
+
+    fun hideMenuIfVisible(item: Any) {
+        val currentItem = adapter.joinedItems.getOrNull(pager.currentItem)
+        if (item == currentItem && isIdle) {
+            activity.hideMenu()
+        }
+    }
 }

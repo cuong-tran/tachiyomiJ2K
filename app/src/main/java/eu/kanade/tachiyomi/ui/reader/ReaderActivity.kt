@@ -227,7 +227,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             field = value
             (viewer as? PagerViewer)?.config?.hingeGapSize = value
         }
-    val decimalFormat by lazy {
+    private val decimalFormat by lazy {
         DecimalFormat(
             "#.###",
             DecimalFormatSymbols()
@@ -1080,7 +1080,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     fun hideMenu() {
-        if (menuVisible) {
+        if (menuVisible && !isScrollingThroughPagesOrChapters) {
             setMenuVisibility(false)
         }
     }
