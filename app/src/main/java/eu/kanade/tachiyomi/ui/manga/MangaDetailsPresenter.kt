@@ -129,7 +129,9 @@ class MangaDetailsPresenter(
             runBlocking { getChapters() }
             controller.updateChapters(this.chapters)
         }
-        setTrackItems()
+        presenterScope.launch {
+            setTrackItems()
+        }
         refreshTracking(false)
     }
 
@@ -884,18 +886,17 @@ class MangaDetailsPresenter(
 
     // Tracking
     private fun setTrackItems() {
-        presenterScope.launch {
-            trackList = loggedServices.map { service ->
-                TrackItem(tracks.find { it.sync_id == service.id }, service)
-            }
+        trackList = loggedServices.filter { service ->
+            if (service !is EnhancedTrackService) return@filter true
+            service.accept(source)
+        }.map { service ->
+            TrackItem(tracks.find { it.sync_id == service.id }, service)
         }
     }
 
     suspend fun fetchTracks() {
         tracks = withContext(Dispatchers.IO) { db.getTracks(manga).executeAsBlocking() }
-        trackList = loggedServices.map { service ->
-            TrackItem(tracks.find { it.sync_id == service.id }, service)
-        }
+        setTrackItems()
         withContext(Dispatchers.Main) { controller?.refreshTracking(trackList) }
     }
 
