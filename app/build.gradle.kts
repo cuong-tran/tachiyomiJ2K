@@ -100,8 +100,8 @@ android {
             buildConfigField("Boolean", "INCLUDE_UPDATER", "true")
         }
         create("dev") {
-//            resourceConfigurations.clear()
-//            resourceConfigurations.add("en")
+            resourceConfigurations.clear()
+            resourceConfigurations.add("en")
         }
     }
 
