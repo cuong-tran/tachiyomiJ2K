@@ -45,6 +45,7 @@ class ChapterHolder(
         }
 
         binding.downloadButton.downloadButton.isVisible = !manga.isLocal() && !isLocked
+        localSource = manga.isLocal()
 
         ChapterUtil.setTextViewForChapter(binding.chapterTitle, item, hideStatus = isLocked)
 
