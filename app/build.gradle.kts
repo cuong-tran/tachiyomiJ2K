@@ -100,8 +100,8 @@ android {
             buildConfigField("Boolean", "INCLUDE_UPDATER", "true")
         }
         create("dev") {
-            resourceConfigurations.clear()
-            resourceConfigurations.add("en")
+//            resourceConfigurations.clear()
+//            resourceConfigurations.add("en")
         }
     }
 
@@ -149,15 +149,15 @@ dependencies {
     // Android X libraries
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.cardview:cardview:1.0.0")
-    implementation("com.google.android.material:material:1.7.0-rc01")
-    implementation("androidx.webkit:webkit:1.5.0")
+    implementation("com.google.android.material:material:1.8.0")
+    implementation("androidx.webkit:webkit:1.6.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.preference:preference:1.2.0")
-    implementation("androidx.annotation:annotation:1.4.0")
-    implementation("androidx.browser:browser:1.4.0")
+    implementation("androidx.annotation:annotation:1.5.0")
+    implementation("androidx.browser:browser:1.5.0")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.core:core-ktx:1.8.0")
+    implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("androidx.window:window:1.0.0")
