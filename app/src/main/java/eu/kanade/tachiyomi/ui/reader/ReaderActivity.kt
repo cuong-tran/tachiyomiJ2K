@@ -116,6 +116,7 @@ import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.spToPx
+import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.collapse
@@ -598,8 +599,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         return true
     }
 
-    private fun shiftDoublePages() {
+    fun shiftDoublePages(forceShift: Boolean? = null) {
         (viewer as? PagerViewer)?.config?.let { config ->
+            if (forceShift == config.shiftDoublePage) return
             config.shiftDoublePage = !config.shiftDoublePage
             viewModel.state.value.viewerChapters?.let {
                 (viewer as? PagerViewer)?.updateShifting()
@@ -608,6 +610,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             }
         }
     }
+
+    fun isFirstPageFull(): Boolean = viewModel.getCurrentChapter()?.pages?.get(0)?.fullPage == true
 
     private fun popToMain() {
         if (fromUrl) {
@@ -1252,21 +1256,24 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 pViewer.config.splitPages = preferences.automaticSplitsPage().get() && !pViewer.config.doublePages
             }
         }
-        val currentChapter = viewModel.getCurrentChapter()
         if (doublePages) {
-            // If we're moving from singe to double, we want the current page to be the first page
-            pViewer.config.shiftDoublePage = (
-                binding.readerNav.pageSeekbar.value.roundToInt() +
-                    (
-                        currentChapter?.pages?.take(binding.readerNav.pageSeekbar.value.roundToInt())
-                            ?.count { it.fullPage == true || it.isolatedPage } ?: 0
-                        )
-                ) % 2 != 0
+            // If we're moving from single to double, we want the current page to be the first page
+            val currentIndex = binding.readerNav.pageSeekbar.value.roundToInt()
+            pViewer.config.shiftDoublePage = shouldShiftDoublePages(currentIndex)
         }
         viewModel.state.value.viewerChapters?.let {
             pViewer.setChaptersDoubleShift(it)
         }
         invalidateOptionsMenu()
+    }
+
+    private fun shouldShiftDoublePages(currentIndex: Int): Boolean {
+        val currentChapter = viewModel.getCurrentChapter()
+        val currentPage = currentChapter?.pages?.get(currentIndex)
+        return (currentIndex +
+                (currentPage?.isEndPage == true && currentPage.fullPage != true).toInt() +
+                (currentChapter?.pages?.take(currentIndex)?.count { it.alonePage } ?: 0)
+        ) % 2 != 0
     }
 
     /**
@@ -1283,14 +1290,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             indexChapterToShift = null
             indexPageToShift = null
         } else if (lastShiftDoubleState != null) {
-            val currentChapter = viewerChapters.currChapter
-            (viewer as? PagerViewer)?.config?.shiftDoublePage = (
-                currentChapter.requestedPage +
-                    (
-                        currentChapter.pages?.take(currentChapter.requestedPage)
-                            ?.count { it.fullPage == true || it.isolatedPage } ?: 0
-                        )
-                ) % 2 != 0
+            val currentIndex = viewerChapters.currChapter.requestedPage
+            (viewer as? PagerViewer)?.config?.shiftDoublePage = shouldShiftDoublePages(currentIndex)
         }
         val currentChapterPageCount = viewerChapters.currChapter.pages?.size ?: 1
         binding.readerNav.root.visibility = when {

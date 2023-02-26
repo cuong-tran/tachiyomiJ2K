@@ -17,6 +17,8 @@ open class ReaderPage(
     var isolatedPage: Boolean = false,
     var firstHalf: Boolean? = null,
     var longPage: Boolean? = null,
+    var isEndPage: Boolean? = null,
+    var isStartPage: Boolean? = null,
 ) : Page(index, url, imageUrl, null) {
 
     open lateinit var chapter: ReaderChapter
@@ -28,6 +30,9 @@ open class ReaderPage(
             longPage = value
             if (value == true) shiftedPage = false
         }
+
+    val alonePage: Boolean
+        get() = fullPage == true || isolatedPage
 
     fun isFromSamePage(page: ReaderPage): Boolean =
         index == page.index && chapter.chapter.id == page.chapter.chapter.id

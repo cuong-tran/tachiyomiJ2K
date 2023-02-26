@@ -81,6 +81,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             }
         }
 
+    private var hasMoved = false
+
     /**
      * Variable used to hold the forward pos for reader activity shared transitions
      * Without this var landscapezoom wont work with activity transitions
@@ -99,6 +101,9 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
         override fun onPageScrollStateChanged(state: Int) {
             isIdle = state == ViewPager.SCROLL_STATE_IDLE
+            if (!hasMoved) {
+                hasMoved = !isIdle
+            }
         }
     }
 
@@ -295,6 +300,13 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         setChaptersInternal(chapters)
         pager.addOnPageChangeListener(pagerListener)
         // Since we removed the listener while shifting, call page change to update the ui
+        if (!hasMoved) {
+            activity.isScrollingThroughPagesOrChapters = true
+            chapters.currChapter.pages?.let { pages ->
+                moveToPage(pages[chapters.currChapter.requestedPage], false)
+            }
+            activity.isScrollingThroughPagesOrChapters = false
+        }
         onPageChange(pager.currentItem)
     }
 

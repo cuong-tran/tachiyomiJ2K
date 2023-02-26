@@ -189,8 +189,12 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         if (!viewer.config.doublePages) {
             // If not in double mode, set up items like before
             subItems.forEach {
-                (it as? ReaderPage)?.shiftedPage = false
-                (it as? ReaderPage)?.firstHalf = null
+                (it as? ReaderPage)?.apply {
+                    shiftedPage = false
+                    firstHalf = null
+                    isEndPage = null
+                    isStartPage = null
+                }
             }
             if (viewer.config.splitPages) {
                 var itemIndex = 0

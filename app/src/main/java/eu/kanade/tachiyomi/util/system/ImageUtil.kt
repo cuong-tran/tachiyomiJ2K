@@ -17,6 +17,7 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.webkit.MimeTypeMap
 import androidx.annotation.ColorInt
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.alpha
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
@@ -36,6 +37,7 @@ import java.net.URLConnection
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 object ImageUtil {
 
@@ -280,12 +282,16 @@ object ImageUtil {
         }
         val isLandscape = context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (darkBG) {
-            return if (!isLandscape && image.getPixel(left, bot).isWhite && image.getPixel(right, bot).isWhite) {
+            return if (!isLandscape && image.getPixel(left, bot).isWhite &&
+                image.getPixel(right, bot).isWhite
+            ) {
                 GradientDrawable(
                     GradientDrawable.Orientation.TOP_BOTTOM,
                     intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor),
                 )
-            } else if (!isLandscape && image.getPixel(left, top).isWhite && image.getPixel(right, top).isWhite) {
+            } else if (!isLandscape && image.getPixel(left, top).isWhite &&
+                image.getPixel(right, top).isWhite
+            ) {
                 GradientDrawable(
                     GradientDrawable.Orientation.TOP_BOTTOM,
                     intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel),
@@ -633,11 +639,66 @@ object ImageUtil {
             abs(color1.blue - color2.blue) < 30
     }
 
+    /** Returns if this bitmap matches what would be (if rightSide param is true)
+     * the single left side page, or the second page to read in a RTL book, first in an LTR book
+     *
+     * @param image: bitmap image to check
+     * @param rightSide: when true, check if its a single left side page, else right side
+     * */
+    fun isPagePadded(image: Bitmap, rightSide: Boolean): Boolean {
+        if (image.isSidePadded(!rightSide, checkWhite = true) ||
+            image.isSidePadded(!rightSide, checkWhite = false)
+        ) {
+            return false
+        }
+        return image.isSidePadded(rightSide, checkWhite = true) ||
+            image.isSidePadded(rightSide, checkWhite = false) ||
+            // if neither of the above 2 worked,
+            // try starting from the vert. middle and see which side has more padding
+            image.isOneSideMorePadded(rightSide, checkWhite = true) ||
+            image.isOneSideMorePadded(rightSide, checkWhite = false)
+    }
+
+    private fun Bitmap.isSidePadded(rightSide: Boolean, checkWhite: Boolean): Boolean {
+        val left = (width * 0.0275).toInt()
+        val right = width - left
+        val paddedSide = if (rightSide) right else left
+        val unPaddedSide = if (!rightSide) right else left
+        return (1 until 30).all {
+            // if all of a side is padded (the left page usually has a white padding on the right when scanned)
+            getPixel(paddedSide, (height * (it / 30f)).roundToInt()).isWhiteOrDark(checkWhite)
+        } && !(1 until 50).all {
+            // and if all of the other side isn't padded
+            getPixel(unPaddedSide, (height * (it / 50f)).roundToInt()).isWhiteOrDark(checkWhite)
+        }
+    }
+
+    private fun Bitmap.isOneSideMorePadded(rightSide: Boolean, checkWhite: Boolean): Boolean {
+        val middle = height / 2
+        val paddedSide: (Int) -> Int = { if (rightSide) width - it * 2 else it * 2 }
+        val unPaddedSide: (Int) -> Int = { if (!rightSide) width - it * 2 else it * 2 }
+//        val pixels = IntArray(100)
+//        getPixels(pixels, 0, 2, paddedSide(0), 0)
+        return run stop@{
+            (1 until 100).any {
+                if (!getPixel(paddedSide(it), middle).isWhiteOrDark(checkWhite)) return@stop false
+                !getPixel(unPaddedSide(it), middle).isWhiteOrDark(checkWhite)
+            }
+        } // && getPixels()
+    }
+
+    private fun Int.isWhiteOrDark(checkWhite: Boolean): Boolean =
+        if (checkWhite) isWhite else isDark
+
     private val Int.isWhite: Boolean
         get() = red + blue + green > 740
 
     private val Int.isDark: Boolean
-        get() = red < 40 && blue < 40 && green < 40 && alpha > 200
+        get() {
+            val bgArray = FloatArray(3)
+            ColorUtils.colorToHSL(this, bgArray)
+            return red < 40 && blue < 40 && green < 40 && alpha > 200 && bgArray[1] <= 0.2f
+        }
 
     fun getPercentOfColor(
         @ColorInt color: Int,

@@ -41,7 +41,6 @@ import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -192,7 +191,6 @@ class PagerPageHolder(
     /**
      * Called when this view is detached from the window. Unsubscribes any active subscription.
      */
-    @SuppressLint("ClickableViewAccessibility")
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         cancelProgressJob(1)
@@ -552,12 +550,12 @@ class PagerPageHolder(
             .doOnUnsubscribe {
                 try {
                     openStream?.close()
-                } catch (e: Exception) {}
+                } catch (_: Exception) {}
             }
             .doOnError {
                 try {
                     openStream?.close()
-                } catch (e: Exception) {}
+                } catch (_: Exception) {}
             }
             .subscribe({}, {})
     }
@@ -727,7 +725,7 @@ class PagerPageHolder(
                     splitDoublePages()
                 }
             }
-            scope?.launchUI {
+            scope.launchUI {
                 progressBar.completeAndFadeOut()
             }
             return imageStream
@@ -743,7 +741,7 @@ class PagerPageHolder(
             }
             val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
             return ImageUtil.splitBitmap(imageBitmap, (page.firstHalf == false).xor(!isLTR)) {
-                scope?.launchUI {
+                scope.launchUI {
                     if (it == 100) {
                         progressBar.completeAndFadeOut()
                     } else {
@@ -772,7 +770,7 @@ class PagerPageHolder(
                     splitDoublePages()
                     val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
                     return ImageUtil.splitBitmap(imageBitmap, !isLTR) {
-                        scope?.launchUI {
+                        scope.launchUI {
                             if (it == 100) {
                                 progressBar.completeAndFadeOut()
                             } else {
@@ -799,7 +797,7 @@ class PagerPageHolder(
             Timber.e("Cannot combine pages ${e.message}")
             return supportHingeIfThere(imageBytes.inputStream())
         }
-        scope?.launchUI { progressBar.setProgress(96) }
+        scope.launchUI { progressBar.setProgress(96) }
         val height = imageBitmap.height
         val width = imageBitmap.width
 
@@ -807,8 +805,27 @@ class PagerPageHolder(
             imageStream2.close()
             imageStream.close()
             page.fullPage = true
-            splitDoublePages()
+            delayPageUpdate {
+                if (page.index == 0 && viewer.config.shiftDoublePage) {
+                    viewer.activity.shiftDoublePages(false)
+                } else {
+                    viewer.splitDoublePages(page)
+                }
+            }
             return supportHingeIfThere(imageBytes.inputStream())
+        }
+        val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
+        if (page.index <= 2 && page.isEndPage == null && page.fullPage == null) {
+            page.isEndPage = ImageUtil.isPagePadded(imageBitmap, rightSide = !isLTR)
+            if (page.index == 1 && page.isEndPage == true && viewer.config.shiftDoublePage) {
+                shiftDoublePages(false)
+                return supportHingeIfThere(imageBytes.inputStream())
+            } else if ((page.isEndPage == true) &&
+                (if (page.index == 2) !viewer.activity.isFirstPageFull() else true)
+            ) {
+                shiftDoublePages(true)
+                return supportHingeIfThere(imageBytes.inputStream())
+            }
         }
 
         val imageBytes2 = imageStream2.readBytes()
@@ -823,7 +840,7 @@ class PagerPageHolder(
             Timber.e("Cannot combine pages ${e.message}")
             return supportHingeIfThere(imageBytes.inputStream())
         }
-        scope?.launchUI { progressBar.setProgress(97) }
+        scope.launchUI { progressBar.setProgress(97) }
         val height2 = imageBitmap2.height
         val width2 = imageBitmap2.width
 
@@ -835,7 +852,6 @@ class PagerPageHolder(
             splitDoublePages()
             return supportHingeIfThere(imageBytes.inputStream())
         }
-        val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
         val bg = if (viewer.config.readerTheme >= 2 || viewer.config.readerTheme == 0) {
             Color.WHITE
         } else {
@@ -844,8 +860,16 @@ class PagerPageHolder(
 
         imageStream.close()
         imageStream2.close()
+
+        if (extraPage?.index == 1 && extraPage?.isStartPage == null && extraPage?.fullPage == null) {
+            extraPage?.isStartPage = ImageUtil.isPagePadded(imageBitmap, rightSide = isLTR)
+            if (extraPage?.isStartPage == true) {
+                shiftDoublePages(true)
+                return supportHingeIfThere(imageBytes.inputStream())
+            }
+        }
         return ImageUtil.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, bg, viewer.config.hingeGapSize, context) {
-            scope?.launchUI {
+            scope.launchUI {
                 if (it == 100) {
                     progressBar.completeAndFadeOut()
                 } else {
@@ -887,11 +911,18 @@ class PagerPageHolder(
         return imageStream
     }
 
+    private fun shiftDoublePages(shift: Boolean) {
+        delayPageUpdate { viewer.activity.shiftDoublePages(shift) }
+    }
+
     private fun splitDoublePages() {
-        // extraPage ?: return
-        scope?.launchUI {
+        delayPageUpdate { viewer.splitDoublePages(page) }
+    }
+
+    fun delayPageUpdate(callback: () -> Unit) {
+        scope.launchUI {
             delay(100)
-            viewer.splitDoublePages(page)
+            callback()
             if (extraPage?.fullPage == true || page.fullPage == true) {
                 extraPage = null
             }
