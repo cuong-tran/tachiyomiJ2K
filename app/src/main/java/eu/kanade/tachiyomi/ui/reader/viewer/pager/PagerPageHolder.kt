@@ -817,7 +817,9 @@ class PagerPageHolder(
         val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
         if (page.index <= 2 && page.isEndPage == null && page.fullPage == null) {
             page.isEndPage = ImageUtil.isPagePadded(imageBitmap, rightSide = !isLTR)
-            if (page.index == 1 && page.isEndPage == true && viewer.config.shiftDoublePage) {
+            if (page.index == 1 && page.isEndPage == true && viewer.config.shiftDoublePage &&
+                !viewer.activity.isFirstPageEnd()
+            ) {
                 shiftDoublePages(false)
                 return supportHingeIfThere(imageBytes.inputStream())
             } else if ((page.isEndPage == true) &&

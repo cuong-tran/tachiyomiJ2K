@@ -81,7 +81,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             }
         }
 
-    private var hasMoved = false
+    var hasMoved = false
 
     /**
      * Variable used to hold the forward pos for reader activity shared transitions

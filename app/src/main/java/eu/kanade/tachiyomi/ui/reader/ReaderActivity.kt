@@ -612,6 +612,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     fun isFirstPageFull(): Boolean = viewModel.getCurrentChapter()?.pages?.get(0)?.fullPage == true
+    fun isFirstPageEnd(): Boolean = viewModel.getCurrentChapter()?.pages?.get(0)?.isEndPage == true
 
     private fun popToMain() {
         if (fromUrl) {
@@ -1259,6 +1260,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         if (doublePages) {
             // If we're moving from single to double, we want the current page to be the first page
             val currentIndex = binding.readerNav.pageSeekbar.value.roundToInt()
+            viewModel.getCurrentChapter()?.requestedPage = currentIndex
+            pViewer.hasMoved = false
             pViewer.config.shiftDoublePage = shouldShiftDoublePages(currentIndex)
         }
         viewModel.state.value.viewerChapters?.let {
@@ -1270,10 +1273,11 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     private fun shouldShiftDoublePages(currentIndex: Int): Boolean {
         val currentChapter = viewModel.getCurrentChapter()
         val currentPage = currentChapter?.pages?.get(currentIndex)
-        return (currentIndex +
+        return (
+            currentIndex +
                 (currentPage?.isEndPage == true && currentPage.fullPage != true).toInt() +
                 (currentChapter?.pages?.take(currentIndex)?.count { it.alonePage } ?: 0)
-        ) % 2 != 0
+            ) % 2 != 0
     }
 
     /**
