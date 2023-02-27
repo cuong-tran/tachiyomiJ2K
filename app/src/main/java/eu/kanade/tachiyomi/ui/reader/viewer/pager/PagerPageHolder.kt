@@ -804,10 +804,14 @@ class PagerPageHolder(
         if (height < width) {
             imageStream2.close()
             imageStream.close()
+            val oldValue = page.fullPage
             page.fullPage = true
             delayPageUpdate {
-                if (page.index == 0 && viewer.config.shiftDoublePage) {
-                    viewer.activity.shiftDoublePages(false)
+                if (page.index == 0 &&
+                    (viewer.config.shiftDoublePage || extraPage?.isEndPage == true) &&
+                    oldValue != true
+                ) {
+                    viewer.activity.shiftDoublePages(extraPage?.isEndPage == true, extraPage)
                 } else {
                     viewer.splitDoublePages(page)
                 }
@@ -921,7 +925,7 @@ class PagerPageHolder(
         delayPageUpdate { viewer.splitDoublePages(page) }
     }
 
-    fun delayPageUpdate(callback: () -> Unit) {
+    private fun delayPageUpdate(callback: () -> Unit) {
         scope.launchUI {
             delay(100)
             callback()

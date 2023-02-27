@@ -298,8 +298,6 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         // If we don't the size change could put us on a new chapter
         pager.removeOnPageChangeListener(pagerListener)
         setChaptersInternal(chapters)
-        pager.addOnPageChangeListener(pagerListener)
-        // Since we removed the listener while shifting, call page change to update the ui
         if (!hasMoved) {
             activity.isScrollingThroughPagesOrChapters = true
             chapters.currChapter.pages?.let { pages ->
@@ -307,6 +305,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             }
             activity.isScrollingThroughPagesOrChapters = false
         }
+        pager.addOnPageChangeListener(pagerListener)
+        // Since we removed the listener while shifting, call page change to update the ui
         onPageChange(pager.currentItem)
     }
 
