@@ -101,7 +101,7 @@ object ImageUtil {
                 Format.Webp -> type.isAnimated && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
                 else -> false
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
         return false
     }
@@ -326,23 +326,6 @@ object ImageUtil {
             )
         }
         return ColorDrawable(backgroundColor)
-    }
-
-    /**
-     * Check whether the image is a double-page spread
-     * @return true if the width is greater than the height
-     */
-    fun isDoublePage(imageStream: InputStream): Boolean {
-        imageStream.mark(imageStream.available() + 1)
-
-        val imageBytes = imageStream.readBytes()
-
-        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, options)
-
-        imageStream.reset()
-
-        return options.outWidth > options.outHeight
     }
 
     fun splitBitmap(
