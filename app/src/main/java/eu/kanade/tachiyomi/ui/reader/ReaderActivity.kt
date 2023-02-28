@@ -208,6 +208,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     private var indexChapterToShift: Long? = null
 
     private var lastCropRes = 0
+    var manuallyShiftedPages = false
+        private set
 
     val isSplitScreen: Boolean
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode
@@ -593,6 +595,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         when (item.itemId) {
             R.id.action_shift_double_page -> {
                 shiftDoublePages()
+                manuallyShiftedPages = true
             }
             else -> return super.onOptionsItemSelected(item)
         }
@@ -600,12 +603,13 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     fun shiftDoublePages(forceShift: Boolean? = null, page: ReaderPage? = null) {
-        (viewer as? PagerViewer)?.config?.let { config ->
-            if (forceShift == config.shiftDoublePage) return
-            config.shiftDoublePage = !config.shiftDoublePage
+        (viewer as? PagerViewer)?.let { pViewer ->
+            if (forceShift == pViewer.config.shiftDoublePage) return
+            if (page != null && pViewer.getShiftedPage() == page) return
+            pViewer.config.shiftDoublePage = !pViewer.config.shiftDoublePage
             viewModel.state.value.viewerChapters?.let {
-                (viewer as? PagerViewer)?.updateShifting(page)
-                (viewer as? PagerViewer)?.setChaptersDoubleShift(it)
+                pViewer.updateShifting(page)
+                pViewer.setChaptersDoubleShift(it)
                 invalidateOptionsMenu()
             }
         }
@@ -821,6 +825,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
         binding.chaptersSheet.shiftPageButton.setOnClickListener {
             shiftDoublePages()
+            manuallyShiftedPages = true
         }
 
         binding.readerNav.leftChapter.setOnClickListener { loadAdjacentChapter(false) }
@@ -1302,6 +1307,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             currentChapterPageCount == 1 -> View.GONE
             binding.chaptersSheet.root.sheetBehavior.isCollapsed() -> View.VISIBLE
             else -> View.INVISIBLE
+        }
+        if (lastShiftDoubleState == null) {
+            manuallyShiftedPages = false
         }
         lastShiftDoubleState = null
         viewer?.setChapters(viewerChapters)

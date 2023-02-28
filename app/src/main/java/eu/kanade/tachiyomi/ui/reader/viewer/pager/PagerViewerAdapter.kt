@@ -167,12 +167,8 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 (oldCurrent?.first as? ReaderPage)?.firstHalf == false
             } else {
                 oldCurrent?.second == current ||
-                    (current.index + 1) < (
-                    (
-                        oldCurrent?.second
-                            ?: oldCurrent?.first
-                        ) as? ReaderPage
-                    )?.index ?: 0
+                    (current.index + 1) <
+                    (((oldCurrent?.second ?: oldCurrent?.first) as? ReaderPage)?.index ?: 0)
             },
         )
 

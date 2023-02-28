@@ -647,27 +647,29 @@ object ImageUtil {
         val right = width - left
         val paddedSide = if (rightSide) right else left
         val unPaddedSide = if (!rightSide) right else left
-        return (1 until 30).all {
+        return (1 until 30).count {
             // if all of a side is padded (the left page usually has a white padding on the right when scanned)
             getPixel(paddedSide, (height * (it / 30f)).roundToInt()).isWhiteOrDark(checkWhite)
-        } && !(1 until 50).all {
+        } >= 27 && !(1 until 50).all {
             // and if all of the other side isn't padded
             getPixel(unPaddedSide, (height * (it / 50f)).roundToInt()).isWhiteOrDark(checkWhite)
         }
     }
 
     private fun Bitmap.isOneSideMorePadded(rightSide: Boolean, checkWhite: Boolean): Boolean {
-        val middle = height / 2
-        val paddedSide: (Int) -> Int = { if (rightSide) width - it * 2 else it * 2 }
-        val unPaddedSide: (Int) -> Int = { if (!rightSide) width - it * 2 else it * 2 }
-//        val pixels = IntArray(100)
-//        getPixels(pixels, 0, 2, paddedSide(0), 0)
+        val middle = (height * 0.475).roundToInt()
+        val middle2 = (height * 0.525).roundToInt()
+        val widthFactor = max(1, (width / 400f).roundToInt())
+        val paddedSide: (Int) -> Int = { if (!rightSide) width - it * widthFactor else it * widthFactor }
+        val unPaddedSide: (Int) -> Int = { if (rightSide) width - it * widthFactor else it * widthFactor }
         return run stop@{
-            (1 until 100).any {
+            (1 until 37).any {
                 if (!getPixel(paddedSide(it), middle).isWhiteOrDark(checkWhite)) return@stop false
-                !getPixel(unPaddedSide(it), middle).isWhiteOrDark(checkWhite)
+                if (!getPixel(paddedSide(it), middle2).isWhiteOrDark(checkWhite)) return@stop false
+                !getPixel(unPaddedSide(it), middle).isWhiteOrDark(checkWhite) ||
+                    !getPixel(unPaddedSide(it), middle2).isWhiteOrDark(checkWhite)
             }
-        } // && getPixels()
+        }
     }
 
     private fun Int.isWhiteOrDark(checkWhite: Boolean): Boolean =
