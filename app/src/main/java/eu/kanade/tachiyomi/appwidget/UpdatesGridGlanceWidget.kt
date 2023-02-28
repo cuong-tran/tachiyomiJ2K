@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.appwidget.components.CoverHeight
 import eu.kanade.tachiyomi.appwidget.components.CoverWidth
 import eu.kanade.tachiyomi.appwidget.components.LockedWidget
+import eu.kanade.tachiyomi.appwidget.components.UpdatesWidget
 import eu.kanade.tachiyomi.appwidget.util.appWidgetBackgroundRadius
 import eu.kanade.tachiyomi.appwidget.util.calculateRowAndColumnCount
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -33,7 +34,6 @@ import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.MainScope
-import tachiyomi.presentation.widget.components.UpdatesWidget
 import uy.kohesive.injekt.injectLazy
 import java.util.Calendar
 import java.util.Date
