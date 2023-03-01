@@ -3,12 +3,14 @@ package eu.kanade.tachiyomi.ui.recents
 import android.text.format.DateUtils
 import android.view.View
 import android.widget.TextView
+import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.util.system.dpToPx
 import java.util.Date
 
 class DateItem(val date: Date, val addedString: Boolean = false) : AbstractHeaderItem<DateItem.Holder>() {
@@ -48,6 +50,7 @@ class DateItem(val date: Date, val addedString: Boolean = false) : AbstractHeade
         private val sectionText: TextView = view.findViewById(R.id.section_text)
 
         fun bind(item: DateItem) {
+            sectionText.updatePadding(top = (if (bindingAdapterPosition == 0) 4 else 18).dpToPx)
             val dateString = DateUtils.getRelativeTimeSpanString(item.date.time, now, DateUtils.DAY_IN_MILLIS)
             sectionText.text =
                 if (item.addedString) itemView.context.getString(R.string.fetched_, dateString) else dateString

@@ -197,7 +197,6 @@ object PreferenceKeys {
     const val groupChaptersHistory = "group_chapters_history"
 
     const val showUpdatedTime = "show_updated_time"
-    const val groupChaptersUpdates = "group_chapters_updates"
 
     const val categoryNumberOfItems = "display_number_of_items"
 

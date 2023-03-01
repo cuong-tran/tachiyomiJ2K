@@ -20,6 +20,7 @@ import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.TransitionSet
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -29,6 +30,7 @@ import com.google.android.material.tabs.TabLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadService
@@ -163,9 +165,7 @@ class RecentsController(bundle: Bundle? = null) :
         binding.recycler.layoutManager = LinearLayoutManagerAccurateOffset(view.context)
         binding.recycler.setHasFixedSize(true)
         binding.recycler.recycledViewPool.setMaxRecycledViews(0, 0)
-        binding.recycler.addItemDecoration(
-            RecentMangaDivider(view.context),
-        )
+        binding.recycler.addItemDecoration(RecentMangaDivider(view.context))
         adapter.isSwipeEnabled = true
         adapter.itemTouchHelperCallback.setSwipeFlags(
             if (view.resources.isLTR) ItemTouchHelper.LEFT else ItemTouchHelper.RIGHT,
@@ -513,7 +513,7 @@ class RecentsController(bundle: Bundle? = null) :
         binding.frameLayout.alpha = 1f
         binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
         adapter.removeAllScrollableHeaders()
-        adapter.updateItems(recents)
+        adapter.updateDataSet(recents)
         adapter.onLoadMoreComplete(null)
         if (isControllerVisible) {
             activityBinding?.appBar?.lockYPos = false
@@ -568,8 +568,19 @@ class RecentsController(bundle: Bundle? = null) :
             binding.downloadBottomSheet.dlBottomSheet.onUpdateDownloadedPages(download)
         }
         val id = download.chapter.id ?: return
-        val holder = binding.recycler.findViewHolderForItemId(id) as? RecentMangaHolder ?: return
-        holder.notifyStatus(download.status, download.progress, download.chapter.read, true)
+        val item = adapter.getItemByChapterId(id) ?: return
+        val holder = binding.recycler.findViewHolderForItemId(item.id!!) as? RecentMangaHolder ?: return
+        if (item.id == id) {
+            holder.notifyStatus(download.status, download.progress, download.chapter.read, true)
+        } else {
+            holder.notifySubStatus(
+                download.chapter,
+                download.status,
+                download.progress,
+                download.chapter.read,
+                true,
+            )
+        }
     }
 
     fun updateDownloadStatus(isRunning: Boolean) {
@@ -605,6 +616,26 @@ class RecentsController(bundle: Bundle? = null) :
         presenter.startDownloadChapterNow(chapter)
     }
 
+    override fun downloadChapter(position: Int, chapter: Chapter) {
+        val view = view ?: return
+        val item = adapter.getItem(position) as? RecentMangaItem ?: return
+        val manga = item.mch.manga
+        val status = item.downloadInfo.find { it.chapterId == chapter.id }?.status ?: return
+        if (status != Download.State.NOT_DOWNLOADED && status != Download.State.ERROR) {
+            presenter.deleteChapter(chapter, manga)
+        } else {
+            if (status == Download.State.ERROR) {
+                DownloadService.start(view.context)
+            } else {
+                presenter.downloadChapter(manga, chapter)
+            }
+        }
+    }
+
+    override fun startDownloadNow(position: Int, chapter: Chapter) {
+        presenter.startDownloadChapterNow(chapter)
+    }
+
     override fun onCoverClick(position: Int) {
         val manga = (adapter.getItem(position) as? RecentMangaItem)?.mch?.manga ?: return
         router.pushController(MangaDetailsController(manga).withFadeTransaction())
@@ -612,6 +643,25 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun onRemoveHistoryClicked(position: Int) {
         onItemLongClick(position)
+    }
+
+    override fun onSubChapterClicked(position: Int, chapter: Chapter, view: View) {
+        val manga = (adapter.getItem(position) as? RecentMangaItem)?.mch?.manga ?: return
+        openChapter(view, manga, chapter)
+    }
+
+    override fun areExtraChaptersExpanded(position: Int): Boolean {
+        val item = (adapter.getItem(position) as? RecentMangaItem) ?: return false
+        val date = presenter.dateFormat.format(item.chapter.date_fetch)
+        val invertDefault = !presenter.preferences.collapseGroupedUpdates().get()
+        return presenter.expandedSectionsMap["${item.mch.manga} - $date"]?.xor(invertDefault)
+            ?: invertDefault
+    }
+
+    override fun updateExpandedExtraChapters(position: Int, expanded: Boolean) {
+        val item = (adapter.getItem(position) as? RecentMangaItem) ?: return
+        val date = presenter.dateFormat.format(item.chapter.date_fetch)
+        presenter.expandedSectionsMap["${item.mch.manga} - $date"] = expanded
     }
 
     fun tempJumpTo(viewType: Int) {
@@ -645,21 +695,25 @@ class RecentsController(bundle: Bundle? = null) :
                     },
                 )
             } else {
-                val activity = activity ?: return false
-                activity.apply {
-                    val (manga, chapter) = item.mch.manga to item.chapter
-                    if (view != null) {
-                        val (intent, bundle) = ReaderActivity
-                            .newIntentWithTransitionOptions(activity, manga, chapter, view)
-                        startActivity(intent, bundle)
-                    } else {
-                        val intent = ReaderActivity.newIntent(activity, manga, chapter)
-                        startActivity(intent)
-                    }
-                }
+                if (activity == null) return false
+                openChapter(view?.findViewById(R.id.main_view), item.mch.manga, item.chapter)
             }
         } else if (item is RecentMangaHeaderItem) return false
         return true
+    }
+
+    private fun openChapter(view: View?, manga: Manga, chapter: Chapter) {
+        val activity = activity ?: return
+        activity.apply {
+            if (view != null) {
+                val (intent, bundle) = ReaderActivity
+                    .newIntentWithTransitionOptions(activity, manga, chapter, view)
+                startActivity(intent, bundle)
+            } else {
+                val intent = ReaderActivity.newIntent(activity, manga, chapter)
+                startActivity(intent)
+            }
+        }
     }
 
     override fun onItemLongClick(position: Int) {
@@ -686,7 +740,15 @@ class RecentsController(bundle: Bundle? = null) :
         val preferences = presenter.preferences
         val db = presenter.db
         val item = adapter.getItem(position) as? RecentMangaItem ?: return
-        val chapter = item.chapter
+        val holder = binding.recycler.findViewHolderForAdapterPosition(position)
+        val holderId = (holder as? RecentMangaHolder)?.chapterId
+        adapter.notifyItemChanged(position)
+        val transition = TransitionSet().addTransition(androidx.transition.Fade())
+        transition.duration = view!!.resources.getInteger(android.R.integer.config_shortAnimTime)
+            .toLong()
+        androidx.transition.TransitionManager.beginDelayedTransition(binding.recycler, transition)
+        val chapter = holderId?.let { item.mch.extraChapters.find { holderId == it.id } }
+            ?: item.chapter
         val manga = item.mch.manga
         val lastRead = chapter.last_page_read
         val pagesLeft = chapter.pages_left
@@ -743,7 +805,6 @@ class RecentsController(bundle: Bundle? = null) :
         setOnQueryTextChangeListener(activityBinding?.searchToolbar?.searchView) {
             if (query != it) {
                 query = it ?: return@setOnQueryTextChangeListener false
-                // loadNoMore()
                 resetProgressItem()
                 refresh()
             }

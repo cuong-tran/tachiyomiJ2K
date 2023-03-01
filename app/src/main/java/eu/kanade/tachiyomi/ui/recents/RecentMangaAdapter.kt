@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.recents
 
+import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.fredporciuncula.flow.preferences.Preference
 import eu.davidea.flexibleadapter.items.IFlexible
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterAdapter
@@ -30,10 +32,6 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     val viewType: Int
         get() = delegate.getViewType()
 
-    fun updateItems(items: List<IFlexible<*>>?) {
-        updateDataSet(items)
-    }
-
     val decimalFormat = DecimalFormat(
         "#.###",
         DecimalFormatSymbols()
@@ -50,6 +48,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         preferences.showTitleFirstInRecents().register { showTitleFirst = it }
         preferences.showUpdatedTime().register { showUpdatedTime = it }
         preferences.uniformGrid().register { uniformCovers = it }
+        preferences.collapseGroupedUpdates().register { }
         preferences.sortFetchedTime().asImmediateFlowIn(delegate.scope()) { sortByFetched = it }
         preferences.outlineOnCovers().register(false) {
             showOutline = it
@@ -57,6 +56,13 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
                 (recyclerView.findViewHolderForAdapterPosition(i) as? RecentMangaHolder)?.updateCards()
             }
         }
+    }
+
+    fun getItemByChapterId(id: Long): RecentMangaItem? {
+        return currentItems.find {
+            val item = (it as? RecentMangaItem) ?: return@find false
+            return@find id in item.mch.allChapters.map { ch -> ch.id }
+        } as? RecentMangaItem
     }
 
     private fun <T> Preference<T>.register(notify: Boolean = true, onChanged: (T) -> Unit) {
@@ -71,11 +77,12 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
             .launchIn(delegate.scope())
     }
 
-    interface RecentsInterface : RecentMangaInterface, DownloadInterface
-
-    interface RecentMangaInterface {
+    interface RecentsInterface : GroupedDownloadInterface {
         fun onCoverClick(position: Int)
         fun onRemoveHistoryClicked(position: Int)
+        fun onSubChapterClicked(position: Int, chapter: Chapter, view: View)
+        fun updateExpandedExtraChapters(position: Int, expanded: Boolean)
+        fun areExtraChaptersExpanded(position: Int): Boolean
         fun markAsRead(position: Int)
         fun isSearching(): Boolean
         fun scope(): CoroutineScope

@@ -259,6 +259,8 @@
     <string name="fetched_">Fetched %1$s</string>
     <string name="view_history">View history</string>
     <string name="view_all_updates">View all updates</string>
+    <string name="show_more_chapters">Show more chapters</string>
+    <string name="collapse_grouped_chapters">Collapse grouped chapters</string>
     <string name="search_recents">Search recents…</string>
     <string name="no_recent_read_updated_manga">No recently read or updated manga</string>
     <string name="no_recent_chapters">No recent chapters</string>

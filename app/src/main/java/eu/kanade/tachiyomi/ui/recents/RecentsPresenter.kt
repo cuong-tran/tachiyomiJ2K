@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.HistoryImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaChapter
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
@@ -33,8 +34,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 import java.util.TreeMap
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -66,11 +69,14 @@ class RecentsPresenter(
     private var shouldMoveToTop = false
     var viewType: Int = preferences.recentsViewType().get()
         private set
+    val expandedSectionsMap = mutableMapOf<String, Boolean>()
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
     private fun resetOffsets() {
         finished = false
         shouldMoveToTop = true
         pageOffset = 0
+        expandedSectionsMap.clear()
     }
 
     private var pageOffset = 0
@@ -95,7 +101,6 @@ class RecentsPresenter(
         listOf(
             preferences.groupChaptersHistory(),
             preferences.showReadInAllRecents(),
-            preferences.groupChaptersUpdates(),
             preferences.sortFetchedTime(),
         ).forEach {
             it.asFlow()
@@ -151,7 +156,7 @@ class RecentsPresenter(
 
         val showRead = ((preferences.showReadInAllRecents().get() || query.isNotEmpty()) && limit != 0) || includeReadAnyway
         val isUngrouped = viewType > VIEW_TYPE_GROUP_ALL || query.isNotEmpty()
-        val groupChaptersUpdates = preferences.groupChaptersUpdates().get()
+        val groupChaptersUpdates = preferences.collapseGroupedUpdates().get()
         val groupChaptersHistory = preferences.groupChaptersHistory().get()
 
         val isCustom = customViewType != null
@@ -182,40 +187,54 @@ class RecentsPresenter(
                 }.executeOnIO()
             }
             viewType == VIEW_TYPE_ONLY_UPDATES -> {
-                if (groupChaptersUpdates) {
-                    db.getUpdatedChaptersDistinct(
-                        query,
-                        if (isCustom) ENDLESS_LIMIT else pageOffset,
-                        !updatePageCount && !isOnFirstPage,
-                    )
-                } else {
-                    db.getRecentChapters(
-                        query,
-                        if (isCustom) ENDLESS_LIMIT else pageOffset,
-                        !updatePageCount && !isOnFirstPage,
-                    )
-                }.executeOnIO()
-                    .map {
+                db.getRecentChapters(
+                    query,
+                    if (isCustom) ENDLESS_LIMIT else pageOffset,
+                    !updatePageCount && !isOnFirstPage,
+                ).executeOnIO().groupBy {
+                    val date = it.chapter.date_fetch
+                    it.manga.id to if (date <= 0L) "-1" else dateFormat.format(Date(date))
+                }
+                    .map { entry ->
+                        val manga = entry.value.first().manga
+                        val chapters = entry.value.map(MangaChapter::chapter)
+                        val firstChapter: Chapter
+                        var sortedChapters: MutableList<Chapter>
+                        if (chapters.size == 1) {
+                            firstChapter = chapters.first()
+                            sortedChapters = mutableListOf()
+                        } else {
+                            val sort: Comparator<Chapter> =
+                                ChapterSort(manga, chapterFilter, preferences)
+                                    .sortComparator(true)
+                            sortedChapters = chapters.sortedWith(sort).toMutableList()
+                            firstChapter =
+                                sortedChapters.firstOrNull { !it.read } ?: sortedChapters.last()
+                            sortedChapters.remove(firstChapter)
+                            sortedChapters = (
+                                sortedChapters.filter { !it.read } +
+                                    sortedChapters.filter { it.read }.reversed()
+                                ).toMutableList()
+                        }
                         MangaChapterHistory(
-                            it.manga,
-                            it.chapter,
-                            HistoryImpl().apply {
-                                last_read = it.chapter.date_fetch
-                            },
+                            manga,
+                            firstChapter,
+                            HistoryImpl().apply { last_read = firstChapter.date_fetch },
+                            sortedChapters,
                         )
                     }
             }
             else -> emptyList()
         }
 
-        if (cReading.size < ENDLESS_LIMIT) {
+        if (cReading.size + cReading.sumOf { it.extraChapters.size } < ENDLESS_LIMIT) {
             finished = true
         }
 
         if (!isCustom &&
             (pageOffset == 0 || updatePageCount)
         ) {
-            pageOffset += cReading.size
+            pageOffset += cReading.size + cReading.sumOf { it.extraChapters.size }
         }
 
         if (query != oldQuery) return
@@ -242,9 +261,9 @@ class RecentsPresenter(
                     getNextChapter(it.manga)
                         ?: if (showRead && it.chapter.id != null) it.chapter else null
                 }
-                it.history.id == null -> {
+                it.history.id == null && viewType != VIEW_TYPE_ONLY_UPDATES -> {
                     getFirstUpdatedChapter(it.manga, it.chapter)
-                        ?: if ((showRead && it.chapter.id != null) || viewType == VIEW_TYPE_ONLY_UPDATES) it.chapter else null
+                        ?: if ((showRead && it.chapter.id != null)) it.chapter else null
                 }
                 else -> {
                     it.chapter
@@ -330,7 +349,7 @@ class RecentsPresenter(
         } else {
             heldItems[customViewType] = newItems
         }
-        val newCount = itemCount + newItems.size
+        val newCount = itemCount + newItems.size + newItems.sumOf { it.mch.extraChapters.size }
         val hasNewItems = newItems.isNotEmpty()
         if (updatePageCount && (newCount < if (limit > 0) limit else 25) &&
             (viewType != VIEW_TYPE_GROUP_ALL || query.isNotEmpty()) &&
@@ -390,14 +409,34 @@ class RecentsPresenter(
             if (downloadManager.isChapterDownloaded(item.chapter, item.mch.manga)) {
                 item.status = Download.State.DOWNLOADED
             } else if (downloadManager.hasQueue()) {
-                item.status = downloadManager.queue.find { it.chapter.id == item.chapter.id }
-                    ?.status ?: Download.State.default
+                item.download = downloadManager.queue.find { it.chapter.id == item.chapter.id }
+                item.status = item.download?.status ?: Download.State.default
+            }
+
+            item.downloadInfo = item.mch.extraChapters.map { chapter ->
+                val downloadInfo = RecentMangaItem.DownloadInfo()
+                downloadInfo.chapterId = chapter.id
+                if (downloadManager.isChapterDownloaded(chapter, item.mch.manga)) {
+                    downloadInfo.status = Download.State.DOWNLOADED
+                } else if (downloadManager.hasQueue()) {
+                    downloadInfo.download = downloadManager.queue.find { it.chapter.id == chapter.id }
+                    downloadInfo.status = downloadInfo.download?.status ?: Download.State.default
+                }
+                downloadInfo
             }
         }
     }
 
     override fun updateDownload(download: Download) {
-        recentItems.find { it.chapter.id == download.chapter.id }?.download = download
+        recentItems.find { download.chapter.id in it.mch.allChapters.map { ch -> ch.id } }?.apply {
+            if (chapter.id != download.chapter.id) {
+                val downloadInfo = downloadInfo.find { it.chapterId == download.chapter.id }
+                    ?: return@apply
+                downloadInfo.download = download
+            } else {
+                this.download = download
+            }
+        }
         presenterScope.launchUI { controller?.updateChapterDownload(download) }
     }
 
@@ -443,11 +482,23 @@ class RecentsPresenter(
             downloadManager.deleteChapters(listOf(chapter), manga, source, true)
         }
         if (update) {
-            val item = recentItems.find { it.chapter.id == chapter.id } ?: return
+            val item = recentItems.find { chapter.id in it.mch.allChapters.map { ch -> ch.id } } ?: return
             item.apply {
-                if (chapter.bookmark && !preferences.removeBookmarkedChapters().get()) return@apply
-                status = Download.State.NOT_DOWNLOADED
-                download = null
+                if (chapter.id != item.chapter.id) {
+                    val extraChapter = mch.extraChapters.find { it.id == chapter.id } ?: return@apply
+                    val downloadInfo = downloadInfo.find { it.chapterId == chapter.id } ?: return@apply
+                    if (extraChapter.bookmark && !preferences.removeBookmarkedChapters().get()) {
+                        return@apply
+                    }
+                    downloadInfo.status = Download.State.NOT_DOWNLOADED
+                    downloadInfo.download = null
+                } else {
+                    if (chapter.bookmark && !preferences.removeBookmarkedChapters().get()) {
+                        return@apply
+                    }
+                    status = Download.State.NOT_DOWNLOADED
+                    download = null
+                }
             }
 
             controller?.showLists(recentItems, true)

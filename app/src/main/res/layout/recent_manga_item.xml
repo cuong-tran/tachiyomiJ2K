@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/material_green_800"
+        android:layout_gravity="top"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,12 +25,24 @@
             android:layout_height="24dp"
             android:layout_gravity="end|center"
             android:layout_marginEnd="21dp"
+            android:contentDescription="@string/read"
             android:src="@drawable/ic_eye_24dp"
             app:tint="@color/md_white_1000" />
     </FrameLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/front_view"
+        android:animateLayoutChanges="true"
+        android:layout_width="match_parent"
+        android:clipToPadding="false"
+        android:clipChildren="false"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical"
+        android:minHeight="@dimen/material_component_lists_single_line_with_avatar_height">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
@@ -156,7 +169,6 @@
             app:layout_constraintStart_toStartOf="@id/title"
             app:layout_constraintTop_toBottomOf="@id/subtitle" />
 
-
         <LinearLayout
             android:id="@+id/button_layout"
             android:layout_width="wrap_content"
@@ -177,6 +189,21 @@
                 app:layout_constraintHorizontal_chainStyle="spread"
                 app:srcCompat="@drawable/ic_eye_remove_outline_24dp"
                 app:tint="@color/holo_red" />
+
+            <ImageButton
+                android:id="@+id/show_more_chapters"
+                android:layout_width="45dp"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/show_more_chapters"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:tooltipText="@string/show_more_chapters"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:tint="?attr/colorSecondary"
+                app:srcCompat="@drawable/ic_expand_more_24dp" />
 
             <include
                 android:id="@+id/download_button"
@@ -200,5 +227,13 @@
             android:layout_height="6dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/bottom_line" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/more_chapters_layout"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_height="wrap_content"/>
+    </androidx.appcompat.widget.LinearLayoutCompat>
 </FrameLayout>
