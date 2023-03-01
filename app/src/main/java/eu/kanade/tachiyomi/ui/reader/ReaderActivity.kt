@@ -97,6 +97,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil.Companion.preferredChapterName
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
@@ -1315,12 +1316,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         viewer?.setChapters(viewerChapters)
         intentPageNumber?.let { moveToPageIndex(it) }
         intentPageNumber = null
-        binding.toolbar.subtitle = if (viewModel.manga!!.hideChapterTitle(preferences)) {
-            val number = decimalFormat.format(viewerChapters.currChapter.chapter.chapter_number.toDouble())
-            getString(R.string.chapter_, number)
-        } else {
-            viewerChapters.currChapter.chapter.name
-        }
+        val chapter = viewerChapters.currChapter.chapter
+        binding.toolbar.subtitle =
+            chapter.preferredChapterName(this, viewModel.manga!!, preferences)
+
         if (viewerChapters.nextChapter == null && viewerChapters.prevChapter == null) {
             binding.readerNav.leftChapter.isVisible = false
             binding.readerNav.rightChapter.isVisible = false

@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.RecentMangaItemBinding
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil.Companion.preferredChapterName
 import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
@@ -91,12 +92,10 @@ class RecentMangaHolder(
         }
 
         binding.removeHistory.isVisible = item.mch.history.id != null && showRemoveHistory
-        val chapterName = if (item.mch.manga.hideChapterTitle(adapter.preferences)) {
-            val number = adapter.decimalFormat.format(item.chapter.chapter_number.toDouble())
-            itemView.context.getString(R.string.chapter_, number)
-        } else {
-            item.chapter.name
-        }
+        val context = itemView.context
+        val chapterName =
+            item.chapter.preferredChapterName(context, item.mch.manga, adapter.preferences)
+
         binding.title.apply {
             text = if (!showTitleFirst) {
                 chapterName
@@ -120,7 +119,6 @@ class RecentMangaHolder(
         }
         val notValidNum = item.mch.chapter.chapter_number <= 0
         binding.body.isVisible = !isSmallUpdates
-        val context = itemView.context
         binding.body.text = when {
             item.mch.chapter.id == null -> context.timeSpanFromNow(R.string.added_, item.mch.manga.date_added)
             isSmallUpdates -> ""

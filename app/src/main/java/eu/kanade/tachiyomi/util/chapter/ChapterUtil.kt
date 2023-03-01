@@ -7,15 +7,25 @@ import androidx.core.widget.TextViewCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 
 class ChapterUtil {
     companion object {
+
+        private val decimalFormat = DecimalFormat(
+            "#.###",
+            DecimalFormatSymbols()
+                .apply { decimalSeparator = '.' },
+        )
 
         fun relativeDate(chapter: Chapter): String? {
             return when (chapter.date_upload > 0) {
@@ -152,6 +162,15 @@ class ChapterUtil {
 
         fun getScanlatorString(scanlators: Set<String>): String {
             return scanlators.toList().sorted().joinToString(scanlatorSeparator)
+        }
+
+        fun Chapter.preferredChapterName(context: Context, manga: Manga, preferences: PreferencesHelper): String {
+            return if (manga.hideChapterTitle(preferences) && isRecognizedNumber) {
+                val number = decimalFormat.format(chapter_number.toDouble())
+                context.getString(R.string.chapter_, number)
+            } else {
+                name
+            }
         }
     }
 }
