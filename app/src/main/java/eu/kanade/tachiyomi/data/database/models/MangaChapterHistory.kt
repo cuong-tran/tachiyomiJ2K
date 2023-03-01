@@ -7,7 +7,7 @@ package eu.kanade.tachiyomi.data.database.models
  * @param chapter object containing chater
  * @param history object containing history
  */
-data class MangaChapterHistory(val manga: Manga, val chapter: Chapter, val history: History, val extraChapters: List<Chapter> = emptyList()) {
+data class MangaChapterHistory(val manga: Manga, val chapter: Chapter, val history: History, var extraChapters: List<Chapter> = emptyList()) {
 
     val allChapters: List<Chapter>
         get() = listOf(chapter) + extraChapters

@@ -161,6 +161,7 @@ class RecentsPresenter(
 
         val isCustom = customViewType != null
         val isEndless = isUngrouped && limit != 0
+        var extraCount = 0
         val cReading = when {
             viewType <= VIEW_TYPE_UNGROUP_ALL -> {
                 db.getAllRecentsTypes(
@@ -195,11 +196,29 @@ class RecentsPresenter(
                     val date = it.chapter.date_fetch
                     it.manga.id to if (date <= 0L) "-1" else dateFormat.format(Date(date))
                 }
-                    .map { entry ->
+                    .mapNotNull { entry ->
                         val manga = entry.value.first().manga
                         val chapters = entry.value.map(MangaChapter::chapter)
                         val firstChapter: Chapter
                         var sortedChapters: MutableList<Chapter>
+                        val existingItem = recentItems.find {
+                            val date = Date(it.chapter.date_fetch)
+                            entry.key == it.manga_id to dateFormat.format(date)
+                        }?.takeIf { updatePageCount }
+                        if (existingItem != null) {
+                            extraCount += chapters.size
+                            val newChapters = existingItem.mch.extraChapters + chapters
+                            val sort: Comparator<Chapter> =
+                                ChapterSort(manga, chapterFilter, preferences)
+                                    .sortComparator(true)
+                            sortedChapters = newChapters.sortedWith(sort).toMutableList()
+                            sortedChapters = (
+                                sortedChapters.filter { !it.read } +
+                                    sortedChapters.filter { it.read }.reversed()
+                                ).toMutableList()
+                            existingItem.mch.extraChapters = sortedChapters
+                            return@mapNotNull null
+                        }
                         if (chapters.size == 1) {
                             firstChapter = chapters.first()
                             sortedChapters = mutableListOf()
@@ -227,14 +246,14 @@ class RecentsPresenter(
             else -> emptyList()
         }
 
-        if (cReading.size + cReading.sumOf { it.extraChapters.size } < ENDLESS_LIMIT) {
+        if (cReading.size + cReading.sumOf { it.extraChapters.size } + extraCount < ENDLESS_LIMIT) {
             finished = true
         }
 
         if (!isCustom &&
             (pageOffset == 0 || updatePageCount)
         ) {
-            pageOffset += cReading.size + cReading.sumOf { it.extraChapters.size }
+            pageOffset += cReading.size + cReading.sumOf { it.extraChapters.size } + extraCount
         }
 
         if (query != oldQuery) return
@@ -349,7 +368,7 @@ class RecentsPresenter(
         } else {
             heldItems[customViewType] = newItems
         }
-        val newCount = itemCount + newItems.size + newItems.sumOf { it.mch.extraChapters.size }
+        val newCount = itemCount + newItems.size + newItems.sumOf { it.mch.extraChapters.size } + extraCount
         val hasNewItems = newItems.isNotEmpty()
         if (updatePageCount && (newCount < if (limit > 0) limit else 25) &&
             (viewType != VIEW_TYPE_GROUP_ALL || query.isNotEmpty()) &&
