@@ -653,7 +653,7 @@ class RecentsController(bundle: Bundle? = null) :
     override fun areExtraChaptersExpanded(position: Int): Boolean {
         val item = (adapter.getItem(position) as? RecentMangaItem) ?: return false
         val date = presenter.dateFormat.format(item.chapter.date_fetch)
-        val invertDefault = !presenter.preferences.collapseGroupedUpdates().get()
+        val invertDefault = !adapter.collapseGroupedUpdates
         return presenter.expandedSectionsMap["${item.mch.manga} - $date"]?.xor(invertDefault)
             ?: invertDefault
     }

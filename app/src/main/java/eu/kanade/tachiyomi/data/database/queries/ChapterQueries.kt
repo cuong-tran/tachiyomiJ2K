@@ -40,23 +40,6 @@ interface ChapterQueries : DbProvider {
         .withGetResolver(MangaChapterGetResolver.INSTANCE)
         .prepare()
 
-    /**
-     * Returns history of recent manga containing last read chapter in 25s
-     * @param date recent date range
-     * @offset offset the db by
-     */
-    fun getUpdatedChaptersDistinct(search: String = "", offset: Int, isResuming: Boolean) = db.get()
-        .listOfObjects(MangaChapter::class.java)
-        .withQuery(
-            RawQuery.builder()
-                .query(getRecentsQueryDistinct(search.sqLite, offset, isResuming))
-//                .args(date.time, startDate.time)
-                .observesTables(ChapterTable.TABLE)
-                .build(),
-        )
-        .withGetResolver(MangaChapterGetResolver.INSTANCE)
-        .prepare()
-
     fun getChapter(id: Long) = db.get()
         .`object`(Chapter::class.java)
         .withQuery(
