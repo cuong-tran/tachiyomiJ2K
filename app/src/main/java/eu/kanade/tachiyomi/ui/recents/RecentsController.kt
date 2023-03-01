@@ -661,7 +661,8 @@ class RecentsController(bundle: Bundle? = null) :
     override fun updateExpandedExtraChapters(position: Int, expanded: Boolean) {
         val item = (adapter.getItem(position) as? RecentMangaItem) ?: return
         val date = presenter.dateFormat.format(item.chapter.date_fetch)
-        presenter.expandedSectionsMap["${item.mch.manga} - $date"] = expanded
+        val invertDefault = !adapter.collapseGroupedUpdates
+        presenter.expandedSectionsMap["${item.mch.manga} - $date"] = expanded.xor(invertDefault)
     }
 
     fun tempJumpTo(viewType: Int) {
