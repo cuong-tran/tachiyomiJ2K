@@ -34,7 +34,6 @@ interface ChapterQueries : DbProvider {
         .withQuery(
             RawQuery.builder()
                 .query(getRecentsQuery(search.sqLite, offset, isResuming))
-//                .args(date.time, startDate.time)
                 .observesTables(ChapterTable.TABLE)
                 .build(),
         )
