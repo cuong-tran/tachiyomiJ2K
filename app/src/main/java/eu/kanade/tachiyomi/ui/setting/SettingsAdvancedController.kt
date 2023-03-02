@@ -47,6 +47,7 @@ import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.openInBrowser
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.CoroutineStart
@@ -56,9 +57,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import okhttp3.Headers
 import rikka.sui.Sui
-import rx.Observable
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -410,25 +408,16 @@ class SettingsAdvancedController : SettingsController() {
 
     private fun clearChapterCache() {
         if (activity == null) return
-        val files = chapterCache.cacheDir.listFiles() ?: return
-
-        var deletedFiles = 0
-
-        Observable.defer { Observable.from(files) }
-            .doOnNext { file ->
-                if (chapterCache.removeFileFromCache(file.name)) {
-                    deletedFiles++
+        viewScope.launchIO {
+            val files = chapterCache.cacheDir.listFiles() ?: return@launchIO
+            var deletedFiles = 0
+            try {
+                files.forEach { file ->
+                    if (chapterCache.removeFileFromCache(file.name)) {
+                        deletedFiles++
+                    }
                 }
-            }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                {
-                },
-                {
-                    activity?.toast(R.string.cache_delete_error)
-                },
-                {
+                withUIContext {
                     activity?.toast(
                         resources?.getQuantityString(
                             R.plurals.cache_cleared,
@@ -438,8 +427,13 @@ class SettingsAdvancedController : SettingsController() {
                     )
                     findPreference(CLEAR_CACHE_KEY)?.summary =
                         resources?.getString(R.string.used_, chapterCache.readableSize)
-                },
-            )
+                }
+            } catch (_: Exception) {
+                withUIContext {
+                    activity?.toast(R.string.cache_delete_error)
+                }
+            }
+        }
     }
 
     private fun clearWebViewData() {
