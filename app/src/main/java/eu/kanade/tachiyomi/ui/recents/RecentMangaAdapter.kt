@@ -62,7 +62,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     fun getItemByChapterId(id: Long): RecentMangaItem? {
         return currentItems.find {
             val item = (it as? RecentMangaItem) ?: return@find false
-            return@find id in item.mch.allChapters.map { ch -> ch.id }
+            return@find id == item.chapter.id || id in item.mch.extraChapters.map { ch -> ch.id }
         } as? RecentMangaItem
     }
 

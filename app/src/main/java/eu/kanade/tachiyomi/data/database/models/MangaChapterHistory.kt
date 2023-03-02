@@ -9,8 +9,6 @@ package eu.kanade.tachiyomi.data.database.models
  */
 data class MangaChapterHistory(val manga: Manga, val chapter: Chapter, val history: History, var extraChapters: List<Chapter> = emptyList()) {
 
-    val allChapters: List<Chapter>
-        get() = listOf(chapter) + extraChapters
     companion object {
         fun createBlank() = MangaChapterHistory(MangaImpl(), ChapterImpl(), HistoryImpl())
     }

@@ -447,7 +447,10 @@ class RecentsPresenter(
     }
 
     override fun updateDownload(download: Download) {
-        recentItems.find { download.chapter.id in it.mch.allChapters.map { ch -> ch.id } }?.apply {
+        recentItems.find {
+            download.chapter.id == it.chapter.id ||
+                download.chapter.id in it.mch.extraChapters.map { ch -> ch.id }
+        }?.apply {
             if (chapter.id != download.chapter.id) {
                 val downloadInfo = downloadInfo.find { it.chapterId == download.chapter.id }
                     ?: return@apply
@@ -501,7 +504,10 @@ class RecentsPresenter(
             downloadManager.deleteChapters(listOf(chapter), manga, source, true)
         }
         if (update) {
-            val item = recentItems.find { chapter.id in it.mch.allChapters.map { ch -> ch.id } } ?: return
+            val item = recentItems.find {
+                chapter.id == it.chapter.id ||
+                    chapter.id in it.mch.extraChapters.map { ch -> ch.id }
+            } ?: return
             item.apply {
                 if (chapter.id != item.chapter.id) {
                     val extraChapter = mch.extraChapters.find { it.id == chapter.id } ?: return@apply
