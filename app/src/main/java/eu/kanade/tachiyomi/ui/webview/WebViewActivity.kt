@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.util.system.extensionIntentForText
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 open class WebViewActivity : BaseWebViewActivity() {
@@ -37,7 +38,7 @@ open class WebViewActivity : BaseWebViewActivity() {
         const val URL_KEY = "url_key"
         const val TITLE_KEY = "title_key"
 
-        fun newIntent(context: Context, sourceId: Long, url: String, title: String?): Intent {
+        fun newIntent(context: Context, url: String, sourceId: Long? = null, title: String? = null): Intent {
             val intent = Intent(context, WebViewActivity::class.java)
             intent.putExtra(SOURCE_KEY, sourceId)
             intent.putExtra(URL_KEY, url)
@@ -59,9 +60,19 @@ open class WebViewActivity : BaseWebViewActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
         if (bundle == null) {
-            val source = sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource ?: return
             val url = intent.extras!!.getString(URL_KEY) ?: return
-            val headers = source.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
+            var headers = emptyMap<String, String>()
+            (sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource)?.let { source ->
+                try {
+                    headers = source.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to build headers")
+                }
+            }
+
+            headers["user-agent"]?.let {
+                binding.webview.settings.userAgentString = it
+            }
 
             binding.webview.webViewClient = object : WebViewClientCompat() {
                 override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
@@ -98,7 +109,6 @@ open class WebViewActivity : BaseWebViewActivity() {
                 }
             }
 
-            binding.webview.settings.userAgentString = source.headers["User-Agent"]
             binding.webview.loadUrl(url, headers)
         }
     }

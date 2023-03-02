@@ -14,6 +14,7 @@ import androidx.core.view.updatePaddingRelative
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
+import eu.kanade.tachiyomi.ui.reader.viewer.ReaderButton
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderTransitionView
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
@@ -124,13 +125,14 @@ class PagerTransitionHolder(
             text = context.getString(R.string.failed_to_load_pages_, error.message)
         }
 
-        val retryBtn = PagerButton(context, viewer).apply {
+        val retryBtn = ReaderButton(context).apply {
+            viewer = this@PagerTransitionHolder.viewer
             wrapContent()
             setText(R.string.retry)
             setOnClickListener {
                 val toChapter = transition.to
                 if (toChapter != null) {
-                    viewer.activity.requestPreloadChapter(toChapter)
+                    this@PagerTransitionHolder.viewer.activity.requestPreloadChapter(toChapter)
                 }
             }
         }

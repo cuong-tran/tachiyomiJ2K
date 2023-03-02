@@ -55,6 +55,7 @@
         <item name="checkboxStyle">@style/Widget.Tachiyomi.CompoundButton.CheckBox</item>
         <item name="radioButtonStyle">@style/Widget.Tachiyomi.CompoundButton.RadioButton</item>
         <item name="bottomNavigationStyle">@style/Widget.Tachiyomi.BottomNavigationView</item>
+        <item name="materialButtonStyle">@style/Widget.Tachiyomi.Button.Primary</item>
         <item name="navigationRailStyle">@style/Widget.Tachiyomi.NavigationRail</item>
         <item name="elevationOverlayEnabled">false</item>
 

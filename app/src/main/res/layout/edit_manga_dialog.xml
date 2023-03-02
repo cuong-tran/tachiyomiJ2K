@@ -34,11 +34,10 @@
                     android:src="@mipmap/ic_launcher"/>
             </FrameLayout>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/reset_cover"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/Theme.Widget.Button.Primary"
                 android:textAllCaps="false"
                 android:layout_gravity="center"
                 android:layout_marginEnd="16dp"
@@ -158,11 +157,10 @@
                     android:maxLines="1"/>
             </com.google.android.material.chip.ChipGroup>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/reset_tags"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/Theme.Widget.Button.Primary"
                 android:textAllCaps="false"
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"

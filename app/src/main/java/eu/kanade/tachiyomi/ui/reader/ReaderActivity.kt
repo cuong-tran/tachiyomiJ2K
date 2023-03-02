@@ -1782,8 +1782,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
         val intent = WebViewActivity.newIntent(
             applicationContext,
-            source.id,
             chapterUrl,
+            source.id,
             viewModel.manga!!.title,
         )
         startActivity(intent)

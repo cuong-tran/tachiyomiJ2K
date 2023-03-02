@@ -1221,8 +1221,8 @@ class MangaDetailsController :
         val activity = activity ?: return
         val intent = WebViewActivity.newIntent(
             activity.applicationContext,
-            source.id,
             url,
+            source.id,
             presenter.manga
                 .title,
         )
@@ -1237,8 +1237,8 @@ class MangaDetailsController :
         val activity = activity ?: return
         val intent = WebViewActivity.newIntent(
             activity.applicationContext,
-            source.id,
             url,
+            source.id,
             presenter.manga
                 .title,
         )
