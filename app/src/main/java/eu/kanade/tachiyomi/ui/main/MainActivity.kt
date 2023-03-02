@@ -862,7 +862,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 } else {
                     router.popToRoot()
                 }
-                if (intent.action == SHORTCUT_RECENTS) return false
+                if (intent.action == SHORTCUT_RECENTS) return true
                 nav.post {
                     val controller =
                         router.backstack.firstOrNull()?.controller as? RecentsController
