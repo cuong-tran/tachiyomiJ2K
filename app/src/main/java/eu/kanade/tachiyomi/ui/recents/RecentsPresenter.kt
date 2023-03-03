@@ -198,7 +198,11 @@ class RecentsPresenter(
                 }
                     .mapNotNull { entry ->
                         val manga = entry.value.first().manga
-                        val chapters = entry.value.map(MangaChapter::chapter)
+                        val chapters = chapterFilter.filterChaptersByScanlators(
+                            entry.value.map(MangaChapter::chapter),
+                            manga,
+                        )
+                        if (chapters.isEmpty()) { return@mapNotNull null }
                         val firstChapter: Chapter
                         var sortedChapters: MutableList<Chapter>
                         val existingItem = recentItems.find {
