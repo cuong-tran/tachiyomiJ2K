@@ -88,6 +88,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         fun isSearching(): Boolean
         fun scope(): CoroutineScope
         fun getViewType(): Int
+        fun onItemLongClick(position: Int, chapter: Chapter): Boolean
     }
 
     override fun onItemSwiped(position: Int, direction: Int) {

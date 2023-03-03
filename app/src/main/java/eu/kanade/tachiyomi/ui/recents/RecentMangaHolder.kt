@@ -39,9 +39,11 @@ class RecentMangaHolder(
 
     private val binding = RecentMangaItemBinding.bind(view)
     var chapterId: Long? = null
+    private val isUpdates
+        get() = adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
+
     private val isSmallUpdates
-        get() = adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES &&
-            !adapter.showUpdatedTime
+        get() = isUpdates && !adapter.showUpdatedTime
 
     init {
         binding.cardLayout.setOnClickListener { adapter.delegate.onCoverClick(flexibleAdapterPosition) }
@@ -62,7 +64,7 @@ class RecentMangaHolder(
                     RecentSubChapterItemBinding.bind(view).updateDivider()
                 }
             }
-            if (binding.moreChaptersLayout.children.any { view ->
+            if (isUpdates && binding.moreChaptersLayout.children.any { view ->
                 !RecentSubChapterItemBinding.bind(view).subtitle.text.isNullOrBlank()
             }
             ) {
@@ -230,7 +232,7 @@ class RecentMangaHolder(
                 RecentSubChapterItemBinding.bind(binding.moreChaptersLayout.getChildAt(index))
                     .configureView(chapter, item)
             }
-            if (binding.moreChaptersLayout.children.any { view ->
+            if (isUpdates && binding.moreChaptersLayout.children.any { view ->
                 !RecentSubChapterItemBinding.bind(view).subtitle.text.isNullOrBlank()
             }
             ) {
@@ -247,7 +249,7 @@ class RecentMangaHolder(
                         true,
                     )
                     binding.configureView(chapter, item)
-                    if (chapter.isRecognizedNumber &&
+                    if (isUpdates && chapter.isRecognizedNumber &&
                         chapter.chapter_number == item.chapter.chapter_number &&
                         !chapter.scanlator.isNullOrBlank()
                     ) {
@@ -309,12 +311,19 @@ class RecentMangaHolder(
         val showDLs = adapter.showDownloads
         title.text = chapter.preferredChapterName(context, item.mch.manga, adapter.preferences)
         title.setTextColor(ChapterUtil.readColor(context, chapter))
+        chapter.dateRead?.let { dateRead ->
+            subtitle.text = context.timeSpanFromNow(R.string.read_, dateRead)
+            subtitle.isVisible = true
+        }
         root.setOnClickListener {
             adapter.delegate.onSubChapterClicked(
-                flexibleAdapterPosition,
+                bindingAdapterPosition,
                 chapter,
                 it,
             )
+        }
+        root.setOnLongClickListener {
+            adapter.delegate.onItemLongClick(bindingAdapterPosition, chapter)
         }
         listOf(root, downloadButton.root).forEach {
             it.setOnTouchListener { _, event ->

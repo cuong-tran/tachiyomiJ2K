@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.util.chapter.ChapterFilter.Companion.filterChaptersByScanlators
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Date
@@ -32,7 +33,6 @@ fun syncChaptersWithSource(
     }
 
     val downloadManager: DownloadManager = Injekt.get()
-    val chapterFilter: ChapterFilter = Injekt.get()
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
 
@@ -169,9 +169,10 @@ fun syncChaptersWithSource(
         }
         db.updateLastUpdated(manga).executeAsBlocking()
     }
+    val reAddedSet = readded.toSet()
     return Pair(
-        chapterFilter.filterChaptersByScanlators(toAdd.subtract(readded).toList(), manga),
-        toDelete - readded,
+        toAdd.subtract(reAddedSet).toList().filterChaptersByScanlators(manga),
+        toDelete - reAddedSet,
     )
 }
 

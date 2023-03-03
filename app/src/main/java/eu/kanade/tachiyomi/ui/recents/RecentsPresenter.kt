@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.HistoryImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaChapter
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
@@ -19,6 +18,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterFilter.Companion.filterChaptersByScanlators
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -60,12 +60,9 @@ class RecentsPresenter(
         }
     private val newAdditionsHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEWLY_ADDED)
     private val newChaptersHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEW_CHAPTERS)
-    private val continueReadingHeader = RecentMangaHeaderItem(
-        RecentMangaHeaderItem
-            .CONTINUE_READING,
-    )
+    private val continueReadingHeader =
+        RecentMangaHeaderItem(RecentMangaHeaderItem.CONTINUE_READING)
     var finished = false
-    var heldItems: HashMap<Int, List<RecentMangaItem>> = hashMapOf()
     private var shouldMoveToTop = false
     var viewType: Int = preferences.recentsViewType().get()
         private set
@@ -173,19 +170,40 @@ class RecentsPresenter(
                 ).executeOnIO()
             }
             viewType == VIEW_TYPE_ONLY_HISTORY -> {
+                val items = db.getHistoryUngrouped(
+                    query,
+                    if (isCustom) ENDLESS_LIMIT else pageOffset,
+                    !updatePageCount && !isOnFirstPage,
+                )
                 if (groupChaptersHistory) {
-                    db.getRecentMangaLimit(
-                        query,
-                        if (isCustom) ENDLESS_LIMIT else pageOffset,
-                        !updatePageCount && !isOnFirstPage,
-                    )
+                    items.executeOnIO().groupBy {
+                        val date = it.history.last_read
+                        it.manga.id to if (date <= 0L) "-1" else dateFormat.format(Date(date))
+                    }
+                        .mapNotNull { (key, mchs) ->
+                            val manga = mchs.first().manga
+                            val chapters = mchs.map { mch ->
+                                mch.chapter.also { it.history = mch.history }
+                            }.filterChaptersByScanlators(manga)
+                            if (chapters.isEmpty()) return@mapNotNull null
+                            val existingItem = recentItems.find {
+                                val date = Date(it.mch.history.last_read)
+                                key == it.manga_id to dateFormat.format(date)
+                            }?.takeIf { updatePageCount }
+                            val sort = Comparator<Chapter> { c1, c2 ->
+                                c2.dateRead!!.compareTo(c1.dateRead!!)
+                            }
+                            val (sortedChapters, firstChapter, subCount) =
+                                setupExtraChapters(existingItem, chapters, sort)
+                                    ?: return@mapNotNull null
+                            extraCount += subCount
+                            mchs.find { firstChapter.id == it.chapter.id }?.also {
+                                it.extraChapters = sortedChapters
+                            }
+                        }
                 } else {
-                    db.getHistoryUngrouped(
-                        query,
-                        if (isCustom) ENDLESS_LIMIT else pageOffset,
-                        !updatePageCount && !isOnFirstPage,
-                    )
-                }.executeOnIO()
+                    items.executeOnIO()
+                }
             }
             viewType == VIEW_TYPE_ONLY_UPDATES -> {
                 db.getRecentChapters(
@@ -196,49 +214,21 @@ class RecentsPresenter(
                     val date = it.chapter.date_fetch
                     it.manga.id to if (date <= 0L) "-1" else dateFormat.format(Date(date))
                 }
-                    .mapNotNull { entry ->
-                        val manga = entry.value.first().manga
-                        val chapters = chapterFilter.filterChaptersByScanlators(
-                            entry.value.map(MangaChapter::chapter),
-                            manga,
-                        )
-                        if (chapters.isEmpty()) { return@mapNotNull null }
-                        val firstChapter: Chapter
-                        var sortedChapters: MutableList<Chapter>
+                    .mapNotNull { (key, mcs) ->
+                        val manga = mcs.first().manga
+                        val chapters = mcs.map { it.chapter }.filterChaptersByScanlators(manga)
+                        if (chapters.isEmpty()) return@mapNotNull null
                         val existingItem = recentItems.find {
                             val date = Date(it.chapter.date_fetch)
-                            entry.key == it.manga_id to dateFormat.format(date)
+                            key == it.manga_id to dateFormat.format(date)
                         }?.takeIf { updatePageCount }
-                        if (existingItem != null) {
-                            extraCount += chapters.size
-                            val newChapters = existingItem.mch.extraChapters + chapters
-                            val sort: Comparator<Chapter> =
-                                ChapterSort(manga, chapterFilter, preferences)
-                                    .sortComparator(true)
-                            sortedChapters = newChapters.sortedWith(sort).toMutableList()
-                            sortedChapters = (
-                                sortedChapters.filter { !it.read } +
-                                    sortedChapters.filter { it.read }.reversed()
-                                ).toMutableList()
-                            existingItem.mch.extraChapters = sortedChapters
-                            return@mapNotNull null
-                        }
-                        if (chapters.size == 1) {
-                            firstChapter = chapters.first()
-                            sortedChapters = mutableListOf()
-                        } else {
-                            val sort: Comparator<Chapter> =
-                                ChapterSort(manga, chapterFilter, preferences)
-                                    .sortComparator(true)
-                            sortedChapters = chapters.sortedWith(sort).toMutableList()
-                            firstChapter =
-                                sortedChapters.firstOrNull { !it.read } ?: sortedChapters.last()
-                            sortedChapters.remove(firstChapter)
-                            sortedChapters = (
-                                sortedChapters.filter { !it.read } +
-                                    sortedChapters.filter { it.read }.reversed()
-                                ).toMutableList()
-                        }
+                        val sort: Comparator<Chapter> =
+                            ChapterSort(manga, chapterFilter, preferences)
+                                .sortComparator(true)
+                        val (sortedChapters, firstChapter, subCount) =
+                            setupExtraChapters(existingItem, chapters, sort)
+                                ?: return@mapNotNull null
+                        extraCount += subCount
                         MangaChapterHistory(
                             manga,
                             firstChapter,
@@ -281,8 +271,15 @@ class RecentsPresenter(
                     it.chapter
                 }
                 (it.chapter.read && viewType != VIEW_TYPE_ONLY_UPDATES) || it.chapter.id == null -> {
-                    getNextChapter(it.manga)
+                    val nextChapter = getNextChapter(it.manga)
                         ?: if (showRead && it.chapter.id != null) it.chapter else null
+                    if (viewType == VIEW_TYPE_ONLY_HISTORY && nextChapter?.id != null &&
+                        nextChapter.id != it.chapter.id
+                    ) {
+                        nextChapter.dateRead = it.chapter.dateRead
+                        it.extraChapters = listOf(it.chapter) + it.extraChapters
+                    }
+                    nextChapter
                 }
                 it.history.id == null && viewType != VIEW_TYPE_ONLY_UPDATES -> {
                     getFirstUpdatedChapter(it.manga, it.chapter)
@@ -369,8 +366,6 @@ class RecentsPresenter(
             } else {
                 recentItems + newItems
             }
-        } else {
-            heldItems[customViewType] = newItems
         }
         val newCount = itemCount + newItems.size + newItems.sumOf { it.mch.extraChapters.size } + extraCount
         val hasNewItems = newItems.isNotEmpty()
@@ -391,6 +386,45 @@ class RecentsPresenter(
                 }
             }
         }
+    }
+
+    private fun setupExtraChapters(
+        existingItem: RecentMangaItem?,
+        chapters: List<Chapter>,
+        sort: Comparator<Chapter>,
+    ): Triple<MutableList<Chapter>, Chapter, Int>? {
+        var extraCount = 0
+        val firstChapter: Chapter
+        var sortedChapters: MutableList<Chapter>
+        val reverseRead = viewType != VIEW_TYPE_ONLY_HISTORY
+        if (existingItem != null) {
+            extraCount += chapters.size
+            val newChapters = existingItem.mch.extraChapters + chapters
+            sortedChapters = newChapters.sortedWith(sort).toMutableList()
+            sortedChapters = (
+                sortedChapters.filter { !it.read } +
+                    sortedChapters.filter { it.read }
+                        .run { if (reverseRead) reversed() else this }
+                ).toMutableList()
+            existingItem.mch.extraChapters = sortedChapters
+            return null
+        }
+        if (chapters.size == 1) {
+            firstChapter = chapters.first()
+            sortedChapters = mutableListOf()
+        } else {
+            sortedChapters = chapters.sortedWith(sort).toMutableList()
+            firstChapter = sortedChapters.firstOrNull { !it.read }
+                ?: sortedChapters.run { if (reverseRead) last() else first() }
+            sortedChapters.last()
+            sortedChapters.remove(firstChapter)
+            sortedChapters = (
+                sortedChapters.filter { !it.read } +
+                    sortedChapters.filter { it.read }
+                        .run { if (reverseRead) reversed() else this }
+                ).toMutableList()
+        }
+        return Triple(sortedChapters, firstChapter, extraCount)
     }
 
     private fun getNextChapter(manga: Manga): Chapter? {
@@ -564,7 +598,6 @@ class RecentsPresenter(
 
     /**
      * Mark the selected chapter list as read/unread.
-     * @param selectedChapters the list of selected chapters.
      * @param read whether to mark chapters as read or unread.
      */
     fun markChapterRead(
