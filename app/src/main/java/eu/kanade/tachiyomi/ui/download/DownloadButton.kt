@@ -25,15 +25,13 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
             activeColor = colorSecondary
             downloadedColor = colorSecondary
         }
-    private var activeColor = colorSecondary
-        set(value) {
-            ColorUtils.blendARGB(value, context.getResourceColor(R.attr.background), 0.05f)
-        }
+    private val bgColor = context.getResourceColor(R.attr.background)
+    private var activeColor = ColorUtils.blendARGB(colorSecondary, bgColor, 0.05f)
+        set(value) { field = ColorUtils.blendARGB(value, bgColor, 0.05f) }
 
-    private var downloadedColor = colorSecondary
-        set(value) {
-            ColorUtils.blendARGB(value, context.getResourceColor(R.attr.colorOnBackground), 0.3f)
-        }
+    private val cOnBgColor = context.getResourceColor(R.attr.colorOnBackground)
+    private var downloadedColor = ColorUtils.blendARGB(colorSecondary, cOnBgColor, 0.05f)
+        set(value) { field = ColorUtils.blendARGB(value, cOnBgColor, 0.3f) }
     private val progressBGColor by lazy {
         ContextCompat.getColor(context, R.color.divider)
     }
