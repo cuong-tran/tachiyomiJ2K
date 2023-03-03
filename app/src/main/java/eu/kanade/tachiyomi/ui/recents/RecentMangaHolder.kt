@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
-import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
@@ -69,6 +68,8 @@ class RecentMangaHolder(
             }
             ) {
                 showScanlatorInBody(moreVisible)
+            } else {
+                addMoreUpdatesText(!moreVisible)
             }
             binding.endView.updateLayoutParams<ViewGroup.LayoutParams> {
                 height = binding.mainView.height
@@ -237,6 +238,8 @@ class RecentMangaHolder(
             }
             ) {
                 showScanlatorInBody(moreVisible, item)
+            } else {
+                addMoreUpdatesText(!moreVisible, item)
             }
         } else {
             binding.moreChaptersLayout.removeAllViews()
@@ -261,6 +264,7 @@ class RecentMangaHolder(
                         }
                     }
                 }
+                addMoreUpdatesText(!moreVisible, item)
             } else {
                 chapterId = null
             }
@@ -282,9 +286,27 @@ class RecentMangaHolder(
         }
     }
 
+    private fun addMoreUpdatesText(add: Boolean, originalItem: RecentMangaItem? = null) {
+        val item = originalItem ?: adapter.getItem(bindingAdapterPosition) as? RecentMangaItem ?: return
+        val originalText = binding.body.text.toString()
+        val andMoreText = itemView.context.resources.getQuantityString(
+            R.plurals.notification_and_n_more,
+            (item.mch.extraChapters.size),
+            (item.mch.extraChapters.size),
+        )
+        if (add && item.mch.extraChapters.isNotEmpty() && isUpdates &&
+            !isSmallUpdates && !originalText.contains(andMoreText)
+        ) {
+            val text = "${originalText.substringBefore("\n")}\n$andMoreText"
+            binding.body.text = text
+        } else if (!add && originalText.contains(andMoreText)) {
+            binding.body.text = originalText.removeSuffix("\n$andMoreText")
+        }
+    }
+
     private fun showScanlatorInBody(add: Boolean, originalItem: RecentMangaItem? = null) {
         val item = originalItem ?: adapter.getItem(bindingAdapterPosition) as? RecentMangaItem ?: return
-        val originalText = binding.body.text
+        val originalText = binding.body.text.toString()
         binding.body.maxLines = 2
         val scanlator = item.chapter.scanlator ?: return
         if (add) {
@@ -293,7 +315,7 @@ class RecentMangaHolder(
                 binding.body.text = item.chapter.scanlator
                 binding.body.isVisible = true
             } else if (!originalText.contains(scanlator)) {
-                val text = "$originalText\n$scanlator"
+                val text = "${originalText.substringBefore("\n")}\n$scanlator"
                 binding.body.text = text
             }
         } else {
@@ -301,6 +323,7 @@ class RecentMangaHolder(
                 binding.body.isVisible = false
             } else {
                 binding.body.text = originalText.removeSuffix("\n$scanlator")
+                addMoreUpdatesText(true, item)
             }
         }
     }
@@ -311,10 +334,10 @@ class RecentMangaHolder(
         val showDLs = adapter.showDownloads
         title.text = chapter.preferredChapterName(context, item.mch.manga, adapter.preferences)
         title.setTextColor(ChapterUtil.readColor(context, chapter))
-        chapter.dateRead?.let { dateRead ->
-            subtitle.text = context.timeSpanFromNow(R.string.read_, dateRead)
-            subtitle.isVisible = true
-        }
+        subtitle.isVisible = chapter.dateRead != null
+        subtitle.text = chapter.dateRead?.let { dateRead ->
+            context.timeSpanFromNow(R.string.read_, dateRead)
+        } ?: ""
         root.setOnClickListener {
             adapter.delegate.onSubChapterClicked(
                 bindingAdapterPosition,

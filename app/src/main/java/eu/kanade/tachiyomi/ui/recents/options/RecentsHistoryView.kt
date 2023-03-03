@@ -14,6 +14,9 @@ class RecentsHistoryView @JvmOverloads constructor(context: Context, attrs: Attr
     override fun inflateBinding() = RecentsHistoryViewBinding.bind(this)
     override fun initGeneralPreferences() {
         binding.groupChapters.bindToPreference(preferences.groupChaptersHistory())
+        binding.collapseGroupedChapters.bindToPreference(preferences.collapseGroupedHistory()) {
+            controller?.presenter?.expandedSectionsMap?.clear()
+        }
         binding.clearHistory.setOnClickListener {
             val activity = controller?.activity ?: return@setOnClickListener
             activity.materialAlertDialog()

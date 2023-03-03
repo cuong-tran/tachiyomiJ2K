@@ -28,7 +28,14 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     var uniformCovers = preferences.uniformGrid().get()
     var showOutline = preferences.outlineOnCovers().get()
     var sortByFetched = preferences.sortFetchedTime().get()
-    var collapseGroupedUpdates = preferences.collapseGroupedUpdates().get()
+    private var collapseGroupedUpdates = preferences.collapseGroupedUpdates().get()
+    private var collapseGroupedHistory = preferences.collapseGroupedHistory().get()
+    val collapseGrouped: Boolean
+        get() = if (viewType == RecentsPresenter.VIEW_TYPE_ONLY_HISTORY) {
+            collapseGroupedHistory
+        } else {
+            collapseGroupedUpdates
+        }
 
     val viewType: Int
         get() = delegate.getViewType()
@@ -50,6 +57,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         preferences.showUpdatedTime().register { showUpdatedTime = it }
         preferences.uniformGrid().register { uniformCovers = it }
         preferences.collapseGroupedUpdates().register { collapseGroupedUpdates = it }
+        preferences.collapseGroupedHistory().register { collapseGroupedHistory = it }
         preferences.sortFetchedTime().asImmediateFlowIn(delegate.scope()) { sortByFetched = it }
         preferences.outlineOnCovers().register(false) {
             showOutline = it

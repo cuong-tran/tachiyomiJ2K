@@ -377,6 +377,8 @@ class PreferencesHelper(val context: Context) {
 
     fun groupChaptersHistory() = flowPrefs.getBoolean(Keys.groupChaptersHistory, true)
 
+    fun collapseGroupedHistory() = flowPrefs.getBoolean("collapse_group_history", false)
+
     fun showTitleFirstInRecents() = flowPrefs.getBoolean(Keys.showTitleFirstInRecents, false)
 
     fun lastExtCheck() = flowPrefs.getLong("last_ext_check", 0)

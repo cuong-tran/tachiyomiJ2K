@@ -21,12 +21,19 @@
             android:text="@string/group_chapters_together"
             android:textColor="?attr/colorOnBackground" />
 
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/collapse_grouped_chapters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/collapse_grouped_chapters"
+            android:textColor="?attr/colorOnBackground" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/clear_history"
             style="@style/Theme.Widget.Button.TextButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/clear_history" />
-
     </LinearLayout>
 </eu.kanade.tachiyomi.ui.recents.options.RecentsHistoryView>

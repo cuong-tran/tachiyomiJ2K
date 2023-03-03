@@ -187,7 +187,7 @@ class RecentsPresenter(
                             }.filterChaptersByScanlators(manga)
                             extraCount += mchs.size - chapters.size
                             if (chapters.isEmpty()) return@mapNotNull null
-                            val existingItem = recentItems.find {
+                            val existingItem = recentItems.takeLast(ENDLESS_LIMIT).find {
                                 val date = Date(it.mch.history.last_read)
                                 key == it.manga_id to dateFormat.format(date)
                             }?.takeIf { updatePageCount }
@@ -220,7 +220,7 @@ class RecentsPresenter(
                         val chapters = mcs.map { it.chapter }.filterChaptersByScanlators(manga)
                         extraCount += mcs.size - chapters.size
                         if (chapters.isEmpty()) return@mapNotNull null
-                        val existingItem = recentItems.find {
+                        val existingItem = recentItems.takeLast(ENDLESS_LIMIT).find {
                             val date = Date(it.chapter.date_fetch)
                             key == it.manga_id to dateFormat.format(date)
                         }?.takeIf { updatePageCount }
@@ -279,9 +279,9 @@ class RecentsPresenter(
                         if (viewType == VIEW_TYPE_ONLY_HISTORY && nextChapter != null) {
                             val unreadChapterIsAlreadyInList =
                                 recentItems.any { item -> item.mch.manga.id == it.manga.id } ||
-                                        mangaList.indexOfFirst { item ->
-                                            item.manga.id == it.manga.id
-                                        } > mangaList.indexOf(it)
+                                    mangaList.indexOfFirst { item ->
+                                    item.manga.id == it.manga.id
+                                } > mangaList.indexOf(it)
                             if (unreadChapterIsAlreadyInList) {
                                 return@result it.chapter
                             }
