@@ -119,10 +119,14 @@ class RecentMangaHolder(
         binding.buttonLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
             if (isSmallUpdates) {
                 topToBottom = -1
-                topToTop = R.id.main_view
+                topToTop = R.id.card_layout
+                bottomToBottom = R.id.card_layout
+                topMargin = 4.dpToPx
             } else {
                 topToTop = -1
                 topToBottom = R.id.subtitle
+                bottomToBottom = R.id.main_view
+                topMargin = 0
             }
         }
         val freeformCovers = !isSmallUpdates && !adapter.uniformCovers
