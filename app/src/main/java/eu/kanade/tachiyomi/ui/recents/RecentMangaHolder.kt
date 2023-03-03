@@ -59,11 +59,14 @@ class RecentMangaHolder(
             )
             if (moreVisible) {
                 binding.moreChaptersLayout.children.forEach { view ->
-                    try {
-                        RecentSubChapterItemBinding.bind(view).updateDivider()
-                    } catch (_: Exception) {
-                    }
+                    RecentSubChapterItemBinding.bind(view).updateDivider()
                 }
+            }
+            if (binding.moreChaptersLayout.children.any { view ->
+                !RecentSubChapterItemBinding.bind(view).subtitle.text.isNullOrBlank()
+            }
+            ) {
+                showScanlatorInBody(moreVisible)
             }
             binding.endView.updateLayoutParams<ViewGroup.LayoutParams> {
                 height = binding.mainView.height
@@ -223,15 +226,34 @@ class RecentMangaHolder(
                 RecentSubChapterItemBinding.bind(binding.moreChaptersLayout.getChildAt(index))
                     .configureView(chapter, item)
             }
+            if (binding.moreChaptersLayout.children.any { view ->
+                !RecentSubChapterItemBinding.bind(view).subtitle.text.isNullOrBlank()
+            }
+            ) {
+                showScanlatorInBody(moreVisible, item)
+            }
         } else {
             binding.moreChaptersLayout.removeAllViews()
+            var hasSameChapter = false
             if (item.mch.extraChapters.isNotEmpty()) {
                 item.mch.extraChapters.forEach { chapter ->
-                    RecentSubChapterItemBinding.inflate(
+                    val binding = RecentSubChapterItemBinding.inflate(
                         LayoutInflater.from(context),
                         binding.moreChaptersLayout,
                         true,
-                    ).configureView(chapter, item)
+                    )
+                    binding.configureView(chapter, item)
+                    if (chapter.isRecognizedNumber &&
+                        chapter.chapter_number == item.chapter.chapter_number &&
+                        !chapter.scanlator.isNullOrBlank()
+                    ) {
+                        binding.subtitle.text = chapter.scanlator
+                        binding.subtitle.isVisible = true
+                        if (!hasSameChapter) {
+                            showScanlatorInBody(moreVisible, item)
+                            hasSameChapter = true
+                        }
+                    }
                 }
             } else {
                 chapterId = null
@@ -250,6 +272,29 @@ class RecentMangaHolder(
                     chapterId = null
                 }
                 false
+            }
+        }
+    }
+
+    private fun showScanlatorInBody(add: Boolean, originalItem: RecentMangaItem? = null) {
+        val item = originalItem ?: adapter.getItem(bindingAdapterPosition) as? RecentMangaItem ?: return
+        val originalText = binding.body.text
+        binding.body.maxLines = 2
+        val scanlator = item.chapter.scanlator ?: return
+        if (add) {
+            if (isSmallUpdates) {
+                binding.body.maxLines = 1
+                binding.body.text = item.chapter.scanlator
+                binding.body.isVisible = true
+            } else if (!originalText.contains(scanlator)) {
+                val text = "$originalText\n$scanlator"
+                binding.body.text = text
+            }
+        } else {
+            if (isSmallUpdates) {
+                binding.body.isVisible = false
+            } else {
+                binding.body.text = originalText.removeSuffix("\n$scanlator")
             }
         }
     }
@@ -282,7 +327,7 @@ class RecentMangaHolder(
                 false
             }
         }
-        title.updatePaddingRelative(start = if (isSmallUpdates) 64.dpToPx else 84.dpToPx)
+        textLayout.updatePaddingRelative(start = if (isSmallUpdates) 64.dpToPx else 84.dpToPx)
         updateDivider()
         root.transitionName = "recents sub chapter ${chapter.id ?: 0L} transition"
         root.tag = "sub ${chapter.id}"

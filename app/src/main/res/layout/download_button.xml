@@ -5,8 +5,8 @@
     android:id="@+id/download_button"
     android:clickable="true"
     android:focusable="true"
-    android:layout_width="30dp"
-    android:layout_height="30dp">
+    android:layout_width="32dp"
+    android:layout_height="32dp">
 
     <ImageView
         android:id="@+id/download_border"
