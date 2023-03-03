@@ -185,6 +185,7 @@ class RecentsPresenter(
                             val chapters = mchs.map { mch ->
                                 mch.chapter.also { it.history = mch.history }
                             }.filterChaptersByScanlators(manga)
+                            extraCount += mchs.size - chapters.size
                             if (chapters.isEmpty()) return@mapNotNull null
                             val existingItem = recentItems.find {
                                 val date = Date(it.mch.history.last_read)
@@ -195,8 +196,8 @@ class RecentsPresenter(
                             }
                             val (sortedChapters, firstChapter, subCount) =
                                 setupExtraChapters(existingItem, chapters, sort)
-                                    ?: return@mapNotNull null
                             extraCount += subCount
+                            if (firstChapter == null) return@mapNotNull null
                             mchs.find { firstChapter.id == it.chapter.id }?.also {
                                 it.extraChapters = sortedChapters
                             }
@@ -217,6 +218,7 @@ class RecentsPresenter(
                     .mapNotNull { (key, mcs) ->
                         val manga = mcs.first().manga
                         val chapters = mcs.map { it.chapter }.filterChaptersByScanlators(manga)
+                        extraCount += mcs.size - chapters.size
                         if (chapters.isEmpty()) return@mapNotNull null
                         val existingItem = recentItems.find {
                             val date = Date(it.chapter.date_fetch)
@@ -227,8 +229,8 @@ class RecentsPresenter(
                                 .sortComparator(true)
                         val (sortedChapters, firstChapter, subCount) =
                             setupExtraChapters(existingItem, chapters, sort)
-                                ?: return@mapNotNull null
                         extraCount += subCount
+                        if (firstChapter == null) return@mapNotNull null
                         MangaChapterHistory(
                             manga,
                             firstChapter,
@@ -265,28 +267,40 @@ class RecentsPresenter(
             }
         }
         val pairs = mangaList.mapNotNull {
-            val chapter = when {
-                (viewType == VIEW_TYPE_ONLY_UPDATES && !groupChaptersUpdates) ||
-                    (viewType == VIEW_TYPE_ONLY_HISTORY && !groupChaptersHistory) -> {
-                    it.chapter
-                }
-                (it.chapter.read && viewType != VIEW_TYPE_ONLY_UPDATES) || it.chapter.id == null -> {
-                    val nextChapter = getNextChapter(it.manga)
-                        ?: if (showRead && it.chapter.id != null) it.chapter else null
-                    if (viewType == VIEW_TYPE_ONLY_HISTORY && nextChapter?.id != null &&
-                        nextChapter.id != it.chapter.id
-                    ) {
-                        nextChapter.dateRead = it.chapter.dateRead
-                        it.extraChapters = listOf(it.chapter) + it.extraChapters
+            val chapter = run result@{
+                when {
+                    (viewType == VIEW_TYPE_ONLY_UPDATES && !groupChaptersUpdates) ||
+                        (viewType == VIEW_TYPE_ONLY_HISTORY && !groupChaptersHistory) -> {
+                        it.chapter
                     }
-                    nextChapter
-                }
-                it.history.id == null && viewType != VIEW_TYPE_ONLY_UPDATES -> {
-                    getFirstUpdatedChapter(it.manga, it.chapter)
-                        ?: if ((showRead && it.chapter.id != null)) it.chapter else null
-                }
-                else -> {
-                    it.chapter
+                    (it.chapter.read && viewType != VIEW_TYPE_ONLY_UPDATES) || it.chapter.id == null -> {
+                        val nextChapter = getNextChapter(it.manga)
+                            ?: if (showRead && it.chapter.id != null) it.chapter else null
+                        if (viewType == VIEW_TYPE_ONLY_HISTORY && nextChapter != null) {
+                            val unreadChapterIsAlreadyInList =
+                                recentItems.any { item -> item.mch.manga.id == it.manga.id } ||
+                                        mangaList.indexOfFirst { item ->
+                                            item.manga.id == it.manga.id
+                                        } > mangaList.indexOf(it)
+                            if (unreadChapterIsAlreadyInList) {
+                                return@result it.chapter
+                            }
+                        }
+                        if (viewType == VIEW_TYPE_ONLY_HISTORY && nextChapter?.id != null &&
+                            nextChapter.id != it.chapter.id
+                        ) {
+                            nextChapter.dateRead = it.chapter.dateRead
+                            it.extraChapters = listOf(it.chapter) + it.extraChapters
+                        }
+                        nextChapter
+                    }
+                    it.history.id == null && viewType != VIEW_TYPE_ONLY_UPDATES -> {
+                        getFirstUpdatedChapter(it.manga, it.chapter)
+                            ?: if ((showRead && it.chapter.id != null)) it.chapter else null
+                    }
+                    else -> {
+                        it.chapter
+                    }
                 }
             }
             if (chapter == null) if ((query.isNotEmpty() || viewType > VIEW_TYPE_UNGROUP_ALL) &&
@@ -392,7 +406,7 @@ class RecentsPresenter(
         existingItem: RecentMangaItem?,
         chapters: List<Chapter>,
         sort: Comparator<Chapter>,
-    ): Triple<MutableList<Chapter>, Chapter, Int>? {
+    ): Triple<MutableList<Chapter>, Chapter?, Int> {
         var extraCount = 0
         val firstChapter: Chapter
         var sortedChapters: MutableList<Chapter>
@@ -407,7 +421,7 @@ class RecentsPresenter(
                         .run { if (reverseRead) reversed() else this }
                 ).toMutableList()
             existingItem.mch.extraChapters = sortedChapters
-            return null
+            return Triple(mutableListOf(), null, extraCount)
         }
         if (chapters.size == 1) {
             firstChapter = chapters.first()
