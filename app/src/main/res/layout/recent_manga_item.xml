@@ -41,194 +41,194 @@
         android:layout_gravity="center_vertical"
         android:minHeight="@dimen/material_component_lists_single_line_with_avatar_height">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/main_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clipToPadding="false"
-        android:clipChildren="false"
-        android:layout_gravity="center_vertical"
-        android:background="@drawable/list_item_selector"
-        android:minHeight="@dimen/material_component_lists_single_line_with_avatar_height">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/main_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:clipChildren="false"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/list_item_selector"
+            android:minHeight="@dimen/material_component_lists_single_line_with_avatar_height">
 
-        <FrameLayout
-            android:id="@+id/card_layout"
-            android:layout_width="60dp"
-            android:layout_height="80dp"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="6dp"
-            app:layout_constrainedHeight="true"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0">
+            <FrameLayout
+                android:id="@+id/card_layout"
+                android:layout_width="60dp"
+                android:layout_height="80dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp"
+                app:layout_constrainedHeight="true"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0">
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center">
-
-                <ImageView
-                    android:id="@+id/cover_thumbnail"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:adjustViewBounds="true"
-                    android:background="?attr/background"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    android:maxHeight="60dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription"
-                    tools:src="@mipmap/ic_launcher" />
+                    android:layout_gravity="center">
 
-            </com.google.android.material.card.MaterialCardView>
-        </FrameLayout>
+                    <ImageView
+                        android:id="@+id/cover_thumbnail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:adjustViewBounds="true"
+                        android:background="?attr/background"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:maxHeight="60dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="ContentDescription"
+                        tools:src="@mipmap/ic_launcher" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/title"
-            style="?textAppearanceTitleMedium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="16dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="?attr/colorOnBackground"
-            app:layout_constrainedWidth="true"
-            app:layout_constraintBottom_toTopOf="@id/subtitle"
-            app:layout_constraintVertical_chainStyle="packed"
+                </com.google.android.material.card.MaterialCardView>
+            </FrameLayout>
 
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:flow_verticalBias="0.0"
-            app:layout_constraintStart_toEndOf="@id/card_layout"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="New Chapters" />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/title"
+                style="?textAppearanceTitleMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="16dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="?attr/colorOnBackground"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toTopOf="@id/subtitle"
+                app:layout_constraintVertical_chainStyle="packed"
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/subtitle"
-            style="?textAppearanceBodyMedium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:singleLine="true"
-            android:textColor="?attr/colorOnBackground"
-            app:layout_constrainedWidth="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/title"
-            app:layout_constraintTop_toBottomOf="@+id/title"
-            app:layout_constraintBottom_toTopOf="@id/body"
-            tools:text="Manga title" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:flow_verticalBias="0.0"
+                app:layout_constraintStart_toEndOf="@id/card_layout"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="New Chapters" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/body"
-            style="@style/TextAppearance.BodyMedium.ReducedSpace"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="6dp"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textColor="?android:attr/textColorSecondary"
-            app:layout_constrainedWidth="true"
-            app:layout_constraintBottom_toTopOf="@id/space"
-            app:layout_constraintEnd_toStartOf="@id/button_layout"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/title"
-            app:layout_constraintTop_toBottomOf="@id/subtitle"
-            app:layout_constraintVertical_bias="0.0"
-            tools:text="Last Read Chapter 4\n3 Days ago" />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/subtitle"
+                style="?textAppearanceBodyMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="?attr/colorOnBackground"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/title"
+                app:layout_constraintTop_toBottomOf="@+id/title"
+                app:layout_constraintBottom_toTopOf="@id/body"
+                tools:text="Manga title" />
 
-        <Space
-            android:id="@+id/space"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@id/bottom_line"
-            app:layout_constraintTop_toBottomOf="@id/body" />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/body"
+                style="@style/TextAppearance.BodyMedium.ReducedSpace"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="?android:attr/textColorSecondary"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toTopOf="@id/space"
+                app:layout_constraintEnd_toStartOf="@id/button_layout"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/title"
+                app:layout_constraintTop_toBottomOf="@id/subtitle"
+                app:layout_constraintVertical_bias="0.0"
+                tools:text="Last Read Chapter 4\n3 Days ago" />
 
-        <ProgressBar
-            android:id="@+id/progress"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="0dp"
-            android:layout_height="3dp"
-            android:layout_gravity="bottom"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="6dp"
-            android:background="#66000000"
-            android:indeterminate="false"
-            android:progress="10"
-            android:progressTint="?attr/colorSecondary"
-            android:visibility="gone"
-            app:layout_constraintEnd_toStartOf="@id/button_layout"
-            app:layout_constraintStart_toStartOf="@id/title"
-            app:layout_constraintTop_toBottomOf="@id/subtitle" />
+            <Space
+                android:id="@+id/space"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toTopOf="@id/bottom_line"
+                app:layout_constraintTop_toBottomOf="@id/body" />
 
-        <LinearLayout
-            android:id="@+id/button_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/subtitle">
+            <ProgressBar
+                android:id="@+id/progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:layout_gravity="bottom"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="6dp"
+                android:background="#66000000"
+                android:indeterminate="false"
+                android:progress="10"
+                android:progressTint="?attr/colorSecondary"
+                android:visibility="gone"
+                app:layout_constraintEnd_toStartOf="@id/button_layout"
+                app:layout_constraintStart_toStartOf="@id/title"
+                app:layout_constraintTop_toBottomOf="@id/subtitle" />
 
-            <ImageButton
-                android:id="@+id/remove_history"
-                android:layout_width="45dp"
-                android:layout_height="match_parent"
-                android:background="?selectableItemBackgroundBorderless"
-                android:contentDescription="@string/next_title"
-                android:padding="8dp"
-                android:tooltipText="@string/reset_chapter_history"
-                app:layout_constraintHorizontal_chainStyle="spread"
-                app:srcCompat="@drawable/ic_eye_remove_outline_24dp"
-                app:tint="@color/holo_red" />
+            <LinearLayout
+                android:id="@+id/button_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/subtitle">
 
-            <ImageButton
-                android:id="@+id/show_more_chapters"
-                android:layout_width="45dp"
-                android:layout_height="match_parent"
-                android:background="?selectableItemBackgroundBorderless"
-                android:contentDescription="@string/show_more_chapters"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:tooltipText="@string/show_more_chapters"
-                app:layout_constraintHorizontal_chainStyle="spread"
-                app:tint="?attr/colorSecondary"
-                app:srcCompat="@drawable/ic_expand_more_24dp" />
+                <ImageButton
+                    android:id="@+id/remove_history"
+                    android:layout_width="45dp"
+                    android:layout_height="match_parent"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/reset_chapter_history"
+                    android:padding="8dp"
+                    android:tooltipText="@string/reset_chapter_history"
+                    app:layout_constraintHorizontal_chainStyle="spread"
+                    app:srcCompat="@drawable/ic_eye_remove_outline_24dp"
+                    app:tint="@color/holo_red" />
 
-            <include
-                android:id="@+id/download_button"
-                layout="@layout/download_button"
-                android:layout_width="45dp"
-                android:layout_height="match_parent" />
-        </LinearLayout>
+                <ImageButton
+                    android:id="@+id/show_more_chapters"
+                    android:layout_width="45dp"
+                    android:layout_height="match_parent"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/show_more_chapters"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:tooltipText="@string/show_more_chapters"
+                    app:layout_constraintHorizontal_chainStyle="spread"
+                    app:tint="?attr/colorSecondary"
+                    app:srcCompat="@drawable/ic_expand_more_24dp" />
 
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/bottom_line"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="6dp"
-            android:orientation="horizontal"
-            app:barrierDirection="bottom"
-            app:constraint_referenced_ids="space,card_layout" />
+                <include
+                    android:id="@+id/download_button"
+                    layout="@layout/download_button"
+                    android:layout_width="45dp"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
 
-        <Space
-            android:id="@+id/padding"
-            android:layout_width="0dp"
-            android:layout_height="6dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/bottom_line" />
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/bottom_line"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="6dp"
+                android:orientation="horizontal"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="space,card_layout" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <Space
+                android:id="@+id/padding"
+                android:layout_width="0dp"
+                android:layout_height="6dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/bottom_line" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <androidx.appcompat.widget.LinearLayoutCompat
             android:id="@+id/more_chapters_layout"
             android:layout_width="match_parent"
