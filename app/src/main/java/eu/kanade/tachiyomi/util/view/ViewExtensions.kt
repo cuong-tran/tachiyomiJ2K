@@ -348,11 +348,7 @@ fun Int.numberOfRowsForValue(rawValue: Float): Int {
 }
 
 var View.compatToolTipText: CharSequence?
-    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        tooltipText
-    } else {
-        ""
-    }
+    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) tooltipText else ""
     set(value) {
         ViewCompat.setTooltipText(this, value)
     }
