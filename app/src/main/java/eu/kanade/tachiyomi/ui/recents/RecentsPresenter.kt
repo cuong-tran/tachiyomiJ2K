@@ -275,12 +275,12 @@ class RecentsPresenter(
                 (it.chapter.read && viewType != VIEW_TYPE_ONLY_UPDATES) || it.chapter.id == null -> {
                     val unreadChapterIsAlreadyInList by lazy {
                         val fIndex = mangaList.indexOfFirst { item -> item.manga.id == it.manga.id }
-                        (
-                            recentItems.any { item -> item.mch.manga.id == it.manga.id } ||
-                                fIndex < mangaList.indexOf(it)
-                            )
+                        recentItems.any { item -> item.mch.manga.id == it.manga.id } ||
+                            fIndex < mangaList.indexOf(it)
                     }
-                    if (viewType == VIEW_TYPE_ONLY_HISTORY && unreadChapterIsAlreadyInList) {
+                    if (viewType == VIEW_TYPE_ONLY_HISTORY && updatePageCount &&
+                        unreadChapterIsAlreadyInList
+                    ) {
                         it.chapter
                     } else {
                         val nextChapter = getNextChapter(it.manga)
