@@ -217,7 +217,8 @@ class RecentMangaHolder(
             )
         }
 
-        binding.showMoreChapters.isVisible = item.mch.extraChapters.isNotEmpty() && !adapter.isSearching
+        binding.showMoreChapters.isVisible = item.mch.extraChapters.isNotEmpty() &&
+                !adapter.delegate.isSearching()
         binding.moreChaptersLayout.isVisible = item.mch.extraChapters.isNotEmpty() &&
             adapter.delegate.areExtraChaptersExpanded(flexibleAdapterPosition)
         val moreVisible = binding.moreChaptersLayout.isVisible

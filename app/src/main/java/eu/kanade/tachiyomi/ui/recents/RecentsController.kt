@@ -107,9 +107,7 @@ class RecentsController(bundle: Bundle? = null) :
         retainViewMode = RetainViewMode.RETAIN_DETACH
     }
 
-    /**
-     * Adapter containing the recent manga.
-     */
+    /** Adapter containing the recent manga. */
     private lateinit var adapter: RecentMangaAdapter
     var displaySheet: TabbedRecentsOptionsSheet? = null
 
@@ -118,7 +116,7 @@ class RecentsController(bundle: Bundle? = null) :
     private var snack: Snackbar? = null
     private var lastChapterId: Long? = null
     private var showingDownloads = false
-    var headerHeight = 0
+    private var headerHeight = 0
     private var ogRadius = 0f
     private var deviceRadius = 0f to 0f
 
@@ -126,9 +124,6 @@ class RecentsController(bundle: Bundle? = null) :
         set(value) {
             field = value
             presenter.query = value
-            if (this::adapter.isInitialized) {
-                adapter.isSearching = value.isNotBlank()
-            }
         }
 
     override val mainRecycler: RecyclerView
