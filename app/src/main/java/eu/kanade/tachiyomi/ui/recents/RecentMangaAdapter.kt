@@ -28,6 +28,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     var uniformCovers = preferences.uniformGrid().get()
     var showOutline = preferences.outlineOnCovers().get()
     var sortByFetched = preferences.sortFetchedTime().get()
+    var isSearching = false
     private var collapseGroupedUpdates = preferences.collapseGroupedUpdates().get()
     private var collapseGroupedHistory = preferences.collapseGroupedHistory().get()
     val collapseGrouped: Boolean

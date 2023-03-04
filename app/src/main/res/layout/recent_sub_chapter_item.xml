@@ -26,6 +26,8 @@
         android:paddingBottom="12dp"
         android:paddingStart="84dp"
         android:paddingEnd="2dp"
+        android:gravity="center"
+        app:layout_constraintHeight_min="48dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/download_button"
         app:layout_constraintTop_toTopOf="parent"

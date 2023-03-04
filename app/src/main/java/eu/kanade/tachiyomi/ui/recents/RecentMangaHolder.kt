@@ -30,6 +30,9 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import eu.kanade.tachiyomi.util.view.setAnimVectorCompat
 import eu.kanade.tachiyomi.util.view.setCards
+import java.util.Calendar
+import java.util.Date
+import java.util.concurrent.TimeUnit
 
 class RecentMangaHolder(
     view: View,
@@ -214,8 +217,8 @@ class RecentMangaHolder(
             )
         }
 
-        binding.showMoreChapters.isVisible = item.mch.extraChapters.isNotEmpty()
-        binding.moreChaptersLayout.isVisible = binding.showMoreChapters.isVisible &&
+        binding.showMoreChapters.isVisible = item.mch.extraChapters.isNotEmpty() && !adapter.isSearching
+        binding.moreChaptersLayout.isVisible = item.mch.extraChapters.isNotEmpty() &&
             adapter.delegate.areExtraChaptersExpanded(flexibleAdapterPosition)
         val moreVisible = binding.moreChaptersLayout.isVisible
         binding.showMoreChapters.setImageResource(
@@ -334,10 +337,19 @@ class RecentMangaHolder(
         val showDLs = adapter.showDownloads
         title.text = chapter.preferredChapterName(context, item.mch.manga, adapter.preferences)
         title.setTextColor(ChapterUtil.readColor(context, chapter))
-        subtitle.isVisible = chapter.dateRead != null
         subtitle.text = chapter.dateRead?.let { dateRead ->
+            val date = Calendar.getInstance().apply {
+                time = Date()
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.MILLISECOND, 0)
+                set(Calendar.SECOND, 0)
+            }.timeInMillis
             context.timeSpanFromNow(R.string.read_, dateRead)
+                .takeIf { date - dateRead < TimeUnit.DAYS.toMillis(1) }
         } ?: ""
+        subtitle.isVisible = subtitle.text.isNotBlank()
+        title.textSize = (if (subtitle.isVisible) 14f else 14.5f)
         root.setOnClickListener {
             adapter.delegate.onSubChapterClicked(
                 bindingAdapterPosition,

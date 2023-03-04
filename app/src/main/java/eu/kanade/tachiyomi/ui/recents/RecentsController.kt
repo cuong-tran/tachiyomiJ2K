@@ -126,6 +126,9 @@ class RecentsController(bundle: Bundle? = null) :
         set(value) {
             field = value
             presenter.query = value
+            if (this::adapter.isInitialized) {
+                adapter.isSearching = value.isNotBlank()
+            }
         }
 
     override val mainRecycler: RecyclerView
@@ -651,6 +654,7 @@ class RecentsController(bundle: Bundle? = null) :
     }
 
     override fun areExtraChaptersExpanded(position: Int): Boolean {
+        if (query.isNotBlank()) return true
         val item = (adapter.getItem(position) as? RecentMangaItem) ?: return false
         val date = presenter.dateFormat.format(item.chapter.dateRead ?: item.chapter.date_fetch)
         val invertDefault = !adapter.collapseGrouped
@@ -659,6 +663,7 @@ class RecentsController(bundle: Bundle? = null) :
     }
 
     override fun updateExpandedExtraChapters(position: Int, expanded: Boolean) {
+        if (query.isNotBlank()) return
         val item = (adapter.getItem(position) as? RecentMangaItem) ?: return
         val date = presenter.dateFormat.format(item.chapter.dateRead ?: item.chapter.date_fetch)
         val invertDefault = !adapter.collapseGrouped

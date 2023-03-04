@@ -267,25 +267,24 @@ class RecentsPresenter(
             }
         }
         val pairs = mangaList.mapNotNull {
-            val chapter = run result@{
-                when {
-                    (viewType == VIEW_TYPE_ONLY_UPDATES && !groupChaptersUpdates) ||
-                        (viewType == VIEW_TYPE_ONLY_HISTORY && !groupChaptersHistory) -> {
-                        it.chapter
+            val chapter = when {
+                (viewType == VIEW_TYPE_ONLY_UPDATES && !groupChaptersUpdates) ||
+                    (viewType == VIEW_TYPE_ONLY_HISTORY && !groupChaptersHistory) -> {
+                    it.chapter
+                }
+                (it.chapter.read && viewType != VIEW_TYPE_ONLY_UPDATES) || it.chapter.id == null -> {
+                    val unreadChapterIsAlreadyInList by lazy {
+                        val fIndex = mangaList.indexOfFirst { item -> item.manga.id == it.manga.id }
+                        (
+                            recentItems.any { item -> item.mch.manga.id == it.manga.id } ||
+                                fIndex < mangaList.indexOf(it)
+                            )
                     }
-                    (it.chapter.read && viewType != VIEW_TYPE_ONLY_UPDATES) || it.chapter.id == null -> {
+                    if (viewType == VIEW_TYPE_ONLY_HISTORY && unreadChapterIsAlreadyInList) {
+                        it.chapter
+                    } else {
                         val nextChapter = getNextChapter(it.manga)
                             ?: if (showRead && it.chapter.id != null) it.chapter else null
-                        if (viewType == VIEW_TYPE_ONLY_HISTORY && nextChapter != null) {
-                            val unreadChapterIsAlreadyInList =
-                                recentItems.any { item -> item.mch.manga.id == it.manga.id } ||
-                                    mangaList.indexOfFirst { item ->
-                                    item.manga.id == it.manga.id
-                                } > mangaList.indexOf(it)
-                            if (unreadChapterIsAlreadyInList) {
-                                return@result it.chapter
-                            }
-                        }
                         if (viewType == VIEW_TYPE_ONLY_HISTORY && nextChapter?.id != null &&
                             nextChapter.id != it.chapter.id
                         ) {
@@ -294,13 +293,13 @@ class RecentsPresenter(
                         }
                         nextChapter
                     }
-                    it.history.id == null && viewType != VIEW_TYPE_ONLY_UPDATES -> {
-                        getFirstUpdatedChapter(it.manga, it.chapter)
-                            ?: if ((showRead && it.chapter.id != null)) it.chapter else null
-                    }
-                    else -> {
-                        it.chapter
-                    }
+                }
+                it.history.id == null && viewType != VIEW_TYPE_ONLY_UPDATES -> {
+                    getFirstUpdatedChapter(it.manga, it.chapter)
+                        ?: if ((showRead && it.chapter.id != null)) it.chapter else null
+                }
+                else -> {
+                    it.chapter
                 }
             }
             if (chapter == null) if ((query.isNotEmpty() || viewType > VIEW_TYPE_UNGROUP_ALL) &&
