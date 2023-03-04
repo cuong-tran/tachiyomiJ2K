@@ -232,18 +232,17 @@ class RecentMangaHolder(
             it.findViewById<DownloadButton>(R.id.download_button)?.tag
         }.toList()
         if (extraIds == item.mch.extraChapters.map { it.id }) {
+            var hasSameChapter = false
             item.mch.extraChapters.forEachIndexed { index, chapter ->
-                RecentSubChapterItemBinding.bind(binding.moreChaptersLayout.getChildAt(index))
-                    .configureView(chapter, item)
+                val binding =
+                    RecentSubChapterItemBinding.bind(binding.moreChaptersLayout.getChildAt(index))
+                binding.configureView(chapter, item)
+                if (isUpdates && !binding.subtitle.text.isNullOrBlank() && !hasSameChapter) {
+                    showScanlatorInBody(moreVisible, item)
+                    hasSameChapter = true
+                }
             }
-            if (isUpdates && binding.moreChaptersLayout.children.any { view ->
-                !RecentSubChapterItemBinding.bind(view).subtitle.text.isNullOrBlank()
-            }
-            ) {
-                showScanlatorInBody(moreVisible, item)
-            } else {
-                addMoreUpdatesText(!moreVisible, item)
-            }
+            addMoreUpdatesText(!moreVisible, item)
         } else {
             binding.moreChaptersLayout.removeAllViews()
             var hasSameChapter = false
@@ -255,16 +254,9 @@ class RecentMangaHolder(
                         true,
                     )
                     binding.configureView(chapter, item)
-                    if (isUpdates && chapter.isRecognizedNumber &&
-                        chapter.chapter_number == item.chapter.chapter_number &&
-                        !chapter.scanlator.isNullOrBlank()
-                    ) {
-                        binding.subtitle.text = chapter.scanlator
-                        binding.subtitle.isVisible = true
-                        if (!hasSameChapter) {
-                            showScanlatorInBody(moreVisible, item)
-                            hasSameChapter = true
-                        }
+                    if (isUpdates && !binding.subtitle.text.isNullOrBlank() && !hasSameChapter) {
+                        showScanlatorInBody(moreVisible, item)
+                        hasSameChapter = true
                     }
                 }
                 addMoreUpdatesText(!moreVisible, item)
@@ -348,6 +340,12 @@ class RecentMangaHolder(
             context.timeSpanFromNow(R.string.read_, dateRead)
                 .takeIf { date - dateRead < TimeUnit.DAYS.toMillis(1) }
         } ?: ""
+        if (isUpdates && chapter.isRecognizedNumber &&
+            chapter.chapter_number == item.chapter.chapter_number &&
+            !chapter.scanlator.isNullOrBlank()
+        ) {
+            subtitle.text = chapter.scanlator
+        }
         subtitle.isVisible = subtitle.text.isNotBlank()
         title.textSize = (if (subtitle.isVisible) 14f else 14.5f)
         root.setOnClickListener {
