@@ -64,7 +64,9 @@ class RecentsPresenter(
         RecentMangaHeaderItem(RecentMangaHeaderItem.CONTINUE_READING)
     var finished = false
     private var shouldMoveToTop = false
-    var viewType: Int = preferences.recentsViewType().get()
+    var viewType: RecentsViewType = RecentsViewType.valueOf(preferences.recentsViewType().get())
+        private set
+    var groupHistory: Boolean = preferences.groupChaptersHistory().get()
         private set
     val expandedSectionsMap = mutableMapOf<String, Boolean>()
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -135,7 +137,7 @@ class RecentsPresenter(
         retryCount: Int = 0,
         itemCount: Int = 0,
         limit: Int = -1,
-        customViewType: Int? = null,
+        customViewType: RecentsViewType? = null,
         includeReadAnyway: Boolean = false,
     ) {
         if (retryCount > 5) {
@@ -152,15 +154,15 @@ class RecentsPresenter(
         val viewType = customViewType ?: viewType
 
         val showRead = ((preferences.showReadInAllRecents().get() || query.isNotEmpty()) && limit != 0) || includeReadAnyway
-        val isUngrouped = viewType > VIEW_TYPE_GROUP_ALL || query.isNotEmpty()
-        val groupChaptersUpdates = preferences.collapseGroupedUpdates().get()
+        val isUngrouped = viewType != RecentsViewType.GroupedAll || query.isNotEmpty()
         val groupChaptersHistory = preferences.groupChaptersHistory().get()
+        groupHistory = groupChaptersHistory
 
         val isCustom = customViewType != null
         val isEndless = isUngrouped && limit != 0
         var extraCount = 0
-        val cReading = when {
-            viewType <= VIEW_TYPE_UNGROUP_ALL -> {
+        val cReading: List<MangaChapterHistory> = when (viewType) {
+            RecentsViewType.GroupedAll, RecentsViewType.UngroupedAll -> {
                 db.getAllRecentsTypes(
                     query,
                     showRead,
@@ -169,7 +171,7 @@ class RecentsPresenter(
                     !updatePageCount && !isOnFirstPage,
                 ).executeOnIO()
             }
-            viewType == VIEW_TYPE_ONLY_HISTORY -> {
+            RecentsViewType.History -> {
                 val items = db.getHistoryUngrouped(
                     query,
                     if (isCustom) ENDLESS_LIMIT else pageOffset,
@@ -206,7 +208,7 @@ class RecentsPresenter(
                     items.executeOnIO()
                 }
             }
-            viewType == VIEW_TYPE_ONLY_UPDATES -> {
+            RecentsViewType.Updates -> {
                 db.getRecentChapters(
                     query,
                     if (isCustom) ENDLESS_LIMIT else pageOffset,
@@ -239,25 +241,22 @@ class RecentsPresenter(
                         )
                     }
             }
-            else -> emptyList()
         }
-
-        if (cReading.size + cReading.sumOf { it.extraChapters.size } + extraCount < ENDLESS_LIMIT) {
+        val extraChapterCount = cReading.sumOf { it.extraChapters.size }
+        if (cReading.size + extraChapterCount + extraCount < ENDLESS_LIMIT) {
             finished = true
         }
 
-        if (!isCustom &&
-            (pageOffset == 0 || updatePageCount)
-        ) {
-            pageOffset += cReading.size + cReading.sumOf { it.extraChapters.size } + extraCount
+        if (!isCustom && (pageOffset == 0 || updatePageCount)) {
+            pageOffset += cReading.size + extraChapterCount + extraCount
         }
 
         if (query != oldQuery) return
         val mangaList = cReading.distinctBy {
-            if (query.isEmpty() && viewType != VIEW_TYPE_ONLY_HISTORY && viewType != VIEW_TYPE_ONLY_UPDATES) it.manga.id else it.chapter.id
+            if (query.isEmpty() && viewType.isAll) it.manga.id else it.chapter.id
         }.filter { mch ->
             if (updatePageCount && !isOnFirstPage && query.isEmpty()) {
-                if (viewType != VIEW_TYPE_ONLY_HISTORY && viewType != VIEW_TYPE_ONLY_UPDATES) {
+                if (viewType.isAll) {
                     recentItems.none { mch.manga.id == it.mch.manga.id }
                 } else {
                     recentItems.none { mch.chapter.id == it.mch.chapter.id }
@@ -266,26 +265,21 @@ class RecentsPresenter(
                 true
             }
         }
-        val pairs = mangaList.mapNotNull {
-            val chapter = when {
-                (viewType == VIEW_TYPE_ONLY_UPDATES && !groupChaptersUpdates) ||
-                    (viewType == VIEW_TYPE_ONLY_HISTORY && !groupChaptersHistory) -> {
-                    it.chapter
-                }
-                (it.chapter.read && viewType != VIEW_TYPE_ONLY_UPDATES) || it.chapter.id == null -> {
+        val pairs: List<Pair<MangaChapterHistory, Chapter>> = mangaList.mapNotNull {
+            val chapter: Chapter? = when {
+                // If the chapter is read in history/all or this mch is for a newly added manga
+                (it.chapter.read && !viewType.isUpdates) || it.chapter.id == null -> {
                     val unreadChapterIsAlreadyInList by lazy {
                         val fIndex = mangaList.indexOfFirst { item -> item.manga.id == it.manga.id }
                         recentItems.any { item -> item.mch.manga.id == it.manga.id } ||
                             fIndex < mangaList.indexOf(it)
                     }
-                    if (viewType == VIEW_TYPE_ONLY_HISTORY && updatePageCount &&
-                        unreadChapterIsAlreadyInList
-                    ) {
+                    if (viewType.isHistory && updatePageCount && unreadChapterIsAlreadyInList) {
                         it.chapter
                     } else {
                         val nextChapter = getNextChapter(it.manga)
                             ?: if (showRead && it.chapter.id != null) it.chapter else null
-                        if (viewType == VIEW_TYPE_ONLY_HISTORY && nextChapter?.id != null &&
+                        if (viewType.isHistory && nextChapter?.id != null &&
                             nextChapter.id != it.chapter.id
                         ) {
                             nextChapter.dateRead = it.chapter.dateRead
@@ -294,22 +288,20 @@ class RecentsPresenter(
                         nextChapter
                     }
                 }
-                it.history.id == null && viewType != VIEW_TYPE_ONLY_UPDATES -> {
+                // if in all view type and mch is a newly updated item
+                it.history.id == null && !viewType.isUpdates -> {
                     getFirstUpdatedChapter(it.manga, it.chapter)
                         ?: if ((showRead && it.chapter.id != null)) it.chapter else null
                 }
-                else -> {
-                    it.chapter
+                else -> it.chapter
+            }
+            if (chapter == null) {
+                if ((query.isNotEmpty() || !viewType.isAll) && it.chapter.id != null) {
+                    Pair(it, it.chapter)
+                } else {
+                    null
                 }
-            }
-            if (chapter == null) if ((query.isNotEmpty() || viewType > VIEW_TYPE_UNGROUP_ALL) &&
-                it.chapter.id != null
-            ) {
-                Pair(it, it.chapter)
             } else {
-                null
-            }
-            else {
                 Pair(it, chapter)
             }
         }
@@ -327,19 +319,11 @@ class RecentsPresenter(
                         }
                     }
                     .take(4).map {
-                        RecentMangaItem(
-                            it.first,
-                            it.second,
-                            newChaptersHeader,
-                        )
+                        RecentMangaItem(it.first, it.second, newChaptersHeader)
                     }.toMutableList()
             val cReadingItems =
                 pairs.filter { it.first.history.id != null }.take(9 - nChaptersItems.size).map {
-                    RecentMangaItem(
-                        it.first,
-                        it.second,
-                        continueReadingHeader,
-                    )
+                    RecentMangaItem(it.first, it.second, continueReadingHeader)
                 }.toMutableList()
             if (nChaptersItems.isNotEmpty()) {
                 nChaptersItems.add(RecentMangaItem(header = newChaptersHeader))
@@ -353,20 +337,19 @@ class RecentsPresenter(
                 it.firstOrNull()?.mch?.history?.last_read ?: 0L
             }.flatten()
         } else {
-            if (viewType == VIEW_TYPE_ONLY_UPDATES) {
+            if (viewType.isUpdates) {
                 val map =
                     TreeMap<Date, MutableList<Pair<MangaChapterHistory, Chapter>>> { d1, d2 ->
-                        d2
-                            .compareTo(d1)
+                        d2.compareTo(d1)
                     }
-                val byDay =
-                    pairs.groupByTo(map) { getMapKey(it.first.history.last_read) }
+                val byDay = pairs.groupByTo(map) { getMapKey(it.first.history.last_read) }
                 byDay.flatMap {
                     val dateItem = DateItem(it.key, true)
+                    val sortByFetched = preferences.sortFetchedTime().get()
                     it.value
                         .map { item -> RecentMangaItem(item.first, item.second, dateItem) }
                         .sortedByDescending { item ->
-                            if (preferences.sortFetchedTime().get()) item.date_fetch else item.date_upload
+                            if (sortByFetched) item.date_fetch else item.date_upload
                         }
                 }
             } else {
@@ -383,8 +366,7 @@ class RecentsPresenter(
         val newCount = itemCount + newItems.size + newItems.sumOf { it.mch.extraChapters.size } + extraCount
         val hasNewItems = newItems.isNotEmpty()
         if (updatePageCount && (newCount < if (limit > 0) limit else 25) &&
-            (viewType != VIEW_TYPE_GROUP_ALL || query.isNotEmpty()) &&
-            limit != 0
+            (viewType != RecentsViewType.GroupedAll || query.isNotEmpty()) && limit != 0
         ) {
             runRecents(oldQuery, true, retryCount + (if (hasNewItems) 0 else 1), newCount)
             return
@@ -409,7 +391,7 @@ class RecentsPresenter(
         var extraCount = 0
         val firstChapter: Chapter
         var sortedChapters: MutableList<Chapter>
-        val reverseRead = viewType != VIEW_TYPE_ONLY_HISTORY
+        val reverseRead = !viewType.isHistory
         if (existingItem != null) {
             extraCount += chapters.size
             val newChapters = existingItem.mch.extraChapters + chapters
@@ -447,9 +429,11 @@ class RecentsPresenter(
 
     private fun getFirstUpdatedChapter(manga: Manga, chapter: Chapter): Chapter? {
         val chapters = db.getChapters(manga).executeAsBlocking()
-        return chapters.sortedWith(ChapterSort(manga, chapterFilter, preferences).sortComparator(true)).find {
-            !it.read && abs(it.date_fetch - chapter.date_fetch) <= TimeUnit.HOURS.toMillis(12)
-        }
+        return chapters
+            .filterChaptersByScanlators(manga)
+            .sortedWith(ChapterSort(manga, chapterFilter, preferences).sortComparator(true)).find {
+                !it.read && abs(it.date_fetch - chapter.date_fetch) <= TimeUnit.HOURS.toMillis(12)
+            }
     }
 
     override fun onDestroy() {
@@ -460,9 +444,9 @@ class RecentsPresenter(
         lastRecents = recentItems
     }
 
-    fun toggleGroupRecents(pref: Int, updatePref: Boolean = true) {
+    fun toggleGroupRecents(pref: RecentsViewType, updatePref: Boolean = true) {
         if (updatePref) {
-            preferences.recentsViewType().set(pref)
+            preferences.recentsViewType().set(pref.mainValue)
         }
         viewType = pref
         resetOffsets()
@@ -682,17 +666,13 @@ class RecentsPresenter(
             lastRecents = null
         }
 
-        const val VIEW_TYPE_GROUP_ALL = 0
-        const val VIEW_TYPE_UNGROUP_ALL = 1
-        const val VIEW_TYPE_ONLY_HISTORY = 2
-        const val VIEW_TYPE_ONLY_UPDATES = 3
         const val ENDLESS_LIMIT = 50
         var SHORT_LIMIT = 25
             private set
 
         suspend fun getRecentManga(includeRead: Boolean = false, customAmount: Int = 0): List<Pair<Manga, Long>> {
             val presenter = RecentsPresenter()
-            presenter.viewType = 1
+            presenter.viewType = RecentsViewType.UngroupedAll
             SHORT_LIMIT = when {
                 customAmount > 0 -> (customAmount * 1.5).roundToInt()
                 includeRead -> 50

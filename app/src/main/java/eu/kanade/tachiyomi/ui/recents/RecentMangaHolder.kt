@@ -41,11 +41,9 @@ class RecentMangaHolder(
 
     private val binding = RecentMangaItemBinding.bind(view)
     var chapterId: Long? = null
-    private val isUpdates
-        get() = adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
 
-    private val isSmallUpdates
-        get() = isUpdates && !adapter.showUpdatedTime
+    private val isUpdates get() = adapter.viewType.isUpdates
+    private val isSmallUpdates get() = isUpdates && !adapter.showUpdatedTime
 
     init {
         binding.cardLayout.setOnClickListener { adapter.delegate.onCoverClick(flexibleAdapterPosition) }
@@ -182,7 +180,7 @@ class RecentMangaHolder(
             item.mch.chapter.id == null -> context.timeSpanFromNow(R.string.added_, item.mch.manga.date_added)
             isSmallUpdates -> ""
             item.mch.history.id == null -> {
-                if (adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES) {
+                if (isUpdates) {
                     if (adapter.sortByFetched) {
                         context.timeSpanFromNow(R.string.fetched_, item.chapter.date_fetch)
                     } else {
@@ -218,7 +216,7 @@ class RecentMangaHolder(
         }
 
         binding.showMoreChapters.isVisible = item.mch.extraChapters.isNotEmpty() &&
-                !adapter.delegate.isSearching()
+            !adapter.delegate.alwaysExpanded()
         binding.moreChaptersLayout.isVisible = item.mch.extraChapters.isNotEmpty() &&
             adapter.delegate.areExtraChaptersExpanded(flexibleAdapterPosition)
         val moreVisible = binding.moreChaptersLayout.isVisible

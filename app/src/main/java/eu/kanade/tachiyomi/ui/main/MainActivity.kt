@@ -90,7 +90,7 @@ import eu.kanade.tachiyomi.ui.more.AboutController
 import eu.kanade.tachiyomi.ui.more.OverflowDialog
 import eu.kanade.tachiyomi.ui.more.stats.StatsController
 import eu.kanade.tachiyomi.ui.recents.RecentsController
-import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
+import eu.kanade.tachiyomi.ui.recents.RecentsViewType
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
@@ -868,8 +868,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         router.backstack.firstOrNull()?.controller as? RecentsController
                     controller?.tempJumpTo(
                         when (intent.action) {
-                            SHORTCUT_RECENTLY_UPDATED -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
-                            else -> RecentsPresenter.VIEW_TYPE_ONLY_HISTORY
+                            SHORTCUT_RECENTLY_UPDATED -> RecentsViewType.Updates
+                            else -> RecentsViewType.History
                         },
                     )
                 }

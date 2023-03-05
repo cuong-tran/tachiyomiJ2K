@@ -137,8 +137,8 @@ class RecentsController(bundle: Bundle? = null) :
         return searchTitle(
             view?.context?.getString(
                 when (presenter.viewType) {
-                    RecentsPresenter.VIEW_TYPE_ONLY_HISTORY -> R.string.history
-                    RecentsPresenter.VIEW_TYPE_ONLY_UPDATES -> R.string.updates
+                    RecentsViewType.History -> R.string.history
+                    RecentsViewType.Updates -> R.string.updates
                     else -> R.string.updates_and_history
                 },
             )?.lowercase(Locale.ROOT),
@@ -449,7 +449,8 @@ class RecentsController(bundle: Bundle? = null) :
     }
 
     override fun canStillGoBack(): Boolean {
-        return showingDownloads || presenter.preferences.recentsViewType().get() != presenter.viewType
+        return showingDownloads ||
+            presenter.preferences.recentsViewType().get() != presenter.viewType.mainValue
     }
 
     override fun handleBack(): Boolean {
@@ -457,8 +458,9 @@ class RecentsController(bundle: Bundle? = null) :
             binding.downloadBottomSheet.dlBottomSheet.dismiss()
             return true
         }
-        if (presenter.preferences.recentsViewType().get() != presenter.viewType) {
-            tempJumpTo(presenter.preferences.recentsViewType().get())
+        val viewType = RecentsViewType.valueOf(presenter.preferences.recentsViewType().get())
+        if (viewType != presenter.viewType) {
+            tempJumpTo(viewType)
             return true
         }
         return false
@@ -516,11 +518,11 @@ class RecentsController(bundle: Bundle? = null) :
         if (isControllerVisible) {
             activityBinding?.appBar?.lockYPos = false
         }
-        if (!hasNewItems || presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL ||
+        if (!hasNewItems || presenter.viewType == RecentsViewType.GroupedAll ||
             recents.isEmpty()
         ) {
             loadNoMore()
-        } else if (hasNewItems && presenter.viewType != RecentsPresenter.VIEW_TYPE_GROUP_ALL) {
+        } else if (presenter.viewType != RecentsViewType.GroupedAll) {
             resetProgressItem()
         }
         if (recents.isEmpty()) {
@@ -534,8 +536,8 @@ class RecentsController(bundle: Bundle? = null) :
                     R.string.no_results_found
                 } else {
                     when (presenter.viewType) {
-                        RecentsPresenter.VIEW_TYPE_ONLY_UPDATES -> R.string.no_recent_chapters
-                        RecentsPresenter.VIEW_TYPE_ONLY_HISTORY -> R.string.no_recently_read_manga
+                        RecentsViewType.Updates -> R.string.no_recent_chapters
+                        RecentsViewType.History -> R.string.no_recently_read_manga
                         else -> R.string.no_recent_read_updated_manga
                     }
                 },
@@ -649,7 +651,7 @@ class RecentsController(bundle: Bundle? = null) :
     }
 
     override fun areExtraChaptersExpanded(position: Int): Boolean {
-        if (query.isNotBlank()) return true
+        if (alwaysExpanded()) return true
         val item = (adapter.getItem(position) as? RecentMangaItem) ?: return false
         val date = presenter.dateFormat.format(item.chapter.dateRead ?: item.chapter.date_fetch)
         val invertDefault = !adapter.collapseGrouped
@@ -658,28 +660,28 @@ class RecentsController(bundle: Bundle? = null) :
     }
 
     override fun updateExpandedExtraChapters(position: Int, expanded: Boolean) {
-        if (query.isNotBlank()) return
+        if (alwaysExpanded()) return
         val item = (adapter.getItem(position) as? RecentMangaItem) ?: return
         val date = presenter.dateFormat.format(item.chapter.dateRead ?: item.chapter.date_fetch)
         val invertDefault = !adapter.collapseGrouped
         presenter.expandedSectionsMap["${item.mch.manga} - $date"] = expanded.xor(invertDefault)
     }
 
-    fun tempJumpTo(viewType: Int) {
+    fun tempJumpTo(viewType: RecentsViewType) {
         presenter.toggleGroupRecents(viewType, false)
-        activityBinding?.mainTabs?.selectTab(activityBinding?.mainTabs?.getTabAt(viewType))
+        activityBinding?.mainTabs?.run { selectTab(getTabAt(viewType.mainValue)) }
         (activity as? MainActivity)?.reEnableBackPressedCallBack()
         updateTitleAndMenu()
     }
 
-    private fun setViewType(viewType: Int) {
+    private fun setViewType(viewType: RecentsViewType) {
         if (viewType != presenter.viewType) {
             presenter.toggleGroupRecents(viewType)
             updateTitleAndMenu()
         }
     }
 
-    override fun getViewType(): Int = presenter.viewType
+    override fun getViewType(): RecentsViewType = presenter.viewType
 
     override fun scope() = viewScope
 
@@ -690,8 +692,8 @@ class RecentsController(bundle: Bundle? = null) :
                 val headerItem = adapter.getHeaderOf(item) as? RecentMangaHeaderItem
                 tempJumpTo(
                     when (headerItem?.recentsType) {
-                        RecentMangaHeaderItem.NEW_CHAPTERS -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
-                        RecentMangaHeaderItem.CONTINUE_READING -> RecentsPresenter.VIEW_TYPE_ONLY_HISTORY
+                        RecentMangaHeaderItem.NEW_CHAPTERS -> RecentsViewType.Updates
+                        RecentMangaHeaderItem.CONTINUE_READING -> RecentsViewType.History
                         else -> return false
                     },
                 )
@@ -800,7 +802,9 @@ class RecentsController(bundle: Bundle? = null) :
         (activity as? MainActivity)?.setUndoSnackBar(snack)
     }
 
-    override fun isSearching() = query.isNotEmpty()
+    private fun isSearching() = query.isNotEmpty()
+    override fun alwaysExpanded() =
+        query.isNotEmpty() || (presenter.viewType.isHistory && !presenter.groupHistory)
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.recents, menu)
@@ -832,25 +836,19 @@ class RecentsController(bundle: Bundle? = null) :
                 tabs.removeAllTabs()
                 tabs.clearOnTabSelectedListeners()
                 val selectedTab = presenter.viewType
-                listOf(
-                    R.string.grouped,
-                    R.string.all,
-                    R.string.history,
-                    R.string.updates,
-                ).forEachIndexed { index, resId ->
+                RecentsViewType.values().forEach { viewType ->
                     tabs.addTab(
-                        tabs.newTab().setText(resId).also { tab ->
+                        tabs.newTab().setText(viewType.stringRes).also { tab ->
                             tab.view.compatToolTipText = null
                         },
-                        index == selectedTab,
+                        viewType == selectedTab,
                     )
                 }
                 tabs.addOnTabSelectedListener(
                     object : TabLayout.OnTabSelectedListener {
                         override fun onTabSelected(tab: TabLayout.Tab?) {
-                            setViewType(tab?.position ?: 0)
+                            setViewType(RecentsViewType.valueOf(tab?.position))
                         }
-
                         override fun onTabUnselected(tab: TabLayout.Tab?) {}
                         override fun onTabReselected(tab: TabLayout.Tab?) {
                             binding.recycler.smoothScrollToTop()
@@ -919,7 +917,7 @@ class RecentsController(bundle: Bundle? = null) :
             R.id.display_options -> {
                 displaySheet = TabbedRecentsOptionsSheet(
                     this,
-                    (presenter.viewType - 1).coerceIn(0, 2),
+                    (presenter.viewType.mainValue - 1).coerceIn(0, 2),
                 )
                 displaySheet?.show()
             }
@@ -933,10 +931,7 @@ class RecentsController(bundle: Bundle? = null) :
         val view = view ?: return
         if (presenter.finished ||
             BackupRestoreService.isRunning(view.context.applicationContext) ||
-            (
-                presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL &&
-                    !isSearching()
-                )
+            (presenter.viewType == RecentsViewType.GroupedAll && !isSearching())
         ) {
             loadNoMore()
             return

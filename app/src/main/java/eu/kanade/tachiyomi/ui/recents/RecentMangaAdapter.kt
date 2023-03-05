@@ -31,13 +31,13 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     private var collapseGroupedUpdates = preferences.collapseGroupedUpdates().get()
     private var collapseGroupedHistory = preferences.collapseGroupedHistory().get()
     val collapseGrouped: Boolean
-        get() = if (viewType == RecentsPresenter.VIEW_TYPE_ONLY_HISTORY) {
+        get() = if (viewType.isHistory) {
             collapseGroupedHistory
         } else {
             collapseGroupedUpdates
         }
 
-    val viewType: Int
+    val viewType: RecentsViewType
         get() = delegate.getViewType()
 
     val decimalFormat = DecimalFormat(
@@ -93,9 +93,9 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         fun updateExpandedExtraChapters(position: Int, expanded: Boolean)
         fun areExtraChaptersExpanded(position: Int): Boolean
         fun markAsRead(position: Int)
-        fun isSearching(): Boolean
+        fun alwaysExpanded(): Boolean
         fun scope(): CoroutineScope
-        fun getViewType(): Int
+        fun getViewType(): RecentsViewType
         fun onItemLongClick(position: Int, chapter: Chapter): Boolean
     }
 
