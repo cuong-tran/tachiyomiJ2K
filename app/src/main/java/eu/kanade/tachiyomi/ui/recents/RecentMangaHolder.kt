@@ -30,7 +30,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import eu.kanade.tachiyomi.util.view.setAnimVectorCompat
 import eu.kanade.tachiyomi.util.view.setCards
-import java.util.Calendar
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
@@ -329,15 +328,8 @@ class RecentMangaHolder(
         title.text = chapter.preferredChapterName(context, item.mch.manga, adapter.preferences)
         title.setTextColor(ChapterUtil.readColor(context, chapter))
         subtitle.text = chapter.dateRead?.let { dateRead ->
-            val date = Calendar.getInstance().apply {
-                time = Date()
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.MILLISECOND, 0)
-                set(Calendar.SECOND, 0)
-            }.timeInMillis
             context.timeSpanFromNow(R.string.read_, dateRead)
-                .takeIf { date - dateRead < TimeUnit.DAYS.toMillis(1) }
+                .takeIf { Date().time - dateRead < TimeUnit.DAYS.toMillis(1) }
         } ?: ""
         if (isUpdates && chapter.isRecognizedNumber &&
             chapter.chapter_number == item.chapter.chapter_number &&
