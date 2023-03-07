@@ -441,8 +441,8 @@ object ImageUtil {
         val canvas = Canvas(result)
         canvas.drawColor(background)
         val widthAndHinge = maxWidth + adjustedHingeGap
-        val minRatio = min(maxHeight / height.toFloat(), maxWidth / width.toFloat())
         if (imageBitmap.height != maxHeight && imageBitmap.width != maxWidth) {
+            val minRatio = min(maxHeight / height.toFloat(), maxWidth / width.toFloat())
             imageBitmap = imageBitmap.scale((width * minRatio).toInt(), (height * minRatio).toInt())
         }
         height = imageBitmap.height
@@ -456,8 +456,9 @@ object ImageUtil {
         canvas.drawBitmap(imageBitmap, imageBitmap.rect, upperPart, null)
         progressCallback?.invoke(98)
         if (imageBitmap2.height != maxHeight && imageBitmap2.width != maxWidth) {
+            val minRatio = min(maxHeight / height2.toFloat(), maxWidth / width2.toFloat())
             imageBitmap2 =
-                imageBitmap2.scale((width * minRatio).toInt(), (height * minRatio).toInt())
+                imageBitmap2.scale((width2 * minRatio).toInt(), (height2 * minRatio).toInt())
         }
         height2 = imageBitmap2.height
         width2 = imageBitmap2.width
