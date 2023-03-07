@@ -22,6 +22,7 @@ import androidx.core.graphics.alpha
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
+import androidx.core.graphics.scale
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import tachiyomi.decoder.Format
@@ -415,18 +416,20 @@ object ImageUtil {
     }
 
     fun mergeBitmaps(
-        imageBitmap: Bitmap,
-        imageBitmap2: Bitmap,
+        iBitmap: Bitmap,
+        iBitmap2: Bitmap,
         isLTR: Boolean,
         @ColorInt background: Int = Color.WHITE,
         hingeGap: Int = 0,
         context: Context? = null,
         progressCallback: ((Int) -> Unit)? = null,
     ): ByteArrayInputStream {
-        val height = imageBitmap.height
-        val width = imageBitmap.width
-        val height2 = imageBitmap2.height
-        val width2 = imageBitmap2.width
+        var imageBitmap = iBitmap
+        var imageBitmap2 = iBitmap2
+        var height = imageBitmap.height
+        var width = imageBitmap.width
+        var height2 = imageBitmap2.height
+        var width2 = imageBitmap2.width
         val maxHeight = max(height, height2)
         val maxWidth = max(width, width2)
         val adjustedHingeGap = context?.let {
@@ -437,19 +440,32 @@ object ImageUtil {
         val result = Bitmap.createBitmap((maxWidth * 2) + adjustedHingeGap, maxHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(result)
         canvas.drawColor(background)
+        val widthAndHinge = maxWidth + adjustedHingeGap
+        val minRatio = min(maxHeight / height.toFloat(), maxWidth / width.toFloat())
+        if (imageBitmap.height != maxHeight && imageBitmap.width != maxWidth) {
+            imageBitmap = imageBitmap.scale((width * minRatio).toInt(), (height * minRatio).toInt())
+        }
+        height = imageBitmap.height
+        width = imageBitmap.width
         val upperPart = Rect(
-            if (isLTR) max(maxWidth - imageBitmap.width, 0) else maxWidth + adjustedHingeGap,
-            (maxHeight - imageBitmap.height) / 2,
-            (if (isLTR) max(maxWidth - imageBitmap.width, 0) else maxWidth + adjustedHingeGap) + imageBitmap.width,
-            imageBitmap.height + (maxHeight - imageBitmap.height) / 2,
+            if (isLTR) max(maxWidth - width, 0) else widthAndHinge,
+            (maxHeight - height) / 2,
+            (if (isLTR) max(maxWidth - width, 0) else widthAndHinge) + width,
+            height + (maxHeight - height) / 2,
         )
         canvas.drawBitmap(imageBitmap, imageBitmap.rect, upperPart, null)
         progressCallback?.invoke(98)
+        if (imageBitmap2.height != maxHeight && imageBitmap2.width != maxWidth) {
+            imageBitmap2 =
+                imageBitmap2.scale((width * minRatio).toInt(), (height * minRatio).toInt())
+        }
+        height2 = imageBitmap2.height
+        width2 = imageBitmap2.width
         val bottomPart = Rect(
-            if (!isLTR) max(maxWidth - imageBitmap2.width, 0) else maxWidth + adjustedHingeGap,
-            (maxHeight - imageBitmap2.height) / 2,
-            (if (!isLTR) max(maxWidth - imageBitmap2.width, 0) else maxWidth + adjustedHingeGap) + imageBitmap2.width,
-            imageBitmap2.height + (maxHeight - imageBitmap2.height) / 2,
+            if (!isLTR) max(maxWidth - width2, 0) else widthAndHinge,
+            (maxHeight - height2) / 2,
+            (if (!isLTR) max(maxWidth - width2, 0) else widthAndHinge) + width2,
+            height2 + (maxHeight - height2) / 2,
         )
         canvas.drawBitmap(imageBitmap2, imageBitmap2.rect, bottomPart, null)
         progressCallback?.invoke(99)
