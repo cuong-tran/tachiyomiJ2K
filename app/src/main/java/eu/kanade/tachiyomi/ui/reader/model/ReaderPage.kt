@@ -18,6 +18,7 @@ open class ReaderPage(
     var firstHalf: Boolean? = null,
     var longPage: Boolean? = null,
     var isEndPage: Boolean? = null,
+    var paddedPageConfidence: Int = 0,
     var isStartPage: Boolean? = null,
 ) : Page(index, url, imageUrl, null) {
 

@@ -454,7 +454,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         outState.putBoolean(::menuVisible.name, menuVisible)
         (viewer as? PagerViewer)?.let { pViewer ->
             val config = pViewer.config
-            outState.putBoolean(SHIFT_DOUBLE_PAGES, config.shiftDoublePage)
+            if (config.doublePages) {
+                outState.putBoolean(SHIFT_DOUBLE_PAGES, config.shiftDoublePage)
+            }
             if (config.shiftDoublePage && config.doublePages) {
                 pViewer.getShiftedPage()?.let {
                     outState.putInt(SHIFTED_PAGE_INDEX, it.index)
@@ -605,8 +607,11 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
     fun shiftDoublePages(forceShift: Boolean? = null, page: ReaderPage? = null) {
         (viewer as? PagerViewer)?.let { pViewer ->
-            if (forceShift == pViewer.config.shiftDoublePage) return
-            if (page != null && pViewer.getShiftedPage() == page) return
+            if (forceShift == pViewer.config.shiftDoublePage &&
+                page != null && page == pViewer.getShiftedPage()
+            ) {
+                return
+            }
             pViewer.config.shiftDoublePage = !pViewer.config.shiftDoublePage
             viewModel.state.value.viewerChapters?.let {
                 pViewer.updateShifting(page)
@@ -617,7 +622,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     fun isFirstPageFull(): Boolean = viewModel.getCurrentChapter()?.pages?.get(0)?.fullPage == true
-    fun isFirstPageEnd(): Boolean = viewModel.getCurrentChapter()?.pages?.get(0)?.isEndPage == true
+    fun getFirstPage(): ReaderPage? = viewModel.getCurrentChapter()?.pages?.get(0)
 
     private fun popToMain() {
         if (fromUrl) {
@@ -1278,10 +1283,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
     private fun shouldShiftDoublePages(currentIndex: Int): Boolean {
         val currentChapter = viewModel.getCurrentChapter()
-        val currentPage = currentChapter?.pages?.get(currentIndex)
         return (
             currentIndex +
-                (currentPage?.isEndPage == true && currentPage.fullPage != true).toInt() +
                 (currentChapter?.pages?.take(currentIndex)?.count { it.alonePage } ?: 0)
             ) % 2 != 0
     }
@@ -1299,9 +1302,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             }
             indexChapterToShift = null
             indexPageToShift = null
-        } else if (lastShiftDoubleState != null) {
-            val currentIndex = viewerChapters.currChapter.requestedPage
-            (viewer as? PagerViewer)?.config?.shiftDoublePage = shouldShiftDoublePages(currentIndex)
         }
         val currentChapterPageCount = viewerChapters.currChapter.pages?.size ?: 1
         binding.readerNav.root.visibility = when {

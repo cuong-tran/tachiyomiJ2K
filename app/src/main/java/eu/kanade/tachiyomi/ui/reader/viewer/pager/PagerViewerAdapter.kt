@@ -190,6 +190,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                     firstHalf = null
                     isEndPage = null
                     isStartPage = null
+                    paddedPageConfidence = 0
                 }
             }
             if (viewer.config.splitPages) {

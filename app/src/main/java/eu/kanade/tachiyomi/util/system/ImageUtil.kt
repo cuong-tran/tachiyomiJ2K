@@ -622,27 +622,27 @@ object ImageUtil {
             abs(color1.blue - color2.blue) < 30
     }
 
-    /** Returns if this bitmap matches what would be (if rightSide param is true)
-     * the single left side page, or the second page to read in a RTL book, first in an LTR book
+    /**
+     * Returns if this bitmap matches what would be (if rightSide param is true)
+     * the single left side page, or the second page to read in a RTL book, first in an LTR book.
      *
-     * @param image: bitmap image to check
-     * @param rightSide: when true, check if its a single left side page, else right side
+     * @return An int based on confidence, 0 meaning not padded, 1 meaning barely padded,
+     * 2 meaning likely padded, 3 meaining definitely padded
+     * @param rightSide: When true, check if its a single left side page, else right side
      * */
-    fun isPagePadded(image: Bitmap, rightSide: Boolean): Boolean {
-        if (image.isSidePadded(!rightSide, checkWhite = true) ||
-            image.isSidePadded(!rightSide, checkWhite = false)
-        ) {
-            return false
+    fun Bitmap.isPagePadded(rightSide: Boolean): Int {
+        val booleans = listOf(true, false)
+        return when {
+            booleans.any { isSidePadded(!rightSide, checkWhite = it) } -> 0
+            booleans.any { isSidePadded(rightSide, checkWhite = it) } -> 3
+            booleans.any { isOneSideMorePadded(rightSide, checkWhite = it) } -> 2
+            booleans.any { isSidePadded(rightSide, checkWhite = it, halfCheck = true) } -> 1
+            else -> 0
         }
-        return image.isSidePadded(rightSide, checkWhite = true) ||
-            image.isSidePadded(rightSide, checkWhite = false) ||
-            // if neither of the above 2 worked,
-            // try starting from the vert. middle and see which side has more padding
-            image.isOneSideMorePadded(rightSide, checkWhite = true) ||
-            image.isOneSideMorePadded(rightSide, checkWhite = false)
     }
 
-    private fun Bitmap.isSidePadded(rightSide: Boolean, checkWhite: Boolean): Boolean {
+    /** Returns if one side has a vertical padding and the other side does not */
+    private fun Bitmap.isSidePadded(rightSide: Boolean, checkWhite: Boolean, halfCheck: Boolean = false): Boolean {
         val left = (width * 0.0275).toInt()
         val right = width - left
         val paddedSide = if (rightSide) right else left
@@ -650,12 +650,13 @@ object ImageUtil {
         return (1 until 30).count {
             // if all of a side is padded (the left page usually has a white padding on the right when scanned)
             getPixel(paddedSide, (height * (it / 30f)).roundToInt()).isWhiteOrDark(checkWhite)
-        } >= 27 && !(1 until 50).all {
+        } >= (if (halfCheck) 15 else 27) && !(1 until 50).all {
             // and if all of the other side isn't padded
             getPixel(unPaddedSide, (height * (it / 50f)).roundToInt()).isWhiteOrDark(checkWhite)
         }
     }
 
+    /** Returns if one side is more padded than the other */
     private fun Bitmap.isOneSideMorePadded(rightSide: Boolean, checkWhite: Boolean): Boolean {
         val middle = (height * 0.475).roundToInt()
         val middle2 = (height * 0.525).roundToInt()
