@@ -9,10 +9,12 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.os.Build
@@ -117,7 +119,6 @@ import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.spToPx
-import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.collapse
@@ -231,13 +232,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             field = value
             (viewer as? PagerViewer)?.config?.hingeGapSize = value
         }
-    private val decimalFormat by lazy {
-        DecimalFormat(
-            "#.###",
-            DecimalFormatSymbols()
-                .apply { decimalSeparator = '.' },
-        )
-    }
 
     companion object {
 
@@ -1017,7 +1011,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
     private suspend fun loadChapter(chapter: ReaderChapter) {
         val lastPage = viewModel.loadChapter(chapter) ?: return
-        launchUI {
+        scope.launchUI {
             moveToPageIndex(lastPage, false, chapterChange = true)
         }
         refreshChapters()
@@ -1674,7 +1668,20 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 if (errorMessage != null) {
                     val icon = contextCompatDrawable(service.getLogo())
                         ?.mutate()
-                        ?.apply {
+                        ?.run {
+                            (this as? BitmapDrawable)?.run {
+                                val newBitmap = Bitmap.createBitmap(
+                                    intrinsicWidth,
+                                    intrinsicHeight,
+                                    bitmap.config
+                                )
+                                val canvas = Canvas(newBitmap)
+                                val bgColor = ColorUtils.setAlphaComponent(service.getLogoColor(), 255)
+                                canvas.drawColor(bgColor)
+                                canvas.drawBitmap(bitmap, 0f, 0f, null)
+                                BitmapDrawable(resources, newBitmap)
+                            } ?: this
+                        }?.apply {
                             val size =
                                 resources.getDimension(com.google.android.material.R.dimen.design_snackbar_text_size)
                             val dRatio = intrinsicWidth / intrinsicHeight.toFloat()
@@ -1693,7 +1700,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     private fun onVisibilityChange(visible: Boolean) {
         if (visible && !menuStickyVisible && !menuVisible && !binding.appBar.isVisible) {
             menuStickyVisible = true
-            coroutine = launchUI {
+            coroutine = scope.launchUI {
                 delay(2000)
                 if (window.decorView.rootWindowInsetsCompat?.isVisible(statusBars()) == true) {
                     menuStickyVisible = false
