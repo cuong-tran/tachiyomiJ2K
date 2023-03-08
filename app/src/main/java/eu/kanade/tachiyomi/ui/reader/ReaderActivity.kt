@@ -601,11 +601,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
     fun shiftDoublePages(forceShift: Boolean? = null, page: ReaderPage? = null) {
         (viewer as? PagerViewer)?.let { pViewer ->
-            if (forceShift == pViewer.config.shiftDoublePage &&
-                page != null && page == pViewer.getShiftedPage()
-            ) {
-                return
-            }
+            if (forceShift == pViewer.config.shiftDoublePage) return
             pViewer.config.shiftDoublePage = !pViewer.config.shiftDoublePage
             viewModel.state.value.viewerChapters?.let {
                 pViewer.updateShifting(page)
