@@ -47,7 +47,7 @@ class RecentMangaHolder(
     init {
         binding.cardLayout.setOnClickListener { adapter.delegate.onCoverClick(flexibleAdapterPosition) }
         binding.removeHistory.setOnClickListener { adapter.delegate.onRemoveHistoryClicked(flexibleAdapterPosition) }
-        binding.showMoreChapters.setOnClickListener {
+        binding.showMoreChapters.setOnClickListener { _ ->
             val moreVisible = !binding.moreChaptersLayout.isVisible
             binding.moreChaptersLayout.isVisible = moreVisible
             adapter.delegate.updateExpandedExtraChapters(flexibleAdapterPosition, moreVisible)
@@ -71,14 +71,15 @@ class RecentMangaHolder(
             } else {
                 addMoreUpdatesText(!moreVisible)
             }
+            readLastText(!moreVisible).takeIf { it.isNotEmpty() }?.let { binding.body.text = it }
             binding.endView.updateLayoutParams<ViewGroup.LayoutParams> {
                 height = binding.mainView.height
             }
             val transition = TransitionSet()
                 .addTransition(androidx.transition.ChangeBounds())
                 .addTransition(androidx.transition.Slide())
-            transition.duration = it.resources.getInteger(android.R.integer.config_shortAnimTime)
-                .toLong()
+            transition.duration =
+                itemView.resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
             TransitionManager.beginDelayedTransition(adapter.recyclerView, transition)
         }
         updateCards()
@@ -173,7 +174,13 @@ class RecentMangaHolder(
                 if (item.read) R.drawable.ic_eye_off_24dp else R.drawable.ic_eye_24dp,
             )
         }
-        val notValidNum = item.mch.chapter.chapter_number <= 0
+
+        binding.showMoreChapters.isVisible = item.mch.extraChapters.isNotEmpty() &&
+            !adapter.delegate.alwaysExpanded()
+        binding.moreChaptersLayout.isVisible = item.mch.extraChapters.isNotEmpty() &&
+            adapter.delegate.areExtraChaptersExpanded(flexibleAdapterPosition)
+        val moreVisible = binding.moreChaptersLayout.isVisible
+
         binding.body.isVisible = !isSmallUpdates
         binding.body.text = when {
             item.mch.chapter.id == null -> context.timeSpanFromNow(R.string.added_, item.mch.manga.date_added)
@@ -190,11 +197,7 @@ class RecentMangaHolder(
                         context.timeSpanFromNow(R.string.updated_, item.chapter.date_upload)
                 }
             }
-            item.chapter.id != item.mch.chapter.id -> context.timeSpanFromNow(R.string.read_, item.mch.history.last_read) +
-                "\n" + binding.body.context.getString(
-                if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
-                if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number),
-            )
+            item.chapter.id != item.mch.chapter.id -> readLastText(!moreVisible)
             item.chapter.pages_left > 0 && !item.chapter.read -> context.timeSpanFromNow(R.string.read_, item.mch.history.last_read) +
                 "\n" + itemView.resources.getQuantityString(
                 R.plurals.pages_left,
@@ -214,11 +217,6 @@ class RecentMangaHolder(
             )
         }
 
-        binding.showMoreChapters.isVisible = item.mch.extraChapters.isNotEmpty() &&
-            !adapter.delegate.alwaysExpanded()
-        binding.moreChaptersLayout.isVisible = item.mch.extraChapters.isNotEmpty() &&
-            adapter.delegate.areExtraChaptersExpanded(flexibleAdapterPosition)
-        val moreVisible = binding.moreChaptersLayout.isVisible
         binding.showMoreChapters.setImageResource(
             if (moreVisible) {
                 R.drawable.ic_expand_less_24dp
@@ -297,6 +295,21 @@ class RecentMangaHolder(
         }
     }
 
+    private fun readLastText(show: Boolean, originalItem: RecentMangaItem? = null): String {
+        val item = originalItem ?: adapter.getItem(bindingAdapterPosition) as? RecentMangaItem ?: return ""
+        val notValidNum = item.mch.chapter.chapter_number <= 0
+        return if (adapter.viewType.isHistory && item.chapter.id != item.mch.chapter.id) {
+            if (show) {
+                itemView.context.timeSpanFromNow(R.string.read_, item.mch.history.last_read) + "\n"
+            } else {
+                ""
+            } + itemView.context.getString(
+                if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
+                if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number),
+            )
+        } else { "" }
+    }
+
     private fun showScanlatorInBody(add: Boolean, originalItem: RecentMangaItem? = null) {
         val item = originalItem ?: adapter.getItem(bindingAdapterPosition) as? RecentMangaItem ?: return
         val originalText = binding.body.text.toString()
@@ -327,9 +340,12 @@ class RecentMangaHolder(
         val showDLs = adapter.showDownloads
         title.text = chapter.preferredChapterName(context, item.mch.manga, adapter.preferences)
         title.setTextColor(ChapterUtil.readColor(context, chapter))
+        val notReadYet = item.chapter.id != item.mch.chapter.id && item.mch.history.id != null
         subtitle.text = chapter.dateRead?.let { dateRead ->
             context.timeSpanFromNow(R.string.read_, dateRead)
-                .takeIf { Date().time - dateRead < TimeUnit.DAYS.toMillis(1) }
+                .takeIf {
+                    Date().time - dateRead < TimeUnit.DAYS.toMillis(1) || notReadYet
+                }
         } ?: ""
         if (isUpdates && chapter.isRecognizedNumber &&
             chapter.chapter_number == item.chapter.chapter_number &&
