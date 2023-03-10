@@ -31,6 +31,7 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.ChapterHistory
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadService
@@ -653,7 +654,7 @@ class RecentsController(bundle: Bundle? = null) :
     override fun areExtraChaptersExpanded(position: Int): Boolean {
         if (alwaysExpanded()) return true
         val item = (adapter.getItem(position) as? RecentMangaItem) ?: return false
-        val date = presenter.dateFormat.format(item.chapter.dateRead ?: item.chapter.date_fetch)
+        val date = presenter.dateFormat.format(item.mch.history.last_read)
         val invertDefault = !adapter.collapseGrouped
         return presenter.expandedSectionsMap["${item.mch.manga} - $date"]?.xor(invertDefault)
             ?: invertDefault
@@ -662,7 +663,7 @@ class RecentsController(bundle: Bundle? = null) :
     override fun updateExpandedExtraChapters(position: Int, expanded: Boolean) {
         if (alwaysExpanded()) return
         val item = (adapter.getItem(position) as? RecentMangaItem) ?: return
-        val date = presenter.dateFormat.format(item.chapter.dateRead ?: item.chapter.date_fetch)
+        val date = presenter.dateFormat.format(item.mch.history.last_read)
         val invertDefault = !adapter.collapseGrouped
         presenter.expandedSectionsMap["${item.mch.manga} - $date"] = expanded.xor(invertDefault)
     }
@@ -729,7 +730,7 @@ class RecentsController(bundle: Bundle? = null) :
         }
     }
 
-    override fun onItemLongClick(position: Int, chapter: Chapter): Boolean {
+    override fun onItemLongClick(position: Int, chapter: ChapterHistory): Boolean {
         val history = chapter.history ?: return false
         val item = adapter.getItem(position) as? RecentMangaItem ?: return false
         val manga = item.mch.manga

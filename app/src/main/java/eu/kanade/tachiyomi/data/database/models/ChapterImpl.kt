@@ -24,13 +24,6 @@ class ChapterImpl : Chapter {
 
     override var date_upload: Long = 0
 
-    override var dateRead: Long? = null
-    override var history: History? = null
-        set(value) {
-            field = value
-            dateRead = history?.last_read
-        }
-
     override var chapter_number: Float = 0f
 
     override var source_order: Int = 0

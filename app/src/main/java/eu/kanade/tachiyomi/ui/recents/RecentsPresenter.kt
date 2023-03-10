@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.recents
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.ChapterHistory
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.HistoryImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -185,7 +186,7 @@ class RecentsPresenter(
                         .mapNotNull { (key, mchs) ->
                             val manga = mchs.first().manga
                             val chapters = mchs.map { mch ->
-                                mch.chapter.also { it.history = mch.history }
+                                ChapterHistory(mch.chapter, mch.history)
                             }.filterChaptersByScanlators(manga)
                             extraCount += mchs.size - chapters.size
                             if (chapters.isEmpty()) return@mapNotNull null
@@ -193,8 +194,8 @@ class RecentsPresenter(
                                 val date = Date(it.mch.history.last_read)
                                 key == it.manga_id to dateFormat.format(date)
                             }?.takeIf { updatePageCount }
-                            val sort = Comparator<Chapter> { c1, c2 ->
-                                c2.dateRead!!.compareTo(c1.dateRead!!)
+                            val sort = Comparator<ChapterHistory> { c1, c2 ->
+                                c2.history!!.last_read.compareTo(c1.history!!.last_read)
                             }
                             val (sortedChapters, firstChapter, subCount) =
                                 setupExtraChapters(existingItem, chapters, sort)
@@ -219,14 +220,15 @@ class RecentsPresenter(
                 }
                     .mapNotNull { (key, mcs) ->
                         val manga = mcs.first().manga
-                        val chapters = mcs.map { it.chapter }.filterChaptersByScanlators(manga)
+                        val chapters = mcs.map { ChapterHistory(it.chapter) }
+                            .filterChaptersByScanlators(manga)
                         extraCount += mcs.size - chapters.size
                         if (chapters.isEmpty()) return@mapNotNull null
                         val existingItem = recentItems.takeLast(ENDLESS_LIMIT).find {
                             val date = Date(it.chapter.date_fetch)
                             key == it.manga_id to dateFormat.format(date)
                         }?.takeIf { updatePageCount }
-                        val sort: Comparator<Chapter> =
+                        val sort: Comparator<ChapterHistory> =
                             ChapterSort(manga, chapterFilter, preferences)
                                 .sortComparator(true)
                         val (sortedChapters, firstChapter, subCount) =
@@ -283,8 +285,8 @@ class RecentsPresenter(
                         if (viewType.isHistory && nextChapter?.id != null &&
                             nextChapter.id != it.chapter.id
                         ) {
-                            nextChapter.dateRead = it.chapter.dateRead
-                            it.extraChapters = listOf(it.chapter) + it.extraChapters
+                            it.extraChapters = listOf(ChapterHistory(it.chapter, it.history)) +
+                                it.extraChapters
                         }
                         nextChapter
                     }
@@ -386,12 +388,12 @@ class RecentsPresenter(
 
     private fun setupExtraChapters(
         existingItem: RecentMangaItem?,
-        chapters: List<Chapter>,
-        sort: Comparator<Chapter>,
-    ): Triple<MutableList<Chapter>, Chapter?, Int> {
+        chapters: List<ChapterHistory>,
+        sort: Comparator<ChapterHistory>,
+    ): Triple<MutableList<ChapterHistory>, Chapter?, Int> {
         var extraCount = 0
         val firstChapter: Chapter
-        var sortedChapters: MutableList<Chapter>
+        var sortedChapters: MutableList<ChapterHistory>
         val reverseRead = !viewType.isHistory
         if (existingItem != null) {
             extraCount += chapters.size

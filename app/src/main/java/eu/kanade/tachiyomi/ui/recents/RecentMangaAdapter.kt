@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import com.fredporciuncula.flow.preferences.Preference
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.ChapterHistory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterAdapter
@@ -96,7 +97,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         fun alwaysExpanded(): Boolean
         fun scope(): CoroutineScope
         fun getViewType(): RecentsViewType
-        fun onItemLongClick(position: Int, chapter: Chapter): Boolean
+        fun onItemLongClick(position: Int, chapter: ChapterHistory): Boolean
     }
 
     override fun onItemSwiped(position: Int, direction: Int) {

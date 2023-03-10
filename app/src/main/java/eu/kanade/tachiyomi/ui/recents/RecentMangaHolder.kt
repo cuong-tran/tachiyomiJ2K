@@ -17,6 +17,7 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.ChapterHistory
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.RecentMangaItemBinding
@@ -335,16 +336,16 @@ class RecentMangaHolder(
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun RecentSubChapterItemBinding.configureView(chapter: Chapter, item: RecentMangaItem) {
+    private fun RecentSubChapterItemBinding.configureView(chapter: ChapterHistory, item: RecentMangaItem) {
         val context = itemView.context
         val showDLs = adapter.showDownloads
         title.text = chapter.preferredChapterName(context, item.mch.manga, adapter.preferences)
         title.setTextColor(ChapterUtil.readColor(context, chapter))
         val notReadYet = item.chapter.id != item.mch.chapter.id && item.mch.history.id != null
-        subtitle.text = chapter.dateRead?.let { dateRead ->
-            context.timeSpanFromNow(R.string.read_, dateRead)
+        subtitle.text = chapter.history?.let { history ->
+            context.timeSpanFromNow(R.string.read_, history.last_read)
                 .takeIf {
-                    Date().time - dateRead < TimeUnit.DAYS.toMillis(1) || notReadYet
+                    Date().time - history.last_read < TimeUnit.DAYS.toMillis(1) || notReadYet
                 }
         } ?: ""
         if (isUpdates && chapter.isRecognizedNumber &&
