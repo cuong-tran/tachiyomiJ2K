@@ -146,7 +146,7 @@ class ReaderViewModel(
         chaptersForReader.sortedWith(chapterSort.sortComparator(true)).map(::ReaderChapter)
     }
 
-    var chapterItems = emptyList<ReaderChapterItem>()
+    private var chapterItems = emptyList<ReaderChapterItem>()
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
 

@@ -201,7 +201,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     var sheetManageNavColor = false
 
     private val wic by lazy { WindowInsetsControllerCompat(window, binding.root) }
-    var lastVis = false
+    private var lastVis = false
 
     private var snackbar: Snackbar? = null
 
@@ -220,8 +220,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     val isSplitScreen: Boolean
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode
 
-    var didTransistionFromChapter = false
-    var visibleChapterRange = longArrayOf()
+    private var didTransitionFromChapter = false
+    private var visibleChapterRange = longArrayOf()
     private var backPressedCallback: OnBackPressedCallback? = null
     private val backCallback = {
         if (binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()) {
@@ -279,7 +279,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 MainActivity.chapterIdToExitTo = 0L
                 contentView.transitionName = intent.extras?.getString(TRANSITION_NAME)
                 visibleChapterRange = intent.extras?.getLongArray(VISIBLE_CHAPTERS) ?: longArrayOf()
-                didTransistionFromChapter = contentView.transitionName.contains("details chapter")
+                didTransitionFromChapter = contentView.transitionName.contains("details chapter")
                 setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
                 window.sharedElementEnterTransition = buildContainerTransform(true)
                 window.sharedElementReturnTransition = buildContainerTransform(false)
@@ -331,9 +331,12 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
         if (savedInstanceState != null) {
             menuVisible = savedInstanceState.getBoolean(::menuVisible.name)
-            lastShiftDoubleState = savedInstanceState.get(SHIFT_DOUBLE_PAGES) as? Boolean
-            indexPageToShift = savedInstanceState.get(SHIFTED_PAGE_INDEX) as? Int
-            indexChapterToShift = savedInstanceState.get(SHIFTED_CHAP_INDEX) as? Long
+            lastShiftDoubleState = savedInstanceState.getBoolean(SHIFT_DOUBLE_PAGES)
+                .takeIf { savedInstanceState.containsKey(SHIFT_DOUBLE_PAGES) }
+            indexPageToShift = savedInstanceState.getInt(SHIFTED_PAGE_INDEX, Int.MIN_VALUE)
+                .takeIf { it != Int.MIN_VALUE }
+            indexChapterToShift = savedInstanceState.getLong(SHIFTED_CHAP_INDEX, Long.MIN_VALUE)
+                .takeIf { it != Long.MIN_VALUE }
             binding.readerNav.root.isInvisible = !menuVisible
         } else {
             binding.readerNav.root.isInvisible = true
@@ -636,7 +639,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     override fun finishAfterTransition() {
-        if (didTransistionFromChapter && visibleChapterRange.isNotEmpty() && MainActivity.chapterIdToExitTo !in visibleChapterRange) {
+        if (didTransitionFromChapter && visibleChapterRange.isNotEmpty() && MainActivity.chapterIdToExitTo !in visibleChapterRange) {
             finish()
         } else {
             viewModel.onBackPressed()
@@ -1136,7 +1139,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top)
                 toolbarAnimation.doOnEnd { binding.appBar.isVisible = false }
                 binding.appBar.startAnimation(toolbarAnimation)
-                BottomSheetBehavior.from(binding.chaptersSheet.chaptersBottomSheet).isHideable = true
+                binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.isHideable = true
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
             } else if (!animate) {
                 binding.appBar.isVisible = false
@@ -1152,7 +1155,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * Called from the view model when a manga is ready. Used to instantiate the appropriate viewer
      * and the binding.toolbar title.
      */
-    fun setManga(manga: Manga) {
+    private fun setManga(manga: Manga) {
         val prevViewer = viewer
         val noDefault = manga.viewer_flags == -1
         val mangaViewer = viewModel.getMangaReadingMode()
@@ -1339,7 +1342,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             binding.readerNav.rightChapter.alpha = if (viewerChapters.nextChapter != null) 1f else 0.5f
             binding.readerNav.leftChapter.alpha = if (viewerChapters.prevChapter != null) 1f else 0.5f
         }
-        if (didTransistionFromChapter) {
+        if (didTransitionFromChapter) {
             MainActivity.chapterIdToExitTo = viewerChapters.currChapter.chapter.id ?: 0L
         }
     }
@@ -1356,7 +1359,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         }
     }
 
-
     private fun getTextViewsWithText(text: CharSequence?): TextView? {
         if (text.isNullOrBlank()) return null
         val viewTopComparator = Comparator<View> { view1, view2 -> view1.top - view2.top }
@@ -1369,7 +1371,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * Called from the view model if the initial load couldn't load the pages of the chapter. In
      * this case the activity is closed and a toast is shown to the user.
      */
-    fun setInitialChapterError(error: Throwable) {
+    private fun setInitialChapterError(error: Throwable) {
         Timber.e(error)
         finish()
         toast(error.message)
@@ -1381,7 +1383,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * [show]. This is only used when the next/previous buttons on the binding.toolbar are clicked; the
      * other cases are handled with chapter transitions on the viewers and chapter preloading.
      */
-    fun setProgressDialog(show: Boolean) {
+    private fun setProgressDialog(show: Boolean) {
         if (!show) {
             binding.readerNav.leftChapter.isVisible = true
             binding.readerNav.rightChapter.isVisible = true
@@ -1391,11 +1393,11 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             binding.chaptersSheet.root.resetChapter()
         }
         if (show) {
-            isLoading = show
+            isLoading = true
         } else {
             scope.launchIO {
                 delay(100)
-                isLoading = show
+                isLoading = false
             }
         }
     }
@@ -1404,7 +1406,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * Moves the viewer to the given page [index]. It does nothing if the viewer is null or the
      * page is not found.
      */
-    fun moveToPageIndex(index: Int, animated: Boolean = true, chapterChange: Boolean = false) {
+    private fun moveToPageIndex(index: Int, animated: Boolean = true, chapterChange: Boolean = false) {
         val viewer = viewer ?: return
         val currentChapter = viewModel.getCurrentChapter() ?: return
         val page = currentChapter.pages?.getOrNull(index) ?: return
@@ -1414,7 +1416,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         }
     }
 
-    fun refreshChapters() {
+    private fun refreshChapters() {
         binding.chaptersSheet.chaptersBottomSheet.refreshList()
     }
 
@@ -1612,7 +1614,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * Called from the view model when a page is ready to be shared. It shows Android's default
      * sharing tool.
      */
-    fun onShareImageResult(file: File, page: ReaderPage, secondPage: ReaderPage? = null) {
+    private fun onShareImageResult(file: File, page: ReaderPage, secondPage: ReaderPage? = null) {
         val manga = viewModel.manga ?: return
         val chapter = page.chapter.chapter
 
@@ -1660,7 +1662,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * Called from the view model when a page is saved or fails. It shows a message or logs the
      * event depending on the [result].
      */
-    fun onSaveImageResult(result: ReaderViewModel.SaveImageResult) {
+    private fun onSaveImageResult(result: ReaderViewModel.SaveImageResult) {
         when (result) {
             is ReaderViewModel.SaveImageResult.Success -> {
                 toast(R.string.picture_saved)
@@ -1683,7 +1685,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * Called from the view model when a page is set as cover or fails. It shows a different message
      * depending on the [result].
      */
-    fun onSetAsCoverResult(result: ReaderViewModel.SetAsCoverResult) {
+    private fun onSetAsCoverResult(result: ReaderViewModel.SetAsCoverResult) {
         toast(
             when (result) {
                 Success -> R.string.cover_updated
