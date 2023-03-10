@@ -19,6 +19,7 @@ import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.text.TextUtils
 import android.text.style.DynamicDrawableSpan
 import android.text.style.ImageSpan
 import android.view.Gravity
@@ -32,6 +33,7 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.activity.viewModels
@@ -49,6 +51,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.Type.statusBars
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.children
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -148,6 +151,7 @@ import timber.log.Timber
 import java.io.File
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import java.util.Collections
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
@@ -1117,6 +1121,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                     toolbarAnimation.doOnStart {
                         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                     }
+                    toolbarAnimation.doOnEnd { delayTitleScroll() }
                     binding.appBar.startAnimation(toolbarAnimation)
                 }
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.collapse()
@@ -1135,6 +1140,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
             } else if (!animate) {
                 binding.appBar.isVisible = false
+            }
+            listOfNotNull(getTitleTextView(), getSubtitleTextView()).forEach { textView ->
+                textView.isSelected = false
             }
         }
         menuStickyVisible = false
@@ -1310,6 +1318,17 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         binding.toolbar.subtitle =
             chapter.preferredChapterName(this, viewModel.manga!!, preferences)
 
+        listOfNotNull(getTitleTextView(), getSubtitleTextView()).forEach { textView ->
+            textView.ellipsize = TextUtils.TruncateAt.MARQUEE
+            textView.marqueeRepeatLimit = -1
+            textView.isSingleLine = true
+            textView.isFocusable = true
+            textView.isFocusableInTouchMode = true
+            textView.isHorizontalFadingEdgeEnabled = true
+            textView.setFadingEdgeLength(16.dpToPx)
+            textView.setHorizontallyScrolling(true)
+        }
+
         if (viewerChapters.nextChapter == null && viewerChapters.prevChapter == null) {
             binding.readerNav.leftChapter.isVisible = false
             binding.readerNav.rightChapter.isVisible = false
@@ -1323,6 +1342,27 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         if (didTransistionFromChapter) {
             MainActivity.chapterIdToExitTo = viewerChapters.currChapter.chapter.id ?: 0L
         }
+    }
+
+    private fun getTitleTextView(): TextView? = getTextViewsWithText(binding.toolbar.title)
+    private fun getSubtitleTextView(): TextView? = getTextViewsWithText(binding.toolbar.subtitle)
+    private fun delayTitleScroll() {
+        val list = listOfNotNull(getTitleTextView(), getSubtitleTextView())
+        if (list.isNotEmpty()) {
+            scope.launchUI {
+                delay(1000)
+                list.forEach { it.isSelected = true }
+            }
+        }
+    }
+
+
+    private fun getTextViewsWithText(text: CharSequence?): TextView? {
+        if (text.isNullOrBlank()) return null
+        val viewTopComparator = Comparator<View> { view1, view2 -> view1.top - view2.top }
+        val textViews = binding.toolbar.children.filterIsInstance<TextView>()
+            .filter { TextUtils.equals(it.text, text) }.toList()
+        return if (textViews.isEmpty()) null else Collections.max(textViews, viewTopComparator)
     }
 
     /**
@@ -1722,6 +1762,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
             toolbarAnimation.doOnStart {
                 window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            }
+            toolbarAnimation.doOnEnd {
+                delayTitleScroll()
             }
             binding.appBar.startAnimation(toolbarAnimation)
         } else if (!visible && (menuStickyVisible || menuVisible)) {
