@@ -72,7 +72,10 @@ class RecentMangaHolder(
             } else {
                 addMoreUpdatesText(!moreVisible)
             }
-            readLastText(!moreVisible).takeIf { it.isNotEmpty() }?.let { binding.body.text = it }
+            if (adapter.viewType.isHistory) {
+                readLastText(!moreVisible).takeIf { it.isNotEmpty() }
+                    ?.let { binding.body.text = it }
+            }
             binding.endView.updateLayoutParams<ViewGroup.LayoutParams> {
                 height = binding.mainView.height
             }
@@ -299,7 +302,7 @@ class RecentMangaHolder(
     private fun readLastText(show: Boolean, originalItem: RecentMangaItem? = null): String {
         val item = originalItem ?: adapter.getItem(bindingAdapterPosition) as? RecentMangaItem ?: return ""
         val notValidNum = item.mch.chapter.chapter_number <= 0
-        return if (adapter.viewType.isHistory && item.chapter.id != item.mch.chapter.id) {
+        return if (item.chapter.id != item.mch.chapter.id) {
             if (show) {
                 itemView.context.timeSpanFromNow(R.string.read_, item.mch.history.last_read) + "\n"
             } else {
