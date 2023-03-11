@@ -1354,7 +1354,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         if (list.isNotEmpty()) {
             scope.launchUI {
                 delay(1000)
-                list.forEach { it.isSelected = true }
+                if (menuVisible || menuStickyVisible) {
+                    list.forEach { it.isSelected = true }
+                }
             }
         }
     }
