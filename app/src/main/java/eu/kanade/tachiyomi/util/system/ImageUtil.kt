@@ -646,34 +646,71 @@ object ImageUtil {
      * @return An int based on confidence, 0 meaning not padded, 1 meaning barely padded,
      * 2 meaning likely padded, 3 meaining definitely padded
      * @param rightSide: When true, check if its a single left side page, else right side
-     * */
+     */
     fun Bitmap.isPagePadded(rightSide: Boolean): Int {
         val booleans = listOf(true, false)
         return when {
-            booleans.any { isSidePadded(!rightSide, checkWhite = it) } -> 0
-            booleans.any { isSidePadded(rightSide, checkWhite = it) } -> 3
-            booleans.any { isOneSideMorePadded(rightSide, checkWhite = it) } -> 2
-            booleans.any { isSidePadded(rightSide, checkWhite = it, halfCheck = true) } -> 1
+            booleans.any { isSidePadded(!rightSide, checkWhite = it) > 1 } -> 0
+            booleans.any {
+                when (isSidePadded(rightSide, checkWhite = it)) {
+                    2 -> true
+                    1 -> isSideLonger(rightSide, checkWhite = it)
+                    else -> false
+                }
+            } -> 3
+            booleans.any { isSideLonger(rightSide, checkWhite = it) } -> 2
+            booleans.any { isOneSideMorePadded(rightSide, checkWhite = it) } -> 1
             else -> 0
         }
     }
 
-    /** Returns if one side has a vertical padding and the other side does not */
-    private fun Bitmap.isSidePadded(rightSide: Boolean, checkWhite: Boolean, halfCheck: Boolean = false): Boolean {
+    /**
+     * Returns if one side has a vertical padding and the other side does not,
+     * 2 for def, 1 for maybe, 0 if not at all
+     */
+    private fun Bitmap.isSidePadded(rightSide: Boolean, checkWhite: Boolean, halfCheck: Boolean = false): Int {
         val left = (width * 0.0275).toInt()
         val right = width - left
         val paddedSide = if (rightSide) right else left
         val unPaddedSide = if (!rightSide) right else left
-        return (1 until 30).count {
+        val paddedCount = (1 until 50).count {
             // if all of a side is padded (the left page usually has a white padding on the right when scanned)
-            getPixel(paddedSide, (height * (it / 30f)).roundToInt()).isWhiteOrDark(checkWhite)
-        } >= (if (halfCheck) 15 else 27) && !(1 until 50).all {
+            getPixel(paddedSide, (height * (it / 50f)).roundToInt()).isWhiteOrDark(checkWhite)
+        }
+        val isNotFullyUnPadded = !(1 until 50).all {
             // and if all of the other side isn't padded
             getPixel(unPaddedSide, (height * (it / 50f)).roundToInt()).isWhiteOrDark(checkWhite)
         }
+        return if (isNotFullyUnPadded) {
+            if (paddedCount == 49) 2 else if (paddedCount >= (if (halfCheck) 25 else 47)) 1 else 0
+        } else {
+            0
+        }
     }
 
-    /** Returns if one side is more padded than the other */
+    /** Returns if one side has a longer streak (of white or black) than the other */
+    private fun Bitmap.isSideLonger(rightSide: Boolean, checkWhite: Boolean): Boolean {
+        if (isSidePadded(rightSide, checkWhite, true) == 0) return false
+        val left = (width * 0.0275).toInt()
+        val right = width - left
+        val step = 70
+        val list = listOf((1 until step), (1 until step).reversed())
+        val streakFunc: (Int) -> Int = { side ->
+            list.maxOf { range ->
+                var count = 0
+                for (it in range) {
+                    val pixel = getPixel(side, (height * (it / step.toFloat())).roundToInt())
+                    if (pixel.isWhiteOrDark(checkWhite)) ++count else return@maxOf count
+                }
+                count
+            }
+        }
+        val paddedSide = if (rightSide) right else left
+        val unPaddedSide = if (!rightSide) right else left
+        return streakFunc(paddedSide) > streakFunc(unPaddedSide)
+    }
+
+    /** Returns if one side is more horizontally padded than the other */
     private fun Bitmap.isOneSideMorePadded(rightSide: Boolean, checkWhite: Boolean): Boolean {
         val middle = (height * 0.475).roundToInt()
         val middle2 = (height * 0.525).roundToInt()

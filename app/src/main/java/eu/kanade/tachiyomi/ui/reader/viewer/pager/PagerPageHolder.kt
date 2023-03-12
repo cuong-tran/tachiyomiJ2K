@@ -712,6 +712,7 @@ class PagerPageHolder(
         val imageBytes2 by lazy { imageStream2.readBytes() }
         val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
 
+        val pages = page.chapter.pages
         if (height < width) {
             if (extraPage?.index == 1) {
                 setExtraPageBitmap(imageBytes2, isLTR)
@@ -720,11 +721,15 @@ class PagerPageHolder(
             val oldValue = page.fullPage
             page.fullPage = true
             delayPageUpdate {
+                val thirdPageIsStart = pages?.getOrNull(2)?.isStartPage == true
+                val extraPageIsEnd = extraPage?.isEndPage == true
                 if (page.index == 0 &&
-                    (viewer.config.shiftDoublePage || extraPage?.isEndPage == true) &&
-                    oldValue != true
+                    (
+                        (viewer.config.shiftDoublePage && !thirdPageIsStart) ||
+                            extraPage?.isEndPage == true
+                        ) && oldValue != true
                 ) {
-                    viewer.activity.shiftDoublePages(extraPage?.isEndPage == true, extraPage)
+                    viewer.activity.shiftDoublePages(extraPageIsEnd || thirdPageIsStart, extraPage)
                 } else {
                     viewer.splitDoublePages(page)
                 }
@@ -734,7 +739,6 @@ class PagerPageHolder(
         }
         val isNotEndPage: ReaderPage.() -> Boolean =
             { isEndPage != true || page.paddedPageConfidence > paddedPageConfidence }
-        val pages = page.chapter.pages
         var earlyImageBitmap2: Bitmap? = null
         val isFirstPageNotEnd by lazy { pages?.get(0)?.let { it.isNotEndPage() } != false }
         val isThirdPageNotEnd by lazy { pages?.getOrNull(2)?.let { it.isNotEndPage() } == true }
@@ -808,16 +812,31 @@ class PagerPageHolder(
 
         closeStreams(imageStream, imageStream2)
         extraPage?.let { extraPage ->
-            if (extraPage.index <= 2 && extraPage.isEndPage == null &&
+            val shouldSubShiftAnyway = !viewer.activity.manuallyShiftedPages &&
+                extraPage.isStartPage == true && extraPage.paddedPageConfidence >= 2
+            if (extraPage.index <= 2 && extraPage.paddedPageConfidence != 3 &&
                 extraPage.isStartPage == null && extraPage.fullPage == null
             ) {
-                extraPage.paddedPageConfidence = imageBitmap2.isPagePadded(rightSide = isLTR)
-                extraPage.isStartPage = extraPage.paddedPageConfidence > 0
+                val startingConfidence = imageBitmap2.isPagePadded(rightSide = isLTR)
+                if (startingConfidence > extraPage.paddedPageConfidence) {
+                    extraPage.paddedPageConfidence = startingConfidence
+                    extraPage.isStartPage = extraPage.paddedPageConfidence > 0
+                    if (extraPage.isEndPage == true) {
+                        extraPage.isEndPage = false
+                    }
+                } else {
+                    extraPage.isStartPage = false
+                }
                 if (extraPage.isStartPage == true) {
                     shiftDoublePages(page.index == 0 || pages?.get(0)?.fullPage == true)
                     this.extraPage = null
                     return supportHingeIfThere(imageBytes.inputStream())
                 }
+            } else if (shouldSubShiftAnyway && page.index == 1 && extraPage.isEndPage == false &&
+                !viewer.config.shiftDoublePage
+            ) {
+                shiftDoublePages(true)
+                return supportHingeIfThere(imageBytes.inputStream())
             }
         }
         // If page has been removed in another thread, don't show it
