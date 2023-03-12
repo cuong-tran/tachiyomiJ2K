@@ -732,30 +732,32 @@ class PagerPageHolder(
             }
             return supportHingeIfThere(imageBytes.inputStream())
         }
+        val isNotEndPage: ReaderPage.() -> Boolean =
+            { isEndPage != true || page.paddedPageConfidence > paddedPageConfidence }
+        val pages = page.chapter.pages
         var earlyImageBitmap2: Bitmap? = null
+        val isFirstPageNotEnd by lazy { pages?.get(0)?.let { it.isNotEndPage() } != false }
+        val isThirdPageNotEnd by lazy { pages?.getOrNull(2)?.let { it.isNotEndPage() } == true }
+        val shouldShiftAnyway = !viewer.activity.manuallyShiftedPages && page.isEndPage == true &&
+            page.paddedPageConfidence == 3
         if (page.index <= 2 && page.isEndPage == null && page.fullPage == null) {
             page.paddedPageConfidence = imageBitmap.isPagePadded(rightSide = !isLTR)
             page.isEndPage = page.paddedPageConfidence > 0
             if (extraPage?.index == 1 && extraPage?.isEndPage == null) {
                 earlyImageBitmap2 = setExtraPageBitmap(imageBytes2, isLTR)
             }
-            val isFirstPageEndPage by lazy {
-                viewer.activity.getFirstPage()?.let {
-                    it.isEndPage != true || page.paddedPageConfidence > it.paddedPageConfidence
-                } != false
-            }
             if (page.index == 1 && page.isEndPage == true && viewer.config.shiftDoublePage &&
-                isFirstPageEndPage
+                (isFirstPageNotEnd || isThirdPageNotEnd)
             ) {
                 shiftDoublePages(false)
                 return supportHingeIfThere(imageBytes.inputStream())
             } else if (page.isEndPage == true &&
                 when (page.index) {
-                    // 3rd page shouldn't shift if page 1 is a spread
-                    2 -> !viewer.activity.isFirstPageFull()
-                    // 2nd page shouldn't shift if page 1 is more likely an end page
-                    1 -> isFirstPageEndPage
-                    // first page shouldn't shift if page 2 is definitely an end page
+                    // 3rd page shouldn't shift if the 1st page is a spread
+                    2 -> pages?.get(0)?.fullPage != true
+                    // 2nd page shouldn't shift if the 1st page is more likely an end page
+                    1 -> isFirstPageNotEnd
+                    // 1st page shouldn't shift if the 2nd page is definitely an end page
                     0 -> extraPage?.run { isEndPage == true && paddedPageConfidence == 3 } != true ||
                         page.paddedPageConfidence == 3
                     else -> false
@@ -765,12 +767,15 @@ class PagerPageHolder(
                 extraPage = null
                 return supportHingeIfThere(imageBytes.inputStream())
             }
-        } else if (!viewer.activity.manuallyShiftedPages && (page.index == 0 || page.index == 2) &&
-            page.isEndPage == true && page.paddedPageConfidence == 3
-        ) {
+        } else if (shouldShiftAnyway && (page.index == 0 || page.index == 2)) {
             // if for some reason the first page should be by itself but its not, fix that
             shiftDoublePages(true)
             extraPage = null
+            return supportHingeIfThere(imageBytes.inputStream())
+        } else if (shouldShiftAnyway && page.index == 1 &&
+            viewer.config.shiftDoublePage && (isFirstPageNotEnd || isThirdPageNotEnd)
+        ) {
+            shiftDoublePages(false)
             return supportHingeIfThere(imageBytes.inputStream())
         }
 
@@ -809,7 +814,7 @@ class PagerPageHolder(
                 extraPage.paddedPageConfidence = imageBitmap2.isPagePadded(rightSide = isLTR)
                 extraPage.isStartPage = extraPage.paddedPageConfidence > 0
                 if (extraPage.isStartPage == true) {
-                    shiftDoublePages(page.index == 0 || viewer.activity.isFirstPageFull())
+                    shiftDoublePages(page.index == 0 || pages?.get(0)?.fullPage == true)
                     this.extraPage = null
                     return supportHingeIfThere(imageBytes.inputStream())
                 }

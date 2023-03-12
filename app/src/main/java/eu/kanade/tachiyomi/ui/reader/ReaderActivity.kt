@@ -618,9 +618,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         }
     }
 
-    fun isFirstPageFull(): Boolean = viewModel.getCurrentChapter()?.pages?.get(0)?.fullPage == true
-    fun getFirstPage(): ReaderPage? = viewModel.getCurrentChapter()?.pages?.get(0)
-
     private fun popToMain() {
         if (fromUrl) {
             val intent = Intent(this, MainActivity::class.java).apply {
