@@ -182,7 +182,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     /**
      * Whether the menu should stay visible.
      */
-    private var menuStickyVisible = false
+    private var menuTemporarilyVisible = false
 
     private var coroutine: Job? = null
 
@@ -1119,13 +1119,15 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 window.navigationBarColor = Color.TRANSPARENT
             }
             if (animate && oldVisibility != menuVisible) {
-                if (!menuStickyVisible) {
+                if (!menuTemporarilyVisible) {
                     val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                     toolbarAnimation.doOnStart {
                         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                     }
                     toolbarAnimation.doOnEnd { delayTitleScroll() }
                     binding.appBar.startAnimation(toolbarAnimation)
+                } else {
+                    delayTitleScroll()
                 }
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.collapse()
             }
@@ -1137,18 +1139,19 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
             if (animate && binding.appBar.isVisible) {
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top)
-                toolbarAnimation.doOnEnd { binding.appBar.isVisible = false }
+                toolbarAnimation.doOnEnd {
+                    binding.appBar.isVisible = false
+                    stopTitleScroll()
+                }
                 binding.appBar.startAnimation(toolbarAnimation)
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.isHideable = true
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
             } else if (!animate) {
                 binding.appBar.isVisible = false
-            }
-            listOfNotNull(getTitleTextView(), getSubtitleTextView()).forEach { textView ->
-                textView.isSelected = false
+                stopTitleScroll()
             }
         }
-        menuStickyVisible = false
+        menuTemporarilyVisible = false
     }
 
     /**
@@ -1349,17 +1352,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
     private fun getTitleTextView(): TextView? = getTextViewsWithText(binding.toolbar.title)
     private fun getSubtitleTextView(): TextView? = getTextViewsWithText(binding.toolbar.subtitle)
-    private fun delayTitleScroll() {
-        val list = listOfNotNull(getTitleTextView(), getSubtitleTextView())
-        if (list.isNotEmpty()) {
-            scope.launchUI {
-                delay(1000)
-                if (menuVisible || menuStickyVisible) {
-                    list.forEach { it.isSelected = true }
-                }
-            }
-        }
-    }
 
     private fun getTextViewsWithText(text: CharSequence?): TextView? {
         if (text.isNullOrBlank()) return null
@@ -1368,6 +1360,21 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             .filter { TextUtils.equals(it.text, text) }.toList()
         return if (textViews.isEmpty()) null else Collections.max(textViews, viewTopComparator)
     }
+
+    private fun delayTitleScroll() {
+        val list = listOfNotNull(getTitleTextView(), getSubtitleTextView())
+        if (list.isNotEmpty()) {
+            scope.launchUI {
+                delay(1000)
+                if (menuVisible) {
+                    list.forEach { it.isSelected = true }
+                }
+            }
+        }
+    }
+
+    private fun stopTitleScroll() =
+        listOfNotNull(getTitleTextView(), getSubtitleTextView()).forEach { it.isSelected = false }
 
     /**
      * Called from the view model if the initial load couldn't load the pages of the chapter. In
@@ -1738,12 +1745,12 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     private fun onVisibilityChange(visible: Boolean) {
-        if (visible && !menuStickyVisible && !menuVisible && !binding.appBar.isVisible) {
-            menuStickyVisible = true
+        if (visible && !menuTemporarilyVisible && !menuVisible && !binding.appBar.isVisible) {
+            menuTemporarilyVisible = true
             coroutine = scope.launchUI {
                 delay(2000)
                 if (window.decorView.rootWindowInsetsCompat?.isVisible(statusBars()) == true) {
-                    menuStickyVisible = false
+                    menuTemporarilyVisible = false
                     setMenuVisibility(false)
                 }
             }
@@ -1767,12 +1774,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             toolbarAnimation.doOnStart {
                 window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             }
-            toolbarAnimation.doOnEnd {
-                delayTitleScroll()
-            }
             binding.appBar.startAnimation(toolbarAnimation)
-        } else if (!visible && (menuStickyVisible || menuVisible)) {
-            if (menuStickyVisible && !menuVisible) {
+        } else if (!visible && (menuTemporarilyVisible || menuVisible)) {
+            if (menuTemporarilyVisible && !menuVisible) {
                 setMenuVisibility(false)
             }
             coroutine?.cancel()
