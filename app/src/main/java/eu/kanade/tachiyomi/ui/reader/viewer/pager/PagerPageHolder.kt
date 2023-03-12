@@ -738,15 +738,13 @@ class PagerPageHolder(
             return supportHingeIfThere(imageBytes.inputStream())
         }
         val isNotEndPage: ReaderPage.() -> Boolean =
-            { isEndPage != true || page.paddedPageConfidence > paddedPageConfidence }
+            { isEndPage != true || (page.endPageConfidence ?: 0) > (endPageConfidence ?: 0) }
         var earlyImageBitmap2: Bitmap? = null
         val isFirstPageNotEnd by lazy { pages?.get(0)?.let { it.isNotEndPage() } != false }
         val isThirdPageNotEnd by lazy { pages?.getOrNull(2)?.let { it.isNotEndPage() } == true }
-        val shouldShiftAnyway = !viewer.activity.manuallyShiftedPages && page.isEndPage == true &&
-            page.paddedPageConfidence == 3
+        val shouldShiftAnyway = !viewer.activity.manuallyShiftedPages && page.endPageConfidence == 3
         if (page.index <= 2 && page.isEndPage == null && page.fullPage == null) {
-            page.paddedPageConfidence = imageBitmap.isPagePadded(rightSide = !isLTR)
-            page.isEndPage = page.paddedPageConfidence > 0
+            page.endPageConfidence = imageBitmap.isPagePadded(rightSide = !isLTR)
             if (extraPage?.index == 1 && extraPage?.isEndPage == null) {
                 earlyImageBitmap2 = setExtraPageBitmap(imageBytes2, isLTR)
             }
@@ -762,8 +760,7 @@ class PagerPageHolder(
                     // 2nd page shouldn't shift if the 1st page is more likely an end page
                     1 -> isFirstPageNotEnd
                     // 1st page shouldn't shift if the 2nd page is definitely an end page
-                    0 -> extraPage?.run { isEndPage == true && paddedPageConfidence == 3 } != true ||
-                        page.paddedPageConfidence == 3
+                    0 -> extraPage?.endPageConfidence != 3 || page.endPageConfidence == 3
                     else -> false
                 }
             ) {
@@ -813,28 +810,20 @@ class PagerPageHolder(
         closeStreams(imageStream, imageStream2)
         extraPage?.let { extraPage ->
             val shouldSubShiftAnyway = !viewer.activity.manuallyShiftedPages &&
-                extraPage.isStartPage == true && extraPage.paddedPageConfidence >= 2
-            if (extraPage.index <= 2 && extraPage.paddedPageConfidence != 3 &&
+                extraPage.isStartPage == true && extraPage.endPageConfidence == 0
+            if (extraPage.index <= 2 && extraPage.endPageConfidence != 3 &&
                 extraPage.isStartPage == null && extraPage.fullPage == null
             ) {
-                val startingConfidence = imageBitmap2.isPagePadded(rightSide = isLTR)
-                if (startingConfidence > extraPage.paddedPageConfidence) {
-                    extraPage.paddedPageConfidence = startingConfidence
-                    extraPage.isStartPage = extraPage.paddedPageConfidence > 0
-                    if (extraPage.isEndPage == true) {
-                        extraPage.isEndPage = false
-                    }
-                } else {
-                    extraPage.isStartPage = false
-                }
+                extraPage.startPageConfidence = imageBitmap2.isPagePadded(rightSide = isLTR)
                 if (extraPage.isStartPage == true) {
+                    if (extraPage.endPageConfidence != null) {
+                        extraPage.endPageConfidence = 0
+                    }
                     shiftDoublePages(page.index == 0 || pages?.get(0)?.fullPage == true)
                     this.extraPage = null
                     return supportHingeIfThere(imageBytes.inputStream())
                 }
-            } else if (shouldSubShiftAnyway && page.index == 1 && extraPage.isEndPage == false &&
-                !viewer.config.shiftDoublePage
-            ) {
+            } else if (shouldSubShiftAnyway && page.index == 1 && !viewer.config.shiftDoublePage) {
                 shiftDoublePages(true)
                 return supportHingeIfThere(imageBytes.inputStream())
             }
@@ -858,12 +847,11 @@ class PagerPageHolder(
         val earlyImageBitmap2 = try {
             BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.size)
         } catch (_: Exception) {
-            null
+            return null
         }
-        val paddedPageConfidence = earlyImageBitmap2?.isPagePadded(rightSide = !isLTR) ?: 0
+        val paddedPageConfidence = earlyImageBitmap2.isPagePadded(rightSide = !isLTR)
         if (paddedPageConfidence == 3) {
-            extraPage?.paddedPageConfidence = paddedPageConfidence
-            extraPage?.isEndPage = true
+            extraPage?.endPageConfidence = paddedPageConfidence
         }
         return earlyImageBitmap2
     }
