@@ -160,7 +160,7 @@ class ChapterHolder(
                 binding.chapterTitle,
                 ColorStateList.valueOf(it),
             )
-            colorSecondary = it
+            accentColor = it
         }
         if (locked) {
             isVisible = false
