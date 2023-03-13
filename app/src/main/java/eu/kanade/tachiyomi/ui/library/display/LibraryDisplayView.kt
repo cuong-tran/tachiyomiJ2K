@@ -46,18 +46,16 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
 
         binding.reorderFiltersButton.setOnClickListener {
             val recycler = RecyclerView(context)
-            var filterOrder = preferences.filterOrder().get()
-            if (filterOrder.count() != 6) {
-                filterOrder = FilterBottomSheet.Filters.DEFAULT_ORDER
+            val filterOrder = preferences.filterOrder().get().toMutableList()
+            FilterBottomSheet.Filters.values().forEach {
+                if (it.value !in filterOrder) {
+                    filterOrder.add(it.value)
+                }
             }
             val adapter = FlexibleAdapter(
-                filterOrder.toCharArray().map {
-                    if (FilterBottomSheet.Filters.filterOf(it) != null) {
-                        ManageFilterItem(it)
-                    } else {
-                        null
-                    }
-                }.filterNotNull(),
+                filterOrder.mapNotNull { char ->
+                    FilterBottomSheet.Filters.filterOf(char)?.let { ManageFilterItem(char) }
+                },
                 this,
                 true,
             )
