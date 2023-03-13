@@ -157,21 +157,18 @@ class RecentMangaHolder(
         val chapterName =
             item.chapter.preferredChapterName(context, item.mch.manga, adapter.preferences)
 
-        binding.title.apply {
-            text = if (!showTitleFirst) {
-                chapterName
-            } else {
-                item.mch.manga.title
+        listOf(binding.title, binding.subtitle).forEach {
+            it.apply {
+                setCompoundDrawablesRelative(null, null, null, null)
+                translationX = 0f
+                text = if (!showTitleFirst.xor(it === binding.subtitle)) {
+                    ChapterUtil.setTextViewForChapter(this, item)
+                    chapterName
+                } else {
+                    setTextColor(ChapterUtil.readColor(context, item))
+                    item.mch.manga.title
+                }
             }
-            ChapterUtil.setTextViewForChapter(this, item)
-        }
-        binding.subtitle.apply {
-            text = if (!showTitleFirst) {
-                item.mch.manga.title
-            } else {
-                chapterName
-            }
-            setTextColor(ChapterUtil.readColor(context, item))
         }
         if (binding.frontView.translationX == 0f) {
             binding.read.setImageResource(
@@ -343,7 +340,7 @@ class RecentMangaHolder(
         val context = itemView.context
         val showDLs = adapter.showDownloads
         title.text = chapter.preferredChapterName(context, item.mch.manga, adapter.preferences)
-        title.setTextColor(ChapterUtil.readColor(context, chapter))
+        ChapterUtil.setTextViewForChapter(title, chapter)
         val notReadYet = item.chapter.id != item.mch.chapter.id && item.mch.history.id != null
         subtitle.text = chapter.history?.let { history ->
             context.timeSpanFromNow(R.string.read_, history.last_read)
