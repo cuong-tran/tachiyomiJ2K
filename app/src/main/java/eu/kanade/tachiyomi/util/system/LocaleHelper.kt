@@ -16,7 +16,7 @@ object LocaleHelper {
      */
     fun getSourceDisplayName(lang: String?, context: Context): String {
         return when (lang) {
-            "" -> context.getString(R.string.other)
+            "", "other" -> context.getString(R.string.other)
             SourcePresenter.LAST_USED_KEY -> context.getString(R.string.last_used)
             SourcePresenter.PINNED_KEY -> context.getString(R.string.pinned)
             "all" -> context.getString(R.string.all)

@@ -13,6 +13,7 @@
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:paddingStart="12dp"
+        android:paddingEnd="12dp"
         tools:text="Title" />
 
 </FrameLayout>
