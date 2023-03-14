@@ -13,13 +13,13 @@
         android:orientation="vertical"
         android:background="@android:color/transparent">
 
-        <com.google.android.material.materialswitch.MaterialSwitch
+        <eu.kanade.tachiyomi.widget.MaterialSpinnerView
             android:id="@+id/group_chapters"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/group_chapters_together"
-            android:textColor="?attr/colorOnBackground" />
+            android:entries="@array/group_chapters_together"
+            app:title="@string/group_chapters_together" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/collapse_grouped_chapters"

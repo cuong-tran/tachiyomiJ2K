@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil.Companion.preferredChapterName
 import eu.kanade.tachiyomi.util.isLocal
+import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import eu.kanade.tachiyomi.util.view.setAnimVectorCompat
@@ -225,12 +226,12 @@ class RecentMangaHolder(
                 R.drawable.ic_expand_more_24dp
             },
         )
-        val extraIds = binding.moreChaptersLayout.children.map {
-            it.findViewById<DownloadButton>(R.id.download_button)?.tag
+        val extraIds = binding.moreChaptersLayout.children.toList().shorterList().map {
+            it?.findViewById<DownloadButton>(R.id.download_button)?.tag
         }.toList()
-        if (extraIds == item.mch.extraChapters.map { it.id }) {
+        if (extraIds == item.mch.extraChapters.shorterList().map { it?.id }) {
             var hasSameChapter = false
-            item.mch.extraChapters.forEachIndexed { index, chapter ->
+            item.mch.extraChapters.shorterList().forEachIndexed { index, chapter ->
                 val binding =
                     RecentSubChapterItemBinding.bind(binding.moreChaptersLayout.getChildAt(index))
                 binding.configureView(chapter, item)
@@ -244,7 +245,7 @@ class RecentMangaHolder(
             binding.moreChaptersLayout.removeAllViews()
             var hasSameChapter = false
             if (item.mch.extraChapters.isNotEmpty()) {
-                item.mch.extraChapters.forEach { chapter ->
+                item.mch.extraChapters.shorterList().forEach { chapter ->
                     val binding = RecentSubChapterItemBinding.inflate(
                         LayoutInflater.from(context),
                         binding.moreChaptersLayout,
@@ -335,8 +336,40 @@ class RecentMangaHolder(
         }
     }
 
+    private fun <T> List<T>.shorterList(): List<T?> =
+        if (size > 21) take(10) + null + takeLast(10) else this
+
     @SuppressLint("ClickableViewAccessibility")
-    private fun RecentSubChapterItemBinding.configureView(chapter: ChapterHistory, item: RecentMangaItem) {
+    private fun RecentSubChapterItemBinding.configureBlankView(count: Int) {
+        val context = itemView.context
+        title.text =
+            context.resources.getQuantityString(R.plurals.notification_and_n_more, count, count)
+        downloadButton.root.isVisible = false
+        downloadButton.root.tag = null
+        title.textSize = 13f
+        title.setTextColor(context.contextCompatColor(R.color.read_chapter))
+        textLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            matchConstraintMinHeight = 16.dpToPx
+        }
+        root.tag = "sub ${-1L}"
+        root.setOnLongClickListener { false }
+        root.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                chapterId = -1L
+            }
+            false
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun RecentSubChapterItemBinding.configureView(chapter: ChapterHistory?, item: RecentMangaItem) {
+        if (chapter?.id == null) {
+            configureBlankView(item.mch.extraChapters.size - 20)
+            return
+        }
+        textLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            matchConstraintMinHeight = 48.dpToPx
+        }
         val context = itemView.context
         val showDLs = adapter.showDownloads
         title.text = chapter.preferredChapterName(context, item.mch.manga, adapter.preferences)
@@ -345,7 +378,10 @@ class RecentMangaHolder(
         subtitle.text = chapter.history?.let { history ->
             context.timeSpanFromNow(R.string.read_, history.last_read)
                 .takeIf {
-                    Date().time - history.last_read < TimeUnit.DAYS.toMillis(1) || notReadYet
+                    Date().time - history.last_read < TimeUnit.DAYS.toMillis(1) || notReadYet ||
+                        adapter.dateFormat.run {
+                            format(history.last_read) != format(item.mch.history.last_read)
+                        }
                 }
         } ?: ""
         if (isUpdates && chapter.isRecognizedNumber &&
@@ -457,7 +493,7 @@ class RecentMangaHolder(
         }
     }
 
-    override fun getRearEndView(): View {
-        return binding.endView
+    override fun getRearEndView(): View? {
+        return if (chapterId == -1L) null else binding.endView
     }
 }

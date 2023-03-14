@@ -269,10 +269,6 @@
     <string name="reset_chapter_question">Reset chapter?</string>
     <string name="press_and_hold_to_also_reset">Press and hold can also reset chapter history</string>
     <string name="show_download_button">Show download button</string>
-    <string name="only_unread">Only unread</string>
-    <string name="only_downloaded">Only downloaded</string>
-    <string name="unread_or_downloaded">Unread or downloaded</string>
-    <string name="clear_history">Clear history</string>
     <string name="clear_history_completed">History deleted</string>
     <string name="clear_history_confirmation">Are you sure? All history will be lost.</string>
 
@@ -284,8 +280,15 @@
     <string name="show_updated_time">Show updated time</string>
     <string name="sort_fetched_time">Sort by fetched time</string>
     <string name="group_chapters_together">Group chapters together</string>
+    <string name="by_series">By series</string>
+    <string name="by_week">By week</string>
+    <string name="by_day">By day</string>
     <string name="uniform_covers">Uniform covers</string>
     <string name="affects_library_grid">Affects library grid covers</string>
+    <string name="only_unread">Only unread</string>
+    <string name="only_downloaded">Only downloaded</string>
+    <string name="unread_or_downloaded">Unread or downloaded</string>
+    <string name="clear_history">Clear history</string>
 
     <!-- Browse -->
     <string name="search_filters">Search filters</string>

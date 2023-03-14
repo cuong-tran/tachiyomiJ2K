@@ -194,8 +194,6 @@ object PreferenceKeys {
     const val showReadInAllRecents = "show_read_in_all_recents"
     const val showTitleFirstInRecents = "show_title_first_in_recents"
 
-    const val groupChaptersHistory = "group_chapters_history"
-
     const val showUpdatedTime = "show_updated_time"
 
     const val categoryNumberOfItems = "display_number_of_items"

@@ -67,7 +67,7 @@ class RecentsPresenter(
     private var shouldMoveToTop = false
     var viewType: RecentsViewType = RecentsViewType.valueOf(preferences.recentsViewType().get())
         private set
-    var groupHistory: Boolean = preferences.groupChaptersHistory().get()
+    var groupHistory: GroupType = preferences.groupChaptersHistory().get()
         private set
     val expandedSectionsMap = mutableMapOf<String, Boolean>()
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -173,12 +173,26 @@ class RecentsPresenter(
                 ).executeOnIO()
             }
             RecentsViewType.History -> {
-                val items = db.getHistoryUngrouped(
-                    query,
-                    if (isCustom) ENDLESS_LIMIT else pageOffset,
-                    !updatePageCount && !isOnFirstPage,
-                )
-                if (groupChaptersHistory) {
+                val items = if (groupChaptersHistory == GroupType.BySeries) {
+                    db.getRecentMangaLimit(
+                        query,
+                        if (isCustom) ENDLESS_LIMIT else pageOffset,
+                        !updatePageCount && !isOnFirstPage,
+                    )
+                } else {
+                    db.getHistoryUngrouped(
+                        query,
+                        if (isCustom) ENDLESS_LIMIT else pageOffset,
+                        !updatePageCount && !isOnFirstPage,
+                    )
+                }
+                if (groupChaptersHistory.isByTime) {
+                    dateFormat.applyPattern(
+                        when (groupChaptersHistory) {
+                            GroupType.ByWeek -> "yyyy-w"
+                            else -> "yyyy-MM-dd"
+                        },
+                    )
                     items.executeOnIO().groupBy {
                         val date = it.history.last_read
                         it.manga.id to if (date <= 0L) "-1" else dateFormat.format(Date(date))
@@ -190,7 +204,12 @@ class RecentsPresenter(
                             }.filterChaptersByScanlators(manga)
                             extraCount += mchs.size - chapters.size
                             if (chapters.isEmpty()) return@mapNotNull null
-                            val existingItem = recentItems.takeLast(ENDLESS_LIMIT).find {
+                            val lastAmount = if (groupChaptersHistory == GroupType.ByDay) {
+                                ENDLESS_LIMIT
+                            } else {
+                                recentItems.size
+                            }
+                            val existingItem = recentItems.takeLast(lastAmount).find {
                                 val date = Date(it.mch.history.last_read)
                                 key == it.manga_id to dateFormat.format(date)
                             }?.takeIf { updatePageCount }
@@ -210,6 +229,7 @@ class RecentsPresenter(
                 }
             }
             RecentsViewType.Updates -> {
+                dateFormat.applyPattern("yyyy-MM-dd")
                 db.getRecentChapters(
                     query,
                     if (isCustom) ENDLESS_LIMIT else pageOffset,
@@ -660,6 +680,16 @@ class RecentsPresenter(
                 getRecents()
             }
         }
+    }
+
+    enum class GroupType {
+        BySeries,
+        ByWeek,
+        ByDay,
+        Never,
+        ;
+
+        val isByTime get() = this == ByWeek || this == ByDay
     }
 
     companion object {

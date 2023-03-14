@@ -106,6 +106,13 @@
         <item>@string/always</item>
     </string-array>
 
+    <string-array name="group_chapters_together">
+        <item>@string/by_series</item>
+        <item>@string/by_week</item>
+        <item>@string/by_day</item>
+        <item>@string/never</item>
+    </string-array>
+
     <string-array name="reader_nav">
         <item>@string/default_value</item>
         <item>@string/l_nav</item>

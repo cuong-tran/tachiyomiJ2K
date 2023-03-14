@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
+import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CoroutineScope
@@ -207,6 +208,12 @@ object Migrations {
                 val oldDLAfterReading = prefs.getInt("auto_download_after_reading", 0)
                 if (oldDLAfterReading > 0) {
                     preferences.autoDownloadWhileReading().set(max(2, oldDLAfterReading))
+                }
+            }
+            if (oldVersion < 102) {
+                val oldGroupHistory = prefs.getBoolean("group_chapters_history", true)
+                if (!oldGroupHistory) {
+                    preferences.groupChaptersHistory().set(RecentsPresenter.GroupType.Never)
                 }
             }
 

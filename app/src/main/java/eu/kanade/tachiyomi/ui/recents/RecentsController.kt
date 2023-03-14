@@ -761,6 +761,7 @@ class RecentsController(bundle: Bundle? = null) :
         transition.duration = view!!.resources.getInteger(android.R.integer.config_shortAnimTime)
             .toLong()
         androidx.transition.TransitionManager.beginDelayedTransition(binding.recycler, transition)
+        if (holderId == -1L) return
         val chapter = holderId?.let { item.mch.extraChapters.find { holderId == it.id } }
             ?: item.chapter
         val manga = item.mch.manga
@@ -805,7 +806,7 @@ class RecentsController(bundle: Bundle? = null) :
 
     private fun isSearching() = query.isNotEmpty()
     override fun alwaysExpanded() =
-        query.isNotEmpty() || (presenter.viewType.isHistory && !presenter.groupHistory)
+        query.isNotEmpty() || (presenter.viewType.isHistory && !presenter.groupHistory.isByTime)
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.recents, menu)

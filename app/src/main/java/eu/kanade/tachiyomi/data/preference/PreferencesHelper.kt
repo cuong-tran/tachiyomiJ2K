@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
+import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.system.Themes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -375,7 +376,7 @@ class PreferencesHelper(val context: Context) {
 
     fun collapseGroupedUpdates() = flowPrefs.getBoolean("group_chapters_updates", false)
 
-    fun groupChaptersHistory() = flowPrefs.getBoolean(Keys.groupChaptersHistory, true)
+    fun groupChaptersHistory() = flowPrefs.getEnum("group_chapters_history_type", RecentsPresenter.GroupType.ByWeek)
 
     fun collapseGroupedHistory() = flowPrefs.getBoolean("collapse_group_history", false)
 

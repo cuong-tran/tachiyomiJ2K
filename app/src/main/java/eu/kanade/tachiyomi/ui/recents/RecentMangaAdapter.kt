@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class RecentMangaAdapter(val delegate: RecentsInterface) :
     BaseChapterAdapter<IFlexible<*>>(delegate) {
@@ -46,6 +48,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         DecimalFormatSymbols()
             .apply { decimalSeparator = '.' },
     )
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
     init {
         setDisplayHeadersAtStartUp(true)
