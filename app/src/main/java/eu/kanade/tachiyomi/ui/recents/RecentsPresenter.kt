@@ -193,6 +193,8 @@ class RecentsPresenter(
                             else -> "yyyy-MM-dd"
                         },
                     )
+                    val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) % 7 + 1
+                    dateFormat.calendar.firstDayOfWeek = dayOfWeek
                     items.executeOnIO().groupBy {
                         val date = it.history.last_read
                         it.manga.id to if (date <= 0L) "-1" else dateFormat.format(Date(date))
@@ -230,6 +232,8 @@ class RecentsPresenter(
             }
             RecentsViewType.Updates -> {
                 dateFormat.applyPattern("yyyy-MM-dd")
+                dateFormat.calendar.firstDayOfWeek =
+                    Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
                 db.getRecentChapters(
                     query,
                     if (isCustom) ENDLESS_LIMIT else pageOffset,
