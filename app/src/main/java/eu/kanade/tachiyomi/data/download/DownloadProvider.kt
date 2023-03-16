@@ -11,7 +11,11 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.storage.DiskUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.injectLazy
 
@@ -28,6 +32,8 @@ class DownloadProvider(private val context: Context) {
      */
     private val preferences: PreferencesHelper by injectLazy()
 
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     /**
      * The root directory for downloads.
      */
@@ -40,7 +46,7 @@ class DownloadProvider(private val context: Context) {
     init {
         preferences.downloadsDirectory().asFlow().drop(1).onEach {
             downloadsDir = UniFile.fromUri(context, it.toUri())
-        }
+        }.launchIn(scope)
     }
 
     /**
