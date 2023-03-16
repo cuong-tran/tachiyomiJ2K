@@ -46,7 +46,7 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
 
     private val ratio = 5f.dpToPx
     private val fullRatio = 0f
-    val shortAnimationDuration = (
+    private val shortAnimationDuration = (
         activity?.resources?.getInteger(
             android.R.integer.config_shortAnimTime,
         ) ?: 0
