@@ -1,13 +1,10 @@
 package eu.kanade.tachiyomi.util.system
 
-import android.app.ActivityManager
 import android.app.LocaleManager
 import android.app.Notification
 import android.app.NotificationManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.res.Configuration
@@ -306,51 +303,6 @@ val Context.powerManager: PowerManager
     get() = getSystemService()!!
 
 /**
- * Function used to send a local broadcast asynchronous
- *
- * @param intent intent that contains broadcast information
- */
-fun Context.sendLocalBroadcast(intent: Intent) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(
-        intent,
-    )
-}
-
-/**
- * Function used to send a local broadcast synchronous
- *
- * @param intent intent that contains broadcast information
- */
-fun Context.sendLocalBroadcastSync(intent: Intent) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcastSync(
-        intent,
-    )
-}
-
-/**
- * Function used to register local broadcast
- *
- * @param receiver receiver that gets registered.
- */
-fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFilter) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).registerReceiver(
-        receiver,
-        filter,
-    )
-}
-
-/**
- * Function used to unregister local broadcast
- *
- * @param receiver receiver that gets unregistered.
- */
-fun Context.unregisterLocalReceiver(receiver: BroadcastReceiver) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(
-        receiver,
-    )
-}
-
-/**
  * Returns true if device is connected to Wifi.
  */
 fun Context.isConnectedToWifi(): Boolean {
@@ -366,17 +318,6 @@ fun Context.isConnectedToWifi(): Boolean {
         @Suppress("DEPRECATION")
         wifiManager.connectionInfo.bssid != null
     }
-}
-
-/**
- * Returns true if the given service class is running.
- */
-fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
-    val className = serviceClass.name
-    val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-    @Suppress("DEPRECATION")
-    return manager.getRunningServices(Integer.MAX_VALUE)
-        .any { className == it.service.className }
 }
 
 fun Context.openInBrowser(url: String, @ColorInt toolbarColor: Int? = null, forceBrowser: Boolean = false) {
