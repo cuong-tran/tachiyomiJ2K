@@ -774,7 +774,7 @@ class PagerPageHolder(
             extraPage = null
             return supportHingeIfThere(imageBytes.inputStream())
         } else if (shouldShiftAnyway && page.index == 1 &&
-            viewer.config.shiftDoublePage && (isFirstPageNotEnd || isThirdPageNotEnd)
+            viewer.config.shiftDoublePage && (isFirstPageNotEnd && isThirdPageNotEnd)
         ) {
             shiftDoublePages(false)
             return supportHingeIfThere(imageBytes.inputStream())
