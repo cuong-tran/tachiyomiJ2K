@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="?attr/colorSurface"
     android:gravity="center_vertical"
     app:cardCornerRadius="0dp">
@@ -11,9 +12,14 @@
         android:id="@+id/section_text"
         style="?textAppearanceTitleLarge"
         android:textSize="20sp"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:paddingTop="18dp"
         android:paddingBottom="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="Fetched yesterday"
         android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
         android:paddingStart="?android:attr/listPreferredItemPaddingStart"
         android:textColor="?attr/actionBarTintColor"
@@ -21,4 +27,26 @@
         android:layout_gravity="center_vertical"
         android:maxLines="1"/>
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/last_updated_text"
+        style="?textAppearanceBodySmall"
+        android:textStyle="italic"
+        android:textAlignment="textEnd"
+        tools:text="Library last updated: Yesterday"
+        android:layout_width="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+        android:textColor="?attr/actionBarTintColor"
+        android:layout_height="0dp"
+        android:layout_gravity="end|top"
+        app:layout_constraintBottom_toBottomOf="@id/section_text"
+        android:maxLines="1"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

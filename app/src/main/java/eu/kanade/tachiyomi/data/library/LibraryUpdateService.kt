@@ -57,6 +57,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
+import java.util.Date
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -237,6 +238,8 @@ class LibraryUpdateService(
         }
         if (target == Target.CHAPTERS) {
             listener?.onUpdateManga(Manga.create(STARTING_UPDATE_SOURCE))
+            // If this is a chapter update, set the last update time to now
+            preferences.libraryUpdateLastTimestamp().set(Date().time)
         }
         job = GlobalScope.launch(handler) {
             when (target) {

@@ -31,6 +31,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     var uniformCovers = preferences.uniformGrid().get()
     var showOutline = preferences.outlineOnCovers().get()
     var sortByFetched = preferences.sortFetchedTime().get()
+    var lastUpdatedTime = preferences.libraryUpdateLastTimestamp().get()
     private var collapseGroupedUpdates = preferences.collapseGroupedUpdates().get()
     private var collapseGroupedHistory = preferences.collapseGroupedHistory().get()
     val collapseGrouped: Boolean
@@ -69,6 +70,12 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
                 (recyclerView.findViewHolderForAdapterPosition(i) as? RecentMangaHolder)?.updateCards()
             }
         }
+        preferences.libraryUpdateLastTimestamp().asFlow().onEach {
+            lastUpdatedTime = it
+            if (viewType.isUpdates) {
+                notifyItemChanged(0)
+            }
+        }.launchIn(delegate.scope())
     }
 
     fun getItemByChapterId(id: Long): RecentMangaItem? {

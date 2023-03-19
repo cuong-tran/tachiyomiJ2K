@@ -257,6 +257,7 @@
     <string name="updated_">Updated %1$s</string>
     <string name="added_">Added %1$s</string>
     <string name="fetched_">Fetched %1$s</string>
+    <string name="updates_last_update_info">Library last updated: %s</string>
     <string name="view_history">View history</string>
     <string name="view_all_updates">View all updates</string>
     <string name="show_more_chapters">Show more chapters</string>
