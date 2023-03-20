@@ -694,13 +694,6 @@ class MangaDetailsPresenter(
         }
     }
 
-    fun setFavorite(favorite: Boolean) {
-        if (manga.favorite == favorite) {
-            return
-        }
-        toggleFavorite()
-    }
-
     override fun onUpdateManga(manga: Manga?) {
         if (manga?.id == this.manga.id) {
             fetchChapters()
@@ -719,7 +712,7 @@ class MangaDetailsPresenter(
                 withUIContext {
                     controller?.shareManga(file)
                 }
-            } catch (e: java.lang.Exception) {
+            } catch (_: java.lang.Exception) {
             }
         }
     }
