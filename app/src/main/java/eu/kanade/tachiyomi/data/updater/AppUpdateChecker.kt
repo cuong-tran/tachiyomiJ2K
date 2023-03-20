@@ -32,11 +32,12 @@ class AppUpdateChecker {
                     .await()
                     .parseAs<List<GithubRelease>>()
                     .let {
-                        val release = it.firstOrNull() ?: return@let AppUpdateResult.NoNewUpdate
+                        val releases = it.take(10)
+                        // Check if any of the latest versions are newer than the current version
+                        val release = releases.find { release -> isNewVersion(release.version) }
                         preferences.lastAppCheck().set(Date().time)
 
-                        // Check if latest version is different from current version
-                        if (isNewVersion(release.version)) {
+                        if (release != null) {
                             AppUpdateResult.NewUpdate(release)
                         } else {
                             AppUpdateResult.NoNewUpdate
@@ -50,7 +51,7 @@ class AppUpdateChecker {
                     .let {
                         preferences.lastAppCheck().set(Date().time)
 
-                        // Check if latest version is different from current version
+                        // Check if latest version is newer than the current version
                         if (isNewVersion(it.version)) {
                             AppUpdateResult.NewUpdate(it)
                         } else {
@@ -89,8 +90,19 @@ class AppUpdateChecker {
         return if (newSemVer.size > oldSemVer.size) {
             true
         } else {
-            // For production versions from beta (new: 1.2.3 vs old: 1.2.3-b1, return true)
-            (newPreReleaseVer.getOrNull(1) != null) != (oldPreReleaseVer.getOrNull(1) != null)
+            // If the version numbers match, check the beta versions
+            val newPreVersion =
+                newPreReleaseVer.getOrNull(1)?.replace("[^\\d.-]".toRegex(), "")?.toIntOrNull()
+            val oldPreVersion =
+                oldPreReleaseVer.getOrNull(1)?.replace("[^\\d.-]".toRegex(), "")?.toIntOrNull()
+            when {
+                // For prod, don't bother with betas (current: 1.2.3 vs new: 1.2.3-b1)
+                oldPreVersion == null -> false
+                // For betas, always use prod builds (current: 1.2.3-b1 vs new: 1.2.3)
+                newPreVersion == null -> true
+                // For betas, higher beta ver is newer (current: 1.2.3-b1 vs new: 1.2.3-b2)
+                else -> (oldPreVersion < newPreVersion)
+            }
         }
     }
 }
