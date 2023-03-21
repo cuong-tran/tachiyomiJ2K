@@ -228,8 +228,8 @@ dependencies {
     implementation("com.github.gabrielemariotti.changeloglib:changelog:2.1.0")
 
     // Database
-    implementation("androidx.sqlite:sqlite-ktx:2.2.0")
-    implementation("com.github.requery:sqlite-android:3.36.0")
+    implementation("androidx.sqlite:sqlite-ktx:2.3.0")
+    implementation("com.github.requery:sqlite-android:3.39.2")
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
 
