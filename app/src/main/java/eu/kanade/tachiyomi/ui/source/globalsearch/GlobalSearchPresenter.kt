@@ -80,7 +80,7 @@ open class GlobalSearchPresenter(
             search(initialQuery.orEmpty())
         }
         presenterScope.launchUI {
-            controller?.setItems(items)
+            view?.setItems(items)
         }
     }
 
@@ -201,7 +201,7 @@ open class GlobalSearchPresenter(
                                     { "${it.source.name.lowercase(Locale.getDefault())} (${it.source.lang})" },
                                 ),
                             )
-                        withUIContext { controller?.setItems(items) }
+                        withUIContext { view?.setItems(items) }
                     }
                 }
             }
@@ -230,7 +230,7 @@ open class GlobalSearchPresenter(
                 .map {
                     presenterScope.launchIO {
                         val manga = getMangaDetails(it, source)
-                        withUIContext { controller?.onMangaInitialized(source as CatalogueSource, manga) }
+                        withUIContext { view?.onMangaInitialized(source as CatalogueSource, manga) }
                     }
                 }
         }.launchIn(presenterScope)

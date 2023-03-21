@@ -43,7 +43,7 @@ class StatsDetailsPresenter(
 ) : BaseCoroutinePresenter<StatsDetailsController>() {
 
     private val context
-        get() = controller?.view?.context ?: prefs.context
+        get() = view?.view?.context ?: prefs.context
     var libraryMangas = getLibrary()
         set(value) {
             field = value
@@ -131,7 +131,7 @@ class StatsDetailsPresenter(
                 Stats.READ_DURATION -> setupReadDuration()
                 else -> {}
             }
-            withUIContext { controller?.updateStats(keepAdapter = keepAdapter) }
+            withUIContext { view?.updateStats(keepAdapter = keepAdapter) }
         }
     }
 

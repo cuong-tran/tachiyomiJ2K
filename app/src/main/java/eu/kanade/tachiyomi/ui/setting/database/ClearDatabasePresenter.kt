@@ -65,7 +65,7 @@ class ClearDatabasePresenter : BaseCoroutinePresenter<ClearDatabaseController>()
                     ),
                 )
             withUIContext {
-                controller?.setItems(sources)
+                view?.setItems(sources)
             }
         }
     }

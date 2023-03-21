@@ -140,7 +140,7 @@ open class BrowseSourcePresenter(
                         BrowseSourceItem(it, browseAsList, sourceListType, outlineCovers)
                     }
                     this@BrowseSourcePresenter.items.addAll(items)
-                    withUIContext { controller?.onAddPage(page, items) }
+                    withUIContext { view?.onAddPage(page, items) }
                 } catch (error: Exception) {
                     Timber.e(error)
                 }
@@ -162,7 +162,7 @@ open class BrowseSourcePresenter(
             try {
                 pager.requestNextPage()
             } catch (e: Throwable) {
-                withUIContext { controller?.onAddPageError(e) }
+                withUIContext { view?.onAddPageError(e) }
             }
         }
     }
@@ -211,7 +211,7 @@ open class BrowseSourcePresenter(
                 .filter { it.thumbnail_url == null && !it.initialized }
                 .map { getMangaDetails(it) }
                 .onEach {
-                    withUIContext { controller?.onMangaInitialized(it) }
+                    withUIContext { view?.onMangaInitialized(it) }
                 }
                 .catch { e -> Timber.e(e) }
                 .collect()

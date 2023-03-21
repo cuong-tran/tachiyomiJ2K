@@ -26,7 +26,7 @@ class ExtensionDetailsPresenter(
             .drop(1)
             .onEach { extensions ->
                 extensions.filter { it.pkgName == pkgName }
-                presenterScope.launchUI { controller?.onExtensionUninstalled() }
+                presenterScope.launchUI { view?.onExtensionUninstalled() }
             }
             .launchIn(presenterScope)
     }

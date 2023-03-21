@@ -72,7 +72,7 @@ class LibraryPresenter(
 
     private val context = preferences.context
     private val viewContext
-        get() = controller?.view?.context
+        get() = view?.view?.context
 
     private val loggedServices by lazy { trackManager.services.filter { it.isLogged } }
 
@@ -107,7 +107,7 @@ class LibraryPresenter(
         get() = groupType != UNGROUPED
 
     private val controllerIsSubClass
-        get() = controller?.isSubClass == true
+        get() = view?.isSubClass == true
 
     var hasActiveFilters: Boolean = run {
         val filterDownloaded = preferences.filterDownloaded().get()
@@ -153,7 +153,7 @@ class LibraryPresenter(
             // Doing this instead of a job in case the app isn't used often
             presenterScope.launchIO {
                 setSearchSuggestion(preferences, db, sourceManager)
-                withUIContext { controller?.setTitle() }
+                withUIContext { view?.setTitle() }
             }
         }
     }
@@ -204,7 +204,7 @@ class LibraryPresenter(
         preferences.lastUsedCategory().set(order)
         val category = categories.find { it.order == order }?.id ?: return
         currentCategory = category
-        controller?.onNextLibraryUpdate(
+        view?.onNextLibraryUpdate(
             sectionedLibraryItems[currentCategory] ?: blankItem(),
         )
     }
@@ -228,7 +228,7 @@ class LibraryPresenter(
                 it.order == preferences.lastUsedCategory().get()
             }?.id ?: 0
         }
-        controller?.onNextLibraryUpdate(
+        view?.onNextLibraryUpdate(
             if (!show) {
                 sectionedLibraryItems[currentCategory]
                     ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
@@ -255,7 +255,7 @@ class LibraryPresenter(
             }?.id ?: 0
         }
         withUIContext {
-            controller?.onNextLibraryUpdate(
+            view?.onNextLibraryUpdate(
                 if (!showAll) {
                     sectionedLibraryItems[currentCategory]
                         ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
@@ -289,7 +289,7 @@ class LibraryPresenter(
 
         val filterTrackers = FilterBottomSheet.FILTER_TRACKER
 
-        val filtersOff = controller?.isSubClass != true &&
+        val filtersOff = view?.isSubClass != true &&
             (filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0)
         hasActiveFilters = !filtersOff
         val missingCategorySet = categories.mapNotNull { it.id }.toMutableSet()
@@ -354,7 +354,7 @@ class LibraryPresenter(
         filterBookmarked: Int,
         filterTrackers: String,
     ): Boolean {
-        (controller as? FilteredLibraryController)?.let {
+        (view as? FilteredLibraryController)?.let {
             return matchesCustomFilters(item, it, filterTrackers)
         }
 
@@ -848,7 +848,7 @@ class LibraryPresenter(
                             service.getStatus(track.status)
                         }
                     } else {
-                        controller?.view?.context?.getString(R.string.not_tracked) ?: ""
+                        view?.view?.context?.getString(R.string.not_tracked) ?: ""
                     }
                     listOf(LibraryItem(manga, makeOrGetHeader(status), viewContext))
                 }
@@ -985,7 +985,7 @@ class LibraryPresenter(
 
     /** Create a default category with the sort set */
     private fun createDefaultCategory(): Category {
-        val default = Category.createDefault(controller?.applicationContext ?: context)
+        val default = Category.createDefault(view?.applicationContext ?: context)
         default.order = -1
         val defOrder = preferences.defaultMangaOrder().get()
         if (defOrder.firstOrNull()?.isLetter() == true) {
@@ -1096,7 +1096,7 @@ class LibraryPresenter(
             val mangaToAdd = mangas.distinctBy { it.id }
             mangaToAdd.forEach { it.favorite = true }
             db.insertMangas(mangaToAdd).executeOnIO()
-            (controller as? FilteredLibraryController)?.updateStatsPage()
+            (view as? FilteredLibraryController)?.updateStatsPage()
             getLibrary()
             mangaToAdd.forEach { db.insertManga(it).executeAsBlocking() }
         }
