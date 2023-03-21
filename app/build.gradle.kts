@@ -8,6 +8,7 @@ plugins {
     id(Plugins.kotlinSerialization)
     id("com.google.android.gms.oss-licenses-plugin")
     id(Plugins.googleServices) apply false
+    id("com.google.firebase.crashlytics")
 }
 
 if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
@@ -166,8 +167,10 @@ dependencies {
 
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("com.google.firebase:firebase-core:21.1.0")
-    implementation("com.google.firebase:firebase-analytics-ktx:21.1.0")
+    implementation(platform("com.google.firebase:firebase-bom:31.2.3"))
+
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
 
     val lifecycleVersion = "2.5.1"
     kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
@@ -283,9 +286,6 @@ dependencies {
     val coroutines = "1.5.1"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines")
-
-    // Crash reports
-    implementation("ch.acra:acra-http:5.9.3")
 
     // Text distance
     implementation("info.debatty:java-string-similarity:2.0.0")

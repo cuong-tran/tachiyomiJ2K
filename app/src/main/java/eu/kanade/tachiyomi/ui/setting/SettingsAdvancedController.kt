@@ -15,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceScreen
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.ChapterCache
@@ -86,6 +88,13 @@ class SettingsAdvancedController : SettingsController() {
             titleRes = R.string.send_crash_report
             summaryRes = R.string.helps_fix_bugs
             defaultValue = true
+            onChange {
+                try {
+                    Firebase.crashlytics.setCrashlyticsCollectionEnabled(it as Boolean)
+                } catch (_: Exception) {
+                }
+                true
+            }
         }
 
         preference {
@@ -138,7 +147,7 @@ class SettingsAdvancedController : SettingsController() {
 
                 onChange {
                     it as Boolean
-                    if ((!it && BuildConfig.BETA) || (it && !BuildConfig.BETA)) {
+                    if (it != BuildConfig.BETA) {
                         activity!!.materialAlertDialog()
                             .setTitle(R.string.warning)
                             .setMessage(if (it) R.string.warning_enroll_into_beta else R.string.warning_unenroll_from_beta)

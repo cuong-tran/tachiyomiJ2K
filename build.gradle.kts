@@ -30,6 +30,7 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${AndroidVersions.kotlin}")
         classpath("com.google.android.gms:oss-licenses-plugin:0.10.6")
         classpath("org.jetbrains.kotlin:kotlin-serialization:${AndroidVersions.kotlin}")
+        classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.4")
     }
     repositories {
         gradlePluginPortal()
