@@ -109,7 +109,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                 setContentIntent(pendingIntent)
                 setSmallIcon(R.drawable.ic_tachij2k_notification)
                 addAction(
-                    R.drawable.nnf_ic_file_folder,
+                    R.drawable.ic_file_open_24dp,
                     context.getString(R.string.open_log),
                     pendingIntent,
                 )
@@ -144,7 +144,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                 setContentIntent(NotificationHandler.openUrl(context, HELP_SKIPPED_URL))
                 setSmallIcon(R.drawable.ic_tachij2k_notification)
                 addAction(
-                    R.drawable.nnf_ic_file_folder,
+                    R.drawable.ic_file_open_24dp,
                     context.getString(R.string.open_log),
                     NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri),
                 )

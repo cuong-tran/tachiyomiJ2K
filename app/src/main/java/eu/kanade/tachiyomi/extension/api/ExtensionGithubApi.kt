@@ -97,7 +97,7 @@ internal class ExtensionGithubApi {
                     isNsfw = it.nsfw == 1,
                     hasReadme = it.hasReadme == 1,
                     hasChangelog = it.hasChangelog == 1,
-                    sources = it.sources,
+                    sources = it.sources ?: emptyList(),
                     apkName = it.apk,
                     iconUrl = "${getUrlPrefix()}icon/${it.apk.replace(".apk", ".png")}",
                 )

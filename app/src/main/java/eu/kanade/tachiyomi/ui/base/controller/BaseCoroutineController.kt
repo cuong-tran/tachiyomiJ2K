@@ -18,8 +18,8 @@ abstract class BaseCoroutineController<VB : ViewBinding, PS : BaseCoroutinePrese
     @Suppress("UNCHECKED_CAST")
     private fun <View> BaseCoroutinePresenter<View>.takeView(view: Any) = attachView(view as? View)
 
-    override fun onDestroyView(view: View) {
-        super.onDestroyView(view)
+    override fun onDestroy() {
+        super.onDestroy()
         presenter.onDestroy()
     }
 }

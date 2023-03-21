@@ -97,7 +97,7 @@ abstract class HttpSource : CatalogueSource {
     }
 
     fun getExtension(extensionManager: ExtensionManager? = null): Extension.Installed? =
-        (extensionManager ?: Injekt.get()).installedExtensions.find { it.sources.contains(this) }
+        (extensionManager ?: Injekt.get()).installedExtensionsFlow.value.find { it.sources.contains(this) }
 
     fun extOnlyHasAllLanguage(extensionManager: ExtensionManager? = null) =
         getExtension(extensionManager)?.sources?.all { it.lang == "all" } ?: true

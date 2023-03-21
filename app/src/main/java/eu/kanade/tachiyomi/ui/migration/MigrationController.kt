@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.databinding.MigrationControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.source.BrowseController
-import eu.kanade.tachiyomi.util.system.await
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.activityBinding
@@ -24,7 +23,6 @@ import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -94,9 +92,7 @@ class MigrationController :
         val item = adapter?.getItem(position) as? SourceItem ?: return
 
         launchUI {
-            val manga = Injekt.get<DatabaseHelper>().getFavoriteMangas().asRxSingle().await(
-                Schedulers.io(),
-            )
+            val manga = Injekt.get<DatabaseHelper>().getFavoriteMangas().executeAsBlocking()
             val sourceMangas =
                 manga.asSequence().filter { it.source == item.source.id }.map { it.id!! }.toList()
             withContext(Dispatchers.Main) {

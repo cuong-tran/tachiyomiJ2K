@@ -821,15 +821,15 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     fun getExtensionUpdates(force: Boolean) {
-        if ((force && extensionManager.availableExtensions.isEmpty()) ||
+        if ((force && extensionManager.availableExtensionsFlow.value.isEmpty()) ||
             Date().time >= preferences.lastExtCheck().get() + TimeUnit.HOURS.toMillis(6)
         ) {
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    extensionManager.findAvailableExtensionsAsync()
+                    extensionManager.findAvailableExtensions()
                     val pendingUpdates = ExtensionGithubApi().checkForUpdates(
                         this@MainActivity,
-                        extensionManager.availableExtensions.takeIf { it.isNotEmpty() },
+                        extensionManager.availableExtensionsFlow.value.takeIf { it.isNotEmpty() },
                     )
                     preferences.extensionUpdatesCount().set(pendingUpdates.size)
                     preferences.lastExtCheck().set(Date().time)

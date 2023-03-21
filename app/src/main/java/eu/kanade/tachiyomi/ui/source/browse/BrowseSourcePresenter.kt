@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
-import android.os.Bundle
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -13,7 +12,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
+import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.source.filter.CheckboxItem
 import eu.kanade.tachiyomi.ui.source.filter.CheckboxSectionItem
 import eu.kanade.tachiyomi.ui.source.filter.GroupItem
@@ -36,9 +35,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -54,7 +50,7 @@ open class BrowseSourcePresenter(
     val db: DatabaseHelper = Injekt.get(),
     val prefs: PreferencesHelper = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
-) : BasePresenter<BrowseSourceController>() {
+) : BaseCoroutinePresenter<BrowseSourceController>() {
 
     /**
      * Selected source.
@@ -65,6 +61,10 @@ open class BrowseSourcePresenter(
         get() = this::source.isInitialized
 
     var filtersChanged = false
+
+    var items = mutableListOf<BrowseSourceItem>()
+    val page: Int
+        get() = pager.currentPage
 
     /**
      * Modifiable list of filters.
@@ -87,39 +87,24 @@ open class BrowseSourcePresenter(
      * Pager containing a list of manga results.
      */
     private lateinit var pager: Pager
-
-    /**
-     * Subscription for the pager.
-     */
-    private var pagerSubscription: Subscription? = null
+    private var pagerJob: Job? = null
 
     /**
      * Subscription for one request from the pager.
      */
     private var nextPageJob: Job? = null
 
-    init {
-        query = searchQuery ?: ""
-    }
+    var query = searchQuery ?: ""
 
-    override fun onCreate(savedState: Bundle?) {
-        super.onCreate(savedState)
+    override fun onCreate() {
+        super.onCreate()
+        if (!::pager.isInitialized) {
+            source = sourceManager.get(sourceId) as? CatalogueSource ?: return
 
-        source = sourceManager.get(sourceId) as? CatalogueSource ?: return
-
-        sourceFilters = source.getFilterList()
-        filtersChanged = false
-
-        if (savedState != null) {
-            query = savedState.getString(::query.name, "")
+            sourceFilters = source.getFilterList()
+            filtersChanged = false
+            restartPager()
         }
-
-        restartPager()
-    }
-
-    override fun onSave(state: Bundle) {
-        state.putString(::query.name, query)
-        super.onSave(state)
     }
 
     /**
@@ -140,27 +125,27 @@ open class BrowseSourcePresenter(
         val browseAsList = prefs.browseAsList()
         val sourceListType = prefs.libraryLayout()
         val outlineCovers = prefs.outlineOnCovers()
+        items.clear()
 
         // Prepare the pager.
-        pagerSubscription?.let { remove(it) }
-        pagerSubscription = pager.results()
-            .observeOn(Schedulers.io())
-            .map { (first, second) ->
-                first to second
-                    .map { networkToLocalManga(it, sourceId) }
-                    .filter { !prefs.hideInLibraryItems().get() || !it.favorite }
-            }
-            .doOnNext { initializeMangas(it.second) }
-            .map { (first, second) -> first to second.map { BrowseSourceItem(it, browseAsList, sourceListType, outlineCovers) } }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeReplay(
-                { view, (page, mangas) ->
-                    view.onAddPage(page, mangas)
-                },
-                { _, error ->
+        pagerJob?.cancel()
+        pagerJob = presenterScope.launchIO {
+            pager.results().onEach { (page, second) ->
+                try {
+                    val mangas = second
+                        .map { networkToLocalManga(it, sourceId) }
+                        .filter { !prefs.hideInLibraryItems().get() || !it.favorite }
+                    initializeMangas(mangas)
+                    val items = mangas.map {
+                        BrowseSourceItem(it, browseAsList, sourceListType, outlineCovers)
+                    }
+                    this@BrowseSourcePresenter.items.addAll(items)
+                    withUIContext { controller?.onAddPage(page, items) }
+                } catch (error: Exception) {
                     Timber.e(error)
-                },
-            )
+                }
+            }.collect()
+        }
 
         // Request first page.
         requestNext()
@@ -173,14 +158,11 @@ open class BrowseSourcePresenter(
         if (!hasNextPage()) return
 
         nextPageJob?.cancel()
-        nextPageJob = launchIO {
+        nextPageJob = presenterScope.launchIO {
             try {
                 pager.requestNextPage()
             } catch (e: Throwable) {
-                withUIContext {
-                    @Suppress("DEPRECATION")
-                    view?.onAddPageError(e)
-                }
+                withUIContext { controller?.onAddPageError(e) }
             }
         }
     }
@@ -229,10 +211,7 @@ open class BrowseSourcePresenter(
                 .filter { it.thumbnail_url == null && !it.initialized }
                 .map { getMangaDetails(it) }
                 .onEach {
-                    withUIContext {
-                        @Suppress("DEPRECATION")
-                        view?.onMangaInitialized(it)
-                    }
+                    withUIContext { controller?.onMangaInitialized(it) }
                 }
                 .catch { e -> Timber.e(e) }
                 .collect()

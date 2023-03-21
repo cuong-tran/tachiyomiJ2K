@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.SourceGlobalSearchControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
-import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
@@ -42,7 +42,7 @@ open class GlobalSearchController(
     protected val initialQuery: String? = null,
     val extensionFilter: String? = null,
     bundle: Bundle? = null,
-) : NucleusController<SourceGlobalSearchControllerBinding, GlobalSearchPresenter>(bundle),
+) : BaseCoroutineController<SourceGlobalSearchControllerBinding, GlobalSearchPresenter>(bundle),
     FloatingSearchInterface,
     SmallToolbarInterface,
     GlobalSearchAdapter.OnTitleClickListener,
@@ -78,14 +78,7 @@ open class GlobalSearchController(
         return customTitle ?: presenter.query
     }
 
-    /**
-     * Create the [GlobalSearchPresenter] used in controller.
-     *
-     * @return instance of [GlobalSearchPresenter]
-     */
-    override fun createPresenter(): GlobalSearchPresenter {
-        return GlobalSearchPresenter(initialQuery, extensionFilter)
-    }
+    override val presenter = GlobalSearchPresenter(initialQuery, extensionFilter)
 
     override fun onTitleClick(source: CatalogueSource) {
         preferences.lastUsedCatalogueSource().set(source.id)
@@ -108,7 +101,7 @@ open class GlobalSearchController(
     /**
      * Called when manga in global search is long clicked.
      *
-     * @param manga clicked item containing manga information.
+     * @param position clicked item containing manga information.
      */
     override fun onMangaLongClick(position: Int, adapter: GlobalSearchCardAdapter) {
         val manga = adapter.getItem(position)?.manga ?: return

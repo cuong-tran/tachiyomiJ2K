@@ -46,7 +46,7 @@ sealed class Extension {
         override val hasChangelog: Boolean,
         val apkName: String,
         val iconUrl: String,
-        val sources: List<AvailableSource>? = null,
+        val sources: List<AvailableSource>,
     ) : Extension()
 
     @Serializable

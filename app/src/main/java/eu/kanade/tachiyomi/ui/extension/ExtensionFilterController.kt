@@ -22,7 +22,7 @@ class ExtensionFilterController : SettingsController() {
 
         val activeLangs = preferences.enabledLanguages().get()
 
-        val availableLangs = extensionManager.availableExtensions.groupBy { it.lang }.keys
+        val availableLangs = extensionManager.availableExtensionsFlow.value.groupBy { it.lang }.keys
             .sortedWith(compareBy({ it !in activeLangs }, { LocaleHelper.getSourceDisplayName(it, context) }))
 
         availableLangs.forEach {

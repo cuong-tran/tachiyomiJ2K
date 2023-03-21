@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
@@ -39,12 +40,12 @@ class ExtensionBottomPresenter() : BaseMigrationPresenter<ExtensionBottomSheet>(
         super.onCreate()
         presenterScope.launch {
             val extensionJob = async {
-                extensionManager.findAvailableExtensionsAsync()
+                extensionManager.findAvailableExtensions()
                 extensions = toItems(
                     Triple(
-                        extensionManager.installedExtensions,
-                        extensionManager.untrustedExtensions,
-                        extensionManager.availableExtensions,
+                        extensionManager.installedExtensionsFlow.value,
+                        extensionManager.untrustedExtensionsFlow.value,
+                        extensionManager.availableExtensionsFlow.value,
                     ),
                 )
                 withContext(Dispatchers.Main) { controller?.setExtensions(extensions, false) }
@@ -53,16 +54,16 @@ class ExtensionBottomPresenter() : BaseMigrationPresenter<ExtensionBottomSheet>(
             listOf(migrationJob, extensionJob).awaitAll()
         }
         presenterScope.launch {
-            extensionManager.downloadRelay
+            extensionManager.downloadRelay.asSharedFlow()
                 .collect {
                     if (it.first.startsWith("Finished")) {
                         firstLoad = true
                         currentDownloads.clear()
                         extensions = toItems(
                             Triple(
-                                extensionManager.installedExtensions,
-                                extensionManager.untrustedExtensions,
-                                extensionManager.availableExtensions,
+                                extensionManager.installedExtensionsFlow.value,
+                                extensionManager.untrustedExtensionsFlow.value,
+                                extensionManager.availableExtensionsFlow.value,
                             ),
                         )
                         withUIContext { controller?.setExtensions(extensions) }
@@ -91,9 +92,9 @@ class ExtensionBottomPresenter() : BaseMigrationPresenter<ExtensionBottomSheet>(
         presenterScope.launch {
             extensions = toItems(
                 Triple(
-                    extensionManager.installedExtensions,
-                    extensionManager.untrustedExtensions,
-                    extensionManager.availableExtensions,
+                    extensionManager.installedExtensionsFlow.value,
+                    extensionManager.untrustedExtensionsFlow.value,
+                    extensionManager.availableExtensionsFlow.value,
                 ),
             )
             withContext(Dispatchers.Main) { controller?.setExtensions(extensions, false) }
@@ -249,7 +250,7 @@ class ExtensionBottomPresenter() : BaseMigrationPresenter<ExtensionBottomSheet>(
 
     fun updateExtension(extension: Extension.Installed) {
         val availableExt =
-            extensionManager.availableExtensions.find { it.pkgName == extension.pkgName } ?: return
+            extensionManager.availableExtensionsFlow.value.find { it.pkgName == extension.pkgName } ?: return
         installExtension(availableExt)
     }
 
@@ -265,7 +266,7 @@ class ExtensionBottomPresenter() : BaseMigrationPresenter<ExtensionBottomSheet>(
         val intent = ExtensionInstallService.jobIntent(
             context,
             extensions.mapNotNull { extension ->
-                extensionManager.availableExtensions.find { it.pkgName == extension.pkgName }
+                extensionManager.availableExtensionsFlow.value.find { it.pkgName == extension.pkgName }
             },
         )
         ContextCompat.startForegroundService(context, intent)
@@ -276,7 +277,9 @@ class ExtensionBottomPresenter() : BaseMigrationPresenter<ExtensionBottomSheet>(
     }
 
     fun findAvailableExtensions() {
-        extensionManager.findAvailableExtensions()
+        presenterScope.launch {
+            extensionManager.findAvailableExtensions()
+        }
     }
 
     fun trustSignature(signatureHash: String) {

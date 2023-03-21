@@ -54,7 +54,7 @@ abstract class BaseMigrationPresenter<T : BaseMigrationInterface>(
         val header = SelectionHeader()
         val sourceGroup = library.groupBy { it.source }
         val sortOrder = PreferenceValues.MigrationSourceOrder.fromPreference(preferences)
-        val extensions = extensionManager.installedExtensions
+        val extensions = extensionManager.installedExtensionsFlow.value
         val obsoleteSources =
             extensions.filter { it.isObsolete }.map { it.sources }.flatten().map { it.id }
 

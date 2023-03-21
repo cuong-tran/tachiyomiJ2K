@@ -36,12 +36,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import com.hippo.unifile.UniFile
-import com.nononsenseapps.filepicker.FilePickerActivity
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.widget.CustomLayoutPickerActivity
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -82,27 +80,6 @@ inline fun Context.notification(channelId: String, func: NotificationCompat.Buil
     builder.func()
     return builder.build()
 }
-
-/**
- * Helper method to construct an Intent to use a custom file picker.
- * @param currentDir the path the file picker will open with.
- * @return an Intent to start the file picker activity.
- */
-fun Context.getFilePicker(currentDir: String): Intent {
-    return Intent(this, CustomLayoutPickerActivity::class.java)
-        .putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false)
-        .putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, true)
-        .putExtra(FilePickerActivity.EXTRA_START_PATH, currentDir)
-}
-
-/**
- * Checks if the give permission is granted.
- *
- * @param permission the permission to check.
- * @return true if it has permissions.
- */
-fun Context.hasPermission(permission: String) =
-    ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 
 /**
  * Returns the color for the given attribute.

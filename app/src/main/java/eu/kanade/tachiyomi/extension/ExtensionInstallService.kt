@@ -81,7 +81,7 @@ class ExtensionInstallService(
         instance = this
 
         val list = intent.getParcelableArrayListExtra<ExtensionInfo>(KEY_EXTENSION)?.filter {
-            val installedExt = extensionManager.installedExtensions.find { installed ->
+            val installedExt = extensionManager.installedExtensionsFlow.value.find { installed ->
                 installed.pkgName == it.pkgName
             } ?: return@filter false
             installedExt.versionCode < it.versionCode || installedExt.libVersion < it.libVersion

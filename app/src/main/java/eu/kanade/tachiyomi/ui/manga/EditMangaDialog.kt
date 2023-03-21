@@ -110,7 +110,7 @@ class EditMangaDialog : DialogController {
 
             languages.add("")
             languages.addAll(
-                extensionManager.availableExtensions.groupBy { it.lang }.keys
+                extensionManager.availableExtensionsFlow.value.groupBy { it.lang }.keys
                     .sortedWith(
                         compareBy(
                             { it !in activeLangs },

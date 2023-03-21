@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.source.globalsearch.GlobalSearchCardAdapter
 import eu.kanade.tachiyomi.ui.source.globalsearch.GlobalSearchController
-import eu.kanade.tachiyomi.ui.source.globalsearch.GlobalSearchPresenter
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import uy.kohesive.injekt.Injekt
@@ -51,9 +50,7 @@ class SearchController(
         bundle.getLongArray(SOURCES) ?: LongArray(0),
     )
 
-    override fun createPresenter(): GlobalSearchPresenter {
-        return SearchPresenter(initialQuery, manga!!, sources = sources)
-    }
+    override val presenter = SearchPresenter(initialQuery, manga!!, sources = sources)
 
     override fun onMangaClick(manga: Manga) {
         if (targetController is MigrationListController) {

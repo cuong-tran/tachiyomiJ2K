@@ -29,7 +29,7 @@ import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
@@ -63,7 +63,7 @@ import kotlin.math.roundToInt
  * Controller to manage the catalogues available in the app.
  */
 open class BrowseSourceController(bundle: Bundle) :
-    NucleusController<BrowseSourceControllerBinding, BrowseSourcePresenter>(bundle),
+    BaseCoroutineController<BrowseSourceControllerBinding, BrowseSourcePresenter>(bundle),
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     FloatingSearchInterface,
@@ -146,13 +146,11 @@ open class BrowseSourceController(bundle: Bundle) :
 //        return presenter.source.icon()
 //    }
 
-    override fun createPresenter(): BrowseSourcePresenter {
-        return BrowseSourcePresenter(
-            args.getLong(SOURCE_ID_KEY),
-            args.getString(SEARCH_QUERY_KEY),
-            args.getBoolean(USE_LATEST_KEY),
-        )
-    }
+    override val presenter = BrowseSourcePresenter(
+        args.getLong(SOURCE_ID_KEY),
+        args.getString(SEARCH_QUERY_KEY),
+        args.getBoolean(USE_LATEST_KEY),
+    )
 
     override fun createBinding(inflater: LayoutInflater) = BrowseSourceControllerBinding.inflate(inflater)
 
@@ -165,7 +163,6 @@ open class BrowseSourceController(bundle: Bundle) :
 
         binding.fab.isVisible = presenter.sourceFilters.isNotEmpty()
         binding.fab.setOnClickListener { showFilters() }
-        binding.progress.isVisible = true
         activityBinding?.appBar?.y = 0f
         activityBinding?.appBar?.updateAppBarAfterY(recycler)
         activityBinding?.appBar?.lockYPos = true
@@ -177,6 +174,11 @@ open class BrowseSourceController(bundle: Bundle) :
                 router.popCurrentController()
             }
             return
+        }
+        if (presenter.items.isNotEmpty()) {
+            onAddPage(1, presenter.items)
+        } else {
+            binding.progress.isVisible = true
         }
         requestFilePermissionsSafe(301, preferences, presenter.source is LocalSource)
     }
@@ -278,10 +280,9 @@ open class BrowseSourceController(bundle: Bundle) :
         val searchView = activityBinding?.searchToolbar?.searchView
 
         activityBinding?.searchToolbar?.setQueryHint("", !isBehindGlobalSearch && presenter.query.isBlank())
-        val query = presenter.query
-        if (query.isNotBlank()) {
+        if (presenter.query.isNotBlank()) {
             searchItem?.expandActionView()
-            searchView?.setQuery(query, true)
+            searchView?.setQuery(presenter.query, true)
             searchView?.clearFocus()
         } else if (activityBinding?.searchToolbar?.isSearchExpanded == true) {
             searchItem?.collapseActionView()
@@ -516,7 +517,7 @@ open class BrowseSourceController(bundle: Bundle) :
         showProgressBar()
         adapter?.clear()
 
-        presenter.restartPager(newQuery, presenter.sourceFilters)
+        presenter.restartPager(newQuery)
         updatePopLatestIcons()
     }
 

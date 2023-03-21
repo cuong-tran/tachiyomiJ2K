@@ -12,16 +12,31 @@ import eu.kanade.tachiyomi.source.online.all.Cubari
 import eu.kanade.tachiyomi.source.online.all.MangaDex
 import eu.kanade.tachiyomi.source.online.english.KireiCake
 import eu.kanade.tachiyomi.source.online.english.MangaPlus
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import rx.Observable
-import uy.kohesive.injekt.injectLazy
+import java.util.concurrent.ConcurrentHashMap
 
-open class SourceManager(private val context: Context) {
+class SourceManager(
+    private val context: Context,
+    private val extensionManager: ExtensionManager,
+) {
 
-    private val sourcesMap = mutableMapOf<Long, Source>()
+    private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
-    private val stubSourcesMap = mutableMapOf<Long, StubSource>()
+    private val sourcesMapFlow = MutableStateFlow(ConcurrentHashMap<Long, Source>())
 
-    protected val extensionManager: ExtensionManager by injectLazy()
+    private val stubSourcesMap = ConcurrentHashMap<Long, StubSource>()
+
+    val catalogueSources: Flow<List<CatalogueSource>> = sourcesMapFlow.map { it.values.filterIsInstance<CatalogueSource>() }
+    val onlineSources: Flow<List<HttpSource>> = catalogueSources.map { it.filterIsInstance<HttpSource>() }
 
     private val delegatedSources = listOf(
         DelegatedSource(
@@ -47,16 +62,39 @@ open class SourceManager(private val context: Context) {
     ).associateBy { it.sourceId }
 
     init {
-        createInternalSources().forEach { registerSource(it) }
+        scope.launch {
+            extensionManager.installedExtensionsFlow
+                .collectLatest { extensions ->
+                    val mutableMap = ConcurrentHashMap<Long, Source>(mapOf(LocalSource.ID to LocalSource(context)))
+                    extensions.forEach { extension ->
+                        extension.sources.forEach {
+                            mutableMap[it.id] = it
+                            delegatedSources[it.id]?.delegatedHttpSource?.delegate = it as? HttpSource
+//                            registerStubSource(it)
+                        }
+                    }
+                    sourcesMapFlow.value = mutableMap
+                }
+        }
+
+//        scope.launch {
+//            sourceRepository.subscribeAll()
+//                .collectLatest { sources ->
+//                    val mutableMap = stubSourcesMap.toMutableMap()
+//                    sources.forEach {
+//                        mutableMap[it.id] = StubSource(it)
+//                    }
+//                }
+//        }
     }
 
-    open fun get(sourceKey: Long): Source? {
-        return sourcesMap[sourceKey]
+    fun get(sourceKey: Long): Source? {
+        return sourcesMapFlow.value[sourceKey]
     }
 
     fun getOrStub(sourceKey: Long): Source {
-        return sourcesMap[sourceKey] ?: stubSourcesMap.getOrPut(sourceKey) {
-            StubSource(sourceKey)
+        return sourcesMapFlow.value[sourceKey] ?: stubSourcesMap.getOrPut(sourceKey) {
+            runBlocking { StubSource(sourceKey) }
         }
     }
 
@@ -68,24 +106,9 @@ open class SourceManager(private val context: Context) {
         return delegatedSources.values.find { it.urlName == urlName }?.delegatedHttpSource
     }
 
-    fun getOnlineSources() = sourcesMap.values.filterIsInstance<HttpSource>()
+    fun getOnlineSources() = sourcesMapFlow.value.values.filterIsInstance<HttpSource>()
 
-    fun getCatalogueSources() = sourcesMap.values.filterIsInstance<CatalogueSource>()
-
-    internal fun registerSource(source: Source, overwrite: Boolean = false) {
-        if (overwrite || !sourcesMap.containsKey(source.id)) {
-            delegatedSources[source.id]?.delegatedHttpSource?.delegate = source as? HttpSource
-            sourcesMap[source.id] = source
-        }
-    }
-
-    internal fun unregisterSource(source: Source) {
-        sourcesMap.remove(source.id)
-    }
-
-    private fun createInternalSources(): List<Source> = listOf(
-        LocalSource(context),
-    )
+    fun getCatalogueSources() = sourcesMapFlow.value.values.filterIsInstance<CatalogueSource>()
 
     @Suppress("OverridingDeprecatedMember")
     inner class StubSource(override val id: Long) : Source {
@@ -97,6 +120,7 @@ open class SourceManager(private val context: Context) {
             throw getSourceNotInstalledException()
         }
 
+        @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getMangaDetails"))
         override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
             return Observable.error(getSourceNotInstalledException())
         }
@@ -105,6 +129,7 @@ open class SourceManager(private val context: Context) {
             throw getSourceNotInstalledException()
         }
 
+        @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getChapterList"))
         override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
             return Observable.error(getSourceNotInstalledException())
         }
@@ -113,6 +138,7 @@ open class SourceManager(private val context: Context) {
             throw getSourceNotInstalledException()
         }
 
+        @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getPageList"))
         override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
             return Observable.error(getSourceNotInstalledException())
         }

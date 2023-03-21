@@ -11,19 +11,20 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.SettingsSearchControllerBinding
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
-import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import uy.kohesive.injekt.api.get
 
 /**
  * This controller shows and manages the different search result in settings search.
  * [SettingsSearchAdapter.OnTitleClickListener] called when preference is clicked in settings search
  */
 class SettingsSearchController :
-    NucleusController<SettingsSearchControllerBinding, SettingsSearchPresenter>(),
+    BaseController<SettingsSearchControllerBinding>(),
     FloatingSearchInterface,
     SmallToolbarInterface,
     SettingsSearchAdapter.OnTitleClickListener {
@@ -33,6 +34,7 @@ class SettingsSearchController :
      */
     private var adapter: SettingsSearchAdapter? = null
     private var searchView: SearchView? = null
+    var query: String = ""
 
     init {
         setHasOptionsMenu(true)
@@ -40,18 +42,7 @@ class SettingsSearchController :
 
     override fun createBinding(inflater: LayoutInflater) = SettingsSearchControllerBinding.inflate(inflater)
 
-    override fun getTitle(): String {
-        return presenter.query
-    }
-
-    /**
-     * Create the [SettingsSearchPresenter] used in controller.
-     *
-     * @return instance of [SettingsSearchPresenter]
-     */
-    override fun createPresenter(): SettingsSearchPresenter {
-        return SettingsSearchPresenter()
-    }
+    override fun getTitle(): String = query
 
     /**
      * Adds items to the options menu.
@@ -80,7 +71,7 @@ class SettingsSearchController :
 
                 override fun onQueryTextChange(newText: String?): Boolean {
                     if (!newText.isNullOrBlank()) {
-                        lastSearch = newText
+                        query = newText
                     }
                     setItems(getResultSet(newText))
                     return false
@@ -88,7 +79,7 @@ class SettingsSearchController :
             },
         )
 
-        searchView?.setQuery(lastSearch, true)
+        searchView?.setQuery(query, true)
     }
 
     override fun onActionViewCollapse(item: MenuItem?) {
@@ -151,13 +142,9 @@ class SettingsSearchController :
      */
     override fun onTitleClick(ctrl: SettingsController) {
         searchView?.query.let {
-            lastSearch = it.toString()
+            query = it.toString()
         }
 
         router.pushController(ctrl.withFadeTransaction())
-    }
-
-    companion object {
-        var lastSearch = ""
     }
 }

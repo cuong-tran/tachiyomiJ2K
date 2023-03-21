@@ -158,10 +158,12 @@ dependencies {
     implementation("androidx.browser:browser:1.5.0")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
+    implementation("androidx.activity:activity-ktx:1.7.0-rc01")
+    implementation("androidx.core:core-ktx:1.10.0-rc01")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("androidx.window:window:1.0.0")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
@@ -181,7 +183,6 @@ dependencies {
     implementation("io.reactivex:rxandroid:1.2.1")
     implementation("io.reactivex:rxjava:1.3.8")
     implementation("com.jakewharton.rxrelay:rxrelay:1.2.0")
-    implementation("com.github.pwittchen:reactivenetwork:0.13.0")
 
     // Coroutines
     implementation("com.fredporciuncula:flow-preferences:1.6.0")
@@ -224,9 +225,6 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
-    // Changelog
-    implementation("com.github.gabrielemariotti.changeloglib:changelog:2.1.0")
-
     // Database
     implementation("androidx.sqlite:sqlite-ktx:2.3.0")
     implementation("com.github.requery:sqlite-android:3.39.2")
@@ -261,7 +259,6 @@ dependencies {
     implementation("com.mikepenz:fastadapter-extensions-binding:$fastAdapterVersion")
     implementation("com.github.arkon.FlexibleAdapter:flexible-adapter:c8013533")
     implementation("com.github.arkon.FlexibleAdapter:flexible-adapter-ui:c8013533")
-    implementation("com.nononsenseapps:filepicker:2.5.2")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
     implementation("com.github.mthli:Slice:v1.2")
     implementation("io.noties.markwon:core:4.6.2")

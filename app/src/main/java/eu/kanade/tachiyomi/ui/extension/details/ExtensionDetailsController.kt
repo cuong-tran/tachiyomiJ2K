@@ -36,7 +36,7 @@ import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.getPreferenceKey
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.setting.DSL
 import eu.kanade.tachiyomi.ui.setting.onChange
 import eu.kanade.tachiyomi.ui.setting.switchPreference
@@ -57,7 +57,7 @@ import uy.kohesive.injekt.injectLazy
 
 @SuppressLint("RestrictedApi")
 class ExtensionDetailsController(bundle: Bundle? = null) :
-    NucleusController<ExtensionDetailControllerBinding, ExtensionDetailsPresenter>(bundle),
+    BaseCoroutineController<ExtensionDetailControllerBinding, ExtensionDetailsPresenter>(bundle),
     PreferenceManager.OnDisplayPreferenceDialogListener,
     DialogPreference.TargetFragment {
 
@@ -81,9 +81,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     override fun createBinding(inflater: LayoutInflater) =
         ExtensionDetailControllerBinding.inflate(inflater.cloneInContext(getPreferenceThemeContext()))
 
-    override fun createPresenter(): ExtensionDetailsPresenter {
-        return ExtensionDetailsPresenter(args.getString(PKGNAME_KEY)!!)
-    }
+    override val presenter = ExtensionDetailsPresenter(args.getString(PKGNAME_KEY)!!)
 
     override fun getTitle(): String? {
         return resources?.getString(R.string.extension_info)
