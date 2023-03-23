@@ -11,15 +11,14 @@ fun Project.getCommitCount(): String {
     // return "1"
 }
 
-fun Project.getCommitCountSinceLastRelease(): String {
+fun Project.getBetaCount(): String {
     val betaTags = runCommand("git tag -l --sort=refname v${AndroidVersions.versionName}-b*")
-    return if (betaTags.isNotEmpty()) {
-        val betaTag = betaTags.split("\n").last()
-        runCommand("git rev-list --count $betaTag..HEAD").toIntOrNull()?.toString() ?: "1"
+    return String.format("%02d", if (betaTags.isNotEmpty()) {
+        val betaTag = betaTags.split("\n").last().substringAfter("-b").toIntOrNull()
+        ((betaTag ?: 0) + 1)
     } else {
-        val lastTag = runCommand("git describe --tags --abbrev=0")
-        runCommand("git rev-list --count $lastTag..HEAD").toIntOrNull()?.toString() ?: "1"
-    }
+        1
+    })
     // return "1"
 }
 
