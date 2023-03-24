@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.ui.base.presenter
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import java.lang.ref.WeakReference
 
@@ -23,7 +23,9 @@ open class BaseCoroutinePresenter<T> {
     }
 
     open fun onCreate() {
-        presenterScope = CoroutineScope(Job() + Dispatchers.Default)
+        if (!isScopeInitialized) {
+            presenterScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        }
     }
 
     open fun onDestroy() {
