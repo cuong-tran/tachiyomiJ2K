@@ -380,7 +380,7 @@ class PreferencesHelper(val context: Context) {
 
     fun groupChaptersHistory() = flowPrefs.getEnum("group_chapters_history_type", RecentsPresenter.GroupType.ByWeek)
 
-    fun collapseGroupedHistory() = flowPrefs.getBoolean("collapse_group_history", false)
+    fun collapseGroupedHistory() = flowPrefs.getBoolean("collapse_group_history", true)
 
     fun showTitleFirstInRecents() = flowPrefs.getBoolean(Keys.showTitleFirstInRecents, false)
 
