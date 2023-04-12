@@ -31,10 +31,17 @@ class AppUpdateChecker {
                     .newCall(GET("https://api.github.com/repos/$GITHUB_REPO/releases"))
                     .await()
                     .parseAs<List<GithubRelease>>()
-                    .let {
-                        val releases = it.take(10)
+                    .let { githubReleases ->
+                        val releases = githubReleases.take(10).filter { isNewVersion(it.version) }
                         // Check if any of the latest versions are newer than the current version
-                        val release = releases.find { release -> isNewVersion(release.version) }
+                        val release = releases
+                            .maxWithOrNull { r1, r2 ->
+                                when {
+                                    r1.version == r2.version -> 0
+                                    isNewVersion(r2.version, r1.version) -> -1
+                                    else -> 1
+                                }
+                            }
                         preferences.lastAppCheck().set(Date().time)
 
                         if (release != null) {
@@ -72,10 +79,10 @@ class AppUpdateChecker {
         }
     }
 
-    private fun isNewVersion(versionTag: String): Boolean {
+    private fun isNewVersion(versionTag: String, currentVersion: String = BuildConfig.VERSION_NAME): Boolean {
         // Removes prefixes like "r" or "v"
         val newVersion = versionTag.replace("[^\\d.-]".toRegex(), "")
-        val oldVersion = BuildConfig.VERSION_NAME.replace("[^\\d.-]".toRegex(), "")
+        val oldVersion = currentVersion.replace("[^\\d.-]".toRegex(), "")
         val newPreReleaseVer = newVersion.split("-")
         val oldPreReleaseVer = oldVersion.split("-")
         val newSemVer = newPreReleaseVer.first().split(".").map { it.toInt() }
@@ -84,11 +91,15 @@ class AppUpdateChecker {
         oldSemVer.mapIndexed { index, i ->
             if (newSemVer.getOrElse(index) { i } > i) {
                 return true
+            } else if (newSemVer.getOrElse(index) { i } < i) {
+                return false
             }
         }
         // For cases of extreme patch versions (new: 1.2.3.1 vs old: 1.2.3, return true)
         return if (newSemVer.size > oldSemVer.size) {
             true
+        } else if (newSemVer.size < oldSemVer.size) {
+            false
         } else {
             // If the version numbers match, check the beta versions
             val newPreVersion =
