@@ -48,7 +48,12 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { TrackManager(app) }
 
-        addSingletonFactory { Json { ignoreUnknownKeys = true } }
+        addSingletonFactory {
+            Json {
+                ignoreUnknownKeys = true
+                explicitNulls = false
+            }
+        }
 
         addSingletonFactory { ChapterFilter() }
 
