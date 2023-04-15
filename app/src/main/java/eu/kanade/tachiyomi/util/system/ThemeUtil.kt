@@ -10,6 +10,7 @@ import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderBackgroundColor
 import uy.kohesive.injekt.injectLazy
 
 object ThemeUtil {
@@ -46,8 +47,9 @@ object ThemeUtil {
     }
 
     fun readerBackgroundColor(theme: Int): Int {
-        return when (theme) {
-            1 -> Color.BLACK
+        return when (ReaderBackgroundColor.fromPreference(theme)) {
+            ReaderBackgroundColor.GRAY -> Color.rgb(32, 33, 37)
+            ReaderBackgroundColor.BLACK -> Color.BLACK
             else -> Color.WHITE
         }
     }

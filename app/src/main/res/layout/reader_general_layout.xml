@@ -60,8 +60,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            app:title="@string/background_color"
-            android:entries="@array/reader_themes" />
+            app:title="@string/background_color" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/show_page_number"

@@ -104,6 +104,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil.Companion.preferredChapterName
 import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -1548,12 +1549,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 6, 7 -> extraPage?.let { secondPage ->
                     (viewer as? PagerViewer)?.let { viewer ->
                         val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
-                        val bg =
-                            if (viewer.config.readerTheme >= 2 || viewer.config.readerTheme == 0) {
-                                Color.WHITE
-                            } else {
-                                Color.BLACK
-                            }
+                        val bg = ThemeUtil.readerBackgroundColor(viewer.config.readerTheme)
                         if (item == 6) {
                             viewModel.shareImages(page, secondPage, isLTR, bg)
                         } else {

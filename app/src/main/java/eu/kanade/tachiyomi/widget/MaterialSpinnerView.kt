@@ -112,14 +112,14 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     }
 
     fun setSelection(selection: Int) {
-        if (selectedPosition >= 0 && selectedPosition < popup?.menu?.size() ?: 0) {
+        if (selectedPosition >= 0 && selectedPosition < (popup?.menu?.size() ?: 0)) {
             popup?.menu?.get(selectedPosition)?.let {
                 it.icon = ContextCompat.getDrawable(context, R.drawable.ic_blank_24dp)
                 it.title = entries[selectedPosition]
             }
         }
         selectedPosition = selection
-        if (selectedPosition >= 0 && selectedPosition < popup?.menu?.size() ?: 0) {
+        if (selectedPosition >= 0 && selectedPosition < (popup?.menu?.size() ?: 0)) {
             popup?.menu?.get(selectedPosition)?.let {
                 it.icon = tintedCheck()
                 it.title = it.title?.tintText(blendedAccent)

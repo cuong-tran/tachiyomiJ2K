@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.ReaderErrorBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderBackgroundColor
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderErrorView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
@@ -131,7 +132,7 @@ class PagerPageHolder(
         launchLoadJob()
         setBackgroundColor(
             when (val theme = viewer.config.readerTheme) {
-                3 -> Color.TRANSPARENT
+                ReaderBackgroundColor.SMART_THEME.prefValue -> Color.TRANSPARENT
                 else -> ThemeUtil.readerBackgroundColor(theme)
             },
         )
@@ -490,8 +491,9 @@ class PagerPageHolder(
                 val isAnimated = ImageUtil.isAnimatedAndSupported(stream) ||
                     (stream2?.let { ImageUtil.isAnimatedAndSupported(stream2) } ?: false)
                 withUIContext {
+                    val bgColor = ReaderBackgroundColor.fromPreference(viewer.config.readerTheme)
                     if (!isAnimated) {
-                        if (viewer.config.readerTheme >= 2) {
+                        if (bgColor.isSmartColor) {
                             val bgType = getBGType(viewer.config.readerTheme, context)
                             if (page.bg != null && page.bgType == bgType) {
                                 setImage(openStream, false, imageConfig)
@@ -519,7 +521,7 @@ class PagerPageHolder(
                         }
                     } else {
                         setImage(openStream, true, imageConfig)
-                        if (viewer.config.readerTheme >= 2 && page.bg != null) {
+                        if (bgColor.isSmartColor && page.bg != null) {
                             pageView?.background = page.bg
                         }
                     }
@@ -801,12 +803,7 @@ class PagerPageHolder(
             splitDoublePages()
             return supportHingeIfThere(imageBytes.inputStream())
         }
-        val bg = if (viewer.config.readerTheme >= 2 || viewer.config.readerTheme == 0) {
-            Color.WHITE
-        } else {
-            Color.BLACK
-        }
-
+        val bg = ThemeUtil.readerBackgroundColor(viewer.config.readerTheme)
         closeStreams(imageStream, imageStream2)
         extraPage?.let { extraPage ->
             val shouldSubShiftAnyway = !viewer.activity.manuallyShiftedPages &&
@@ -871,11 +868,7 @@ class PagerPageHolder(
                 return imageBytes.inputStream()
             }
             val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
-            val bg = if (viewer.config.readerTheme >= 2 || viewer.config.readerTheme == 0) {
-                Color.WHITE
-            } else {
-                Color.BLACK
-            }
+            val bg = ThemeUtil.readerBackgroundColor(viewer.config.readerTheme)
             return ImageUtil.padSingleImage(
                 imageBitmap = imageBitmap,
                 isLTR = isLTR,
@@ -913,7 +906,7 @@ class PagerPageHolder(
     }
 
     private fun getBGType(readerTheme: Int, context: Context): Int {
-        return if (readerTheme == 3) {
+        return if (ReaderBackgroundColor.fromPreference(readerTheme) == ReaderBackgroundColor.SMART_THEME) {
             if (context.isInNightMode()) 2 else 1
         } else {
             0 + (context.resources.configuration?.orientation ?: 0) * 10

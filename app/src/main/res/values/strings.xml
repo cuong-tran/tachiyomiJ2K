@@ -438,6 +438,7 @@
     <string name="invert_volume_keys">Invert volume keys</string>
     <string name="background_color">Background color</string>
     <string name="white">White</string>
+    <string name="gray_background">Gray</string>
     <string name="black">Black</string>
     <string name="smart_by_page">Smart (by page)</string>
     <string name="smart_by_theme">Smart (by theme)</string>

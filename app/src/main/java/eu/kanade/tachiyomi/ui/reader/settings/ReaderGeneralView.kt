@@ -39,7 +39,16 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
             } ?: 0,
         )
 
-        binding.backgroundColor.bindToPreference(preferences.readerTheme(), 0)
+        binding.backgroundColor.setEntries(
+            ReaderBackgroundColor.values()
+                .map { context.getString(it.stringRes) },
+        )
+        val selection = ReaderBackgroundColor.indexFromPref(preferences.readerTheme().get())
+        binding.backgroundColor.setSelection(selection)
+        binding.backgroundColor.onItemSelectedListener = { position ->
+            val backgroundColor = ReaderBackgroundColor.values()[position]
+            preferences.readerTheme().set(backgroundColor.prefValue)
+        }
         binding.showPageNumber.bindToPreference(preferences.showPageNumber())
         binding.fullscreen.bindToPreference(preferences.fullscreen())
         binding.keepscreen.bindToPreference(preferences.keepScreenOn())

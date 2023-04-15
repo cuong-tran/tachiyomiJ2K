@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderBackgroundColor
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
@@ -94,21 +95,16 @@ class SettingsReaderController : SettingsController() {
                 titleRes = R.string.default_orientation
                 val enumConstants = OrientationType.values().drop(1)
                 entriesRes = enumConstants.map { it.stringRes }.toTypedArray()
-                entryValues = OrientationType.values().drop(1)
-                    .map { value -> value.flagValue }
+                entryValues = enumConstants.map { value -> value.flagValue }
                 defaultValue = OrientationType.FREE.flagValue
             }
             intListPreference(activity) {
                 key = Keys.readerTheme
                 titleRes = R.string.background_color
-                entriesRes = arrayOf(
-                    R.string.white,
-                    R.string.black,
-                    R.string.smart_based_on_page,
-                    R.string.smart_based_on_page_and_theme,
-                )
-                entryRange = 0..3
-                defaultValue = 2
+                val enumConstants = ReaderBackgroundColor.values()
+                entriesRes = enumConstants.map { it.longStringRes ?: it.stringRes }.toTypedArray()
+                entryValues = enumConstants.map { it.prefValue }
+                defaultValue = ReaderBackgroundColor.SMART_PAGE.prefValue
             }
             switchPreference {
                 key = Keys.fullscreen
