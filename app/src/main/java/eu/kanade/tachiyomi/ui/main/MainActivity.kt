@@ -950,23 +950,17 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     private fun pressingBack() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val insets = window.decorView.rootWindowInsets
-            if (insets?.isVisible(WindowInsetsCompat.Type.ime()) == true) {
-                val vic = WindowInsetsControllerCompat(window, binding.root)
-                vic.hide(WindowInsetsCompat.Type.ime())
-                return
-            }
-        }
-        if (actionMode != null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            window.decorView.rootWindowInsets?.isVisible(WindowInsetsCompat.Type.ime()) == true
+        ) {
+            WindowInsetsControllerCompat(window, binding.root).hide(WindowInsetsCompat.Type.ime())
+        } else if (actionMode != null) {
             actionMode?.finish()
-            return
-        }
-        if (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) {
+        } else if (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) {
             binding.searchToolbar.collapseActionView()
-            return
+        } else {
+            backPress()
         }
-        backPress()
     }
 
     override fun finish() {
