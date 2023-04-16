@@ -951,7 +951,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     private fun pressingBack() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            window.decorView.rootWindowInsets?.isVisible(WindowInsetsCompat.Type.ime()) == true
+            ViewCompat.getRootWindowInsets(window.decorView)
+                ?.isVisible(WindowInsetsCompat.Type.ime()) == true
         ) {
             WindowInsetsControllerCompat(window, binding.root).hide(WindowInsetsCompat.Type.ime())
         } else if (actionMode != null) {
