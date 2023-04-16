@@ -38,7 +38,9 @@ class AppUpdateBroadcast : BroadcastReceiver() {
                     if (status != PackageInstaller.STATUS_FAILURE_ABORTED) {
                         context.toast(R.string.could_not_install_update)
                         val uri = intent.getStringExtra(AppUpdateService.EXTRA_FILE_URI) ?: return
-                        AppUpdateNotifier(context.localeContext).onInstallError(uri.toUri())
+                        val appUpdateNotifier = AppUpdateNotifier(context.localeContext)
+                        appUpdateNotifier.cancelInstallNotification()
+                        appUpdateNotifier.onInstallError(uri.toUri())
                     }
                 }
             }
