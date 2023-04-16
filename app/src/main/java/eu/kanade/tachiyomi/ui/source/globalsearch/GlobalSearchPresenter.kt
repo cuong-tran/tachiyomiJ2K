@@ -164,6 +164,7 @@ open class GlobalSearchPresenter(
         // Create items with the initial state
         val initialItems = sources.map { createCatalogueSearchItem(it, null) }
         items = initialItems
+        presenterScope.launchUI { view?.setItems(items) }
         val pinnedSourceIds = preferences.pinnedCatalogues().get()
 
         fetchSourcesJob?.cancel()
@@ -227,10 +228,18 @@ open class GlobalSearchPresenter(
         fetchImageJob = fetchImageFlow.onEach { (mangaList, source) ->
             mangaList
                 .filter { it.thumbnail_url == null && !it.initialized }
-                .map {
+                .forEach {
                     presenterScope.launchIO {
-                        val manga = getMangaDetails(it, source)
-                        withUIContext { view?.onMangaInitialized(source as CatalogueSource, manga) }
+                        try {
+                            val manga = getMangaDetails(it, source)
+                            withUIContext {
+                                view?.onMangaInitialized(source as CatalogueSource, manga)
+                            }
+                        } catch (_: Exception) {
+                            withUIContext {
+                                view?.onMangaInitialized(source as CatalogueSource, it)
+                            }
+                        }
                     }
                 }
         }.launchIn(presenterScope)
