@@ -615,7 +615,7 @@ class MangaDetailsController :
     //region Lifecycle methods
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        if (presenter.isScopeInitialized) {
+        if (adapter != null) {
             presenter.isLockedFromSearch =
                 shouldLockIfNeeded && SecureActivityDelegate.shouldBeLocked()
             presenter.headerItem.isLocked = presenter.isLockedFromSearch

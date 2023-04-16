@@ -7,8 +7,7 @@ import kotlinx.coroutines.cancel
 import java.lang.ref.WeakReference
 
 open class BaseCoroutinePresenter<T> {
-    lateinit var presenterScope: CoroutineScope
-    val isScopeInitialized get() = this::presenterScope.isInitialized
+    var presenterScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var weakView: WeakReference<T>? = null
     protected val view: T?
         get() = weakView?.get()
@@ -23,9 +22,6 @@ open class BaseCoroutinePresenter<T> {
     }
 
     open fun onCreate() {
-        if (!isScopeInitialized) {
-            presenterScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-        }
     }
 
     open fun onDestroy() {
