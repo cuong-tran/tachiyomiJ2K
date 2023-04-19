@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.suspendCancellableCoroutine
+import timber.log.Timber
 import java.io.BufferedInputStream
 import java.io.InputStream
 
@@ -231,14 +232,19 @@ class WebtoonPageHolder(
 
         val streamFn = page?.stream ?: return
 
-        val (openStream, isAnimated) = withIOContext {
-            val stream = streamFn().buffered(16)
-            val openStream = process(stream)
+        val (openStream, isAnimated) = try {
+            withIOContext {
+                val stream = streamFn().buffered(16)
+                val openStream = process(stream)
 
-            val isAnimated = ImageUtil.isAnimatedAndSupported(stream)
-            Pair(openStream, isAnimated)
+                val isAnimated = ImageUtil.isAnimatedAndSupported(stream)
+                Pair(openStream, isAnimated)
+            }
+        } catch (e: Exception) {
+            Timber.e(e)
+            setError()
+            return
         }
-
         withUIContext {
             frame.setImage(
                 openStream,
