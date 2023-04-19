@@ -194,17 +194,20 @@ class EditMangaDialog : DialogController {
             binding.addTagEditText.requestFocus()
             showKeyboard()
         }
+        binding.addTagEditText.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus && v.parent != null) {
+                addTags()
+            }
+        }
         binding.addTagEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                val tags: List<String> = binding.mangaGenresTags.tags.toList() + binding.addTagEditText.text.toString()
-                setGenreTags(tags)
-                binding.seriesType.setSelection(manga.seriesType(customTags = tags.joinToString(", ")) - 1)
+                addTags(true)
                 binding.addTagEditText.clearFocus()
-                binding.addTagEditText.setText("")
                 hideKeyboard()
+            } else {
+                binding.addTagChip.isVisible = true
+                binding.addTagEditText.isVisible = false
             }
-            binding.addTagChip.isVisible = true
-            binding.addTagEditText.isVisible = false
             true
         }
 
@@ -218,6 +221,21 @@ class EditMangaDialog : DialogController {
             )
             customCoverUri = null
             willResetCover = true
+        }
+    }
+
+    private fun addTags(textCanBeBlank: Boolean = false) {
+        if ((textCanBeBlank || !binding.addTagEditText.text.isNullOrBlank()) &&
+            binding.addTagEditText.isVisible
+        ) {
+            val newTags = binding.addTagEditText.text.toString().split(",")
+                .mapNotNull { tag -> tag.trim().takeUnless { it.isBlank() } }
+            val tags: List<String> = binding.mangaGenresTags.tags.toList() + newTags
+            binding.addTagEditText.setText("")
+            setGenreTags(tags)
+            binding.seriesType.setSelection(manga.seriesType(customTags = tags.joinToString(", ")) - 1)
+            binding.addTagChip.isVisible = true
+            binding.addTagEditText.isVisible = false
         }
     }
 
@@ -339,6 +357,7 @@ class EditMangaDialog : DialogController {
     }
 
     private fun onPositiveButtonClick() {
+        addTags()
         infoController.presenter.updateManga(
             binding.title.text.toString(),
             binding.mangaAuthor.text.toString(),
