@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil.Companion.preferredChapterName
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationBuilder
@@ -172,7 +173,9 @@ class LibraryUpdateNotifier(private val context: Context) {
                 updates.forEach {
                     val manga = it.key
                     val chapters = it.value
-                    val chapterNames = chapters.map { chapter -> chapter.name }
+                    val chapterNames = chapters.map { chapter ->
+                        chapter.preferredChapterName(context, manga, preferences)
+                    }
                     notifications.add(
                         Pair(
                             context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {

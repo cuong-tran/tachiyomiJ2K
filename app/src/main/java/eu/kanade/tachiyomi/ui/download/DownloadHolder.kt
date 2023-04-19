@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil.Companion.preferredChapterName
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 
 /**
@@ -36,7 +37,8 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
     fun bind(download: Download) {
         this.download = download
         // Update the chapter name.
-        binding.chapterTitle.text = download.chapter.name
+        binding.chapterTitle.text = download.chapter
+            .preferredChapterName(itemView.context, download.manga, adapter.preferences)
 
         // Update the manga title
         binding.title.text = download.manga.title

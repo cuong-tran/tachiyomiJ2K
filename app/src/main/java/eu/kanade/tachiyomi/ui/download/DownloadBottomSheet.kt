@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.databinding.DownloadBottomSheetBinding
 import eu.kanade.tachiyomi.ui.extension.ExtensionDividerItemDecoration
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.recents.RecentsController
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil.Companion.preferredChapterName
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.expand
@@ -126,7 +127,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
         binding.titleText.text = if (extCount != null) {
             resources.getString(
                 R.string.downloading_,
-                extCount.chapter.name,
+                extCount.chapter.preferredChapterName(context, extCount.manga, preferences),
             )
         } else {
             ""

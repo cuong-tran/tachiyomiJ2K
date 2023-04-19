@@ -3,6 +3,8 @@ package eu.kanade.tachiyomi.ui.download
 import android.view.MenuItem
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import uy.kohesive.injekt.injectLazy
 
 /**
  * Adapter storing a list of downloads.
@@ -19,6 +21,7 @@ class DownloadAdapter(controller: DownloadItemListener) : FlexibleAdapter<Abstra
      * Listener called when an item of the list is released.
      */
     val downloadItemListener: DownloadItemListener = controller
+    val preferences: PreferencesHelper by injectLazy()
 
     interface DownloadItemListener {
         /**

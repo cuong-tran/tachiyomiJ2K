@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil.Companion.preferredChapterName
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.notificationBuilder
@@ -93,7 +94,8 @@ internal class DownloadNotifier(private val context: Context) {
             if (download != null && !preferences.hideNotificationContent()) {
                 val title = download.manga.title.chop(15)
                 val quotedTitle = Pattern.quote(title)
-                val chapter = download.chapter.name.replaceFirst(
+                val name = download.chapter.preferredChapterName(context, download.manga, preferences)
+                val chapter = name.replaceFirst(
                     "$quotedTitle[\\s]*[-]*[\\s]*"
                         .toRegex(RegexOption.IGNORE_CASE),
                     "",
@@ -152,7 +154,8 @@ internal class DownloadNotifier(private val context: Context) {
             } else {
                 val title = download.manga.title.chop(15)
                 val quotedTitle = Pattern.quote(title)
-                val chapter = download.chapter.name.replaceFirst(
+                val name = download.chapter.preferredChapterName(context, download.manga, preferences)
+                val chapter = name.replaceFirst(
                     "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE),
                     "",
                 )

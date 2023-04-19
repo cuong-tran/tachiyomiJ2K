@@ -1631,7 +1631,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         val text = "${manga.title}: ${if (chapter.isRecognizedNumber) {
             getString(R.string.chapter_, decimalFormat.format(chapter.chapter_number))
         } else {
-            chapter.name
+            chapter.preferredChapterName(this, manga, preferences)
         }
         }, $pageNumber"
 

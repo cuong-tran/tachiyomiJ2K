@@ -38,6 +38,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil.Companion.preferredChapterName
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterRead
 import eu.kanade.tachiyomi.util.isLocal
@@ -734,6 +735,7 @@ class ReaderViewModel(
     private fun saveImage(page: ReaderPage, directory: File, manga: Manga): File {
         val stream = page.stream!!
         val type = ImageUtil.findImageType(stream) ?: throw Exception("Not an image")
+        val context = Injekt.get<Application>()
 
         directory.mkdirs()
 
@@ -741,7 +743,7 @@ class ReaderViewModel(
 
         // Build destination file.
         val filename = DiskUtil.buildValidFilename(
-            "${manga.title} - ${chapter.name}".take(225),
+            "${manga.title} - ${chapter.preferredChapterName(context, manga, preferences)}".take(225),
         ) + " - ${page.number}.${type.extension}"
 
         val destFile = File(directory, filename)
@@ -771,10 +773,11 @@ class ReaderViewModel(
         directory.mkdirs()
 
         val chapter = page1.chapter.chapter
+        val context = Injekt.get<Application>()
 
         // Build destination file.
         val filename = DiskUtil.buildValidFilename(
-            "${manga.title} - ${chapter.name}".take(225),
+            "${manga.title} - ${chapter.preferredChapterName(context, manga, preferences)}".take(225),
         ) + " - ${page1.number}-${page2.number}.jpg"
 
         val destFile = File(directory, filename)
