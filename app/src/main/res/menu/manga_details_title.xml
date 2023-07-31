@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_copy"
-        android:icon="@drawable/ic_done_all_24dp"
+        android:icon="@drawable/ic_content_copy_24dp"
         android:title="@string/copy_value"
         app:showAsAction="ifRoom" />
     <item
@@ -14,6 +14,22 @@
     <item
         android:id="@+id/action_local_search"
         android:icon="@drawable/ic_search_24dp"
+        android:title="@string/search"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_search_author"
+        android:icon="@drawable/ic_author_24dp"
+        android:orderInCategory="5"
+        android:visible="false"
+        android:title="@string/search"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_search_artist"
+        android:icon="@drawable/ic_author_24dp"
+        android:orderInCategory="6"
+        android:visible="false"
         android:title="@string/search"
         app:showAsAction="ifRoom" />
 </menu>

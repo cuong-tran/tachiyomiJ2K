@@ -38,6 +38,10 @@ interface SManga : Serializable {
     val originalStatus: Int
         get() = (this as? MangaImpl)?.ogStatus ?: status
 
+    val hasSameAuthorAndArtist: Boolean
+        get() = author == artist || artist.isNullOrBlank() ||
+            author?.contains(artist ?: "", true) == true
+
     fun copyFrom(other: SManga) {
         if (other.author != null) {
             author = other.originalAuthor
