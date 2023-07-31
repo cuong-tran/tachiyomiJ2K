@@ -36,7 +36,7 @@ class BackupNotifier(private val context: Context) {
         context.notificationManager.notify(id, build())
     }
 
-    fun showBackupProgress(): NotificationCompat.Builder {
+    fun showBackupProgress() {
         val builder = with(progressNotificationBuilder) {
             setContentTitle(context.getString(R.string.creating_backup))
 
@@ -45,8 +45,6 @@ class BackupNotifier(private val context: Context) {
         }
 
         builder.show(Notifications.ID_BACKUP_PROGRESS)
-
-        return builder
     }
 
     fun showBackupError(error: String?) {
@@ -88,7 +86,7 @@ class BackupNotifier(private val context: Context) {
                 setContentText(content)
             }
 
-            setProgress(maxAmount, progress, false)
+            setProgress(maxAmount, progress, progress == -1)
             setOnlyAlertOnce(true)
 
             // Clear old actions if they exist
@@ -101,7 +99,9 @@ class BackupNotifier(private val context: Context) {
             )
         }
 
-        builder.show(Notifications.ID_RESTORE_PROGRESS)
+        if (progress != -1) {
+            builder.show(Notifications.ID_RESTORE_PROGRESS)
+        }
 
         return builder
     }

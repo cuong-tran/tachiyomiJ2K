@@ -61,9 +61,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.download.DownloadService
-import eu.kanade.tachiyomi.data.library.LibraryServiceListener
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.download.DownloadJob
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -148,8 +147,7 @@ open class LibraryController(
     LibraryCategoryAdapter.LibraryListener,
     BottomSheetController,
     RootSearchInterface,
-    FloatingSearchInterface,
-    LibraryServiceListener {
+    FloatingSearchInterface {
 
     init {
         setHasOptionsMenu(true)
@@ -598,6 +596,7 @@ open class LibraryController(
         setupFilterSheet()
         setUpHopper()
         setPreferenceFlows()
+        LibraryUpdateJob.updateFlow.onEach(::onUpdateManga).launchIn(viewScope)
 
         elevateAppBar =
             scrollViewWith(
@@ -676,7 +675,7 @@ open class LibraryController(
     private fun setSwipeRefresh() = with(binding.swipeRefresh) {
         setOnRefreshListener {
             isRefreshing = false
-            if (!LibraryUpdateService.isRunning()) {
+            if (!LibraryUpdateJob.isRunning(context)) {
                 when {
                     !presenter.showAllCategories && presenter.groupType == BY_DEFAULT -> {
                         presenter.allCategories.find { it.id == presenter.currentCategory }?.let {
@@ -942,12 +941,12 @@ open class LibraryController(
 
     private fun updateLibrary(category: Category? = null) {
         val view = view ?: return
-        LibraryUpdateService.start(view.context, category)
+        LibraryUpdateJob.startNow(view.context, category)
         snack = view.snack(R.string.updating_library) {
             anchorView = anchorView()
             view.elevation = 15f.dpToPx
             setAction(R.string.cancel) {
-                LibraryUpdateService.stop(context)
+                LibraryUpdateJob.stop(context)
                 viewScope.launchUI {
                     NotificationReceiver.dismissNotification(
                         context,
@@ -1031,8 +1030,7 @@ open class LibraryController(
             if (type == ControllerChangeType.POP_ENTER) {
                 presenter.getLibrary()
             }
-            DownloadService.callListeners()
-            LibraryUpdateService.setListener(this)
+            DownloadJob.callListeners()
             binding.recyclerCover.isClickable = false
             binding.recyclerCover.isFocusable = false
             singleCategory = presenter.categories.size <= 1
@@ -1067,7 +1065,6 @@ open class LibraryController(
     }
 
     override fun onDestroyView(view: View) {
-        LibraryUpdateService.removeListener(this)
         destroyActionModeIfNeeded()
         if (isBindingInitialized) {
             binding.libraryGridRecycler.recycler.removeOnScrollListener(scrollListener)
@@ -1088,6 +1085,9 @@ open class LibraryController(
         view ?: return
         destroyActionModeIfNeeded()
         if (mangaMap.isNotEmpty()) {
+            if (!binding.progress.isVisible) {
+                (activity as? MainActivity)?.showNotificationPermissionPrompt()
+            }
             binding.emptyView.hide()
         } else {
             binding.emptyView.show(
@@ -1584,9 +1584,9 @@ open class LibraryController(
         }
     }
 
-    override fun onUpdateManga(manga: Manga?) {
-        if (manga?.source == LibraryUpdateService.STARTING_UPDATE_SOURCE) return
-        if (manga == null) {
+    private fun onUpdateManga(mangaId: Long?) {
+        if (mangaId == LibraryUpdateJob.STARTING_UPDATE_SOURCE) return
+        if (mangaId == null) {
             adapter.getHeaderPositions().forEach { adapter.notifyItemChanged(it) }
         } else {
             presenter.updateManga()
@@ -1703,13 +1703,13 @@ open class LibraryController(
 
     override fun updateCategory(position: Int): Boolean {
         val category = (adapter.getItem(position) as? LibraryHeaderItem)?.category ?: return false
-        val inQueue = LibraryUpdateService.categoryInQueue(category.id)
+        val inQueue = LibraryUpdateJob.categoryInQueue(category.id)
         snack?.dismiss()
         snack = view?.snack(
             resources!!.getString(
                 when {
                     inQueue -> R.string._already_in_queue
-                    LibraryUpdateService.isRunning() -> R.string.adding_category_to_queue
+                    LibraryUpdateJob.isRunning(view!!.context) -> R.string.adding_category_to_queue
                     else -> R.string.updating_
                 },
                 category.name,
@@ -1719,7 +1719,7 @@ open class LibraryController(
             anchorView = anchorView()
             view.elevation = 15f.dpToPx
             setAction(R.string.cancel) {
-                LibraryUpdateService.stop(context)
+                LibraryUpdateJob.stop(context)
                 viewScope.launchUI {
                     NotificationReceiver.dismissNotification(
                         context,
@@ -1729,7 +1729,7 @@ open class LibraryController(
             }
         }
         if (!inQueue) {
-            LibraryUpdateService.start(
+            LibraryUpdateJob.startNow(
                 view!!.context,
                 category,
                 mangaToUse = if (category.isDynamic) {

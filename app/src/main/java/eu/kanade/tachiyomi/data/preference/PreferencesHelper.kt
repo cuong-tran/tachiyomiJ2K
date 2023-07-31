@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.extension.model.InstalledExtensionsOrder
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.ui.library.LibraryItem
@@ -95,6 +95,8 @@ class PreferencesHelper(val context: Context) {
 
     fun startingTab() = flowPrefs.getInt(Keys.startingTab, 0)
     fun backReturnsToStart() = flowPrefs.getBoolean(Keys.backToStart, true)
+
+    fun hasShownNotifPermission() = flowPrefs.getBoolean("has_shown_notification_permission", false)
 
     fun hasDeniedA11FilePermission() = flowPrefs.getBoolean(Keys.deniedA11FilePermission, false)
 
@@ -461,9 +463,9 @@ class PreferencesHelper(val context: Context) {
 
     fun sideNavMode() = flowPrefs.getInt(Keys.sideNavMode, 0)
 
-    fun appShouldAutoUpdate() = prefs.getInt(Keys.shouldAutoUpdate, AutoAppUpdaterJob.ONLY_ON_UNMETERED)
+    fun appShouldAutoUpdate() = prefs.getInt(Keys.shouldAutoUpdate, AppDownloadInstallJob.ONLY_ON_UNMETERED)
 
-    fun autoUpdateExtensions() = prefs.getInt(Keys.autoUpdateExtensions, AutoAppUpdaterJob.ONLY_ON_UNMETERED)
+    fun autoUpdateExtensions() = prefs.getInt(Keys.autoUpdateExtensions, AppDownloadInstallJob.ONLY_ON_UNMETERED)
 
     fun useShizukuForExtensions() = prefs.getBoolean(Keys.useShizuku, false)
 

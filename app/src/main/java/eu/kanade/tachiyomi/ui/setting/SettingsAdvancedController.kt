@@ -24,8 +24,8 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob.Target
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.extension.ShizukuInstaller
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -329,14 +329,14 @@ class SettingsAdvancedController : SettingsController() {
                 titleRes = R.string.refresh_library_metadata
                 summaryRes = R.string.updates_covers_genres_desc
 
-                onClick { LibraryUpdateService.start(context, target = Target.DETAILS) }
+                onClick { LibraryUpdateJob.startNow(context, target = Target.DETAILS) }
             }
             preference {
                 key = "refresh_teacking_meta"
                 titleRes = R.string.refresh_tracking_metadata
                 summaryRes = R.string.updates_tracking_details
 
-                onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
+                onClick { LibraryUpdateJob.startNow(context, target = Target.TRACKING) }
             }
         }
     }

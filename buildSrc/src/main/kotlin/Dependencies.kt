@@ -3,9 +3,9 @@ import java.util.Locale
 object AndroidVersions {
     const val compileSdk = 33
     const val minSdk = 23
-    const val targetSdk = 30
-    const val versionCode = 104
-    const val versionName = "1.6.6"
+    const val targetSdk = 33
+    const val versionCode = 105
+    const val versionName = "1.7.0"
     const val ndk = "23.1.7779620"
     const val kotlin = "1.8.10"
 }

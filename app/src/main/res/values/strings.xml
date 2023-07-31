@@ -195,6 +195,7 @@
     <string name="shift_double_pages">Shift double pages</string>
 
     <!-- Library update service notifications -->
+    <string name="allow_notifications_recommended">Allowing notifications is recommended to keep your library and app up to date.</string>
     <string name="new_chapters_found">New chapters found</string>
     <string name="notification_size_warning">Large updates may lead to increased battery usage and sources becoming slower. Tap to learn more.</string>
     <string name="download_queue_size_warning">Warning: large bulk downloads may lead to sources becoming slower and/or blocking Tachiyomi. Tap to learn more.</string>

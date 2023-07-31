@@ -19,8 +19,10 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.ExtensionsBottomSheetBinding
 import eu.kanade.tachiyomi.databinding.RecyclerWithScrollerBinding
 import eu.kanade.tachiyomi.extension.model.Extension
+import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.extension.model.InstalledExtensionsOrder
 import eu.kanade.tachiyomi.ui.extension.details.ExtensionDetailsController
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.migration.BaseMigrationInterface
 import eu.kanade.tachiyomi.ui.migration.MangaAdapter
 import eu.kanade.tachiyomi.ui.migration.MangaItem
@@ -217,6 +219,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     }
 
     override fun onUpdateAllClicked(position: Int) {
+        (controller.activity as? MainActivity)?.showNotificationPermissionPrompt()
         if (!presenter.preferences.useShizukuForExtensions() &&
             !presenter.preferences.hasPromptedBeforeUpdateAll().get()
         ) {
@@ -245,13 +248,13 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         }
     }
 
-    fun updateAllExtensions(position: Int) {
+    private fun updateAllExtensions(position: Int) {
         val header = (extAdapter?.getSectionHeader(position)) as? ExtensionGroupItem ?: return
         val items = extAdapter?.getSectionItemPositions(header)
         val extensions = items?.mapNotNull {
             val extItem = (extAdapter?.getItem(it) as? ExtensionItem) ?: return
             val extension = (extAdapter?.getItem(it) as? ExtensionItem)?.extension ?: return
-            if (extItem.installStep == null &&
+            if ((extItem.installStep == null || extItem.installStep == InstallStep.Error) &&
                 extension is Extension.Installed && extension.hasUpdate
             ) {
                 extension
@@ -392,7 +395,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         val items = extAdapter?.getSectionItemPositions(updateHeader) ?: return
         updateHeader.canUpdate = items.any {
             val extItem = (extAdapter?.getItem(it) as? ExtensionItem) ?: return
-            extItem.installStep == null
+            extItem.installStep == null || extItem.installStep == InstallStep.Error
         }
         extAdapter?.updateItem(updateHeader)
     }

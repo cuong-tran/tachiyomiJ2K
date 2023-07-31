@@ -20,7 +20,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupConst
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupFileValidator
-import eu.kanade.tachiyomi.data.backup.BackupRestoreService
+import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -77,7 +77,7 @@ class SettingsBackupController : SettingsController() {
                     context.toast(R.string.restore_miui_warning, Toast.LENGTH_LONG)
                 }
 
-                if (!BackupRestoreService.isRunning(context)) {
+                if (!BackupRestoreJob.isRunning(context)) {
                     (activity as? MainActivity)?.getExtensionUpdates(true)
                     val intent = Intent(Intent.ACTION_GET_CONTENT)
                     intent.addCategory(Intent.CATEGORY_OPENABLE)
@@ -187,6 +187,7 @@ class SettingsBackupController : SettingsController() {
                     BackupCreatorJob.startNow(activity, uri, backupFlags)
                 }
                 CODE_BACKUP_RESTORE -> {
+                    (activity as? MainActivity)?.showNotificationPermissionPrompt(true)
                     RestoreBackupDialog(uri).showDialog(router)
                 }
             }
@@ -284,7 +285,7 @@ class SettingsBackupController : SettingsController() {
                         val context = applicationContext
                         if (context != null) {
                             activity.toast(R.string.restoring_backup)
-                            BackupRestoreService.start(context, uri)
+                            BackupRestoreJob.start(context, uri)
                         }
                     }.create()
             } catch (e: Exception) {

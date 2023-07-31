@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcessAdapter
@@ -180,6 +181,7 @@ fun Manga.addOrRemoveToFavorites(
                 db.insertManga(this).executeAsBlocking()
                 val mc = MangaCategory.create(this, defaultCategory)
                 db.setMangaCategories(listOf(mc), listOf(this))
+                (activity as? MainActivity)?.showNotificationPermissionPrompt()
                 onMangaMoved()
                 return view.snack(activity.getString(R.string.added_to_, defaultCategory.name)) {
                     setAction(R.string.change) {
@@ -194,6 +196,7 @@ fun Manga.addOrRemoveToFavorites(
                 db.insertManga(this).executeAsBlocking()
                 db.setMangaCategories(emptyList(), listOf(this))
                 onMangaMoved()
+                (activity as? MainActivity)?.showNotificationPermissionPrompt()
                 return if (categories.isNotEmpty()) {
                     view.snack(activity.getString(R.string.added_to_, activity.getString(R.string.default_value))) {
                         setAction(R.string.change) {
@@ -215,6 +218,7 @@ fun Manga.addOrRemoveToFavorites(
                     ids,
                     true,
                 ) {
+                    (activity as? MainActivity)?.showNotificationPermissionPrompt()
                     onMangaAdded(null)
                     autoAddTrack(db, onMangaMoved)
                 }.show()

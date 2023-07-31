@@ -69,8 +69,9 @@ class DownloadBottomPresenter : BaseCoroutinePresenter<DownloadBottomSheet>() {
     /**
      * Clears the download queue.
      */
-    fun clearQueue() {
+    fun stopDownloads() {
         downloadManager.clearQueue()
+        downloadManager.stopDownloads()
     }
 
     fun reorder(downloads: List<Download>) {

@@ -29,14 +29,14 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.backup.BackupRestoreService
+import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.ChapterHistory
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.download.DownloadService
+import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.databinding.RecentsControllerBinding
@@ -343,9 +343,9 @@ class RecentsController(bundle: Bundle? = null) :
                 }
             },
         )
-        binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
+        binding.swipeRefresh.isRefreshing = LibraryUpdateJob.isRunning(view.context)
         binding.swipeRefresh.setOnRefreshListener {
-            if (!LibraryUpdateService.isRunning()) {
+            if (!LibraryUpdateJob.isRunning(view.context)) {
                 snack?.dismiss()
                 snack = view.snack(R.string.updating_library) {
                     anchorView =
@@ -355,7 +355,7 @@ class RecentsController(bundle: Bundle? = null) :
                             activityBinding?.bottomNav ?: binding.downloadBottomSheet.root
                         }
                     setAction(R.string.cancel) {
-                        LibraryUpdateService.stop(context)
+                        LibraryUpdateJob.stop(context)
                         viewScope.launchUI {
                             NotificationReceiver.dismissNotification(
                                 context,
@@ -367,12 +367,12 @@ class RecentsController(bundle: Bundle? = null) :
                         object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                             override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                                 super.onDismissed(transientBottomBar, event)
-                                binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
+                                binding.swipeRefresh.isRefreshing = LibraryUpdateJob.isRunning(view.context)
                             }
                         },
                     )
                 }
-                LibraryUpdateService.start(view.context)
+                LibraryUpdateJob.startNow(view.context)
             }
         }
         ogRadius = view.resources.getDimension(R.dimen.rounded_radius)
@@ -510,9 +510,12 @@ class RecentsController(bundle: Bundle? = null) :
         shouldMoveToTop: Boolean = false,
     ) {
         if (view == null) return
+        if (!binding.progress.isVisible && recents.isNotEmpty()) {
+            (activity as? MainActivity)?.showNotificationPermissionPrompt()
+        }
         binding.progress.isVisible = false
         binding.frameLayout.alpha = 1f
-        binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
+        binding.swipeRefresh.isRefreshing = LibraryUpdateJob.isRunning(view!!.context)
         adapter.removeAllScrollableHeaders()
         adapter.updateDataSet(recents)
         adapter.onLoadMoreComplete(null)
@@ -605,7 +608,7 @@ class RecentsController(bundle: Bundle? = null) :
             presenter.deleteChapter(chapter, manga)
         } else {
             if (item.status == Download.State.ERROR) {
-                DownloadService.start(view.context)
+                DownloadJob.start(view.context)
             } else {
                 presenter.downloadChapter(manga, chapter)
             }
@@ -626,7 +629,7 @@ class RecentsController(bundle: Bundle? = null) :
             presenter.deleteChapter(chapter, manga)
         } else {
             if (status == Download.State.ERROR) {
-                DownloadService.start(view.context)
+                DownloadJob.start(view.context)
             } else {
                 presenter.downloadChapter(manga, chapter)
             }
@@ -931,7 +934,7 @@ class RecentsController(bundle: Bundle? = null) :
     override fun onLoadMore(lastPosition: Int, currentPage: Int) {
         val view = view ?: return
         if (presenter.finished ||
-            BackupRestoreService.isRunning(view.context.applicationContext) ||
+            BackupRestoreJob.isRunning(view.context.applicationContext) ||
             (presenter.viewType == RecentsViewType.GroupedAll && !isSearching())
         ) {
             loadNoMore()

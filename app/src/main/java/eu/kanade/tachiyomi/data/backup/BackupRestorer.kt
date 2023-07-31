@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.backup
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import eu.kanade.tachiyomi.R
@@ -12,7 +13,9 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.library.CustomMangaManager
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.isActive
 import okio.buffer
 import okio.gzip
 import okio.source
@@ -20,11 +23,13 @@ import java.util.Date
 
 class BackupRestorer(context: Context, notifier: BackupNotifier) : AbstractBackupRestore<BackupManager>(context, notifier) {
 
+    @SuppressLint("Recycle")
     @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun performRestore(uri: Uri): Boolean {
         backupManager = BackupManager(context)
 
-        val backupString = context.contentResolver.openInputStream(uri)!!.source().gzip().buffer().use { it.readByteArray() }
+        val stream = context.contentResolver.openInputStream(uri)
+        val backupString = stream!!.source().gzip().buffer().use { it.readByteArray() }
         val backup = backupManager.parser.decodeFromByteArray(BackupSerializer, backupString)
 
         restoreAmount = backup.backupManga.size + 1 // +1 for categories
@@ -38,18 +43,18 @@ class BackupRestorer(context: Context, notifier: BackupNotifier) : AbstractBacku
         val backupMaps = backup.backupBrokenSources.map { BackupSource(it.name, it.sourceId) } + backup.backupSources
         sourceMapping = backupMaps.associate { it.sourceId to it.name }
 
-        // Restore individual manga
-        backup.backupManga.forEach {
-            if (job?.isActive != true) {
-                return false
+        return coroutineScope {
+            // Restore individual manga
+            backup.backupManga.forEach {
+                if (!isActive) {
+                    return@coroutineScope false
+                }
+
+                restoreManga(it, backup.backupCategories)
             }
-
-            restoreManga(it, backup.backupCategories)
+            true
         }
-
         // TODO: optionally trigger online library + tracker update
-
-        return true
     }
 
     private fun restoreCategories(backupCategories: List<BackupCategory>) {
@@ -89,7 +94,7 @@ class BackupRestorer(context: Context, notifier: BackupNotifier) : AbstractBacku
 
         restoreProgress += 1
         showRestoreProgress(restoreProgress, restoreAmount, manga.title)
-        LibraryUpdateService.callListener(manga)
+        LibraryUpdateJob.updateMutableFlow.tryEmit(manga.id)
     }
 
     /**

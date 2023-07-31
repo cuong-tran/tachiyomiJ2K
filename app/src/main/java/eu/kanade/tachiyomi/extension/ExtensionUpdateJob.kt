@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.extension
 
-import android.app.PendingIntent
+import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -18,16 +18,17 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.notification
+import eu.kanade.tachiyomi.util.system.toInt
 import kotlinx.coroutines.coroutineScope
 import rikka.shizuku.Shizuku
 import uy.kohesive.injekt.Injekt
@@ -72,30 +73,21 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
         }
         if (ExtensionManager.canAutoInstallUpdates(context, true) &&
             inputData.getBoolean(RUN_AUTO, true) &&
-            preferences.autoUpdateExtensions() != AutoAppUpdaterJob.NEVER &&
-            !ExtensionInstallService.isRunning() &&
+            preferences.autoUpdateExtensions() != AppDownloadInstallJob.NEVER &&
+            !ExtensionInstallerJob.isRunning(context) &&
             extensionsInstalledByApp.isNotEmpty()
         ) {
             val cm = context.connectivityManager
-            val libraryServiceRunning = LibraryUpdateService.isRunning()
+            val libraryServiceRunning = LibraryUpdateJob.isRunning(context)
             if (
                 (
-                    preferences.autoUpdateExtensions() == AutoAppUpdaterJob.ALWAYS ||
+                    preferences.autoUpdateExtensions() == AppDownloadInstallJob.ALWAYS ||
                         !cm.isActiveNetworkMetered
                     ) && !libraryServiceRunning
             ) {
-                val intent =
-                    ExtensionInstallService.jobIntent(
-                        context,
-                        extensionsInstalledByApp,
-                        // Re run this job if not all the extensions can be auto updated
-                        if (extensionsInstalledByApp.size == extensions.size) {
-                            1
-                        } else {
-                            2
-                        },
-                    )
-                ContextCompat.startForegroundService(context, intent)
+                // Re-run this job if not all the extensions can be auto updated
+                val showUpdates = (extensionsInstalledByApp.size != extensions.size).toInt()
+                ExtensionInstallerJob.start(context, extensionsInstalledByApp, showUpdates)
                 if (extensionsInstalledByApp.size == extensions.size) {
                     return
                 } else {
@@ -104,10 +96,15 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
             } else if (!libraryServiceRunning) {
                 runJobAgain(context, NetworkType.UNMETERED)
             } else {
-                LibraryUpdateService.runExtensionUpdatesAfter = true
+                LibraryUpdateJob.runExtensionUpdatesAfterJob()
             }
         }
         NotificationManagerCompat.from(context).apply {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                return@apply
+            }
             notify(
                 Notifications.ID_UPDATES_TO_EXTS,
                 context.notification(Notifications.CHANNEL_UPDATES_TO_EXTS) {
@@ -132,23 +129,8 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                     if (ExtensionManager.canAutoInstallUpdates(context, true) &&
                         extensions.size == extensionsList.size
                     ) {
-                        val intent = ExtensionInstallService.jobIntent(context, extensions)
                         val pendingIntent =
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                PendingIntent.getForegroundService(
-                                    context,
-                                    0,
-                                    intent,
-                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                                )
-                            } else {
-                                PendingIntent.getService(
-                                    context,
-                                    0,
-                                    intent,
-                                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                                )
-                            }
+                            NotificationReceiver.startExtensionUpdatePendingJob(context, extensions)
                         addAction(
                             R.drawable.ic_file_download_24dp,
                             context.getString(R.string.update_all),
@@ -202,7 +184,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                     .setConstraints(constraints)
                     .build()
 
-                WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+                WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.UPDATE, request)
             } else {
                 WorkManager.getInstance(context).cancelAllWorkByTag(TAG)
             }

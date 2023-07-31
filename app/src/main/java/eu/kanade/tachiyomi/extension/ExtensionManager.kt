@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.extension.util.ExtensionInstallReceiver
 import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.extension.ExtensionIntallInfo
 import eu.kanade.tachiyomi.util.system.launchNow
 import kotlinx.coroutines.CoroutineScope
@@ -56,14 +55,11 @@ class ExtensionManager(
 
     private val iconMap = mutableMapOf<String, Drawable>()
 
-    val downloadRelay
-        get() = installer.downloadsStateFlow
+    val downloadSharedFlow = installer.downloadSharedFlow
 
     private fun getExtension(downloadId: Long): String? {
         return installer.activeDownloads.entries.find { downloadId == it.value }?.key
     }
-
-    fun getActiveInstalls(): Int = installer.activeDownloads.size
 
     /**
      * Relay used to notify the installed extensions.
@@ -72,16 +68,6 @@ class ExtensionManager(
     val installedExtensionsFlow = _installedExtensionsFlow.asStateFlow()
 
     private var subLanguagesEnabledOnFirstRun = preferences.enabledLanguages().isSet()
-
-    /**
-     * List of the currently installed extensions.
-     */
-//    private var installedExtensions = emptyList<Extension.Installed>()
-//         set(value) {
-//            field = value
-//            installedExtensionsRelay.call(value)
-//    downloadRelay.tryEmit("Finished/Installed/${value.size}" to (InstallStep.Done to null))
-//        }
 
     fun getAppIconForSource(source: Source): Drawable? {
         return getAppIconForSource(source.id)
@@ -110,35 +96,8 @@ class ExtensionManager(
 
     private var availableSources = hashMapOf<Long, Extension.AvailableSource>()
 
-    /**
-     * List of the currently available extensions.
-     */
-//    var availableExtensions = emptyList<Extension.Available>()
-//        private set(value) {
-//            field = value
-//            availableExtensionsRelay.call(value)
-//            updatedInstalledExtensionsStatuses(value)
-//            downloadRelay.tryEmit("Finished/Available/${value.size}" to (InstallStep.Done to null))
-//            setupAvailableSourcesMap()
-//        }
-
     private val _untrustedExtensionsFlow = MutableStateFlow(emptyList<Extension.Untrusted>())
     val untrustedExtensionsFlow = _untrustedExtensionsFlow.asStateFlow()
-
-    /**
-     * List of the currently untrusted extensions.
-     */
-//    var untrustedExtensions = emptyList<Extension.Untrusted>()
-//        private set(value) {
-//            field = value
-//            untrustedExtensionsRelay.call(value)
-//            downloadRelay.tryEmit("Finished/Untrusted/${value.size}" to (InstallStep.Done to null))
-//        }
-
-    /**
-     * The source manager where the sources of the extensions are added.
-     */
-    private lateinit var sourceManager: SourceManager
 
     init {
         initExtensions()
@@ -180,7 +139,7 @@ class ExtensionManager(
         _availableExtensionsFlow.value = extensions
         updatedInstalledExtensionsStatuses(extensions)
         setupAvailableSourcesMap()
-        downloadRelay.tryEmit("Finished/Available/${extensions.size}" to (InstallStep.Done to null))
+        emitToInstaller("Finished/Available/${extensions.size}", (InstallStep.Done to null))
     }
 
     /**
@@ -239,7 +198,7 @@ class ExtensionManager(
             val pkgName = installedExt.pkgName
             val availableExt = availableExtensions.find { it.pkgName == pkgName }
 
-            if (availableExt == null != installedExt.isObsolete) {
+            if (!installedExt.isUnofficial && availableExt == null != installedExt.isObsolete) {
                 mutInstalledExtensions[index] = installedExt.copy(isObsolete = true)
                 changed = true
             }
@@ -304,10 +263,6 @@ class ExtensionManager(
      */
     fun setInstalling(downloadId: Long, sessionId: Int) {
         val pkgName = getExtension(downloadId) ?: return
-        setInstalling(pkgName, sessionId)
-    }
-
-    fun setInstalling(pkgName: String, sessionId: Int) {
         installer.setInstalling(pkgName, sessionId)
     }
 
@@ -323,7 +278,7 @@ class ExtensionManager(
                 InstallStep.Installing
             }
             installer.activeDownloads[pkgName] != null -> InstallStep.Downloading
-            ExtensionInstallService.activeInstalls()
+            ExtensionInstallerJob.activeInstalls()
                 ?.contains(pkgName) == true -> InstallStep.Pending
             else -> return null
         }
@@ -386,7 +341,10 @@ class ExtensionManager(
      */
     private fun registerNewExtension(extension: Extension.Installed) {
         _installedExtensionsFlow.value += extension
-        downloadRelay.tryEmit("Finished/${extension.pkgName}" to ExtensionIntallInfo(InstallStep.Installed, null))
+        emitToInstaller(
+            "Finished/${extension.pkgName}",
+            ExtensionIntallInfo(InstallStep.Installed, null),
+        )
     }
 
     /**
@@ -403,8 +361,14 @@ class ExtensionManager(
         }
         mutInstalledExtensions += extension
         _installedExtensionsFlow.value = mutInstalledExtensions
-        downloadRelay.tryEmit("Finished/${extension.pkgName}" to ExtensionIntallInfo(InstallStep.Installed, null))
+        emitToInstaller(
+            "Finished/${extension.pkgName}",
+            ExtensionIntallInfo(InstallStep.Installed, null),
+        )
     }
+
+    fun emitToInstaller(name: String, extensionInfo: ExtensionIntallInfo) =
+        installer.emitToFlow(name, extensionInfo)
 
     /**
      * Unregisters the extension in this and the source managers given its package name. Note this
@@ -421,6 +385,7 @@ class ExtensionManager(
         if (untrustedExtension != null) {
             _untrustedExtensionsFlow.value -= untrustedExtension
         }
+        installer.emitToFlow("Uninstalled/$pkgName", ExtensionIntallInfo(InstallStep.Done, null))
     }
 
     /**
@@ -462,6 +427,7 @@ class ExtensionManager(
         return (availableExt.versionCode > versionCode || availableExt.libVersion > libVersion)
     }
 
+    @kotlinx.serialization.Serializable
     @Parcelize
     data class ExtensionInfo(
         val apkName: String,

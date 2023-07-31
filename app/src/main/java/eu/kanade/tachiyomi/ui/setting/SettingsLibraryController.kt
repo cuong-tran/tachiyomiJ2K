@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.library.display.TabbedLibraryDisplaySheet
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -125,6 +126,7 @@ class SettingsLibraryController : SettingsController() {
 
                     val interval = newValue as Int
                     if (interval > 0) {
+                        (activity as? MainActivity)?.showNotificationPermissionPrompt(true)
                         LibraryUpdateJob.setupTask(context, interval)
                     }
                     true

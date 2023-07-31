@@ -241,24 +241,9 @@
         </receiver>
 
         <service
-            android:name=".data.library.LibraryUpdateService"
-            android:exported="false" />
-
-        <service
-            android:name=".extension.ExtensionInstallService"
-            android:exported="false" />
-
-        <service
-            android:name=".data.download.DownloadService"
-            android:exported="false" />
-
-        <service
-            android:name=".data.updater.AppUpdateService"
-            android:exported="false" />
-
-        <service
-            android:name=".data.backup.BackupRestoreService"
-            android:exported="false"/>
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge" />
 
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"

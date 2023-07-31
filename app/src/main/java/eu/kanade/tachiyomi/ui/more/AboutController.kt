@@ -15,10 +15,10 @@ import androidx.preference.PreferenceScreen
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateNotifier
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
-import eu.kanade.tachiyomi.data.updater.AppUpdateService
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
@@ -214,7 +214,7 @@ class AboutController : SettingsController() {
                     if (appContext != null) {
                         // Start download
                         val url = args.getString(URL_KEY) ?: ""
-                        AppUpdateService.start(appContext, url, true)
+                        AppDownloadInstallJob.start(appContext, url, true)
                     }
                 }
                 .setNegativeButton(R.string.ignore, null)

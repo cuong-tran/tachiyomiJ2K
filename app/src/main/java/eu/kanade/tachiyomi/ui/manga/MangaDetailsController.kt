@@ -52,7 +52,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.download.DownloadService
+import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.image.coil.getBestColor
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -1442,7 +1442,7 @@ class MangaDetailsController :
             presenter.deleteChapter(chapter)
         } else {
             if (chapter.status == Download.State.ERROR) {
-                DownloadService.start(view.context)
+                DownloadJob.start(view.context)
             } else {
                 downloadChapters(listOf(chapter))
             }

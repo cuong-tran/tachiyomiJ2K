@@ -49,11 +49,6 @@ internal class DownloadNotifier(private val context: Context) {
     var errorThrown = false
 
     /**
-     * Updated when paused
-     */
-    var paused = false
-
-    /**
      * Shows a notification from this builder.
      *
      * @param id the id of the notification.
@@ -70,7 +65,7 @@ internal class DownloadNotifier(private val context: Context) {
         context.notificationManager.cancel(Notifications.ID_DOWNLOAD_CHAPTER)
     }
 
-    fun setPlaceholder(download: Download?) {
+    fun setPlaceholder(download: Download?): NotificationCompat.Builder {
         val context = context.localeContext
         with(notification) {
             // Check if first call.
@@ -101,22 +96,15 @@ internal class DownloadNotifier(private val context: Context) {
                     "",
                 )
                 setContentTitle("$title - $chapter".chop(30))
-                setContentText(
-                    context.getString(R.string.downloading),
-                )
+                setContentText(context.getString(R.string.downloading))
             } else {
-                setContentTitle(
-                    context.getString(
-                        R.string.downloading,
-                    ),
-                )
+                setContentTitle(context.getString(R.string.downloading))
                 setContentText(null)
             }
             setProgress(0, 0, true)
             setStyle(null)
         }
-        // Displays the progress bar on notification
-        notification.show()
+        return notification
     }
 
     /**
@@ -197,10 +185,8 @@ internal class DownloadNotifier(private val context: Context) {
                 context.getString(R.string.cancel_all),
                 NotificationReceiver.clearDownloadsPendingBroadcast(context),
             )
+            show()
         }
-
-        // Show notification.
-        notification.show()
 
         // Reset initial values
         isDownloading = false
@@ -224,7 +210,7 @@ internal class DownloadNotifier(private val context: Context) {
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
             setProgress(0, 0, false)
         }
-        notification.show()
+        notification.show(Notifications.ID_DOWNLOAD_CHAPTER_ERROR)
 
         // Reset download information
         isDownloading = false

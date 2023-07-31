@@ -10,8 +10,8 @@ import eu.kanade.tachiyomi.data.preference.PreferenceValues
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateJob
-import eu.kanade.tachiyomi.data.updater.AppUpdateService
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
@@ -37,7 +37,7 @@ object Migrations {
         val context = preferences.context
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.edit {
-            remove(AppUpdateService.NOTIFY_ON_INSTALL_KEY)
+            remove(AppDownloadInstallJob.NOTIFY_ON_INSTALL_KEY)
         }
         val oldVersion = preferences.lastVersionCode().get()
         if (oldVersion < BuildConfig.VERSION_CODE) {
@@ -215,6 +215,10 @@ object Migrations {
                 if (!oldGroupHistory) {
                     preferences.groupChaptersHistory().set(RecentsPresenter.GroupType.Never)
                 }
+            }
+            if (oldVersion < 105) {
+                LibraryUpdateJob.cancelAllWorks(context)
+                LibraryUpdateJob.setupTask(context)
             }
 
             return true

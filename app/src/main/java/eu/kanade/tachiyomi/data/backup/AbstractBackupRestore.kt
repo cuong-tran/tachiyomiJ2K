@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.util.chapter.NoChaptersException
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
-import kotlinx.coroutines.Job
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.SimpleDateFormat
@@ -24,8 +23,6 @@ abstract class AbstractBackupRestore<T : AbstractBackupManager>(protected val co
     protected val db: DatabaseHelper by injectLazy()
     protected val trackManager: TrackManager by injectLazy()
     protected val customMangaManager: CustomMangaManager by injectLazy()
-
-    var job: Job? = null
 
     protected lateinit var backupManager: T
 

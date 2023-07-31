@@ -1,13 +1,10 @@
 package eu.kanade.tachiyomi.util.system
 
-import android.app.ActivityManager
 import android.app.LocaleManager
 import android.app.Notification
 import android.app.NotificationManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.res.Configuration
@@ -35,11 +32,15 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
+import androidx.work.CoroutineWorker
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -71,7 +72,7 @@ fun Context.toast(text: String?, duration: Int = Toast.LENGTH_SHORT) {
 /**
  * Helper method to create a notification.
  *
- * @param id the channel id.
+ * @param channelId the channel id.
  * @param func the function that will execute inside the builder.
  * @return a notification to be displayed or updated.
  */
@@ -162,7 +163,7 @@ val Context.animatorDurationScale: Float
 /**
  * Helper method to create a notification builder.
  *
- * @param id the channel id.
+ * @param channelId the channel id.
  * @param block the function that will execute inside the builder.
  * @return a notification to be displayed or updated.
  */
@@ -210,7 +211,7 @@ fun Context.withOriginalWidth(): Context {
 
 fun Context.extensionIntentForText(text: String): Intent? {
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(text))
-    val info = packageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL)
+    val info = packageManager.queryIntentActivitiesCompat(intent, PackageManager.MATCH_ALL)
         .firstOrNull {
             try {
                 val pkgName = it.activityInfo.packageName
@@ -228,19 +229,6 @@ fun Context.isLandscape(): Boolean {
 }
 
 /**
- * Convenience method to acquire a partial wake lock.
- */
-fun Context.acquireWakeLock(tag: String? = null, timeout: Long? = null): PowerManager.WakeLock {
-    val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "${tag ?: javaClass.name}:WakeLock")
-    if (timeout != null) {
-        wakeLock.acquire(timeout)
-    } else {
-        wakeLock.acquire()
-    }
-    return wakeLock
-}
-
-/**
  * Gets document size of provided [Uri]
  *
  * @return document size of [uri] or null if size can't be obtained
@@ -254,9 +242,9 @@ fun Context.getUriSize(uri: Uri): Long? {
  */
 fun Context.isPackageInstalled(packageName: String): Boolean {
     return try {
-        packageManager.getApplicationInfo(packageName, 0)
+        packageManager.getApplicationInfoCompat(packageName, 0)
         true
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         false
     }
 }
@@ -283,51 +271,6 @@ val Context.powerManager: PowerManager
     get() = getSystemService()!!
 
 /**
- * Function used to send a local broadcast asynchronous
- *
- * @param intent intent that contains broadcast information
- */
-fun Context.sendLocalBroadcast(intent: Intent) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(
-        intent,
-    )
-}
-
-/**
- * Function used to send a local broadcast synchronous
- *
- * @param intent intent that contains broadcast information
- */
-fun Context.sendLocalBroadcastSync(intent: Intent) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcastSync(
-        intent,
-    )
-}
-
-/**
- * Function used to register local broadcast
- *
- * @param receiver receiver that gets registered.
- */
-fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFilter) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).registerReceiver(
-        receiver,
-        filter,
-    )
-}
-
-/**
- * Function used to unregister local broadcast
- *
- * @param receiver receiver that gets unregistered.
- */
-fun Context.unregisterLocalReceiver(receiver: BroadcastReceiver) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(
-        receiver,
-    )
-}
-
-/**
  * Returns true if device is connected to Wifi.
  */
 fun Context.isConnectedToWifi(): Boolean {
@@ -343,17 +286,6 @@ fun Context.isConnectedToWifi(): Boolean {
         @Suppress("DEPRECATION")
         wifiManager.connectionInfo.bssid != null
     }
-}
-
-/**
- * Returns true if the given service class is running.
- */
-fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
-    val className = serviceClass.name
-    val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-    @Suppress("DEPRECATION")
-    return manager.getRunningServices(Integer.MAX_VALUE)
-        .any { className == it.service.className }
 }
 
 fun Context.openInBrowser(url: String, @ColorInt toolbarColor: Int? = null, forceBrowser: Boolean = false) {
@@ -417,13 +349,7 @@ fun Context.openInBrowser(url: String, forceBrowser: Boolean, fullBrowser: Boole
 
 fun Context.defaultBrowserPackageName(): String? {
     val browserIntent = Intent(Intent.ACTION_VIEW, "http://".toUri())
-    val resolveInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        packageManager.resolveActivity(browserIntent, PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong()))
-    } else {
-        @Suppress("DEPRECATION")
-        packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
-    }
-    return resolveInfo
+    return packageManager.resolveActivityCompat(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
         ?.activityInfo?.packageName
         ?.takeUnless { it in DeviceUtil.invalidDefaultBrowsers }
 }
@@ -432,18 +358,17 @@ fun Context.defaultBrowserPackageName(): String? {
  * Returns a list of packages that support Custom Tabs.
  */
 fun Context.getCustomTabsPackages(): ArrayList<ResolveInfo> {
-    val pm = packageManager
     // Get default VIEW intent handler.
-    val activityIntent = Intent(Intent.ACTION_VIEW, "http://www.example.com".toUri())
+    val activityIntent = Intent(Intent.ACTION_VIEW, "https://www.example.com".toUri())
     // Get all apps that can handle VIEW intents.
-    val resolvedActivityList = pm.queryIntentActivities(activityIntent, 0)
+    val resolvedActivityList = packageManager.queryIntentActivitiesCompat(activityIntent, 0)
     val packagesSupportingCustomTabs = ArrayList<ResolveInfo>()
     for (info in resolvedActivityList) {
         val serviceIntent = Intent()
         serviceIntent.action = ACTION_CUSTOM_TABS_CONNECTION
         serviceIntent.setPackage(info.activityInfo.packageName)
         // Check if this package also resolves the Custom Tabs service.
-        if (pm.resolveService(serviceIntent, 0) != null) {
+        if (packageManager.resolveServiceCompat(serviceIntent, 0) != null) {
             packagesSupportingCustomTabs.add(info)
         }
     }
@@ -515,6 +440,17 @@ fun setLocaleByAppCompat() {
         AppCompatDelegate.getApplicationLocales().get(0)?.let { Locale.setDefault(it) }
     }
 }
+
+suspend fun CoroutineWorker.tryToSetForeground() {
+    try {
+        setForeground(getForegroundInfo())
+    } catch (e: IllegalStateException) {
+        Timber.e(e, "Not allowed to set foreground job")
+    }
+}
+
+fun WorkManager.jobIsRunning(tag: String): Boolean = getWorkInfosForUniqueWork(tag).get()
+    .let { list -> list.count { it.state == WorkInfo.State.RUNNING } == 1 }
 
 val Context.systemLangContext: Context
     get() {

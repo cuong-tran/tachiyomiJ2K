@@ -1,9 +1,8 @@
 package eu.kanade.tachiyomi.ui.extension
 
 import android.content.pm.PackageInstaller
-import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.extension.ExtensionInstallService
+import eu.kanade.tachiyomi.extension.ExtensionInstallerJob
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
@@ -14,8 +13,7 @@ import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -26,7 +24,7 @@ typealias ExtensionIntallInfo = Pair<InstallStep, PackageInstaller.SessionInfo?>
 /**
  * Presenter of [ExtensionBottomSheet].
  */
-class ExtensionBottomPresenter() : BaseMigrationPresenter<ExtensionBottomSheet>() {
+class ExtensionBottomPresenter : BaseMigrationPresenter<ExtensionBottomSheet>() {
 
     private var extensions = emptyList<ExtensionItem>()
 
@@ -52,11 +50,13 @@ class ExtensionBottomPresenter() : BaseMigrationPresenter<ExtensionBottomSheet>(
             listOf(migrationJob, extensionJob).awaitAll()
         }
         presenterScope.launch {
-            extensionManager.downloadRelay.asSharedFlow()
+            extensionManager.downloadSharedFlow
                 .collect {
-                    if (it.first.startsWith("Finished")) {
-                        firstLoad = true
-                        currentDownloads.clear()
+                    if (it.first.startsWith("Finished") || it.first.startsWith("Uninstalled")) {
+                        if (it.first.startsWith("Finished")) {
+                            firstLoad = true
+                            currentDownloads.clear()
+                        }
                         extensions = toItems(
                             Triple(
                                 extensionManager.installedExtensionsFlow.value,
@@ -242,7 +242,20 @@ class ExtensionBottomPresenter() : BaseMigrationPresenter<ExtensionBottomSheet>(
                 ExtensionManager.ExtensionInfo(extension),
                 presenterScope,
             )
-                .launchIn(this)
+                .collect {
+                    when (it.first) {
+                        InstallStep.Installed, InstallStep.Error -> {
+                            currentDownloads.remove(extension.pkgName)
+                        }
+                        else -> {
+                            currentDownloads[extension.pkgName] = it
+                        }
+                    }
+                    val item = updateInstallStep(extension, it.first, it.second)
+                    if (item != null) {
+                        withUIContext { view?.downloadUpdate(item) }
+                    }
+                }
         }
     }
 
@@ -261,13 +274,12 @@ class ExtensionBottomPresenter() : BaseMigrationPresenter<ExtensionBottomSheet>(
             val item = updateInstallStep(it, InstallStep.Pending, null) ?: return@forEach
             view?.downloadUpdate(item)
         }
-        val intent = ExtensionInstallService.jobIntent(
+        ExtensionInstallerJob.start(
             context,
             extensions.mapNotNull { extension ->
                 extensionManager.availableExtensionsFlow.value.find { it.pkgName == extension.pkgName }
             },
         )
-        ContextCompat.startForegroundService(context, intent)
     }
 
     fun uninstallExtension(pkgName: String) {

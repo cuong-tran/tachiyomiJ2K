@@ -11,7 +11,7 @@ import androidx.core.os.LocaleListCompat
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.util.lang.addBetaTag
 import eu.kanade.tachiyomi.util.lang.compareToCaseInsensitiveNaturalOrder
 import eu.kanade.tachiyomi.util.system.systemLangContext
@@ -119,7 +119,7 @@ class SettingsGeneralController : SettingsController() {
                     titleRes = R.string.auto_update_app
                     entryRange = 0..2
                     entriesRes = arrayOf(R.string.over_any_network, R.string.over_wifi_only, R.string.dont_auto_update)
-                    defaultValue = AutoAppUpdaterJob.ONLY_ON_UNMETERED
+                    defaultValue = AppDownloadInstallJob.ONLY_ON_UNMETERED
                 }
             }
         }
