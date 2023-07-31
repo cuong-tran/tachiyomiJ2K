@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.SetCategoriesSheetBinding
 import eu.kanade.tachiyomi.ui.category.ManageCategoryDialog
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -67,6 +68,7 @@ class SetCategoriesSheet(
     private val itemAdapter = ItemAdapter<AddCategoryItem>()
 
     private val db: DatabaseHelper by injectLazy()
+    private val preferences: PreferencesHelper by injectLazy()
     override var recyclerView: RecyclerView? = binding.categoryRecyclerView
 
     private val preCheckedCategories = categories.mapIndexedNotNull { index, category ->
@@ -177,8 +179,8 @@ class SetCategoriesSheet(
 
         val items = when {
             addingToLibrary -> checkedItems.map { it.category }
-            addingMore -> checkedItems.map { it.category }.subtract(preCheckedCategories)
-            removing -> selectedCategories.subtract(selectedItems.map { it.category })
+            addingMore -> checkedItems.map { it.category }.subtract(preCheckedCategories.toSet())
+            removing -> selectedCategories.subtract(selectedItems.map { it.category }.toSet())
             nothingChanged -> selectedItems.map { it.category }
             else -> checkedItems.map { it.category }
         }
@@ -236,7 +238,7 @@ class SetCategoriesSheet(
         binding.newCategoryButton.setOnClickListener {
             ManageCategoryDialog(null) {
                 categories = db.getCategories().executeAsBlocking()
-                val map = itemAdapter.adapterItems.map { it.category.id to it.state }.toMap()
+                val map = itemAdapter.adapterItems.associate { it.category.id to it.state }
                 itemAdapter.set(
                     categories.mapIndexed { index, category ->
                         AddCategoryItem(category).apply {
@@ -270,9 +272,15 @@ class SetCategoriesSheet(
         val removeCategories = uncheckedItems.map(AddCategoryItem::category)
         val mangaCategories = listManga.map { manga ->
             val categories = db.getCategoriesForManga(manga).executeAsBlocking()
-                .subtract(removeCategories).plus(addCategories).distinct()
+                .subtract(removeCategories.toSet()).plus(addCategories).distinct()
             categories.map { MangaCategory.create(manga, it) }
         }.flatten()
+        if (addCategories.isNotEmpty() || listManga.size == 1) {
+            preferences.lastCategoriesAddedTo().set(
+                addCategories.mapNotNull { it.id?.toString() }.toSet().takeIf { it.isNotEmpty() }
+                    ?: setOf("0"),
+            )
+        }
         db.setMangaCategories(mangaCategories, listManga)
         onMangaAdded()
     }
