@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -105,6 +106,9 @@ class MangaDetailsPresenter(
     var allChapters: List<ChapterItem> = emptyList()
         private set
 
+    var allHistory: List<History> = emptyList()
+        private set
+
     val headerItem by lazy { MangaHeaderItem(manga, view?.fromCatalogue == true) }
     var tabletChapterHeaderItem: MangaHeaderItem? = null
     var allChapterScanlators: Set<String> = emptySet()
@@ -166,6 +170,9 @@ class MangaDetailsPresenter(
         // Store the last emission
         allChapters = chapters
         this.chapters = applyChapterFilters(chapters)
+        presenterScope.launchIO {
+            allHistory = manga.id?.let { db.getHistoryByMangaId(it).executeOnIO() }.orEmpty()
+        }
     }
 
     /**

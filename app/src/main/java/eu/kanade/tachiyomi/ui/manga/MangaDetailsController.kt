@@ -106,6 +106,7 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
+import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.findChild
@@ -869,7 +870,7 @@ class MangaDetailsController :
         val adapter = adapter ?: return
         val item = (adapter.getItem(position) as? ChapterItem) ?: return
         val descending = presenter.sortDescending()
-        var items = mutableListOf(
+        val items = mutableListOf(
             MaterialMenuSheet.MenuSheetItem(
                 0,
                 if (descending) R.drawable.ic_eye_down_24dp else R.drawable.ic_eye_up_24dp,
@@ -901,16 +902,20 @@ class MangaDetailsController :
                 ),
             )
         }
-        val menuSheet = MaterialMenuSheet(activity!!, items, item.name) { _, itemPos ->
-            when (itemPos) {
-                0 -> markPreviousAs(item, true)
-                1 -> markPreviousAs(item, false)
-                2 -> startReadRange(position, RangeMode.Read)
-                3 -> startReadRange(position, RangeMode.Unread)
-                4 -> openChapterInWebView(item)
-            }
-            true
+        val lastRead = presenter.allHistory.find { it.chapter_id == item.id }?.let {
+            activity?.timeSpanFromNow(R.string.read_, it.last_read) + "\n"
         }
+        val menuSheet =
+            MaterialMenuSheet(activity!!, items, item.name, subtitle = lastRead) { _, itemPos ->
+                when (itemPos) {
+                    0 -> markPreviousAs(item, true)
+                    1 -> markPreviousAs(item, false)
+                    2 -> startReadRange(position, RangeMode.Read)
+                    3 -> startReadRange(position, RangeMode.Unread)
+                    4 -> openChapterInWebView(item)
+                }
+                true
+            }
         menuSheet.show()
     }
 

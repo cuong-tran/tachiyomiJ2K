@@ -33,6 +33,7 @@ class MaterialMenuSheet(
     selectedId: Int? = null,
     maxHeight: Int? = null,
     showDivider: Boolean = false,
+    subtitle: String? = null,
     onMenuItemClicked: (MaterialMenuSheet, Int) -> Boolean,
 ) : E2EBottomSheetDialog<BottomMenuSheetBinding>(activity) {
 
@@ -76,8 +77,11 @@ class MaterialMenuSheet(
         sheetBehavior.skipCollapsed = true
 
         binding.menuSheetRecycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
-        binding.titleLayout.isVisible = title != null
+        binding.titleLayout.isVisible = title != null || subtitle != null
+        binding.toolbarTitle.isVisible = title != null
         binding.toolbarTitle.text = title
+        binding.toolbarSubtitle.isVisible = subtitle != null
+        binding.toolbarSubtitle.text = subtitle
 
         if (selectedId != null) {
             val pos = max(items.indexOfFirst { it.id == selectedId }, 0)
