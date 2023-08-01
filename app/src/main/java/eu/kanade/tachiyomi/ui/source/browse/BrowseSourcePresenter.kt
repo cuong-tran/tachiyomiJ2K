@@ -96,15 +96,48 @@ open class BrowseSourcePresenter(
 
     var query = searchQuery ?: ""
 
+    private val oldFilters = mutableListOf<Any?>()
+
     override fun onCreate() {
         super.onCreate()
         if (!::pager.isInitialized) {
             source = sourceManager.get(sourceId) as? CatalogueSource ?: return
 
             sourceFilters = source.getFilterList()
+
+            if (oldFilters.isEmpty()) {
+                for (i in sourceFilters) {
+                    if (i is Filter.Group<*>) {
+                        val subFilters = mutableListOf<Any?>()
+                        for (j in i.state) {
+                            subFilters.add((j as Filter<*>).state)
+                        }
+                        oldFilters.add(subFilters)
+                    } else {
+                        oldFilters.add(i.state)
+                    }
+                }
+            }
             filtersChanged = false
             restartPager()
         }
+    }
+
+    fun filtersMatchDefault(): Boolean {
+        for (i in sourceFilters.indices) {
+            val filter = oldFilters.getOrNull(i)
+            if (filter is List<*>) {
+                for (j in filter.indices) {
+                    val state = ((sourceFilters[i] as Filter.Group<*>).state[j] as Filter<*>).state
+                    if (filter[j] != state) {
+                        return false
+                    }
+                }
+            } else if (filter != sourceFilters[i].state) {
+                return false
+            }
+        }
+        return true
     }
 
     /**

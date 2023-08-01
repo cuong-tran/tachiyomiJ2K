@@ -397,9 +397,10 @@ open class BrowseSourceController(bundle: Bundle) :
                     matches = false
                     break
                 }
+                if (!matches) break
             }
             if (!matches) {
-                val allDefault = presenter.sourceFilters == presenter.source.getFilterList()
+                val allDefault = presenter.filtersMatchDefault()
                 showProgressBar()
                 adapter?.clear()
                 presenter.setSourceFilter(if (allDefault) FilterList() else presenter.sourceFilters)
