@@ -144,7 +144,7 @@ dependencies {
     implementation("com.github.jays2kings:subsampling-scale-image-view:756849e") {
         exclude(module = "image-decoder")
     }
-    implementation("com.github.tachiyomiorg:image-decoder:7481a4a")
+    implementation("com.github.tachiyomiorg:image-decoder:7879b45")
 
     // Android X libraries
     implementation("androidx.appcompat:appcompat:1.6.1")
