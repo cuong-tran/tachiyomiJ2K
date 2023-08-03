@@ -371,16 +371,21 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         updateExtUpdateAllButton()
     }
 
+    fun canStillGoBack(): Boolean {
+        return (binding.tabs.selectedTabPosition == 1 && migAdapter is MangaAdapter) ||
+            (binding.tabs.selectedTabPosition == 0 && binding.sheetToolbar.hasExpandedActionView())
+    }
+
     fun canGoBack(): Boolean {
-        if (binding.tabs.selectedTabPosition == 1 && migAdapter is MangaAdapter) {
+        return if (binding.tabs.selectedTabPosition == 1 && migAdapter is MangaAdapter) {
             presenter.deselectSource()
-            return false
-        }
-        if (binding.sheetToolbar.hasExpandedActionView()) {
+            false
+        } else if (binding.sheetToolbar.hasExpandedActionView()) {
             binding.sheetToolbar.collapseActionView()
-            return false
+            false
+        } else {
+            true
         }
-        return true
     }
 
     fun downloadUpdate(item: ExtensionItem) {

@@ -1,16 +1,18 @@
 package eu.kanade.tachiyomi.appwidget
 
 import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
-import androidx.compose.runtime.Composable
 import androidx.core.graphics.drawable.toBitmap
+import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.ImageProvider
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.appWidgetBackground
+import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.updateAll
 import androidx.glance.background
 import androidx.glance.layout.fillMaxSize
@@ -47,15 +49,15 @@ class UpdatesGridGlanceWidget : GlanceAppWidget() {
     private var data: List<Pair<Long, Bitmap?>>? = null
 
     override val sizeMode = SizeMode.Exact
-
-    @Composable
-    override fun Content() {
-        // If app lock enabled, don't do anything
-        if (preferences.useBiometrics().get()) {
-            LockedWidget()
-            return
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        provideContent {
+            // If app lock enabled, don't do anything
+            if (preferences.useBiometrics().get()) {
+                LockedWidget()
+            } else {
+                UpdatesWidget(data)
+            }
         }
-        UpdatesWidget(data)
     }
 
     fun loadData(list: List<Pair<Manga, Long>>? = null) {

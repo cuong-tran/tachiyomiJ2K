@@ -10,6 +10,7 @@ import android.view.MenuItem
 import android.view.RoundedCorner
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.BackEventCompat
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.doOnNextLayout
@@ -104,6 +105,7 @@ class BrowseController :
 
     private var ogRadius = 0f
     private var deviceRadius = 0f to 0f
+    private var lastScale = 1f
 
     override val mainRecycler: RecyclerView
         get() = binding.sourceRecycler
@@ -184,6 +186,17 @@ class BrowseController :
                         updateTitleAndMenu()
                         (activity as? MainActivity)?.reEnableBackPressedCallBack()
                     }
+                    binding.bottomSheet.root.apply {
+                        if (lastScale != 1f && scaleY != 1f) {
+                            val scaleProgress = ((1f - progress) * (1f - lastScale)) + lastScale
+                            scaleX = scaleProgress
+                            scaleY = scaleProgress
+                            for (i in 0 until childCount) {
+                                val childView = getChildAt(i)
+                                childView.scaleY = scaleProgress
+                            }
+                        }
+                    }
                     binding.bottomSheet.sheetToolbar.isVisible = true
                     setBottomSheetTabs(max(0f, progress))
                 }
@@ -195,6 +208,27 @@ class BrowseController :
                         binding.bottomSheet.root.updatedNestedRecyclers()
                         binding.bottomSheet.root.isExpanding = false
                     }
+
+                    binding.bottomSheet.root.apply {
+                        if ((
+                            state == BottomSheetBehavior.STATE_COLLAPSED ||
+                                state == BottomSheetBehavior.STATE_EXPANDED ||
+                                state == BottomSheetBehavior.STATE_HIDDEN
+                            ) &&
+                            scaleY != 1f
+                        ) {
+                            scaleX = 1f
+                            scaleY = 1f
+                            pivotY = 0f
+                            translationX = 0f
+                            for (i in 0 until childCount) {
+                                val childView = getChildAt(i)
+                                childView.scaleY = 1f
+                            }
+                            lastScale = 1f
+                        }
+                    }
+
                     val extBottomSheet = binding.bottomSheet.root
                     if (state == BottomSheetBehavior.STATE_EXPANDED ||
                         state == BottomSheetBehavior.STATE_COLLAPSED
@@ -440,9 +474,28 @@ class BrowseController :
 
     override fun canStillGoBack(): Boolean = showingExtensions
 
+    override fun handleOnBackStarted(backEvent: BackEventCompat) {
+        if (showingExtensions && !binding.bottomSheet.root.canStillGoBack()) {
+            binding.bottomSheet.root.sheetBehavior?.startBackProgress(backEvent)
+        }
+    }
+
+    override fun handleOnBackProgressed(backEvent: BackEventCompat) {
+        if (showingExtensions && !binding.bottomSheet.root.canStillGoBack()) {
+            binding.bottomSheet.root.sheetBehavior?.updateBackProgress(backEvent)
+        }
+    }
+
+    override fun handleOnBackCancelled() {
+        if (showingExtensions && !binding.bottomSheet.root.canStillGoBack()) {
+            binding.bottomSheet.root.sheetBehavior?.cancelBackProgress()
+        }
+    }
+
     override fun handleBack(): Boolean {
         if (showingExtensions) {
             if (binding.bottomSheet.root.canGoBack()) {
+                lastScale = binding.bottomSheet.root.scaleX
                 binding.bottomSheet.root.sheetBehavior?.collapse()
             }
             return true

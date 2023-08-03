@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.BackEventCompat
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
@@ -93,6 +94,12 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
     }
 
     open fun canStillGoBack(): Boolean { return false }
+
+    open fun handleOnBackStarted(backEvent: BackEventCompat) {}
+
+    open fun handleOnBackProgressed(backEvent: BackEventCompat) {}
+
+    open fun handleOnBackCancelled() {}
 
     open val mainRecycler: RecyclerView?
         get() = null

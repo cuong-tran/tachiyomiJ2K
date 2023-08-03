@@ -68,27 +68,27 @@ class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) 
         strokeWidth = 8f
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         if (navigation == null) return
 
         navigation?.regions?.forEach {
             val region = it.invert(navigation!!.invertMode)
             val rect = region.rectF
 
-            canvas?.save()
+            canvas.save()
 
             // Scale rect from 1f,1f to screen width and height
-            canvas?.scale(width.toFloat(), height.toFloat())
+            canvas.scale(width.toFloat(), height.toFloat())
             val directionalRegion = region.type.directionalRegion(isLTR)
             regionPaint.color = ContextCompat.getColor(context, directionalRegion.colorRes)
-            canvas?.drawRect(rect, regionPaint)
+            canvas.drawRect(rect, regionPaint)
 
-            canvas?.restore()
+            canvas.restore()
             // Don't want scale anymore because it messes with drawText
-            canvas?.save()
+            canvas.save()
 
             // Translate origin to rect start (left, top)
-            canvas?.translate((width * rect.left), (height * rect.top))
+            canvas.translate((width * rect.left), (height * rect.top))
 
             // Calculate center of rect width on screen
             val x = width * (abs(rect.left - rect.right) / 2)
@@ -96,10 +96,10 @@ class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) 
             // Calculate center of rect height on screen
             val y = height * (abs(rect.top - rect.bottom) / 2)
 
-            canvas?.drawText(context.getString(directionalRegion.nameRes), x, y, textBorderPaint)
-            canvas?.drawText(context.getString(directionalRegion.nameRes), x, y, textPaint)
+            canvas.drawText(context.getString(directionalRegion.nameRes), x, y, textBorderPaint)
+            canvas.drawText(context.getString(directionalRegion.nameRes), x, y, textPaint)
 
-            canvas?.restore()
+            canvas.restore()
         }
     }
 

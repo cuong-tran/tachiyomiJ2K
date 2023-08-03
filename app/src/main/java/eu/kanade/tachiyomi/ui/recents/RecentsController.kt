@@ -11,6 +11,7 @@ import android.view.MenuItem
 import android.view.RoundedCorner
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.BackEventCompat
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -120,6 +121,7 @@ class RecentsController(bundle: Bundle? = null) :
     private var headerHeight = 0
     private var ogRadius = 0f
     private var deviceRadius = 0f to 0f
+    private var lastScale = 1f
 
     private var query = ""
         set(value) {
@@ -278,6 +280,17 @@ class RecentsController(bundle: Bundle? = null) :
                     if (!isControllerVisible) {
                         return
                     }
+                    binding.downloadBottomSheet.root.apply {
+                        if (lastScale != 1f && scaleY != 1f) {
+                            val scaleProgress = ((1f - progress) * (1f - lastScale)) + lastScale
+                            scaleX = scaleProgress
+                            scaleY = scaleProgress
+                            for (i in 0 until childCount) {
+                                val childView = getChildAt(i)
+                                childView.scaleY = scaleProgress
+                            }
+                        }
+                    }
                     if (isControllerVisible) {
                         activityBinding?.appBar?.alpha = (1 - progress * 3) + 0.5f
                     }
@@ -304,6 +317,25 @@ class RecentsController(bundle: Bundle? = null) :
                         activityBinding?.tabsFrameLayout?.isVisible =
                             state != BottomSheetBehavior.STATE_EXPANDED
                     }
+                    binding.downloadBottomSheet.dlBottomSheet.apply {
+                        if ((
+                            state == BottomSheetBehavior.STATE_COLLAPSED ||
+                                state == BottomSheetBehavior.STATE_EXPANDED ||
+                                state == BottomSheetBehavior.STATE_HIDDEN
+                            ) &&
+                            scaleY != 1f
+                        ) {
+                            scaleX = 1f
+                            scaleY = 1f
+                            pivotY = 0f
+                            translationX = 0f
+                            for (i in 0 until childCount) {
+                                val childView = getChildAt(i)
+                                childView.scaleY = 1f
+                            }
+                        }
+                    }
+
                     if (state == BottomSheetBehavior.STATE_COLLAPSED) {
                         if (hasQueue()) {
                             binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable =
@@ -452,6 +484,24 @@ class RecentsController(bundle: Bundle? = null) :
     override fun canStillGoBack(): Boolean {
         return showingDownloads ||
             presenter.preferences.recentsViewType().get() != presenter.viewType.mainValue
+    }
+
+    override fun handleOnBackStarted(backEvent: BackEventCompat) {
+        if (showingDownloads) {
+            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.startBackProgress(backEvent)
+        }
+    }
+
+    override fun handleOnBackProgressed(backEvent: BackEventCompat) {
+        if (showingDownloads) {
+            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.updateBackProgress(backEvent)
+        }
+    }
+
+    override fun handleOnBackCancelled() {
+        if (showingDownloads) {
+            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.cancelBackProgress()
+        }
     }
 
     override fun handleBack(): Boolean {

@@ -25,6 +25,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import androidx.activity.BackEventCompat
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -249,8 +250,27 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         window.sharedElementsUseOverlay = false
 
         super.onCreate(savedInstanceState)
-        backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
+        backPressedCallback = object : OnBackPressedCallback(enabled = true) {
+            override fun handleOnBackPressed() {
+                backCallback()
+            }
 
+            override fun handleOnBackStarted(backEvent: BackEventCompat) {
+                val controller = router.backstack.lastOrNull()?.controller as? BaseController<*>
+                controller?.handleOnBackStarted(backEvent)
+            }
+
+            override fun handleOnBackProgressed(backEvent: BackEventCompat) {
+                val controller = router.backstack.lastOrNull()?.controller as? BaseController<*>
+                controller?.handleOnBackProgressed(backEvent)
+            }
+
+            override fun handleOnBackCancelled() {
+                val controller = router.backstack.lastOrNull()?.controller as? BaseController<*>
+                controller?.handleOnBackCancelled()
+            }
+        }
+        onBackPressedDispatcher.addCallback(backPressedCallback!!)
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
         if (!isTaskRoot && this !is SearchActivity) {
             finish()
@@ -1378,23 +1398,27 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     )
 
     private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
+        private var startingX = 0f
+        private var startingY = 0f
         override fun onDown(e: MotionEvent): Boolean {
+            startingX = e.x
+            startingY = e.y
             return true
         }
 
         override fun onFling(
-            e1: MotionEvent,
+            e1: MotionEvent?,
             e2: MotionEvent,
             velocityX: Float,
             velocityY: Float,
         ): Boolean {
             var result = false
-            val diffY = e2.y - e1.y
-            val diffX = e2.x - e1.x
+            val diffY = e2.y - startingY
+            val diffX = e2.x - startingX
             if (abs(diffX) <= abs(diffY)) {
                 val sheetRect = Rect()
                 nav.getGlobalVisibleRect(sheetRect)
-                if (sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
+                if (sheetRect.contains(startingX.toInt(), startingY.toInt()) &&
                     abs(diffY) > Companion.SWIPE_THRESHOLD &&
                     abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
                     diffY <= 0
@@ -1403,7 +1427,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                         router.backstack.lastOrNull()?.controller as? BottomSheetController
                     bottomSheetController?.showSheet()
                 } else if (nav == binding.sideNav &&
-                    sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
+                    sheetRect.contains(startingX.toInt(), startingY.toInt()) &&
                     abs(diffY) > Companion.SWIPE_THRESHOLD &&
                     abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
                     diffY > 0

@@ -17,20 +17,24 @@ class LibraryHeaderGestureDetector(
     private val binding: LibraryCategoryHeaderItemBinding?,
 ) : GestureDetector.SimpleOnGestureListener() {
 
+    private var startingX = 0f
+    private var startingY = 0f
     var vibrated = false
     override fun onDown(e: MotionEvent): Boolean {
         vibrated = false
+        startingX = e.x
+        startingY = e.y
         return super.onDown(e)
     }
 
     override fun onScroll(
-        e1: MotionEvent,
+        e1: MotionEvent?,
         e2: MotionEvent,
         distanceX: Float,
         distanceY: Float,
     ): Boolean {
         if (binding == null || header == null) return false
-        val distance = (e1.rawX - e2.rawX)
+        val distance = (startingX - e2.x)
         val poa = 0.75f
         binding.categoryHeaderLayout.translationX = abs(distance).pow(poa) * -sign(distance)
         binding.rearView.isVisible = distance != 0f
@@ -58,14 +62,14 @@ class LibraryHeaderGestureDetector(
     }
 
     override fun onFling(
-        e1: MotionEvent,
+        e1: MotionEvent?,
         e2: MotionEvent,
         velocityX: Float,
         velocityY: Float,
     ): Boolean {
         var result = false
-        val diffY = e2.y - e1.y
-        val diffX = e2.x - e1.x
+        val diffY = e2.y - startingY
+        val diffX = e2.x - startingX
         val mainLayout = binding?.categoryHeaderLayout ?: return false
         val animator = binding.categoryHeaderLayout.animate().setDuration(200L)
         header?.itemView?.parent?.requestDisallowInterceptTouchEvent(false)

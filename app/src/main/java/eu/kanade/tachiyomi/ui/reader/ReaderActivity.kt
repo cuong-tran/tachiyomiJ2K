@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ActivityOptions
 import android.app.assist.AssistContent
 import android.content.ClipData
 import android.content.Context
@@ -38,7 +39,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.text.buildSpannedString
@@ -260,7 +260,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             MainActivity.chapterIdToExitTo = 0L
             val intent = newIntent(activity, manga, chapter)
             intent.putExtra(TRANSITION_NAME, sharedElement.transitionName)
-            val activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(
+            val activityOptions = ActivityOptions.makeSceneTransitionAnimation(
                 activity,
                 sharedElement,
                 sharedElement.transitionName,
@@ -933,7 +933,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 firstPass = false
                 lastVis = vis
             }
-            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
+            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
             if (!fullscreen && sheetManageNavColor) {
                 window.navigationBarColor = getResourceColor(R.attr.colorSurface)
             }
@@ -1132,7 +1132,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         } else {
             if (preferences.fullscreen().get()) {
                 wic.hide(systemBars())
-                wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
+                wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
             }
 
             if (animate && binding.appBar.isVisible) {
@@ -1929,7 +1929,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
          */
         private fun setFullscreen(enabled: Boolean) {
             WindowCompat.setDecorFitsSystemWindows(window, !enabled || isSplitScreen)
-            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
+            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
             binding.root.rootWindowInsetsCompat?.let { setNavColor(it) }
         }
 
