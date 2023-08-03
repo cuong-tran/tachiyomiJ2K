@@ -22,7 +22,7 @@ class TrackSearchItem(val trackSearch: TrackSearch) : AbstractItem<TrackSearchIt
      * Returns the layout resource for this item.
      */
     override val layoutRes: Int = R.layout.track_search_item
-    override var identifier = trackSearch.media_id.toLong()
+    override var identifier = trackSearch.media_id
 
     override fun getViewHolder(v: View): ViewHolder {
         return ViewHolder(v)
@@ -47,7 +47,9 @@ class TrackSearchItem(val trackSearch: TrackSearch) : AbstractItem<TrackSearchIt
             binding.trackSearchSummary.isVisible = track.summary.isNotBlank()
             binding.trackSearchCover.dispose()
             if (track.cover_url.isNotEmpty()) {
-                binding.trackSearchCover.load(track.cover_url)
+                binding.trackSearchCover.load(track.cover_url) {
+                    allowHardware(false)
+                }
             }
 
             if (track.publishing_status.isBlank()) {

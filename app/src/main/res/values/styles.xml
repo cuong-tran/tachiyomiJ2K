@@ -148,6 +148,7 @@
 
     <style name="BottomSheetDialogTheme" parent="@style/ThemeOverlay.Material3.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/BottomSheet.Modal</item>
+        <item name="android:windowSoftInputMode">adjustPan</item>
     </style>
 
     <style name="BottomSheet.Modal" parent="Widget.Material3.BottomSheet.Modal">

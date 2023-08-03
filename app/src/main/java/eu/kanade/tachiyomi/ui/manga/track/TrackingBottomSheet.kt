@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -82,6 +83,14 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     override var recyclerView: RecyclerView? = binding.trackRecycler
 
+    private val backCallback = object : OnBackPressedCallback(enabled = false) {
+        override fun handleOnBackPressed() {
+            if (searchingItem != null) {
+                hideSearchView()
+            }
+        }
+    }
+
     init {
         val insets = activity.window.decorView.rootWindowInsetsCompat?.getInsets(systemBars())
         val height = insets?.bottom ?: 0
@@ -90,7 +99,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         sheetBehavior.skipCollapsed = true
 
         binding.searchCloseButton.setOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
 
         binding.trackSearchRecycler.adapter = adapter
@@ -99,6 +108,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
             trackItem(position)
             true
         }
+        onBackPressedDispatcher.addCallback(backCallback)
 
         searchAdapter.addClickListener<TrackSearchItem.ViewHolder, TrackSearchItem>({ it.binding.linkButton }) { _, _, _, item ->
             activity.openInBrowser(item.trackSearch.tracking_url)
@@ -248,6 +258,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     private fun showSearchView(item: TrackItem) {
         searchingItem = item
+        backCallback.isEnabled = true
         val title = presenter.manga.title
         sheetBehavior.expand()
         sheetBehavior.isDraggable = false
@@ -265,6 +276,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         binding.trackRecycler.isVisible = true
         binding.trackSearchConstraintLayout.isVisible = false
         searchingItem = null
+        backCallback.isEnabled = false
     }
 
     private fun search(query: String) {
