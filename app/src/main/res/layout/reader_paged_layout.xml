@@ -9,6 +9,7 @@
     android:clipToPadding="false">
 
     <LinearLayout
+        android:id="@+id/filter_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/material_component_dialogs_padding_around_content_area"
@@ -71,6 +72,14 @@
             android:layout_marginTop="4dp"
             app:title="@string/cutout_area_behavior"
             android:entries="@array/cutout_behavior" />
+
+        <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+            android:id="@+id/extend_past_cutout_landscape"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/cutout_area_behavior"
+            android:entries="@array/cutout_behavior_landscape" />
 
         <eu.kanade.tachiyomi.widget.MaterialSpinnerView
             android:id="@+id/zoom_start"

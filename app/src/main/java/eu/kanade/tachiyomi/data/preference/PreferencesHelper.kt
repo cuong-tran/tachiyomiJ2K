@@ -114,6 +114,8 @@ class PreferencesHelper(val context: Context) {
 
     fun pagerCutoutBehavior() = flowPrefs.getInt(Keys.pagerCutoutBehavior, 0)
 
+    fun landscapeCutoutBehavior() = flowPrefs.getInt("landscape_cutout_behavior", 0)
+
     fun doubleTapAnimSpeed() = flowPrefs.getInt(Keys.doubleTapAnimationSpeed, 500)
 
     fun showPageNumber() = flowPrefs.getBoolean(Keys.showPageNumber, true)

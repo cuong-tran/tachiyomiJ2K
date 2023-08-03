@@ -149,6 +149,9 @@ class TabbedReaderSettingsSheet(
     override fun dismiss() {
         super.dismiss()
         readerActivity.binding.appBar.isVisible = true
+        if (pagedView.needsActivityRecreate) {
+            readerActivity.recreate()
+        }
     }
 
     fun updateTabs(isWebtoon: Boolean) {

@@ -2,7 +2,12 @@ package eu.kanade.tachiyomi.ui.reader.settings
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.Configuration
+import android.hardware.display.DisplayManager
+import android.os.Build
 import android.util.AttributeSet
+import android.view.Display
+import androidx.core.content.getSystemService
 import androidx.core.view.isVisible
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.R
@@ -15,6 +20,7 @@ import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
 class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseReaderSettingsView<ReaderPagedLayoutBinding>(context, attrs) {
 
+    var needsActivityRecreate = false
     override fun inflateBinding() = ReaderPagedLayoutBinding.bind(this)
     override fun initGeneralPreferences() {
         with(binding) {
@@ -32,6 +38,9 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             pagerNav.bindToPreference(preferences.navigationModePager())
             pagerInvert.bindToPreference(preferences.pagerNavInverted())
             extendPastCutout.bindToPreference(preferences.pagerCutoutBehavior())
+            extendPastCutoutLandscape.bindToPreference(preferences.landscapeCutoutBehavior()) {
+                needsActivityRecreate = true
+            }
             pageLayout.bindToPreference(preferences.pageLayout()) {
                 val mangaViewer = (context as? ReaderActivity)?.viewModel?.getMangaReadingMode() ?: 0
                 val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)
@@ -97,13 +106,28 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             else -> false
         }
         val ogView = (context as? Activity)?.window?.decorView
-        val hasCutout = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+        val hasCutout = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             ogView?.rootWindowInsets?.displayCutout?.safeInsetTop != null || ogView?.rootWindowInsets?.displayCutout?.safeInsetBottom != null
         } else {
             false
         }
+        val hasAnyCutout = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            context.getSystemService<DisplayManager>()
+                ?.getDisplay(Display.DEFAULT_DISPLAY)?.cutout != null
+        } else {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+        }
         binding.landscapeZoom.isVisible = show && preferences.imageScaleType().get() == SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE
         binding.extendPastCutout.isVisible = show && isFullFit && hasCutout && preferences.fullscreen().get()
+        binding.extendPastCutoutLandscape.isVisible = hasAnyCutout && preferences.fullscreen().get() &&
+            ogView?.resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
+        if (binding.extendPastCutoutLandscape.isVisible) {
+            binding.filterLinearLayout.removeView(binding.extendPastCutoutLandscape)
+            binding.filterLinearLayout.addView(
+                binding.extendPastCutoutLandscape,
+                binding.filterLinearLayout.indexOfChild(if (show) binding.extendPastCutout else binding.webtoonPageLayout) + 1,
+            )
+        }
         binding.invertDoublePages.isVisible = show && preferences.pageLayout().get() != PageLayout.SINGLE_PAGE.value
     }
 }

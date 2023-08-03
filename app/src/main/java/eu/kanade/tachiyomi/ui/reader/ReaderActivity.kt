@@ -55,6 +55,7 @@ import androidx.core.view.children
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.core.view.updatePaddingRelative
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -295,7 +296,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         val a = obtainStyledAttributes(intArrayOf(android.R.attr.windowLightStatusBar))
         val lightStatusBar = a.getBoolean(0, false)
         a.recycle()
-        setNotchCutoutMode()
+        setCutoutMode()
 
         wic.isAppearanceLightStatusBars = lightStatusBar
         wic.isAppearanceLightNavigationBars = lightStatusBar
@@ -924,6 +925,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         binding.readerLayout.doOnApplyWindowInsetsCompat { _, insets, _ ->
             setNavColor(insets)
             val systemInsets = insets.ignoredSystemInsets
+            val currentOrientation = resources.configuration.orientation
+            val isLandscapeFully = currentOrientation == Configuration.ORIENTATION_LANDSCAPE && preferences.landscapeCutoutBehavior().get() == 1
+            val cutOutInsets = if (isLandscapeFully) insets.displayCutout else null
             val vis = insets.isVisible(statusBars())
             val fullscreen = preferences.fullscreen().get() && !isSplitScreen
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -949,9 +953,21 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 rightMargin = systemInsets.right
                 height = 280.dpToPx + systemInsets.bottom
             }
+            binding.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = cutOutInsets?.safeInsetLeft ?: 0
+                rightMargin = cutOutInsets?.safeInsetRight ?: 0
+            }
+            binding.chaptersSheet.topbarLayout.updatePadding(
+                left = cutOutInsets?.safeInsetLeft ?: 0,
+                right = cutOutInsets?.safeInsetRight ?: 0,
+            )
+            binding.chaptersSheet.chapterRecycler.updatePadding(
+                left = cutOutInsets?.safeInsetLeft ?: 0,
+                right = cutOutInsets?.safeInsetRight ?: 0,
+            )
             binding.navLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = 12.dpToPx + systemInsets.left
-                rightMargin = 12.dpToPx + systemInsets.right
+                leftMargin = 12.dpToPx + max(systemInsets.left, cutOutInsets?.safeInsetLeft ?: 0)
+                rightMargin = 12.dpToPx + max(systemInsets.right, cutOutInsets?.safeInsetRight ?: 0)
             }
             binding.chaptersSheet.root.sheetBehavior?.peekHeight =
                 peek + if (fullscreen) {
@@ -1779,14 +1795,18 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     /**
      * Sets notch cutout mode to "NEVER", if mobile is in a landscape view
      */
-    private fun setNotchCutoutMode() {
+    private fun setCutoutMode() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val currentOrientation = resources.configuration.orientation
 
             val params = window.attributes
             if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
                 params.layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+                    if (preferences.landscapeCutoutBehavior().get() == 0) {
+                        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+                    } else {
+                        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                    }
             } else {
                 params.layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
@@ -1866,6 +1886,11 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 .launchIn(scope)
 
             preferences.showPageNumber().asImmediateFlowIn(scope) { setPageNumberVisibility(it) }
+
+            preferences.landscapeCutoutBehavior().asFlow()
+                .drop(1)
+                .onEach { setCutoutMode() }
+                .launchIn(scope)
 
             preferences.trueColor().asImmediateFlowIn(scope) { setTrueColor(it) }
 

@@ -1,6 +1,9 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.hardware.display.DisplayManager
 import android.os.Build
+import android.view.Display
+import androidx.core.content.getSystemService
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceValues
@@ -120,6 +123,22 @@ class SettingsReaderController : SettingsController() {
                 key = Keys.showPageNumber
                 titleRes = R.string.show_page_number
                 defaultValue = true
+            }
+            intListPreference(activity) {
+                bindTo(preferences.landscapeCutoutBehavior())
+                title = "${context.getString(R.string.cutout_area_behavior)} (${context.getString(R.string.landscape)})"
+                entriesRes = arrayOf(
+                    R.string.pad_cutout_areas,
+                    R.string.ignore_cutout_areas,
+                )
+                entryRange = 0..1
+                defaultValue = 0
+                isVisible = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    activity?.getSystemService<DisplayManager>()
+                        ?.getDisplay(Display.DEFAULT_DISPLAY)?.cutout != null
+                } else {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                }
             }
         }
 
