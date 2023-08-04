@@ -433,10 +433,9 @@ class MangaHeaderHolder(
             )
         with(binding.mangaSource) {
             val enabledLanguages = presenter.preferences.enabledLanguages().get()
-                .filterNot { it == "all" }
 
             text = buildSpannedString {
-                append(presenter.source.nameBasedOnEnabledLanguages(enabledLanguages.size > 1))
+                append(presenter.source.nameBasedOnEnabledLanguages(enabledLanguages))
                 if (presenter.source is SourceManager.StubSource &&
                     presenter.source.name != presenter.source.id.toString()
                 ) {

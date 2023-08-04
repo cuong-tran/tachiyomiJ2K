@@ -52,7 +52,7 @@ class StatsDetailsPresenter(
     private var mangasDistinct = libraryMangas.distinct()
     val sources = getEnabledSources()
     val extensionManager by injectLazy<ExtensionManager>()
-    val isMultiLingual = prefs.enabledLanguages().get().filterNot { it == "all" }.size > 1
+    val enabledLanguages = prefs.enabledLanguages().get()
 
     var selectedStat: Stats? = null
     var selectedSeriesType = mutableSetOf<String>()
@@ -287,7 +287,7 @@ class StatsDetailsPresenter(
                     meanScore = mangaList.getMeanScoreRounded(),
                     chaptersRead = mangaList.sumOf { it.read },
                     totalChapters = mangaList.sumOf { it.totalChapters },
-                    label = source.nameBasedOnEnabledLanguages(isMultiLingual, extensionManager),
+                    label = source.nameBasedOnEnabledLanguages(enabledLanguages, extensionManager),
                     icon = source.icon(),
                     readDuration = mangaList.getReadDuration(),
                     id = sourceId,

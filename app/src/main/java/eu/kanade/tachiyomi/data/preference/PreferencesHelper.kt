@@ -217,7 +217,10 @@ class PreferencesHelper(val context: Context) {
 
     fun browseAsList() = flowPrefs.getBoolean(Keys.catalogueAsList, false)
 
-    fun enabledLanguages() = flowPrefs.getStringSet(Keys.enabledLanguages, setOf("all", "en", Locale.getDefault().language))
+    fun enabledLanguages() = flowPrefs.getStringSet(
+        Keys.enabledLanguages,
+        setOfNotNull("all", "en", Locale.getDefault().language.takeIf { !it.startsWith("en") }),
+    )
 
     fun sourceSorting() = flowPrefs.getInt(Keys.sourcesSort, 0)
 

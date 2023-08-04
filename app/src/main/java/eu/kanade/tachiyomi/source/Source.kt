@@ -88,16 +88,17 @@ interface Source {
         return fetchPageList(chapter).awaitSingle()
     }
 
-    fun includeLangInName(isMultiLingual: Boolean, extensionManager: ExtensionManager? = null): Boolean {
+    fun includeLangInName(enabledLanguages: Set<String>, extensionManager: ExtensionManager? = null): Boolean {
         val httpSource = this as? HttpSource ?: return true
         val extManager = extensionManager ?: Injekt.get()
         val allExt = httpSource.getExtension(extManager)?.lang == "all"
         val onlyAll = httpSource.extOnlyHasAllLanguage(extManager)
+        val isMultiLingual = enabledLanguages.filterNot { it == "all" }.size > 1
         return (isMultiLingual && allExt) || (lang == "all" && !onlyAll)
     }
 
-    fun nameBasedOnEnabledLanguages(isMultiLingual: Boolean, extensionManager: ExtensionManager? = null): String {
-        return if (includeLangInName(isMultiLingual, extensionManager)) toString() else name
+    fun nameBasedOnEnabledLanguages(enabledLanguages: Set<String>, extensionManager: ExtensionManager? = null): String {
+        return if (includeLangInName(enabledLanguages, extensionManager)) toString() else name
     }
 }
 

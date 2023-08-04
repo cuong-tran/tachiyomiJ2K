@@ -377,7 +377,7 @@ class StatsDetailsController :
             when (it) {
                 is Category -> it.name
                 is Source -> it.nameBasedOnEnabledLanguages(
-                    presenter.isMultiLingual,
+                    presenter.enabledLanguages,
                     presenter.extensionManager,
                 )
                 else -> it.toString()
@@ -519,7 +519,7 @@ class StatsDetailsController :
                 when (val firstValue = selectedValues.first()) {
                     is Category -> firstValue.name
                     is Source -> firstValue.nameBasedOnEnabledLanguages(
-                        presenter.isMultiLingual,
+                        presenter.enabledLanguages,
                         presenter.extensionManager,
                     )
                     else -> firstValue.toString()

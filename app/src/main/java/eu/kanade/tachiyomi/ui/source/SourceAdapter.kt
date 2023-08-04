@@ -20,8 +20,7 @@ class SourceAdapter(val controller: BrowseController) :
 
     val sourceListener: SourceListener = controller
 
-    val isMultiLingual =
-        Injekt.get<PreferencesHelper>().enabledLanguages().get().filterNot { it == "all" }.size > 1
+    val enabledLanguages = Injekt.get<PreferencesHelper>().enabledLanguages().get()
 
     val extensionManager = controller.presenter.extensionManager
 

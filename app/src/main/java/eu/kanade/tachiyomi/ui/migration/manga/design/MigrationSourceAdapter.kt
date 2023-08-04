@@ -19,8 +19,7 @@ class MigrationSourceAdapter(
 ) {
 
     val extensionManager: ExtensionManager = Injekt.get()
-    val isMultiLingual =
-        Injekt.get<PreferencesHelper>().enabledLanguages().get().filterNot { it == "all" }.size > 1
+    val enabledLanguages = Injekt.get<PreferencesHelper>().enabledLanguages().get()
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
