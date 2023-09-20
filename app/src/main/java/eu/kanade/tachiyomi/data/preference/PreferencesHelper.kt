@@ -209,8 +209,6 @@ class PreferencesHelper(val context: Context) {
 
     fun lastUsedCategory() = flowPrefs.getInt(Keys.lastUsedCategory, 0)
 
-    fun lastCategoriesAddedTo() = flowPrefs.getStringSet("last_category_added_to", emptySet())
-
     fun lastUsedSources() = flowPrefs.getStringSet("last_used_sources", emptySet())
 
     fun lastVersionCode() = flowPrefs.getInt("last_version_code", 0)

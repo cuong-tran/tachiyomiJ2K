@@ -52,6 +52,8 @@ interface Category : Serializable {
     }
 
     companion object {
+        var lastCategoriesAddedTo = emptySet<Int>()
+
         fun create(name: String): Category = CategoryImpl().apply {
             this.name = name
         }

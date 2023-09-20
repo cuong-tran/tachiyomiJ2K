@@ -174,8 +174,8 @@ fun Manga.addOrRemoveToFavorites(
         val categories = db.getCategories().executeAsBlocking()
         val defaultCategoryId = preferences.defaultCategory()
         val defaultCategory = categories.find { it.id == defaultCategoryId }
-        val lastUsedCategories = preferences.lastCategoriesAddedTo().get().mapNotNull { catId ->
-            categories.find { it.id == catId.toIntOrNull() }
+        val lastUsedCategories = Category.lastCategoriesAddedTo.mapNotNull { catId ->
+            categories.find { it.id == catId }
         }
         when {
             defaultCategory != null -> {
@@ -195,7 +195,7 @@ fun Manga.addOrRemoveToFavorites(
             }
             defaultCategoryId == -2 && (
                 lastUsedCategories.isNotEmpty() ||
-                    preferences.lastCategoriesAddedTo().get().firstOrNull() == "0"
+                    Category.lastCategoriesAddedTo.firstOrNull() == 0
                 ) -> { // last used category(s)
                 favorite = true
                 date_added = Date().time
