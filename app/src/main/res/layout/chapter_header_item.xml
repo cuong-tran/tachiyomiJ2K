@@ -35,6 +35,7 @@
         android:background="@null"
         android:padding="5dp"
         android:src="@drawable/ic_filter_list_24dp"
+        android:contentDescription="@string/sort_and_filter"
         app:tint="?attr/colorSecondary"
         app:layout_constraintBottom_toBottomOf="@id/chapters_title"
         app:layout_constraintEnd_toEndOf="parent"
@@ -52,8 +53,8 @@
         android:textAlignment="textEnd"
         android:textColor="@color/material_on_background_disabled"
         app:layout_constraintBaseline_toBaselineOf="@id/chapters_title"
-        app:layout_constraintBottom_toBottomOf="@id/webview_button"
-        app:layout_constraintEnd_toStartOf="@id/webview_button"
+        app:layout_constraintBottom_toBottomOf="@id/filter_button"
+        app:layout_constraintEnd_toStartOf="@id/filter_button"
         app:layout_constraintStart_toEndOf="@+id/chapters_title"
-        app:layout_constraintTop_toTopOf="@id/webview_button" />
+        app:layout_constraintTop_toTopOf="@id/filter_button" />
 </androidx.constraintlayout.widget.ConstraintLayout>

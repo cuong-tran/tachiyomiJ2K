@@ -11,7 +11,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
 /**
- * Edge to Edge BottomSheetDiolag that uses a custom theme and settings to extend pass the nav bar
+ * Edge to Edge BottomSheetDialog that uses a custom theme and settings to extend pass the nav bar
  */
 @Suppress("LeakingThis")
 abstract class E2EBottomSheetDialog<VB : ViewBinding>(activity: Activity) :
