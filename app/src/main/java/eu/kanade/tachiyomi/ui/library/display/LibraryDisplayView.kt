@@ -3,21 +3,15 @@ package eu.kanade.tachiyomi.ui.library.display
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.slider.Slider
-import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.LibraryDisplayLayoutBinding
-import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
-import eu.kanade.tachiyomi.ui.library.filter.ManageFilterItem
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.lang.addBetaTag
 import eu.kanade.tachiyomi.util.lang.withSubtitle
 import eu.kanade.tachiyomi.util.system.bottomCutoutInset
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.isLandscape
-import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.topCutoutInset
 import eu.kanade.tachiyomi.util.view.checkHeightThen
 import eu.kanade.tachiyomi.util.view.numberOfRowsForValue
@@ -42,37 +36,6 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
         binding.gridSeekbar.value = ((preferences.gridSize().get() + .5f) * 2f).roundToInt().toFloat()
         binding.resetGridSize.setOnClickListener {
             binding.gridSeekbar.value = 3f
-        }
-
-        binding.reorderFiltersButton.setOnClickListener {
-            val recycler = RecyclerView(context)
-            val filterOrder = preferences.filterOrder().get().toMutableList()
-            FilterBottomSheet.Filters.values().forEach {
-                if (it.value !in filterOrder) {
-                    filterOrder.add(it.value)
-                }
-            }
-            val adapter = FlexibleAdapter(
-                filterOrder.mapNotNull { char ->
-                    FilterBottomSheet.Filters.filterOf(char)?.let { ManageFilterItem(char) }
-                },
-                this,
-                true,
-            )
-            recycler.layoutManager = LinearLayoutManager(context)
-            recycler.adapter = adapter
-            adapter.isHandleDragEnabled = true
-            adapter.isLongPressDragEnabled = true
-            context.materialAlertDialog()
-                .setTitle(R.string.reorder_filters)
-                .setView(recycler)
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.reorder) { _, _ ->
-                    val order = adapter.currentItems.map { it.char }.joinToString("")
-                    preferences.filterOrder().set(order)
-                    recycler.adapter = null
-                }
-                .show()
         }
 
         binding.gridSeekbar.setLabelFormatter {

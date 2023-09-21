@@ -1060,6 +1060,7 @@
 
     <!-- Miscellaneous -->
     <string name="add">Add</string>
+    <string name="apply">Apply</string>
     <string name="add_to_">Add to %1$s</string>
     <string name="added_to_">Added to %1$s</string>
     <string name="all">All</string>

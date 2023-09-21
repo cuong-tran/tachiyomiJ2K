@@ -41,6 +41,9 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         )
     }
 
+    val items: List<String>
+        get() = buttons.filter { it.text.isNotBlank() }.map { it.text.toString() }
+
     override fun isActivated(): Boolean {
         return buttons.any { it.isActivated }
     }

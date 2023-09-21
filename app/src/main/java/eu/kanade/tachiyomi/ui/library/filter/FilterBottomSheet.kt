@@ -81,9 +81,12 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     var sheetBehavior: BottomSheetBehavior<View>? = null
 
-    var filterOrder = preferences.filterOrder().get()
+    private var expandedFilterSheet: ExpandedFilterSheet? = null
+
+    private var filterOrder = preferences.filterOrder().get()
 
     private lateinit var clearButton: ImageView
+    private lateinit var fullFilterButton: ImageView
 
     private val filterItems: MutableList<FilterTagGroup> by lazy {
         val list = mutableListOf<FilterTagGroup>()
@@ -99,9 +102,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     var onGroupClicked: (Int) -> Unit = { _ -> }
-    var libraryRecyler: View? = null
+    private var libraryRecycler: View? = null
     var controller: LibraryController? = null
-    var bottomBarHeight = 0
+    private var bottomBarHeight = 0
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -111,11 +114,12 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     fun onCreate(controller: LibraryController) {
         clearButton = binding.clearButton
         binding.filterLayout.removeView(clearButton)
+        fullFilterButton = binding.filterButton
         sheetBehavior = BottomSheetBehavior.from(this)
         sheetBehavior?.isHideable = true
         this.controller = controller
-        libraryRecyler = controller.binding.libraryGridRecycler.recycler
-        libraryRecyler?.post {
+        libraryRecycler = controller.binding.libraryGridRecycler.recycler
+        libraryRecycler?.post {
             bottomBarHeight =
                 controller.activityBinding?.bottomNav?.height
                     ?: controller.activityBinding?.root?.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom
@@ -167,7 +171,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
         post {
-            libraryRecyler ?: return@post
+            libraryRecycler ?: return@post
             updateRootPadding(
                 when (sheetBehavior?.state) {
                     BottomSheetBehavior.STATE_HIDDEN -> -1f
@@ -189,6 +193,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         createTags()
         clearButton.setOnClickListener { clearFilters() }
+        fullFilterButton.setOnLongClickListener {
+            clearFilters()
+            true
+        }
+        fullFilterButton.setOnClickListener { showFullFilterSheet() }
 
         setExpandText(controller.canCollapseOrExpandCategory(), false)
 
@@ -202,10 +211,45 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             .launchIn(controller.viewScope)
     }
 
+    private fun showFullFilterSheet() {
+        if (expandedFilterSheet != null) return
+        val activity = controller?.activity ?: return
+        expandedFilterSheet = ExpandedFilterSheet(
+            activity,
+            filterOrder.toCharArray().distinct().mapNotNull { c ->
+                val filter = Filters.filterOf(c)
+                val filterTagGroup = mapOfFilters(c)
+                if (filter != null && filterTagGroup != null) {
+                    return@mapNotNull LibraryFilter(
+                        activity.getString(filter.stringRes),
+                        filterTagGroup.items,
+                        filterTagGroup,
+                        filterTagGroup.state + 1,
+                    )
+                }
+                return@mapNotNull null
+            },
+            trackers?.let {
+                LibraryFilter(
+                    activity.getString(R.string.trackers),
+                    it.items,
+                    it,
+                    it.state + 1,
+                )
+            },
+            filterCallback = { massUpdateFilters(filterItems) },
+            clearFilterCallback = { clearFilters() },
+        )
+        expandedFilterSheet?.setOnDismissListener {
+            expandedFilterSheet = null
+        }
+        expandedFilterSheet?.show()
+    }
+
     private fun stateChanged(state: Int) {
         controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
-            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
+            libraryRecycler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             binding.pill.alpha = 0f
@@ -213,7 +257,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         if (state == BottomSheetBehavior.STATE_HIDDEN) {
             onGroupClicked(ACTION_HIDE_FILTER_TIP)
             reSortViews()
-            libraryRecyler?.updatePaddingRelative(bottom = 10.dpToPx + bottomBarHeight)
+            libraryRecycler?.updatePaddingRelative(bottom = 10.dpToPx + bottomBarHeight)
         }
     }
 
@@ -231,9 +275,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val percent = (trueProgress * 100).roundToInt()
         val value = (percent * (maxHeight - minHeight) / 100) + minHeight
         if (trueProgress >= 0) {
-            libraryRecyler?.updatePaddingRelative(bottom = value + 10.dpToPx + bottomBarHeight)
+            libraryRecycler?.updatePaddingRelative(bottom = value + 10.dpToPx + bottomBarHeight)
         } else {
-            libraryRecyler?.updatePaddingRelative(bottom = (minHeight * (1 + trueProgress)).toInt() + bottomBarHeight)
+            libraryRecycler?.updatePaddingRelative(bottom = (minHeight * (1 + trueProgress)).toInt() + bottomBarHeight)
         }
     }
 
@@ -280,7 +324,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             FILTER_TRACKER.isNotEmpty()
     }
 
-    fun createTags() {
+    private fun createTags() {
         downloaded = inflate(R.layout.filter_tag_group) as FilterTagGroup
         downloaded.setup(this, R.string.downloaded, R.string.not_downloaded)
 
@@ -430,50 +474,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     override fun onFilterClicked(view: FilterTagGroup, index: Int, updatePreference: Boolean) {
         if (updatePreference && controller?.isSubClass != true) {
-            when (view) {
-                trackers -> {
-                    FILTER_TRACKER = view.nameOf(index) ?: ""
-                    null
-                }
-                unreadProgress -> {
-                    unread.reset()
-                    preferences.filterUnread().set(
-                        when (index) {
-                            in 0..1 -> index + 3
-                            else -> 0
-                        },
-                    )
-                    null
-                }
-                unread -> {
-                    unreadProgress.reset()
-                    preferences.filterUnread()
-                }
-                downloaded -> preferences.filterDownloaded()
-                completed -> preferences.filterCompleted()
-                bookmarked -> preferences.filterBookmarked()
-                tracked -> preferences.filterTracked()
-                mangaType -> {
-                    val newIndex = when (view.nameOf(index)) {
-                        context.getString(R.string.manga) -> Manga.TYPE_MANGA
-                        context.getString(R.string.manhua) -> Manga.TYPE_MANHUA
-                        context.getString(R.string.manhwa) -> Manga.TYPE_MANHWA
-                        context.getString(R.string.comic) -> Manga.TYPE_COMIC
-                        else -> 0
-                    }
-                    preferences.filterMangaType().set(newIndex)
-                    null
-                }
-                else -> null
-            }?.set(index + 1)
+            setFilterPreference(view, index)
             onGroupClicked(ACTION_FILTER)
         }
         val hasFilters = hasActiveFilters()
-        if (hasFilters && clearButton.parent == null) {
-            binding.filterLayout.addView(clearButton, 0)
-        } else if (!hasFilters && clearButton.parent != null) {
-            binding.filterLayout.removeView(clearButton)
-        }
         if (tracked?.isActivated == true && trackers != null && trackers?.parent == null) {
             binding.filterLayout.addView(trackers, filterItems.indexOf(tracked!!) + 2)
             filterItems.add(filterItems.indexOf(tracked!!) + 1, trackers!!)
@@ -482,6 +486,74 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             trackers?.reset()
             FILTER_TRACKER = ""
             filterItems.remove(trackers!!)
+        }
+        if (hasFilters && clearButton.parent == null) {
+            binding.filterLayout.addView(clearButton)
+        } else if (!hasFilters && clearButton.parent != null) {
+            binding.filterLayout.removeView(clearButton)
+        }
+    }
+
+    private fun setFilterPreference(view: FilterTagGroup, index: Int) {
+        when (view) {
+            trackers -> {
+                FILTER_TRACKER = view.nameOf(index) ?: ""
+                null
+            }
+            unreadProgress -> {
+                unread.reset()
+                preferences.filterUnread().set(
+                    when (index) {
+                        in 0..1 -> index + 3
+                        else -> 0
+                    },
+                )
+                null
+            }
+            unread -> {
+                unreadProgress.reset()
+                preferences.filterUnread()
+            }
+            downloaded -> preferences.filterDownloaded()
+            completed -> preferences.filterCompleted()
+            bookmarked -> preferences.filterBookmarked()
+            tracked -> preferences.filterTracked()
+            mangaType -> {
+                val newIndex = when (view.nameOf(index)) {
+                    context.getString(R.string.manga) -> Manga.TYPE_MANGA
+                    context.getString(R.string.manhua) -> Manga.TYPE_MANHUA
+                    context.getString(R.string.manhwa) -> Manga.TYPE_MANHWA
+                    context.getString(R.string.comic) -> Manga.TYPE_COMIC
+                    else -> 0
+                }
+                preferences.filterMangaType().set(newIndex)
+                null
+            }
+            else -> null
+        }?.set(index + 1)
+    }
+
+    private fun massUpdateFilters(views: List<FilterTagGroup>) {
+        if (controller?.isSubClass != true) {
+            var setUnread = false
+            views.forEach { view ->
+                val index = view.state
+                if ((view == unreadProgress || view == unread) && !setUnread && view.isActivated) {
+                    (if (view == unreadProgress) unread else unreadProgress).reset()
+                    setUnread = true
+                    setFilterPreference(view, index)
+                } else if (!(view == unreadProgress || view == unread)) {
+                    setFilterPreference(view, index)
+                }
+            }
+            if (tracked?.isActivated == false && trackers?.parent != null) {
+                binding.filterLayout.removeView(trackers)
+                trackers?.reset()
+                FILTER_TRACKER = ""
+                filterItems.remove(trackers!!)
+            }
+            reSortViews()
+            onGroupClicked(ACTION_FILTER)
         }
     }
 
@@ -514,14 +586,15 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun reSortViews() {
         binding.filterLayout.removeAllViews()
-        if (filterItems.any { it.isActivated }) {
-            binding.filterLayout.addView(clearButton)
-        }
+        binding.filterLayout.addView(fullFilterButton)
         filterItems.filter { it.isActivated }.forEach {
             binding.filterLayout.addView(it)
         }
         filterItems.filterNot { it.isActivated }.forEach {
             binding.filterLayout.addView(it)
+        }
+        if (filterItems.any { it.isActivated }) {
+            binding.filterLayout.addView(clearButton)
         }
         binding.filterScroll.scrollTo(0, 0)
     }
@@ -548,7 +621,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         Completed('c', R.string.status),
         SeriesType('m', R.string.series_type),
         Bookmarked('b', R.string.bookmarked),
-        Tracked('t', R.string.tracked),
+        Tracked('t', R.string.tracking),
         ;
 
         companion object {
