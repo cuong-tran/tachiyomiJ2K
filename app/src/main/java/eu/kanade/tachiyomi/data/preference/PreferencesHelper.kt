@@ -262,7 +262,7 @@ class PreferencesHelper(val context: Context) {
 
     fun backupInterval() = flowPrefs.getInt(Keys.backupInterval, 0)
 
-    fun removeAfterReadSlots() = prefs.getInt(Keys.removeAfterReadSlots, -1)
+    fun removeAfterReadSlots() = flowPrefs.getInt(Keys.removeAfterReadSlots, -1)
 
     fun removeAfterMarkedAsRead() = prefs.getBoolean(Keys.removeAfterMarkedAsRead, false)
 
@@ -408,6 +408,8 @@ class PreferencesHelper(val context: Context) {
     fun deleteRemovedChapters() = flowPrefs.getInt(Keys.deleteRemovedChapters, 0)
 
     fun removeBookmarkedChapters() = flowPrefs.getBoolean("pref_remove_bookmarked", false)
+
+    fun removeExcludeCategories() = flowPrefs.getStringSet("remove_exclude_categories", emptySet())
 
     fun showAllCategories() = flowPrefs.getBoolean("show_all_categories", true)
 

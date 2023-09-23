@@ -55,6 +55,9 @@ class SettingsDownloadController : SettingsController() {
             summaryRes = R.string.split_tall_images_summary
         }
 
+        val dbCategories = db.getCategories().executeAsBlocking()
+        val categories = listOf(Category.createDefault(context)) + dbCategories
+
         preferenceCategory {
             titleRes = R.string.remove_after_read
 
@@ -64,7 +67,7 @@ class SettingsDownloadController : SettingsController() {
                 defaultValue = false
             }
             intListPreference(activity) {
-                key = Keys.removeAfterReadSlots
+                bindTo(preferences.removeAfterReadSlots())
                 titleRes = R.string.remove_after_read
                 entriesRes = arrayOf(
                     R.string.never,
@@ -77,14 +80,19 @@ class SettingsDownloadController : SettingsController() {
                 entryRange = -1..4
                 defaultValue = -1
             }
+            multiSelectListPreferenceMat(activity) {
+                bindTo(preferences.removeExcludeCategories())
+                titleRes = R.string.pref_remove_exclude_categories
+                entries = categories.map { it.name }
+                entryValues = categories.map { it.id.toString() }
+                noSelectionRes = R.string.none
+                preferences.removeAfterReadSlots().asImmediateFlowIn(viewScope) { isVisible = it != -1 }
+            }
             switchPreference {
                 bindTo(preferences.removeBookmarkedChapters())
                 titleRes = R.string.allow_deleting_bookmarked_chapters
             }
         }
-
-        val dbCategories = db.getCategories().executeAsBlocking()
-        val categories = listOf(Category.createDefault(context)) + dbCategories
 
         preferenceCategory {
             titleRes = R.string.download_new_chapters
