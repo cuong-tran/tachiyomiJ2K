@@ -148,10 +148,10 @@ open class BrowseSourcePresenter(
      */
     fun restartPager(query: String = this.query, filters: FilterList = this.appliedFilters) {
         this.query = query
-        this.appliedFilters = filters
+        this.appliedFilters = filters.ifEmpty { source.getFilterList() }
 
         // Create a new pager.
-        pager = createPager(query, filters)
+        pager = createPager(query, appliedFilters)
 
         val sourceId = source.id
 
