@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.StringRes
@@ -28,7 +29,6 @@ import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
-import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.isCollapsed
@@ -85,7 +85,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private var filterOrder = preferences.filterOrder().get()
 
-    private lateinit var clearButton: ImageView
+    private lateinit var clearButton: Button
     private lateinit var fullFilterButton: ImageView
 
     private val filterItems: MutableList<FilterTagGroup> by lazy {
@@ -112,7 +112,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     fun onCreate(controller: LibraryController) {
-        clearButton = binding.clearButton
+        clearButton = binding.clearFiltersButton
         binding.filterLayout.removeView(clearButton)
         fullFilterButton = binding.filterButton
         sheetBehavior = BottomSheetBehavior.from(this)
@@ -194,14 +194,16 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         createTags()
         clearButton.setOnClickListener { clearFilters() }
         fullFilterButton.setOnLongClickListener {
-            clearFilters()
-            true
+            val hadFilters = hasActiveFilters()
+            if (hadFilters) {
+                clearFilters()
+            }
+            hadFilters
         }
         fullFilterButton.setOnClickListener { showFullFilterSheet() }
 
         setExpandText(controller.canCollapseOrExpandCategory(), false)
 
-        clearButton.compatToolTipText = context.getString(R.string.clear_filters)
         preferences.filterOrder().asFlow()
             .drop(1)
             .onEach {

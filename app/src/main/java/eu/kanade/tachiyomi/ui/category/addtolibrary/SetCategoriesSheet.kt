@@ -277,8 +277,7 @@ class SetCategoriesSheet(
         }.flatten()
         if (addCategories.isNotEmpty() || listManga.size == 1) {
             Category.lastCategoriesAddedTo =
-                addCategories.mapNotNull { it.id }.toSet().takeIf { it.isNotEmpty() }
-                    ?: setOf(0)
+                addCategories.mapNotNull { it.id }.toSet().ifEmpty { setOf(0) }
         }
         db.setMangaCategories(mangaCategories, listManga)
         onMangaAdded()
