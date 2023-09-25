@@ -20,7 +20,7 @@ val listOfStringsAdapter = object : ColumnAdapter<List<String>, String> {
 }
 
 val updateStrategyAdapter = object : ColumnAdapter<UpdateStrategy, Int> {
-    private val enumValues by lazy { UpdateStrategy.values() }
+    private val enumValues by lazy { UpdateStrategy.entries }
 
     override fun decode(databaseValue: Int): UpdateStrategy =
         enumValues.getOrElse(databaseValue) { UpdateStrategy.ALWAYS_UPDATE }

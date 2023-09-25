@@ -60,7 +60,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
         fastAdapterDark.setHasStableIds(true)
         selectExtensionLight = fastAdapterLight.getSelectExtension().setThemeListener(false)
         selectExtensionDark = fastAdapterDark.getSelectExtension().setThemeListener(true)
-        val enumConstants = Themes.values()
+        val enumConstants = Themes.entries
         val supportsDynamic = DynamicColors.isDynamicColorAvailable()
         itemAdapterLight.set(
             enumConstants

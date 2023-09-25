@@ -29,7 +29,7 @@ internal class TriStateMultiChoiceDialogAdapter(
     internal var listener: TriStateMultiChoiceListener?,
 ) : RecyclerView.Adapter<TriStateMultiChoiceViewHolder>() {
 
-    private val states = TriStateCheckBox.State.values()
+    private val states = TriStateCheckBox.State.entries
     private val defaultOrdinal
         get() = if (skipChecked) {
             TriStateCheckBox.State.IGNORE.ordinal

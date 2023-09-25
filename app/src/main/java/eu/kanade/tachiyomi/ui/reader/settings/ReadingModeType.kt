@@ -18,7 +18,7 @@ enum class ReadingModeType(val prefValue: Int, @StringRes val stringRes: Int, @D
     val flagValue = prefValue shl ReadingModeType.SHIFT
 
     companion object {
-        fun fromPreference(preference: Int): ReadingModeType = values().find { it.flagValue == preference } ?: DEFAULT
+        fun fromPreference(preference: Int): ReadingModeType = entries.find { it.flagValue == preference } ?: DEFAULT
         private const val SHIFT = 0x00000000
         const val MASK = 7 shl SHIFT
 
@@ -37,6 +37,6 @@ enum class ReadingModeType(val prefValue: Int, @StringRes val stringRes: Int, @D
             return mode == WEBTOON || mode == CONTINUOUS_VERTICAL
         }
 
-        fun fromSpinner(position: Int?) = values().find { value -> value.prefValue == position } ?: DEFAULT
+        fun fromSpinner(position: Int?) = entries.find { value -> value.prefValue == position } ?: DEFAULT
     }
 }

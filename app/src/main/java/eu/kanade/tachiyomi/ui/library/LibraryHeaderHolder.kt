@@ -277,7 +277,7 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
         val category =
             (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category ?: return
         adapter.controller?.activity?.let { activity ->
-            val items = LibrarySort.values().map { it.menuSheetItem(category.isDynamic) }
+            val items = LibrarySort.entries.map { it.menuSheetItem(category.isDynamic) }
             val sortingMode = category.sortingMode(true)
             val sheet = MaterialMenuSheet(
                 activity,

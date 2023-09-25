@@ -128,9 +128,9 @@ class StatsDetailsController :
                     ?.setTitle(R.string.stat)
                     ?.setSingleChoiceItems(
                         presenter.getStatsArray(),
-                        Stats.values().indexOf(presenter.selectedStat),
+                        Stats.entries.indexOf(presenter.selectedStat),
                     ) { dialog, which ->
-                        val newSelection = Stats.values()[which]
+                        val newSelection = Stats.entries[which]
                         if (newSelection == presenter.selectedStat) return@setSingleChoiceItems
                         chipStat.text = activity?.getString(newSelection.resourceId)
                         presenter.selectedStat = newSelection
@@ -775,9 +775,9 @@ class StatsDetailsController :
             .setTitle(R.string.sort_by)
             .setSingleChoiceItems(
                 presenter.getSortDataArray(),
-                StatsSort.values().indexOf(presenter.selectedStatsSort),
+                StatsSort.entries.indexOf(presenter.selectedStatsSort),
             ) { dialog, which ->
-                val newSelection = StatsSort.values()[which]
+                val newSelection = StatsSort.entries[which]
                 if (newSelection == presenter.selectedStatsSort) return@setSingleChoiceItems
                 statsSortTextView?.text = activity?.getString(newSelection.resourceId)
                 presenter.selectedStatsSort = newSelection

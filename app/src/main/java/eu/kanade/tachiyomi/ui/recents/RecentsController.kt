@@ -891,7 +891,7 @@ class RecentsController(bundle: Bundle? = null) :
                 tabs.removeAllTabs()
                 tabs.clearOnTabSelectedListeners()
                 val selectedTab = presenter.viewType
-                RecentsViewType.values().forEach { viewType ->
+                RecentsViewType.entries.forEach { viewType ->
                     tabs.addTab(
                         tabs.newTab().setText(viewType.stringRes).also { tab ->
                             tab.view.compatToolTipText = null

@@ -22,8 +22,8 @@ enum class OrientationType(val prefValue: Int, val flag: Int, @StringRes val str
         const val MASK = 7 shl SHIFT
 
         fun fromPreference(preference: Int): OrientationType =
-            values().find { it.flagValue == preference } ?: FREE
+            entries.find { it.flagValue == preference } ?: FREE
 
-        fun fromSpinner(position: Int?) = values().find { value -> value.prefValue == position } ?: DEFAULT
+        fun fromSpinner(position: Int?) = entries.find { value -> value.prefValue == position } ?: DEFAULT
     }
 }

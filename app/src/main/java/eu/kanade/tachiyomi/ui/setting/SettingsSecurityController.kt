@@ -55,8 +55,8 @@ class SettingsSecurityController : SettingsController() {
         listPreference(activity) {
             bindTo(preferences.secureScreen())
             titleRes = R.string.secure_screen
-            entriesRes = PreferenceValues.SecureScreenMode.values().map { it.titleResId }.toTypedArray()
-            entryValues = PreferenceValues.SecureScreenMode.values().map { it.name }
+            entriesRes = PreferenceValues.SecureScreenMode.entries.map { it.titleResId }.toTypedArray()
+            entryValues = PreferenceValues.SecureScreenMode.entries.map { it.name }
 
             onChange {
                 it as String

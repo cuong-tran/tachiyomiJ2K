@@ -12,7 +12,7 @@ enum class InstalledExtensionsOrder(val value: Int, @StringRes val nameRes: Int)
     ;
 
     companion object {
-        fun fromValue(preference: Int) = values().find { it.value == preference } ?: Name
+        fun fromValue(preference: Int) = entries.find { it.value == preference } ?: Name
         fun fromPreference(pref: PreferencesHelper) = fromValue(pref.installedExtensionsOrder().get())
     }
 }

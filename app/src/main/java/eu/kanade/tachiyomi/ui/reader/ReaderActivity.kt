@@ -782,7 +782,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
                 setOnClickListener {
                     popupMenu(
-                        items = OrientationType.values().map { it.flagValue to it.stringRes },
+                        items = OrientationType.entries.map { it.flagValue to it.stringRes },
                         selectedItemId = viewModel.manga?.orientationType
                             ?: preferences.defaultOrientationType().get(),
                     ) {
@@ -810,7 +810,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
             readingMode.setOnClickListener { readingMode ->
                 readingMode.popupMenu(
-                    items = ReadingModeType.values().map { it.flagValue to it.stringRes },
+                    items = ReadingModeType.entries.map { it.flagValue to it.stringRes },
                     selectedItemId = viewModel.manga?.readingModeType,
                 ) {
                     viewModel.setMangaReadingMode(itemId)

@@ -148,7 +148,7 @@ class SettingsAppearanceController : SettingsController() {
             intListPreference(activity) {
                 key = Keys.sideNavMode
                 titleRes = R.string.use_side_navigation
-                val values = SideNavMode.values()
+                val values = SideNavMode.entries
                 entriesRes = values.map { it.stringRes }.toTypedArray()
                 entryValues = values.map { it.prefValue }
                 defaultValue = SideNavMode.DEFAULT.prefValue

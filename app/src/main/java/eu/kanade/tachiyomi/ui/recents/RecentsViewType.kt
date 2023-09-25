@@ -15,6 +15,6 @@ enum class RecentsViewType(val mainValue: Int, @StringRes val stringRes: Int) {
     val isUpdates get() = this == Updates
 
     companion object {
-        fun valueOf(value: Int?) = values().find { it.mainValue == value } ?: GroupedAll
+        fun valueOf(value: Int?) = entries.find { it.mainValue == value } ?: GroupedAll
     }
 }

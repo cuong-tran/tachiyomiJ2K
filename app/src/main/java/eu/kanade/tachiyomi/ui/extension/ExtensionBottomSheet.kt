@@ -238,7 +238,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     override fun onExtSortClicked(view: TextView, position: Int) {
         view.popupMenu(
-            InstalledExtensionsOrder.values().map { it.value to it.nameRes },
+            InstalledExtensionsOrder.entries.map { it.value to it.nameRes },
             presenter.preferences.installedExtensionsOrder().get(),
         ) {
             presenter.preferences.installedExtensionsOrder().set(itemId)

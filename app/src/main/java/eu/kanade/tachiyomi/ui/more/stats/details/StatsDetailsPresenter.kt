@@ -538,7 +538,7 @@ class StatsDetailsPresenter(
     }
 
     fun getStatsArray(): Array<String> {
-        return Stats.values().map { context.getString(it.resourceId) }.toTypedArray()
+        return Stats.entries.map { context.getString(it.resourceId) }.toTypedArray()
     }
 
     private fun getEnabledSources(): List<Source> {
@@ -547,7 +547,7 @@ class StatsDetailsPresenter(
     }
 
     fun getSortDataArray(): Array<String> {
-        return StatsSort.values().sortedArray().map { context.getString(it.resourceId) }.toTypedArray()
+        return StatsSort.entries.sorted().map { context.getString(it.resourceId) }.toTypedArray()
     }
 
     fun getTracks(manga: Manga): MutableList<Track> {

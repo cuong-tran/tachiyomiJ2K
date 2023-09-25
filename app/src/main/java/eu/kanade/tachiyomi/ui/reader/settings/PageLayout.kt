@@ -21,6 +21,6 @@ enum class PageLayout(
 
     companion object {
         fun fromPreference(preference: Int): PageLayout =
-            values().find { it.value == preference } ?: SINGLE_PAGE
+            entries.find { it.value == preference } ?: SINGLE_PAGE
     }
 }

@@ -13,8 +13,8 @@ enum class ReaderBackgroundColor(val prefValue: Int, @StringRes val stringRes: I
 
     val isSmartColor get() = this == SMART_PAGE || this == SMART_THEME
     companion object {
-        fun indexFromPref(preference: Int) = values().indexOf(fromPreference(preference))
+        fun indexFromPref(preference: Int) = entries.indexOf(fromPreference(preference))
         fun fromPreference(preference: Int): ReaderBackgroundColor =
-            values().find { it.prefValue == preference } ?: SMART_PAGE
+            entries.find { it.prefValue == preference } ?: SMART_PAGE
     }
 }

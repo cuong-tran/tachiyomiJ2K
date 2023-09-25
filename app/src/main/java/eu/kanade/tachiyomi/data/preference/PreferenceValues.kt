@@ -34,7 +34,7 @@ object PreferenceValues {
         ;
 
         companion object {
-            fun fromValue(preference: Int) = values().find { it.value == preference } ?: Alphabetically
+            fun fromValue(preference: Int) = entries.find { it.value == preference } ?: Alphabetically
             fun fromPreference(pref: PreferencesHelper) = fromValue(pref.migrationSourceOrder().get())
         }
     }

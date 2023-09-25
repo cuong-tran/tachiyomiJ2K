@@ -301,7 +301,7 @@ class SettingsSourcesController : SettingsController(), FloatingSearchInterface 
         Alpha(0), Enabled(1);
 
         companion object {
-            fun from(i: Int): SourcesSort? = values().find { it.value == i }
+            fun from(i: Int): SourcesSort? = entries.find { it.value == i }
         }
     }
 }

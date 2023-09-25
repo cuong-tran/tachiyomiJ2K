@@ -158,7 +158,7 @@ class ExpandedFilterSheet(
     private fun openReorderSheet() {
         val recycler = RecyclerView(context)
         val filterOrder = preferences.filterOrder().get().toMutableList()
-        FilterBottomSheet.Filters.values().forEach {
+        FilterBottomSheet.Filters.entries.forEach {
             if (it.value !in filterOrder) {
                 filterOrder.add(it.value)
             }
