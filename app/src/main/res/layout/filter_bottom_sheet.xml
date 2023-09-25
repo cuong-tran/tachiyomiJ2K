@@ -75,7 +75,9 @@
                         android:id="@+id/clear_filters_button"
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
+                        android:layout_height="32dp"
                         android:maxLines="1"
                         android:text="@string/clear_filters"
                         android:textColor="?attr/colorSecondary" />
