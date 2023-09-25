@@ -128,17 +128,17 @@ android {
 dependencies {
     // Compose
     implementation("androidx.activity:activity-compose:1.7.2")
-    implementation("androidx.compose.foundation:foundation:1.4.3")
-    implementation("androidx.compose.animation:animation:1.4.3")
-    implementation("androidx.compose.ui:ui:1.4.3")
-    implementation("androidx.compose.material:material:1.4.3")
-    implementation("androidx.compose.material3:material3:1.1.1")
+    implementation("androidx.compose.foundation:foundation:1.5.1")
+    implementation("androidx.compose.animation:animation:1.5.1")
+    implementation("androidx.compose.ui:ui:1.5.1")
+    implementation("androidx.compose.material:material:1.5.1")
+    implementation("androidx.compose.material3:material3:1.1.2")
     implementation("com.google.android.material:compose-theme-adapter-3:1.1.1")
-    implementation("androidx.compose.material:material-icons-extended:1.4.3")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.4.3")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.4.3")
+    implementation("androidx.compose.material:material-icons-extended:1.5.1")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.5.1")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.5.1")
     implementation("com.google.accompanist:accompanist-webview:0.30.1")
-    implementation("androidx.glance:glance-appwidget:1.0.0-rc01")
+    implementation("androidx.glance:glance-appwidget:1.0.0")
 
     // Modified dependencies
     implementation("com.github.jays2kings:subsampling-scale-image-view:756849e") {
@@ -149,16 +149,16 @@ dependencies {
     // Android X libraries
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.cardview:cardview:1.0.0")
-    implementation("com.google.android.material:material:1.10.0-alpha05")
-    implementation("androidx.webkit:webkit:1.7.0")
+    implementation("com.google.android.material:material:1.10.0-rc01")
+    implementation("androidx.webkit:webkit:1.8.0")
     implementation("androidx.recyclerview:recyclerview:1.3.1")
     implementation("androidx.preference:preference:1.2.1")
-    implementation("androidx.annotation:annotation:1.6.0")
-    implementation("androidx.browser:browser:1.5.0")
+    implementation("androidx.annotation:annotation:1.7.0")
+    implementation("androidx.browser:browser:1.6.0")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.activity:activity-ktx:1.8.0-alpha06")
-    implementation("androidx.core:core-ktx:1.10.1")
+    implementation("androidx.activity:activity-ktx:1.8.0-rc01")
+    implementation("androidx.core:core-ktx:1.12.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("androidx.window:window:1.1.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
@@ -172,7 +172,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")
 
-    val lifecycleVersion = "2.6.1"
+    val lifecycleVersion = "2.6.2"
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-common:$lifecycleVersion")
@@ -192,7 +192,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
     implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
     implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:$okhttpVersion")
-    implementation("com.squareup.okio:okio:3.3.0")
+    implementation("com.squareup.okio:okio:3.4.0")
 
     // Chucker
     val chuckerVersion = "3.5.2"
@@ -203,7 +203,7 @@ dependencies {
     implementation(kotlin("reflect", version = AndroidVersions.kotlin))
 
     // JSON
-    val kotlinSerialization =  "1.5.0"
+    val kotlinSerialization =  "1.5.1"
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinSerialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${kotlinSerialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-okio:${kotlinSerialization}")
@@ -214,7 +214,7 @@ dependencies {
     // Disk
     implementation("com.jakewharton:disklrucache:2.0.2")
     implementation("com.github.tachiyomiorg:unifile:17bec43")
-    implementation("com.github.junrar:junrar:7.5.4")
+    implementation("com.github.junrar:junrar:7.5.5")
 
     // HTML parser
     implementation("org.jsoup:jsoup:1.16.1")
@@ -227,7 +227,7 @@ dependencies {
 
     // Database
     implementation("androidx.sqlite:sqlite-ktx:2.3.1")
-    implementation("com.github.requery:sqlite-android:3.41.1")
+    implementation("com.github.requery:sqlite-android:3.42.0")
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
 
@@ -280,7 +280,7 @@ dependencies {
 
     implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
 
-    val coroutines = "1.7.0"
+    val coroutines = "1.7.3"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines")
 
