@@ -159,7 +159,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
         } else {
             val filteredManga = withDefContext { mangas.filter { it.filter(s) } }
             if (filteredManga.isEmpty() && controller?.presenter?.showAllCategories == false) {
-                val catId = mangas.firstOrNull()?.manga?.category
+                val catId = mangas.firstOrNull()?.let { it.header?.catId ?: it.manga.category }
                 val blankItem = catId?.let { controller.presenter.blankItem(it) }
                 updateDataSet(blankItem ?: emptyList())
             } else {
