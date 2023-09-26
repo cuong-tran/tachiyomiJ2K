@@ -26,12 +26,6 @@ import androidx.core.view.marginBottom
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
-import androidx.webkit.WebSettingsCompat.DARK_STRATEGY_WEB_THEME_DARKENING_ONLY
-import androidx.webkit.WebSettingsCompat.FORCE_DARK_OFF
-import androidx.webkit.WebSettingsCompat.FORCE_DARK_ON
-import androidx.webkit.WebSettingsCompat.setForceDark
-import androidx.webkit.WebSettingsCompat.setForceDarkStrategy
-import androidx.webkit.WebViewFeature
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.databinding.WebviewActivityBinding
@@ -121,7 +115,6 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
             insets
         }
 
-        setWebDarkMode()
         binding.swipeRefresh.isEnabled = false
 
         if (bundle == null) {
@@ -163,21 +156,6 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
             }
     }
 
-    private fun setWebDarkMode() {
-        if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)) {
-            setForceDarkStrategy(
-                binding.webview.settings,
-                DARK_STRATEGY_WEB_THEME_DARKENING_ONLY,
-            )
-            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
-                setForceDark(
-                    binding.webview.settings,
-                    if (isInNightMode()) FORCE_DARK_ON else FORCE_DARK_OFF,
-                )
-            }
-        }
-    }
-
     override fun onProvideAssistContent(outContent: AssistContent?) {
         super.onProvideAssistContent(outContent)
         binding.webview.url?.let { outContent?.webUri = it.toUri() }
@@ -211,7 +189,6 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                 R.attr.colorPrimaryVariant,
             ),
         )
-        setWebDarkMode()
         val colorSurface = attrs.getColor(0, 0)
         val actionBarTintColor = attrs.getColor(1, 0)
         val colorPrimaryVariant = attrs.getColor(2, 0)

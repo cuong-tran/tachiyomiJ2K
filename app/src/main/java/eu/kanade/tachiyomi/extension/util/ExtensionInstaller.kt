@@ -4,11 +4,13 @@ import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Context.RECEIVER_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
@@ -375,7 +377,7 @@ internal class ExtensionInstaller(private val context: Context) {
             isRegistered = true
 
             val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-            context.registerReceiver(this, filter)
+            ContextCompat.registerReceiver(context, this, filter, ContextCompat.RECEIVER_EXPORTED)
         }
 
         /**
