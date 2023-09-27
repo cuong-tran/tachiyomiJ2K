@@ -541,7 +541,9 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.downloadBottomSheet.root.onDestroy()
+        if (isBindingInitialized) {
+            binding.downloadBottomSheet.root.onDestroy()
+        }
         snack?.dismiss()
         snack = null
     }
