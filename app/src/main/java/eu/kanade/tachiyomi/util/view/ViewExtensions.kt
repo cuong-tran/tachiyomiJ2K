@@ -477,7 +477,7 @@ fun Dialog.blurBehindWindow(
     }
     val filter = IntentFilter()
     filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
-    context.registerReceiver(powerSaverChangeReceiver, filter)
+    ContextCompat.registerReceiver(context, powerSaverChangeReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
     val unregister: () -> Unit = {
         if (registered) {
             context.unregisterReceiver(powerSaverChangeReceiver)

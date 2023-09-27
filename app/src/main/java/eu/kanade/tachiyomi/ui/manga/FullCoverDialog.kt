@@ -20,6 +20,7 @@ import androidx.activity.ComponentDialog
 import androidx.activity.addCallback
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.addListener
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updateLayoutParams
@@ -76,7 +77,7 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
         val filter = IntentFilter()
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            context.registerReceiver(powerSaverChangeReceiver, filter)
+            ContextCompat.registerReceiver(context, powerSaverChangeReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
         }
 
         onBackPressedDispatcher.addCallback {
@@ -196,6 +197,13 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
     override fun dismiss() {
         super.dismiss()
         thumbView.alpha = 1f
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        try {
+            context.unregisterReceiver(powerSaverChangeReceiver)
+        } catch (_: Exception) { }
     }
 
     private fun animateBack() {
