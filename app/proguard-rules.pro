@@ -1,8 +1,8 @@
 -dontobfuscate
 
--keep class eu.kanade.tachiyomi.source.** { public protected *; } #
--keep,allowoptimization class eu.kanade.**
--keep,allowoptimization class tachiyomi.**
+-keep class eu.kanade.tachiyomi.source.** { public protected *; } # Avoid access modification
+-keep,allowoptimization class eu.kanade.** { public protected *; }
+-keep,allowoptimization class tachiyomi.** { public protected *; }
 -keep,allowoptimization class androidx.preference.** { *; }
 
 # Keep common dependencies used in extensions
@@ -25,6 +25,16 @@
 -keep,allowoptimization class eu.kanade.tachiyomi.network.OkHttpExtensionsKt { public protected *; }
 -keep,allowoptimization class eu.kanade.tachiyomi.network.RequestsKt { public protected *; }
 -keep,allowoptimization class eu.kanade.tachiyomi.AppInfo { public protected *; }
+
+-keep class com.hippo.image.** { *; }
+-keep interface com.hippo.image.** { *; }
+-dontwarn nucleus.view.NucleusActionBarActivity
+
+# Design library
+-dontwarn com.google.android.material.**
+-keep class com.google.android.material.** { *; }
+-keep interface com.google.android.material.** { *; }
+-keep public class com.google.android.material.R$* { *; }
 
 ##---------------Begin: proguard configuration for RxJava 1.x  ----------
 -dontwarn sun.misc.**
