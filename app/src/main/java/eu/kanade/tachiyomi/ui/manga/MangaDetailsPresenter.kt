@@ -136,6 +136,7 @@ class MangaDetailsPresenter(
         } else {
             runBlocking { getChapters() }
             controller.updateChapters(this.chapters)
+            getHistory()
         }
         presenterScope.launch {
             setTrackItems()
@@ -153,6 +154,7 @@ class MangaDetailsPresenter(
             getChapters()
             if (andTracking) fetchTracks()
             withContext(Dispatchers.Main) { view?.updateChapters(chapters) }
+            getHistory()
         }
     }
 
@@ -170,8 +172,11 @@ class MangaDetailsPresenter(
         // Store the last emission
         allChapters = chapters
         this.chapters = applyChapterFilters(chapters)
+    }
+
+    private fun getHistory() {
         presenterScope.launchIO {
-            allHistory = manga.id?.let { db.getHistoryByMangaId(it).executeOnIO() }.orEmpty()
+            allHistory = manga.id?.let { db.getHistoryByMangaId(it).executeAsBlocking() }.orEmpty()
         }
     }
 
@@ -428,6 +433,7 @@ class MangaDetailsPresenter(
                     )
                 }
             }
+            getHistory()
         }
     }
 
@@ -453,6 +459,7 @@ class MangaDetailsPresenter(
                 withContext(Dispatchers.Main) {
                     view?.updateChapters(this@MangaDetailsPresenter.chapters)
                 }
+                getHistory()
             } catch (e: java.lang.Exception) {
                 withContext(Dispatchers.Main) {
                     view?.showError(trimException(e))
