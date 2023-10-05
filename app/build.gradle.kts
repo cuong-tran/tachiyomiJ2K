@@ -157,7 +157,7 @@ dependencies {
     implementation("androidx.browser:browser:1.6.0")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.activity:activity-ktx:1.8.0-rc01")
+    implementation("androidx.activity:activity-ktx:1.8.0")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("androidx.window:window:1.1.0")
