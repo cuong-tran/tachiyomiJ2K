@@ -18,7 +18,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import rx.Observable
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
@@ -101,13 +100,13 @@ class LocalSource(private val context: Context) : CatalogueSource, UnmeteredSour
 
     override fun toString() = name
 
-    override fun fetchPopularManga(page: Int) = fetchSearchManga(page, "", popularFilters)
+    override suspend fun getPopularManga(page: Int) = getSearchManga(page, "", popularFilters)
 
-    override fun fetchSearchManga(
+    override suspend fun getSearchManga(
         page: Int,
         query: String,
         filters: FilterList,
-    ): Observable<MangasPage> {
+    ): MangasPage {
         val baseDirs = getBaseDirectories(context)
 
         val time =
@@ -179,10 +178,10 @@ class LocalSource(private val context: Context) : CatalogueSource, UnmeteredSour
             }
         }
 
-        return Observable.just(MangasPage(mangas.toList(), false))
+        return MangasPage(mangas.toList(), false)
     }
 
-    override fun fetchLatestUpdates(page: Int) = fetchSearchManga(page, "", latestFilters)
+    override suspend fun getLatestUpdates(page: Int) = getSearchManga(page, "", latestFilters)
 
     override suspend fun getMangaDetails(manga: SManga): SManga {
         val localDetails = getBaseDirectories(context)

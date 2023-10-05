@@ -43,13 +43,15 @@ class MangaUpdatesApi(
 
     suspend fun getSeriesListItem(track: Track): Pair<ListItem, Rating?> {
         val listItem =
-            authClient.newCall(
-                GET(
-                    url = "$baseUrl/v1/lists/series/${track.media_id}",
-                ),
-            )
-                .awaitSuccess()
-                .parseAs<ListItem>()
+            with(json) {
+                authClient.newCall(
+                    GET(
+                        url = "$baseUrl/v1/lists/series/${track.media_id}",
+                    ),
+                )
+                    .awaitSuccess()
+                    .parseAs<ListItem>()
+            }
 
         val rating = getSeriesRating(track)
 
@@ -108,13 +110,15 @@ class MangaUpdatesApi(
 
     private suspend fun getSeriesRating(track: Track): Rating? {
         return try {
-            authClient.newCall(
-                GET(
-                    url = "$baseUrl/v1/series/${track.media_id}/rating",
-                ),
-            )
-                .awaitSuccess()
-                .parseAs<Rating>()
+            with(json) {
+                authClient.newCall(
+                    GET(
+                        url = "$baseUrl/v1/series/${track.media_id}/rating",
+                    ),
+                )
+                    .awaitSuccess()
+                    .parseAs<Rating>()
+            }
         } catch (e: Exception) {
             null
         }
@@ -153,20 +157,22 @@ class MangaUpdatesApi(
                 },
             )
         }
-        return client.newCall(
-            POST(
-                url = "$baseUrl/v1/series/search",
-                body = body.toString().toRequestBody(contentType),
-            ),
-        )
-            .awaitSuccess()
-            .parseAs<JsonObject>()
-            .let { obj ->
-                obj["results"]?.jsonArray?.map { element ->
-                    json.decodeFromJsonElement<Record>(element.jsonObject["record"]!!)
+        return with(json) {
+            client.newCall(
+                POST(
+                    url = "$baseUrl/v1/series/search",
+                    body = body.toString().toRequestBody(contentType),
+                ),
+            )
+                .awaitSuccess()
+                .parseAs<JsonObject>()
+                .let { obj ->
+                    obj["results"]?.jsonArray?.map { element ->
+                        json.decodeFromJsonElement<Record>(element.jsonObject["record"]!!)
+                    }
                 }
-            }
-            .orEmpty()
+                .orEmpty()
+        }
     }
 
     suspend fun authenticate(username: String, password: String): Context? {
@@ -174,21 +180,23 @@ class MangaUpdatesApi(
             put("username", username)
             put("password", password)
         }
-        return client.newCall(
-            PUT(
-                url = "$baseUrl/v1/account/login",
-                body = body.toString().toRequestBody(contentType),
-            ),
-        )
-            .awaitSuccess()
-            .parseAs<JsonObject>()
-            .let { obj ->
-                try {
-                    json.decodeFromJsonElement<Context>(obj["context"]!!)
-                } catch (e: Exception) {
-                    Timber.e(e)
-                    null
+        return with(json) {
+            client.newCall(
+                PUT(
+                    url = "$baseUrl/v1/account/login",
+                    body = body.toString().toRequestBody(contentType),
+                ),
+            )
+                .awaitSuccess()
+                .parseAs<JsonObject>()
+                .let { obj ->
+                    try {
+                        json.decodeFromJsonElement<Context>(obj["context"]!!)
+                    } catch (e: Exception) {
+                        Timber.e(e)
+                        null
+                    }
                 }
-            }
+        }
     }
 }

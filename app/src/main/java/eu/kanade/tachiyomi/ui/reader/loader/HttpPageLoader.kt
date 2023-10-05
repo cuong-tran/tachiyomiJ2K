@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import eu.kanade.tachiyomi.util.system.awaitSingle
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.CancellationException
@@ -195,7 +194,7 @@ class HttpPageLoader(
         try {
             if (page.imageUrl.isNullOrEmpty()) {
                 page.status = Page.State.LOAD_PAGE
-                page.imageUrl = source.fetchImageUrl(page).awaitSingle()
+                page.imageUrl = source.getImageUrl(page)
             }
             val imageUrl = page.imageUrl!!
 

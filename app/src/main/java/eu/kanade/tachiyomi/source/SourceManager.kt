@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import rx.Observable
 import java.util.concurrent.ConcurrentHashMap
 
 class SourceManager(
@@ -116,38 +115,20 @@ class SourceManager(
         override val name: String
             get() = extensionManager.getStubSource(id)?.name ?: id.toString()
 
-        override suspend fun getMangaDetails(manga: SManga): SManga {
+        override suspend fun getMangaDetails(manga: SManga): SManga =
             throw getSourceNotInstalledException()
-        }
 
-        @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getMangaDetails"))
-        override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
-            return Observable.error(getSourceNotInstalledException())
-        }
-
-        override suspend fun getChapterList(manga: SManga): List<SChapter> {
+        override suspend fun getChapterList(manga: SManga): List<SChapter> =
             throw getSourceNotInstalledException()
-        }
 
-        @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getChapterList"))
-        override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
-            return Observable.error(getSourceNotInstalledException())
-        }
-
-        override suspend fun getPageList(chapter: SChapter): List<Page> {
+        override suspend fun getPageList(chapter: SChapter): List<Page> =
             throw getSourceNotInstalledException()
-        }
-
-        @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getPageList"))
-        override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
-            return Observable.error(getSourceNotInstalledException())
-        }
 
         override fun toString(): String {
             return name
         }
 
-        fun getSourceNotInstalledException(): Exception {
+        private fun getSourceNotInstalledException(): Exception {
             return SourceNotFoundException(
                 context.getString(
                     R.string.source_not_installed_,

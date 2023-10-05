@@ -11,11 +11,13 @@ import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 internal class ExtensionGithubApi {
 
+    private val json: Json by injectLazy()
     private val networkService: NetworkHelper by injectLazy()
 
     private var requiresFallbackSource = false
@@ -42,9 +44,11 @@ internal class ExtensionGithubApi {
                     .await()
             }
 
-            val extensions = response
-                .parseAs<List<ExtensionJsonObject>>()
-                .toExtensions()
+            val extensions = with(json) {
+                response
+                    .parseAs<List<ExtensionJsonObject>>()
+                    .toExtensions()
+            }
 
             // Sanity check - a small number of extensions probably means something broke
             // with the repo generator

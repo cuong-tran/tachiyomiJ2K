@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.track.kavita
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Color
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
@@ -11,7 +10,11 @@ import eu.kanade.tachiyomi.data.track.EnhancedTrackService
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
+import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.sourcePreferences
+import uy.kohesive.injekt.injectLazy
 import java.security.MessageDigest
 
 class Kavita(private val context: Context, id: Int) : TrackService(id), EnhancedTrackService {
@@ -26,6 +29,8 @@ class Kavita(private val context: Context, id: Int) : TrackService(id), Enhanced
 
     private val interceptor by lazy { KavitaInterceptor(this) }
     val api by lazy { KavitaApi(client, interceptor) }
+
+    private val sourceManager: SourceManager by injectLazy()
 
     @StringRes
     override fun nameRes() = R.string.kavita
@@ -117,28 +122,29 @@ class Kavita(private val context: Context, id: Int) : TrackService(id), Enhanced
 
     fun loadOAuth() {
         val oauth = OAuth()
-        for (sourceId in 1..3) {
-            val authentication = oauth.authentications[sourceId - 1]
-            val sourceSuffixID by lazy {
-                val key = "kavita_$sourceId/all/1" // Hardcoded versionID to 1
+        for (id in 1..3) {
+            val authentication = oauth.authentications[id - 1]
+            val sourceId by lazy {
+                val key = "kavita_$id/all/1" // Hardcoded versionID to 1
                 val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
                 (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
                     .reduce(Long::or) and Long.MAX_VALUE
             }
-            val preferences: SharedPreferences by lazy {
-                context.getSharedPreferences("source_$sourceSuffixID", 0x0000)
-            }
-            val prefApiUrl = preferences.getString("APIURL", "")!!
-            if (prefApiUrl.isEmpty()) {
+            val preferences = (sourceManager.get(sourceId) as ConfigurableSource).sourcePreferences()
+
+            val prefApiUrl = preferences.getString("APIURL", "")
+            val prefApiKey = preferences.getString("APIKEY", "")
+            if (prefApiUrl.isNullOrEmpty() || prefApiKey.isNullOrEmpty()) {
                 // Source not configured. Skip
                 continue
             }
-            val prefApiKey = preferences.getString("APIKEY", "")!!
+
             val token = api.getNewToken(apiUrl = prefApiUrl, apiKey = prefApiKey)
             if (token.isNullOrEmpty()) {
                 // Source is not accessible. Skip
                 continue
             }
+
             authentication.apiUrl = prefApiUrl
             authentication.jwtToken = token.toString()
         }

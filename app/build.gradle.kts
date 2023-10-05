@@ -296,21 +296,40 @@ dependencies {
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }
 
-
-
 tasks {
     // See https://kotlinlang.org/docs/reference/experimental.html#experimental-status-of-experimental-api(-markers)
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.freeCompilerArgs += listOf(
-            "-opt-in=kotlin.Experimental",
-            "-opt-in=kotlin.RequiresOptIn",
-            "-opt-in=kotlin.ExperimentalStdlibApi",
+            "-Xcontext-receivers",
+            "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
+            "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
+            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+            "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
+            "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
+            "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
+            "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
+            "-opt-in=coil.annotation.ExperimentalCoilApi",
+            "-opt-in=com.google.accompanist.permissions.ExperimentalPermissionsApi",
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
             "-opt-in=kotlinx.coroutines.FlowPreview",
             "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
             "-opt-in=kotlinx.coroutines.InternalCoroutinesApi",
             "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
-            "-opt-in=coil.annotation.ExperimentalCoilApi",
         )
+
+        if (project.findProperty("tachiyomi.enableComposeCompilerMetrics") == "true") {
+            kotlinOptions.freeCompilerArgs += listOf(
+                "-P",
+                "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" +
+                        project.buildDir.absolutePath + "/compose_metrics",
+            )
+            kotlinOptions.freeCompilerArgs += listOf(
+                "-P",
+                "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" +
+                        project.buildDir.absolutePath + "/compose_metrics",
+            )
+        }
     }
 
     // Duplicating Hebrew string assets due to some locale code issues on different devices

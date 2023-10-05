@@ -27,7 +27,6 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.DiskUtil.NOMEDIA_FILE
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.ImageUtil
-import eu.kanade.tachiyomi.util.system.awaitSingle
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNow
 import eu.kanade.tachiyomi.util.system.withIOContext
@@ -388,7 +387,7 @@ class Downloader(
             pageList.filter { it.imageUrl.isNullOrEmpty() }.forEach { page ->
                 page.status = Page.State.LOAD_PAGE
                 try {
-                    page.imageUrl = download.source.fetchImageUrl(page).awaitSingle()
+                    page.imageUrl = download.source.getImageUrl(page)
                 } catch (e: Throwable) {
                     page.status = Page.State.ERROR
                 }

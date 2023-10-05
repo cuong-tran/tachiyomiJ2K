@@ -25,10 +25,13 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
+import uy.kohesive.injekt.injectLazy
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
+
+    private val json: Json by injectLazy()
 
     private val authClient = client.newBuilder()
         .addInterceptor(interceptor)
@@ -51,14 +54,16 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     }
                 }
             }
-            authClient.newCall(POST(apiUrl, body = payload.toString().toRequestBody(jsonMime)))
-                .awaitSuccess()
-                .parseAs<JsonObject>()
-                .let {
-                    track.library_id =
-                        it["data"]!!.jsonObject["SaveMediaListEntry"]!!.jsonObject["id"]!!.jsonPrimitive.long
-                    track
-                }
+            with(json) {
+                authClient.newCall(POST(apiUrl, body = payload.toString().toRequestBody(jsonMime)))
+                    .awaitSuccess()
+                    .parseAs<JsonObject>()
+                    .let {
+                        track.library_id =
+                            it["data"]!!.jsonObject["SaveMediaListEntry"]!!.jsonObject["id"]!!.jsonPrimitive.long
+                        track
+                    }
+            }
         }
     }
 
@@ -79,21 +84,23 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     }
                 }
             }
-            authClient.newCall(POST(apiUrl, body = payload.toString().toRequestBody(jsonMime)))
-                .awaitSuccess()
-                .parseAs<JsonObject>()
-                .let { response ->
-                    val media = response["data"]!!.jsonObject["SaveMediaListEntry"]!!.jsonObject
-                    val startedDate = parseDate(media, "startedAt")
-                    if (track.started_reading_date <= 0L || startedDate > 0) {
-                        track.started_reading_date = startedDate
+            with(json) {
+                authClient.newCall(POST(apiUrl, body = payload.toString().toRequestBody(jsonMime)))
+                    .awaitSuccess()
+                    .parseAs<JsonObject>()
+                    .let { response ->
+                        val media = response["data"]!!.jsonObject["SaveMediaListEntry"]!!.jsonObject
+                        val startedDate = parseDate(media, "startedAt")
+                        if (track.started_reading_date <= 0L || startedDate > 0) {
+                            track.started_reading_date = startedDate
+                        }
+                        val finishedDate = parseDate(media, "completedAt")
+                        if (track.finished_reading_date <= 0L || finishedDate > 0) {
+                            track.finished_reading_date = finishedDate
+                        }
+                        track
                     }
-                    val finishedDate = parseDate(media, "completedAt")
-                    if (track.finished_reading_date <= 0L || finishedDate > 0) {
-                        track.finished_reading_date = finishedDate
-                    }
-                    track
-                }
+            }
         }
     }
 
@@ -105,16 +112,18 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     put("query", search)
                 }
             }
-            authClient.newCall(POST(apiUrl, body = payload.toString().toRequestBody(jsonMime)))
-                .awaitSuccess()
-                .parseAs<JsonObject>()
-                .let { response ->
-                    val data = response["data"]!!.jsonObject
-                    val page = data["Page"]!!.jsonObject
-                    val media = page["media"]!!.jsonArray
-                    val entries = media.map { jsonToALManga(it.jsonObject) }
-                    entries.map { it.toTrack() }
-                }
+            with(json) {
+                authClient.newCall(POST(apiUrl, body = payload.toString().toRequestBody(jsonMime)))
+                    .awaitSuccess()
+                    .parseAs<JsonObject>()
+                    .let { response ->
+                        val data = response["data"]!!.jsonObject
+                        val page = data["Page"]!!.jsonObject
+                        val media = page["media"]!!.jsonArray
+                        val entries = media.map { jsonToALManga(it.jsonObject) }
+                        entries.map { it.toTrack() }
+                    }
+            }
         }
     }
 
@@ -127,16 +136,18 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     put("manga_id", track.media_id)
                 }
             }
-            authClient.newCall(POST(apiUrl, body = payload.toString().toRequestBody(jsonMime)))
-                .awaitSuccess()
-                .parseAs<JsonObject>()
-                .let { response ->
-                    val data = response["data"]!!.jsonObject
-                    val page = data["Page"]!!.jsonObject
-                    val media = page["mediaList"]!!.jsonArray
-                    val entries = media.map { jsonToALUserManga(it.jsonObject) }
-                    entries.firstOrNull()?.toTrack()
-                }
+            with(json) {
+                authClient.newCall(POST(apiUrl, body = payload.toString().toRequestBody(jsonMime)))
+                    .awaitSuccess()
+                    .parseAs<JsonObject>()
+                    .let { response ->
+                        val data = response["data"]!!.jsonObject
+                        val page = data["Page"]!!.jsonObject
+                        val media = page["mediaList"]!!.jsonArray
+                        val entries = media.map { jsonToALUserManga(it.jsonObject) }
+                        entries.firstOrNull()?.toTrack()
+                    }
+            }
         }
     }
 
@@ -168,22 +179,24 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             val payload = buildJsonObject {
                 put("query", currentUserQuery())
             }
-            authClient.newCall(
-                POST(
-                    apiUrl,
-                    body = payload.toString().toRequestBody(jsonMime),
-                ),
-            )
-                .awaitSuccess()
-                .parseAs<JsonObject>()
-                .let {
-                    val data = it["data"]!!.jsonObject
-                    val viewer = data["Viewer"]!!.jsonObject
-                    Pair(
-                        viewer["id"]!!.jsonPrimitive.int,
-                        viewer["mediaListOptions"]!!.jsonObject["scoreFormat"]!!.jsonPrimitive.content,
-                    )
-                }
+            with(json) {
+                authClient.newCall(
+                    POST(
+                        apiUrl,
+                        body = payload.toString().toRequestBody(jsonMime),
+                    ),
+                )
+                    .awaitSuccess()
+                    .parseAs<JsonObject>()
+                    .let {
+                        val data = it["data"]!!.jsonObject
+                        val viewer = data["Viewer"]!!.jsonObject
+                        Pair(
+                            viewer["id"]!!.jsonPrimitive.int,
+                            viewer["mediaListOptions"]!!.jsonObject["scoreFormat"]!!.jsonPrimitive.content,
+                        )
+                    }
+            }
         }
     }
 

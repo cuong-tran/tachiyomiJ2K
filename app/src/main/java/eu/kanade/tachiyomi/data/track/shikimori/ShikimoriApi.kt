@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.jsonMime
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.system.withIOContext
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -26,8 +27,11 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
+import uy.kohesive.injekt.injectLazy
 
 class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInterceptor) {
+
+    private val json: Json by injectLazy()
 
     private val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
@@ -62,14 +66,16 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
                 .appendQueryParameter("search", search)
                 .appendQueryParameter("limit", "20")
                 .build()
-            authClient.newCall(GET(url.toString()))
-                .awaitSuccess()
-                .parseAs<JsonArray>()
-                .let { response ->
-                    response.map {
-                        jsonToSearch(it.jsonObject)
+            with(json) {
+                authClient.newCall(GET(url.toString()))
+                    .awaitSuccess()
+                    .parseAs<JsonArray>()
+                    .let { response ->
+                        response.map {
+                            jsonToSearch(it.jsonObject)
+                        }
                     }
-                }
+            }
         }
     }
 
@@ -120,9 +126,11 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
             .appendQueryParameter("target_id", track.media_id.toString())
             .appendQueryParameter("target_type", "Manga")
             .build()
-        return authClient.newCall(GET(url.toString()))
-            .execute()
-            .parseAs()
+        return with(json) {
+            authClient.newCall(GET(url.toString()))
+                .execute()
+                .parseAs()
+        }
     }
 
     suspend fun findLibManga(track: Track, user_id: String): Track? {
@@ -130,9 +138,11 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
             val urlMangas = "$apiUrl/mangas".toUri().buildUpon()
                 .appendPath(track.media_id.toString())
                 .build()
-            val mangas = authClient.newCall(GET(urlMangas.toString()))
-                .awaitSuccess()
-                .parseAs<JsonObject>()
+            val mangas = with(json) {
+                authClient.newCall(GET(urlMangas.toString()))
+                    .awaitSuccess()
+                    .parseAs<JsonObject>()
+            }
 
             val entry = getUserRates(track, user_id)
             if (entry.size > 1) {
@@ -146,20 +156,24 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
 
     suspend fun getCurrentUser(): Int {
         return withIOContext {
-            authClient.newCall(GET("$apiUrl/users/whoami"))
-                .awaitSuccess()
-                .parseAs<JsonObject>()
-                .let {
-                    it["id"]!!.jsonPrimitive.int
-                }
+            with(json) {
+                authClient.newCall(GET("$apiUrl/users/whoami"))
+                    .awaitSuccess()
+                    .parseAs<JsonObject>()
+                    .let {
+                        it["id"]!!.jsonPrimitive.int
+                    }
+            }
         }
     }
 
     suspend fun accessToken(code: String): OAuth {
         return withIOContext {
-            client.newCall(accessTokenRequest(code))
-                .awaitSuccess()
-                .parseAs()
+            with(json) {
+                client.newCall(accessTokenRequest(code))
+                    .awaitSuccess()
+                    .parseAs()
+            }
         }
     }
 

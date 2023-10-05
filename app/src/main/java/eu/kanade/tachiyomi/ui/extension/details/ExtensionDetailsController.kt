@@ -34,8 +34,9 @@ import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.getPreferenceKey
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.preferenceKey
+import eu.kanade.tachiyomi.source.sourcePreferences
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.setting.DSL
 import eu.kanade.tachiyomi.ui.setting.onChange
@@ -231,7 +232,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
         val prefs = mutableListOf<Preference>()
         val block: (@DSL SwitchPreferenceCompat).() -> Unit = {
-            key = source.getPreferenceKey() + "_enabled"
+            key = source.preferenceKey() + "_enabled"
             title = when {
                 isMultiSource && !isMultiLangSingleSource -> source.toString()
                 else -> LocaleHelper.getSourceDisplayName(source.lang, context)
@@ -278,9 +279,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
             val newScreen = screen.preferenceManager.createPreferenceScreen(context)
             source.setupPreferenceScreen(newScreen)
 
-            val dataStore = SharedPreferencesDataStore(
-                context.getSharedPreferences(source.getPreferenceKey(), Context.MODE_PRIVATE),
-            )
+            val dataStore = SharedPreferencesDataStore(source.sourcePreferences())
             // Reparent the preferences
             while (newScreen.preferenceCount != 0) {
                 val pref = newScreen.getPreference(0)

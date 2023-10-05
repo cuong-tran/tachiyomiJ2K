@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
-import eu.kanade.tachiyomi.util.system.awaitSingle
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.withUIContext
@@ -176,7 +175,7 @@ open class GlobalSearchPresenter(
                             return@mainLaunch
                         }
                         val mangas = try {
-                            source.fetchSearchManga(1, query, source.getFilterList()).awaitSingle()
+                            source.getSearchManga(1, query, source.getFilterList())
                         } catch (error: Exception) {
                             MangasPage(emptyList(), false)
                         }

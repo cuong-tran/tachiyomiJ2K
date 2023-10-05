@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.network.PUT
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.system.withIOContext
+import kotlinx.serialization.json.Json
 import okhttp3.Credentials
 import okhttp3.Dns
 import okhttp3.FormBody
@@ -23,6 +24,7 @@ import java.nio.charset.Charset
 import java.security.MessageDigest
 
 class TachideskApi {
+    private val json: Json by injectLazy()
     private val network by injectLazy<NetworkHelper>()
     val client: OkHttpClient =
         network.client.newBuilder()
@@ -50,7 +52,9 @@ class TachideskApi {
             trackUrl
         }
 
-        val manga = client.newCall(GET("$url/full", headers)).awaitSuccess().parseAs<MangaDataClass>()
+        val manga = with(json) {
+            client.newCall(GET("$url/full", headers)).awaitSuccess().parseAs<MangaDataClass>()
+        }
 
         TrackSearch.create(TrackManager.SUWAYOMI).apply {
             title = manga.title
@@ -70,7 +74,9 @@ class TachideskApi {
 
     suspend fun updateProgress(track: Track): Track {
         val url = track.tracking_url
-        val chapters = client.newCall(GET("$url/chapters", headers)).awaitSuccess().parseAs<List<ChapterDataClass>>()
+        val chapters = with(json) {
+            client.newCall(GET("$url/chapters", headers)).awaitSuccess().parseAs<List<ChapterDataClass>>()
+        }
         val lastChapterIndex = chapters.first { it.chapterNumber == track.last_chapter_read }.index
 
         client.newCall(
