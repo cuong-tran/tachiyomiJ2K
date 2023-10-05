@@ -4,8 +4,6 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Parcelable
-import androidx.preference.PreferenceManager
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.extension.model.Extension
@@ -78,8 +76,10 @@ class ExtensionManager(
             .find { ext -> ext.sources.any { it.id == sourceId } }?.pkgName
         return if (pkgName != null) {
             try {
-                return iconMap[pkgName]
-                    ?: iconMap.getOrPut(pkgName) { context.packageManager.getApplicationIcon(pkgName) }
+                return iconMap.getOrPut(pkgName) {
+                    ExtensionLoader.getExtensionPackageInfoFromPkgName(context, pkgName)!!.applicationInfo
+                        .loadIcon(context.packageManager)
+                }
             } catch (e: Exception) {
                 null
             }
@@ -250,7 +250,6 @@ class ExtensionManager(
     /** Sets the result of the installation of an extension.
      *
      * @param sessionId The id of the download.
-     * @param result Whether the extension was installed or not.
      */
     fun cancelInstallation(sessionId: Int) {
         installer.cancelInstallation(sessionId)
@@ -299,6 +298,7 @@ class ExtensionManager(
      * @param pkgName The package name of the application to uninstall.
      */
     fun uninstallExtension(pkgName: String) {
+        ExtensionLoader.uninstallPrivateExtension(context, pkgName)
         installer.uninstallApk(pkgName)
     }
 
@@ -446,13 +446,14 @@ class ExtensionManager(
     }
 
     companion object {
-        fun canAutoInstallUpdates(context: Context, checkIfShizukuIsRunning: Boolean = false): Boolean {
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        fun canAutoInstallUpdates(checkIfShizukuIsRunning: Boolean = false): Boolean {
+            val prefs = Injekt.get<PreferencesHelper>().extensionInstaller().get()
             return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ||
                 (
-                    prefs.getBoolean(PreferenceKeys.useShizuku, false) &&
+                    prefs == ExtensionInstaller.SHIZUKU &&
                         (!checkIfShizukuIsRunning || ShizukuInstaller.isShizukuRunning())
-                    )
+                    ) ||
+                prefs == ExtensionInstaller.PRIVATE
         }
     }
 }

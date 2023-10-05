@@ -12,14 +12,14 @@ import android.os.Build
 import android.os.Environment
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.preference.PreferenceManager
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.ExtensionInstallerJob
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.ShizukuInstaller
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.ui.extension.ExtensionIntallInfo
 import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.isPackageInstalled
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CoroutineScope
@@ -44,6 +44,8 @@ import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.io.File
 
 /**
@@ -262,24 +264,58 @@ internal class ExtensionInstaller(private val context: Context) {
         val useActivity =
             pkgName?.let { !ExtensionLoader.isExtensionInstalledByApp(context, pkgName) } ?: true ||
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.S
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        if (prefs.getBoolean(PreferenceKeys.useShizuku, false) && pkgName != null) {
-            setInstalling(pkgName, uri.hashCode())
-            shizukuInstaller?.addToQueue(downloadId, pkgName, uri)
-        } else {
-            val intent =
-                if (useActivity) {
-                    Intent(context, ExtensionInstallActivity::class.java)
-                } else {
-                    Intent(context, ExtensionInstallBroadcast::class.java)
+        val prefs: PreferencesHelper = Injekt.get()
+        when (prefs.extensionInstaller().get()) {
+            SHIZUKU -> {
+                pkgName ?: return
+                setInstalling(pkgName, uri.hashCode())
+                shizukuInstaller?.addToQueue(downloadId, pkgName, uri)
+            }
+            PRIVATE -> {
+                val extensionManager = Injekt.get<ExtensionManager>()
+                val tempFile = File(context.cacheDir, "temp_$downloadId")
+
+                pkgName ?: return
+                if (tempFile.exists() && !tempFile.delete()) {
+                    // Unlikely but just in case
+                    setInstallationResult(pkgName, false)
+                    return
                 }
-                    .setDataAndType(uri, APK_MIME)
-                    .putExtra(EXTRA_DOWNLOAD_ID, downloadId)
-                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            if (useActivity) {
-                context.startActivity(intent)
-            } else {
-                context.sendBroadcast(intent)
+
+                try {
+                    context.contentResolver.openInputStream(uri)?.use { input ->
+                        tempFile.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+
+                    if (ExtensionLoader.installPrivateExtensionFile(context, tempFile)) {
+                        setInstallationResult(pkgName, true)
+                    } else {
+                        setInstallationResult(pkgName, false)
+                    }
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to read downloaded extension file.")
+                    setInstallationResult(pkgName, false)
+                }
+
+                tempFile.delete()
+            }
+            else -> {
+                val intent =
+                    if (useActivity) {
+                        Intent(context, ExtensionInstallActivity::class.java)
+                    } else {
+                        Intent(context, ExtensionInstallBroadcast::class.java)
+                    }
+                        .setDataAndType(uri, APK_MIME)
+                        .putExtra(EXTRA_DOWNLOAD_ID, downloadId)
+                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                if (useActivity) {
+                    context.startActivity(intent)
+                } else {
+                    context.sendBroadcast(intent)
+                }
             }
         }
     }
@@ -290,11 +326,15 @@ internal class ExtensionInstaller(private val context: Context) {
      * @param pkgName The package name of the extension to uninstall
      */
     fun uninstallApk(pkgName: String) {
-        val packageUri = "package:$pkgName".toUri()
-        val intent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri)
-            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-        context.startActivity(intent)
+        if (context.isPackageInstalled(pkgName)) {
+            @Suppress("DEPRECATION")
+            val intent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, "package:$pkgName".toUri())
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        } else {
+            ExtensionLoader.uninstallPrivateExtension(context, pkgName)
+            ExtensionInstallReceiver.notifyRemoved(context, pkgName)
+        }
     }
 
     /**
@@ -430,5 +470,9 @@ internal class ExtensionInstaller(private val context: Context) {
         const val APK_MIME = "application/vnd.android.package-archive"
         const val EXTRA_DOWNLOAD_ID = "ExtensionInstaller.extra.DOWNLOAD_ID"
         const val FILE_SCHEME = "file://"
+
+        const val PACKAGE_INSTALLER = 0
+        const val SHIZUKU = 1
+        const val PRIVATE = 2
     }
 }

@@ -7,13 +7,13 @@ import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.extension.model.InstalledExtensionsOrder
+import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.ui.migration.BaseMigrationPresenter
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -128,8 +128,8 @@ class ExtensionBottomPresenter : BaseMigrationPresenter<ExtensionBottomSheet>() 
                     {
                         when (sortOrder) {
                             InstalledExtensionsOrder.Name -> it.name
-                            InstalledExtensionsOrder.RecentlyUpdated -> Long.MAX_VALUE - extensionUpdateDate(it.pkgName)
-                            InstalledExtensionsOrder.RecentlyInstalled -> Long.MAX_VALUE - extensionInstallDate(it.pkgName)
+                            InstalledExtensionsOrder.RecentlyUpdated -> Long.MAX_VALUE - ExtensionLoader.extensionUpdateDate(context, it)
+                            InstalledExtensionsOrder.RecentlyInstalled -> Long.MAX_VALUE - ExtensionLoader.extensionInstallDate(context, it)
                             InstalledExtensionsOrder.Language -> it.lang
                         }
                     },
@@ -186,24 +186,6 @@ class ExtensionBottomPresenter : BaseMigrationPresenter<ExtensionBottomSheet>() 
 
         this.extensions = items
         return items
-    }
-
-    private fun extensionInstallDate(pkgName: String): Long {
-        val context = view?.context ?: return 0
-        return try {
-            context.packageManager.getPackageInfo(pkgName, 0).firstInstallTime
-        } catch (e: java.lang.Exception) {
-            0
-        }
-    }
-
-    private fun extensionUpdateDate(pkgName: String): Long {
-        val context = view?.context ?: return 0
-        return try {
-            context.packageManager.getPackageInfo(pkgName, 0).lastUpdateTime
-        } catch (e: java.lang.Exception) {
-            0
-        }
     }
 
     fun getExtensionUpdateCount(): Int = preferences.extensionUpdatesCount().get()

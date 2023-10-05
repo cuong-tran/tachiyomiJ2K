@@ -21,6 +21,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.attribute.BasicFileAttributes
 
 /**
  * Class that handles the loading of the extensions installed in the system.
@@ -56,6 +59,55 @@ internal object ExtensionLoader {
      */
     var trustedSignatures = mutableSetOf(officialSignature) + preferences.trustedSignatures().get()
 
+    private const val PRIVATE_EXTENSION_EXTENSION = "ext"
+
+    private fun getPrivateExtensionDir(context: Context) = File(context.filesDir, "exts")
+
+    fun installPrivateExtensionFile(context: Context, file: File): Boolean {
+        val extension = context.packageManager.getPackageArchiveInfo(file.absolutePath, PACKAGE_FLAGS)
+            ?.takeIf { isPackageAnExtension(it) } ?: return false
+        val currentExtension = getExtensionPackageInfoFromPkgName(context, extension.packageName)
+
+        if (currentExtension != null) {
+            if (PackageInfoCompat.getLongVersionCode(extension) <
+                PackageInfoCompat.getLongVersionCode(currentExtension)
+            ) {
+                Timber.e("Installed extension version is higher. Downgrading is not allowed.")
+                return false
+            }
+
+            val extensionSignatures = getSignatures(extension)
+            if (extensionSignatures.isNullOrEmpty()) {
+                Timber.e("Extension to be installed is not signed.")
+                return false
+            }
+
+            if (!extensionSignatures.containsAll(getSignatures(currentExtension)!!)) {
+                Timber.e("Installed extension signature is not matched.")
+                return false
+            }
+        }
+
+        val target = File(getPrivateExtensionDir(context), "${extension.packageName}.$PRIVATE_EXTENSION_EXTENSION")
+        return try {
+            file.copyTo(target, overwrite = true)
+            if (currentExtension != null) {
+                ExtensionInstallReceiver.notifyReplaced(context, extension.packageName)
+            } else {
+                ExtensionInstallReceiver.notifyAdded(context, extension.packageName)
+            }
+            true
+        } catch (e: Exception) {
+            Timber.e("Failed to copy extension file.")
+            target.delete()
+            false
+        }
+    }
+
+    fun uninstallPrivateExtension(context: Context, pkgName: String) {
+        File(getPrivateExtensionDir(context), "$pkgName.$PRIVATE_EXTENSION_EXTENSION").delete()
+    }
+
     /**
      * Return a list of all the installed extensions initialized concurrently.
      *
@@ -75,28 +127,29 @@ internal object ExtensionLoader {
             .filter { isPackageAnExtension(it) }
             .map { ExtensionInfo(packageInfo = it, isShared = true) }
 
-//        val privateExtPkgs = getPrivateExtensionDir(context)
-//            .listFiles()
-//            ?.asSequence()
-//            ?.filter { it.isFile && it.extension == PRIVATE_EXTENSION_EXTENSION }
-//            ?.mapNotNull {
-//                val path = it.absolutePath
-//                pkgManager.getPackageArchiveInfo(path, PACKAGE_FLAGS)
-//                    ?.apply { applicationInfo.fixBasePaths(path) }
-//            }
-//            ?.filter { isPackageAnExtension(it) }
-//            ?.map { ExtensionInfo(packageInfo = it, isShared = false) }
-//            ?: emptySequence()
+        val privateExtPkgs = getPrivateExtensionDir(context)
+            .listFiles()
+            ?.asSequence()
+            ?.filter { it.isFile && it.extension == PRIVATE_EXTENSION_EXTENSION }
+            ?.mapNotNull {
+                it.setReadOnly()
+                val path = it.absolutePath
+                pkgManager.getPackageArchiveInfo(path, PACKAGE_FLAGS)
+                    ?.apply { applicationInfo.fixBasePaths(path) }
+            }
+            ?.filter { isPackageAnExtension(it) }
+            ?.map { ExtensionInfo(packageInfo = it, isShared = false) }
+            ?: emptySequence()
 
-        val extPkgs = (sharedExtPkgs)
+        val extPkgs = (sharedExtPkgs + privateExtPkgs)
             // Remove duplicates. Shared takes priority than private by default
             .distinctBy { it.packageInfo.packageName }
             // Compare version number
-//            .mapNotNull { sharedPkg ->
-//                val privatePkg = privateExtPkgs
-//                    .singleOrNull { it.packageInfo.packageName == sharedPkg.packageInfo.packageName }
-//                selectExtensionPackage(sharedPkg, privatePkg)
-//            }
+            .mapNotNull { sharedPkg ->
+                val privatePkg = privateExtPkgs
+                    .singleOrNull { it.packageInfo.packageName == sharedPkg.packageInfo.packageName }
+                selectExtensionPackage(sharedPkg, privatePkg)
+            }
             .toList()
 
         if (extPkgs.isEmpty()) return emptyList()
@@ -126,22 +179,58 @@ internal object ExtensionLoader {
     fun getExtensionPackageInfoFromPkgName(context: Context, pkgName: String): PackageInfo? {
         return getExtensionInfoFromPkgName(context, pkgName)?.packageInfo
     }
+    fun isExtensionPrivate(context: Context, pkgName: String): Boolean =
+        getExtensionInfoFromPkgName(context, pkgName)?.isShared == false
+
+    fun extensionInstallDate(context: Context, extension: Extension.Installed): Long {
+        return try {
+            if (!extension.isShared) {
+                val file = ExtensionLoader.privateExtensionFile(context, extension.pkgName)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val attr = Files.readAttributes(file.toPath(), BasicFileAttributes::class.java)
+                    attr.creationTime().toMillis()
+                } else {
+                    file.lastModified()
+                }
+            } else {
+                context.packageManager.getPackageInfo(extension.pkgName, 0).firstInstallTime
+            }
+        } catch (e: java.lang.Exception) {
+            0
+        }
+    }
+
+    fun extensionUpdateDate(context: Context, extension: Extension.Installed): Long {
+        return try {
+            if (!extension.isShared) {
+                ExtensionLoader.privateExtensionFile(context, extension.pkgName).lastModified()
+            } else {
+                context.packageManager.getPackageInfo(extension.pkgName, 0).lastUpdateTime
+            }
+        } catch (e: java.lang.Exception) {
+            0
+        }
+    }
+
+    private fun privateExtensionFile(context: Context, pkgName: String): File =
+        File(getPrivateExtensionDir(context), "$pkgName.$PRIVATE_EXTENSION_EXTENSION")
 
     private fun getExtensionInfoFromPkgName(context: Context, pkgName: String): ExtensionInfo? {
-//        val privateExtensionFile = File(getPrivateExtensionDir(context), "$pkgName.$PRIVATE_EXTENSION_EXTENSION")
-//        val privatePkg = if (privateExtensionFile.isFile) {
-//            context.packageManager.getPackageArchiveInfo(privateExtensionFile.absolutePath, PACKAGE_FLAGS)
-//                ?.takeIf { isPackageAnExtension(it) }
-//                ?.let {
-//                    it.applicationInfo.fixBasePaths(privateExtensionFile.absolutePath)
-//                    ExtensionInfo(
-//                        packageInfo = it,
-//                        isShared = false,
-//                    )
-//                }
-//        } else {
-//            null
-//        }
+        val privateExtensionFile = File(getPrivateExtensionDir(context), "$pkgName.$PRIVATE_EXTENSION_EXTENSION")
+        val privatePkg = if (privateExtensionFile.isFile) {
+            privateExtensionFile.setReadOnly()
+            context.packageManager.getPackageArchiveInfo(privateExtensionFile.absolutePath, PACKAGE_FLAGS)
+                ?.takeIf { isPackageAnExtension(it) }
+                ?.let {
+                    it.applicationInfo.fixBasePaths(privateExtensionFile.absolutePath)
+                    ExtensionInfo(
+                        packageInfo = it,
+                        isShared = false,
+                    )
+                }
+        } else {
+            null
+        }
 
         val sharedPkg = try {
             context.packageManager.getPackageInfo(pkgName, PACKAGE_FLAGS)
@@ -156,7 +245,7 @@ internal object ExtensionLoader {
             null
         }
 
-        return sharedPkg // selectExtensionPackage(sharedPkg, privatePkg)
+        return selectExtensionPackage(sharedPkg, privatePkg)
     }
 
     fun isExtensionInstalledByApp(context: Context, pkgName: String): Boolean {

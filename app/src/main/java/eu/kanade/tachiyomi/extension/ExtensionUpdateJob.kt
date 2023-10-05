@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.extension
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -25,6 +26,8 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.extension.model.Extension
+import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
+import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.localeContext
 import eu.kanade.tachiyomi.util.system.notification
@@ -61,17 +64,22 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
         val preferences: PreferencesHelper by injectLazy()
         preferences.extensionUpdatesCount().set(extensions.size)
         val extensionsInstalledByApp by lazy {
-            if (preferences.useShizukuForExtensions()) {
+            if (preferences.extensionInstaller().get() == ExtensionInstaller.SHIZUKU) {
                 if (Shizuku.pingBinder() && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
                     extensions
                 } else {
                     emptyList()
                 }
             } else {
-                extensions.filter { Injekt.get<ExtensionManager>().isInstalledByApp(it) }
+                val extManager = Injekt.get<ExtensionManager>()
+                val isOnA12 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                extensions.filter {
+                    (isOnA12 && extManager.isInstalledByApp(it)) ||
+                        ExtensionLoader.isExtensionPrivate(context, it.pkgName)
+                }
             }
         }
-        if (ExtensionManager.canAutoInstallUpdates(context, true) &&
+        if (ExtensionManager.canAutoInstallUpdates(true) &&
             inputData.getBoolean(RUN_AUTO, true) &&
             preferences.autoUpdateExtensions() != AppDownloadInstallJob.NEVER &&
             !ExtensionInstallerJob.isRunning(context) &&
@@ -126,7 +134,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
                             context,
                         ),
                     )
-                    if (ExtensionManager.canAutoInstallUpdates(context, true) &&
+                    if (ExtensionManager.canAutoInstallUpdates(true) &&
                         extensions.size == extensionsList.size
                     ) {
                         val pendingIntent =

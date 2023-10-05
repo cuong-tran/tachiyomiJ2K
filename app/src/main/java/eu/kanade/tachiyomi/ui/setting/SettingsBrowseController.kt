@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
+import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.migration.MigrationController
@@ -49,7 +50,7 @@ class SettingsBrowseController : SettingsController() {
                     true
                 }
             }
-            if (ExtensionManager.canAutoInstallUpdates(context)) {
+            if (ExtensionManager.canAutoInstallUpdates()) {
                 val intPref = intListPreference(activity) {
                     key = PreferenceKeys.autoUpdateExtensions
                     titleRes = R.string.auto_update_extensions
@@ -61,7 +62,7 @@ class SettingsBrowseController : SettingsController() {
                     )
                     defaultValue = AppDownloadInstallJob.ONLY_ON_UNMETERED
                 }
-                val infoPref = if (!preferences.useShizukuForExtensions()) {
+                val infoPref = if (preferences.extensionInstaller().get() != ExtensionInstaller.SHIZUKU) {
                     infoPreference(R.string.some_extensions_may_not_update)
                 } else {
                     null

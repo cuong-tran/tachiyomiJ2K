@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
@@ -27,7 +28,9 @@ import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob.Target
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.extension.ShizukuInstaller
+import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.PREF_DOH_360
 import eu.kanade.tachiyomi.network.PREF_DOH_ADGUARD
@@ -298,26 +301,45 @@ class SettingsAdvancedController : SettingsController() {
 
         preferenceCategory {
             titleRes = R.string.extensions
-            switchPreference {
-                key = PreferenceKeys.useShizuku
-                titleRes = R.string.use_shizuku_to_install
-                summaryRes = R.string.use_shizuku_summary
-                defaultValue = false
+
+            intListPreference(activity) {
+                bindTo(preferences.extensionInstaller())
+                titleRes = R.string.ext_installer_pref
+                entriesRes = arrayOf(
+                    R.string.default_value,
+                    R.string.ext_installer_shizuku,
+                    R.string.ext_installer_private,
+                )
+                entryValues = listOf(
+                    ExtensionInstaller.PACKAGE_INSTALLER,
+                    ExtensionInstaller.SHIZUKU,
+                    ExtensionInstaller.PRIVATE,
+                )
+
                 onChange {
-                    it as Boolean
-                    if (it && !context.isPackageInstalled(ShizukuInstaller.shizukuPkgName) && !Sui.isSui()) {
-                        context.materialAlertDialog()
-                            .setTitle(R.string.shizuku)
-                            .setMessage(R.string.ext_installer_shizuku_unavailable_dialog)
-                            .setPositiveButton(R.string.download) { _, _ ->
-                                openInBrowser(ShizukuInstaller.downloadLink)
-                            }
-                            .setNegativeButton(android.R.string.cancel, null)
-                            .show()
-                        false
-                    } else {
-                        true
+                    it as Int
+                    if (it == ExtensionInstaller.SHIZUKU) {
+                        return@onChange if (!context.isPackageInstalled(ShizukuInstaller.shizukuPkgName) && !Sui.isSui()) {
+                            context.materialAlertDialog()
+                                .setTitle(R.string.ext_installer_shizuku)
+                                .setMessage(R.string.ext_installer_shizuku_unavailable_dialog)
+                                .setPositiveButton(R.string.download) { _, _ ->
+                                    openInBrowser(ShizukuInstaller.downloadLink)
+                                }
+                                .setNegativeButton(android.R.string.cancel, null)
+                                .show()
+                            false
+                        } else {
+                            true
+                        }
                     }
+                    true
+                }
+            }
+            infoPreference(R.string.ext_installer_summary).apply {
+                preferences.extensionInstaller().asImmediateFlowIn(viewScope) {
+                    isVisible =
+                        it != ExtensionInstaller.PACKAGE_INSTALLER && Build.VERSION.SDK_INT < Build.VERSION_CODES.S
                 }
             }
         }

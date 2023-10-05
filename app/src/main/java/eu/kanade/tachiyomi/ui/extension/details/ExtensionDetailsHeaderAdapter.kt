@@ -9,8 +9,10 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ExtensionDetailHeaderBinding
+import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.ui.extension.getApplicationIcon
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.view.inflate
 
 class ExtensionDetailsHeaderAdapter(private val presenter: ExtensionDetailsPresenter) :
@@ -49,7 +51,24 @@ class ExtensionDetailsHeaderAdapter(private val presenter: ExtensionDetailsPrese
             binding.extensionPkg.text = extension.pkgName
 
             binding.extensionUninstallButton.setOnClickListener {
-                presenter.uninstallExtension()
+                if (extension.isShared) {
+                    presenter.uninstallExtension()
+                } else {
+                    val extName = run {
+                        val appInfo = ExtensionLoader.getExtensionPackageInfoFromPkgName(
+                            context,
+                            extension.pkgName,
+                        )?.applicationInfo ?: return@run extension.name
+                        context.packageManager.getApplicationLabel(appInfo).toString()
+                    }
+                    context.materialAlertDialog()
+                        .setTitle(extName)
+                        .setPositiveButton(R.string.uninstall) { _, _ ->
+                            presenter.uninstallExtension()
+                        }
+                        .setNegativeButton(android.R.string.cancel) { _, _ -> }
+                        .show()
+                }
             }
 
             binding.extensionAppInfoButton.setOnClickListener {
@@ -58,6 +77,8 @@ class ExtensionDetailsHeaderAdapter(private val presenter: ExtensionDetailsPrese
                 }
                 it.context.startActivity(intent)
             }
+
+            binding.extensionAppInfoButton.isVisible = extension.isShared
 
             if (extension.isUnofficial) {
                 binding.extensionWarningBanner.isVisible = true
