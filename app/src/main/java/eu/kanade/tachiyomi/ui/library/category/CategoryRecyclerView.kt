@@ -28,6 +28,7 @@ class CategoryRecyclerView @JvmOverloads constructor(
         fastAdapter.setHasStableIds(true)
         layoutManager = manager
         adapter = fastAdapter
+        itemAnimator = null
     }
 
     fun setCategories(items: List<Category>, itemsMap: Map<Int, Int>) {
