@@ -22,7 +22,6 @@ import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.extension.model.InstalledExtensionsOrder
 import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
-import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.ui.extension.details.ExtensionDetailsController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.migration.BaseMigrationInterface
@@ -300,7 +299,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         if (binding.tabs.selectedTabPosition == 0) {
             val extension = (extAdapter?.getItem(position) as? ExtensionItem)?.extension ?: return
             if (extension is Extension.Installed || extension is Extension.Untrusted) {
-                uninstallExtension(extension.pkgName)
+                uninstallExtension(extension.name, extension.pkgName)
             }
         }
     }
@@ -411,26 +410,26 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     override fun trustSignature(signatureHash: String) {
         presenter.trustSignature(signatureHash)
     }
-
     override fun uninstallExtension(pkgName: String) {
+        presenter.uninstallExtension(pkgName)
+    }
+
+    private fun uninstallExtension(extName: String, pkgName: String) {
         if (context.isPackageInstalled(pkgName)) {
             presenter.uninstallExtension(pkgName)
         } else {
-            val extName = run {
-                val appInfo = ExtensionLoader.getExtensionPackageInfoFromPkgName(
-                    context,
-                    pkgName,
-                )?.applicationInfo ?: return@run pkgName
-                context.packageManager.getApplicationLabel(appInfo).toString()
-            }
             controller.activity!!.materialAlertDialog()
                 .setTitle(extName)
-                .setPositiveButton(R.string.uninstall) { _, _ ->
+                .setPositiveButton(R.string.remove) { _, _ ->
                     presenter.uninstallExtension(pkgName)
                 }
                 .setNegativeButton(android.R.string.cancel) { _, _ -> }
                 .show()
         }
+    }
+
+    fun setCanInstallPrivately(installPrivately: Boolean) {
+        extAdapter?.installPrivately = installPrivately
     }
 
     fun onDestroy() {

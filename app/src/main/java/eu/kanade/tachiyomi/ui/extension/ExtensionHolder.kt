@@ -60,7 +60,14 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
                         .takeUnless { it == 0L }?.let {
                             binding.date.isVisible = true
                             binding.date.text =
-                                itemView.context.timeSpanFromNow(R.string.installed_, it)
+                                itemView.context.timeSpanFromNow(
+                                    if (extension.isShared) {
+                                        R.string.installed_
+                                    } else {
+                                        R.string.added_
+                                    },
+                                    it,
+                                )
                             infoText.add("")
                         }
                 }
@@ -156,7 +163,7 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
             setText(R.string.trust)
         } else {
             resetStrokeColor()
-            setText(R.string.install)
+            setText(if (adapter.installPrivately) R.string.add else R.string.install)
         }
     }
 }

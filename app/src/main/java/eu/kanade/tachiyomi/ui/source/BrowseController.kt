@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceValues
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.BrowseControllerBinding
+import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
@@ -64,6 +65,9 @@ import eu.kanade.tachiyomi.util.view.toolbarHeight
 import eu.kanade.tachiyomi.util.view.updateGradiantBGRadius
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.parcelize.Parcelize
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -173,6 +177,13 @@ class BrowseController :
 
         requestFilePermissionsSafe(301, preferences)
         binding.bottomSheet.root.onCreate(this)
+
+        preferences.extensionInstaller().asFlow()
+            .drop(1)
+            .onEach {
+                binding.bottomSheet.root.setCanInstallPrivately(it == ExtensionInstaller.PRIVATE)
+            }
+            .launchIn(viewScope)
 
         binding.bottomSheet.root.sheetBehavior?.isGestureInsetBottomIgnored = true
 
