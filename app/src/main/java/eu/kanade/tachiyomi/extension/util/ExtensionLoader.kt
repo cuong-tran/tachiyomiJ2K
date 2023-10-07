@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceFactory
 import eu.kanade.tachiyomi.util.lang.Hash
+import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -108,12 +109,7 @@ internal object ExtensionLoader {
         File(getPrivateExtensionDir(context), "$pkgName.$PRIVATE_EXTENSION_EXTENSION").delete()
     }
 
-    /**
-     * Return a list of all the installed extensions initialized concurrently.
-     *
-     * @param context The application context.
-     */
-    fun loadExtensions(context: Context): List<LoadResult> {
+    private fun getExtensionsPackages(context: Context): List<ExtensionInfo> {
         val pkgManager = context.packageManager
 
         val installedPkgs = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -141,7 +137,7 @@ internal object ExtensionLoader {
             ?.map { ExtensionInfo(packageInfo = it, isShared = false) }
             ?: emptySequence()
 
-        val extPkgs = (sharedExtPkgs + privateExtPkgs)
+        return (sharedExtPkgs + privateExtPkgs)
             // Remove duplicates. Shared takes priority than private by default
             .distinctBy { it.packageInfo.packageName }
             // Compare version number
@@ -151,11 +147,28 @@ internal object ExtensionLoader {
                 selectExtensionPackage(sharedPkg, privatePkg)
             }
             .toList()
+    }
 
-        if (extPkgs.isEmpty()) return emptyList()
-
+    /**
+     * Return a list of all the installed extensions initialized concurrently.
+     *
+     * @param context The application context.
+     */
+    fun loadExtensions(context: Context): List<LoadResult> {
+        val extPkgs = getExtensionsPackages(context)
         // Load each extension concurrently and wait for completion
         return runBlocking {
+            val deferred = extPkgs.map {
+                async { loadExtension(context, it) }
+            }
+            deferred.awaitAll()
+        }
+    }
+
+    suspend fun loadExtensionAsync(context: Context): List<LoadResult> {
+        val extPkgs = getExtensionsPackages(context)
+        // Load each extension concurrently and wait for completion
+        return withIOContext {
             val deferred = extPkgs.map {
                 async { loadExtension(context, it) }
             }

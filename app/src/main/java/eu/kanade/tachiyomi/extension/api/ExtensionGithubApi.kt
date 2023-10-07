@@ -13,6 +13,8 @@ import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import timber.log.Timber
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 internal class ExtensionGithubApi {
@@ -64,9 +66,12 @@ internal class ExtensionGithubApi {
         return withIOContext {
             val extensions = prefetchedExtensions ?: findExtensions()
 
-            val installedExtensions = ExtensionLoader.loadExtensions(context)
-                .filterIsInstance<LoadResult.Success>()
-                .map { it.extension }
+            val extensionManager: ExtensionManager = Injekt.get()
+            val installedExtensions = extensionManager.installedExtensionsFlow.value.ifEmpty {
+                ExtensionLoader.loadExtensionAsync(context)
+                    .filterIsInstance<LoadResult.Success>()
+                    .map { it.extension }
+            }
 
             val extensionsWithUpdate = mutableListOf<Extension.Available>()
             for (installedExt in installedExtensions) {
