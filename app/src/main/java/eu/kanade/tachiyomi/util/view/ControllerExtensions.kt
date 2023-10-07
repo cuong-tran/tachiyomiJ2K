@@ -274,7 +274,7 @@ fun Controller.scrollViewWith(
     swipeRefreshLayout?.setDistanceToTriggerSync(150.dpToPx)
     val swipeCircle = swipeRefreshLayout?.findChild<ImageView>()
     activityBinding!!.appBar.doOnLayout {
-        if (fullAppBarHeight!! > 0 && isControllerVisible) {
+        if ((fullAppBarHeight ?: 0) > 0 && isControllerVisible) {
             appBarHeight = fullAppBarHeight!!
             recycler.requestApplyInsets()
         }
@@ -312,7 +312,7 @@ fun Controller.scrollViewWith(
             activityBinding.toolbar.height - if (includeTabView) tabBarHeight else 0
     }
     recycler.doOnApplyWindowInsetsCompat { view, insets, _ ->
-        appBarHeight = fullAppBarHeight!!
+        appBarHeight = fullAppBarHeight ?: 0
         val systemInsets = if (ignoreInsetVisibility) insets.ignoredSystemInsets else insets.getInsets(systemBars())
         val headerHeight = systemInsets.top + appBarHeight
         if (!customPadding) {
@@ -342,7 +342,7 @@ fun Controller.scrollViewWith(
             val floatingBar =
                 (this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView
             if (floatingBar) {
-                setAppBarBG(isColored.toInt().toFloat(), includeTabView)
+                setAppBarBG(isColored.toInt().toFloat(), false)
                 return@f
             }
             val percent = ImageUtil.getPercentOfColor(
@@ -358,7 +358,7 @@ fun Controller.scrollViewWith(
         }
     }
     if ((this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView) {
-        setAppBarBG(0f, includeTabView)
+        setAppBarBG(0f, false)
     }
     addLifecycleListener(
         object : Controller.LifecycleListener() {
@@ -388,9 +388,9 @@ fun Controller.scrollViewWith(
                         fakeBottomNavView = null
                     }
                     lastY = 0f
-                    activityBinding!!.appBar.updateAppBarAfterY(recycler)
-                    activityBinding!!.toolbar.tag = randomTag
-                    activityBinding!!.toolbar.setOnClickListener {
+                    activityBinding?.appBar?.updateAppBarAfterY(recycler)
+                    activityBinding?.toolbar?.tag = randomTag
+                    activityBinding?.toolbar?.setOnClickListener {
                         if (recycler is RecyclerView) {
                             recycler.smoothScrollToTop()
                         } else if (recycler is NestedScrollView) {
@@ -433,7 +433,9 @@ fun Controller.scrollViewWith(
                         v.layoutParams = params
                     }
                     toolbarColorAnim?.cancel()
-                    if (activityBinding!!.toolbar.tag == randomTag) activityBinding!!.toolbar.setOnClickListener(null)
+                    if (activityBinding?.toolbar?.tag == randomTag) {
+                        activityBinding?.toolbar?.setOnClickListener(null)
+                    }
                 }
             }
         },
@@ -442,7 +444,7 @@ fun Controller.scrollViewWith(
 
     recycler.post {
         if (isControllerVisible) {
-            activityBinding!!.appBar.updateAppBarAfterY(recycler)
+            activityBinding?.appBar?.updateAppBarAfterY(recycler)
             colorToolbar(!atTopOfRecyclerView())
         }
     }
@@ -450,15 +452,15 @@ fun Controller.scrollViewWith(
     fun onScrolled(dy: Int) {
         if (isControllerVisible && statusBarHeight > -1 &&
             (this@scrollViewWith as? BaseController<*>)?.isDragging != true &&
-            activity != null && activityBinding!!.appBar.height > 0 &&
+            activity != null && (activityBinding?.appBar?.height ?: 0) > 0 &&
             recycler.translationY == 0f
         ) {
             if (!recycler.canScrollVertically(-1)) {
                 val shortAnimationDuration = resources?.getInteger(
                     android.R.integer.config_shortAnimTime,
                 ) ?: 0
-                activityBinding!!.appBar.y = 0f
-                activityBinding!!.appBar.updateAppBarAfterY(recycler)
+                activityBinding?.appBar?.y = 0f
+                activityBinding?.appBar?.updateAppBarAfterY(recycler)
                 if (router.backstackSize == 1 && isInView) {
                     activityBinding!!.bottomNav?.let {
                         val animator = it.animate()?.translationY(0f)
@@ -472,9 +474,9 @@ fun Controller.scrollViewWith(
                 lastY = 0f
                 if (isToolbarColor) colorToolbar(false)
             } else {
-                activityBinding!!.appBar.y -= dy
-                activityBinding!!.appBar.updateAppBarAfterY(recycler)
-                activityBinding!!.bottomNav?.let { bottomNav ->
+                activityBinding?.appBar?.let { it.y -= dy }
+                activityBinding?.appBar?.updateAppBarAfterY(recycler)
+                activityBinding?.bottomNav?.let { bottomNav ->
                     if (bottomNav.isVisible && isInView) {
                         if (preferences.hideBottomNavOnScroll().get()) {
                             bottomNav.translationY += dy
@@ -493,10 +495,7 @@ fun Controller.scrollViewWith(
 
                 if (!isToolbarColor && (
                     dy == 0 ||
-                        (
-                            activityBinding!!.appBar.y <= -activityBinding!!.appBar.height.toFloat() ||
-                                dy == 0 && activityBinding!!.appBar.y == 0f
-                            )
+                        activityBinding?.appBar?.let { it.y <= -it.height.toFloat() } == true
                     )
                 ) {
                     colorToolbar(true)
@@ -505,45 +504,45 @@ fun Controller.scrollViewWith(
                 if (notAtTop != isToolbarColor) colorToolbar(notAtTop)
                 lastY = activityBinding!!.appBar.y
             }
-            swipeCircle?.translationY = max(
-                activityBinding!!.appBar.y,
-                -activityBinding!!.appBar.height + activityBinding!!.appBar.paddingTop.toFloat(),
-            )
+            activityBinding?.appBar?.let {
+                swipeCircle?.translationY = max(it.y, -it.height + it.paddingTop.toFloat())
+            }
         }
     }
 
     fun onScrollIdle() {
+        val activityBinding = activityBinding ?: return
         if (isControllerVisible && statusBarHeight > -1 &&
-            activity != null && activityBinding!!.appBar.height > 0 &&
+            activity != null && activityBinding.appBar.height > 0 &&
             recycler.translationY == 0f
         ) {
-            val halfWay = activityBinding!!.appBar.height.toFloat() / 2
+            val halfWay = activityBinding.appBar.height.toFloat() / 2
             val shortAnimationDuration = resources?.getInteger(
                 android.R.integer.config_shortAnimTime,
             ) ?: 0
-            val closerToTop = abs(activityBinding!!.appBar.y) > halfWay
-            val halfWayBottom = (activityBinding!!.bottomNav?.height?.toFloat() ?: 0f) / 2
-            val closerToBottom = activityBinding!!.bottomNav?.translationY ?: 0f > halfWayBottom
+            val closerToTop = abs(activityBinding.appBar.y) > halfWay
+            val halfWayBottom = (activityBinding.bottomNav?.height?.toFloat() ?: 0f) / 2
+            val closerToBottom = (activityBinding.bottomNav?.translationY ?: 0f) > halfWayBottom
             val atTop = !recycler.canScrollVertically(-1)
             val closerToEdge =
-                if (activityBinding!!.bottomNav?.isVisible == true &&
+                if (activityBinding.bottomNav?.isVisible == true &&
                     preferences.hideBottomNavOnScroll().get()
                 ) {
                     closerToBottom
                 } else {
                     closerToTop
                 }
-            lastY = activityBinding!!.appBar.snapAppBarY(this@scrollViewWith, recycler) {
-                val activityBinding = activityBinding ?: return@snapAppBarY
+            lastY = activityBinding.appBar.snapAppBarY(this@scrollViewWith, recycler) {
+                val appBar = this.activityBinding?.appBar ?: return@snapAppBarY
                 swipeCircle?.translationY = max(
-                    activityBinding.appBar.y,
-                    -activityBinding.appBar.height + activityBinding.appBar.paddingTop.toFloat(),
+                    appBar.y,
+                    -appBar.height + appBar.paddingTop.toFloat(),
                 )
             }
-            if (activityBinding!!.bottomNav?.isVisible == true &&
+            if (activityBinding.bottomNav?.isVisible == true &&
                 isInView && preferences.hideBottomNavOnScroll().get()
             ) {
-                activityBinding!!.bottomNav?.let {
+                activityBinding.bottomNav.let {
                     val lastBottomY =
                         if (closerToEdge && !atTop) it.height.toFloat() else 0f
                     val animator = it.animate()?.translationY(lastBottomY)
