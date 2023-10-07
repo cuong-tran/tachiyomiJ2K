@@ -46,6 +46,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
     var loadingPos = 0
     lateinit var binding: ReaderChaptersSheetBinding
+    var lastScale = 1f
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -100,6 +101,15 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         activity.window.navigationBarColor =
                             lerpColor(ColorUtils.setAlphaComponent(navPrimary, if (hasLightNav) 0 else 179), navPrimary, trueProgress)
                     }
+                    if (lastScale != 1f && scaleY != 1f) {
+                        val scaleProgress = ((1f - progress) * (1f - lastScale)) + lastScale
+                        scaleX = scaleProgress
+                        scaleY = scaleProgress
+                        for (i in 0 until childCount) {
+                            val childView = getChildAt(i)
+                            childView.scaleY = scaleProgress
+                        }
+                    }
                 }
 
                 override fun onStateChanged(p0: View, state: Int) {
@@ -107,7 +117,8 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     if (state == BottomSheetBehavior.STATE_COLLAPSED) {
                         sheetBehavior?.isHideable = false
                         (binding.chapterRecycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                            adapter?.getPosition(viewModel.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
+                            adapter?.getPosition(viewModel.getCurrentChapter()?.chapter?.id ?: 0L)
+                                ?: 0,
                             binding.chapterRecycler.height / 2 - 30.dpToPx,
                         )
                         if (canShowNav) {
@@ -126,7 +137,10 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         }
                         activity.binding.readerNav.root.alpha = 0f
                         binding.chapterRecycler.alpha = 1f
-                        if (activity.sheetManageNavColor) activity.window.navigationBarColor = navPrimary
+                        if (activity.sheetManageNavColor) {
+                            activity.window.navigationBarColor =
+                                navPrimary
+                        }
                     }
                     if (state == BottomSheetBehavior.STATE_HIDDEN) {
                         activity.binding.readerNav.root.alpha = 0f
@@ -137,9 +151,29 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     } else if (binding.root.isVisible) {
                         binding.root.isVisible = true
                     }
-                    binding.chapterRecycler.isClickable = state == BottomSheetBehavior.STATE_EXPANDED
-                    binding.chapterRecycler.isFocusable = state == BottomSheetBehavior.STATE_EXPANDED
+                    binding.chapterRecycler.isClickable =
+                        state == BottomSheetBehavior.STATE_EXPANDED
+                    binding.chapterRecycler.isFocusable =
+                        state == BottomSheetBehavior.STATE_EXPANDED
                     activity.reEnableBackPressedCallBack()
+
+                    if ((
+                        state == BottomSheetBehavior.STATE_COLLAPSED ||
+                            state == BottomSheetBehavior.STATE_EXPANDED ||
+                            state == BottomSheetBehavior.STATE_HIDDEN
+                        ) &&
+                        scaleY != 1f
+                    ) {
+                        scaleX = 1f
+                        scaleY = 1f
+                        pivotY = 0f
+                        translationX = 0f
+                        for (i in 0 until childCount) {
+                            val childView = getChildAt(i)
+                            childView.scaleY = 1f
+                        }
+                        lastScale = 1f
+                    }
                 }
             },
         )

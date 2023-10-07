@@ -35,6 +35,7 @@ import android.view.Window
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.widget.TextView
+import androidx.activity.BackEventCompat
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.activity.viewModels
@@ -225,12 +226,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     private var didTransitionFromChapter = false
     private var visibleChapterRange = longArrayOf()
     private var backPressedCallback: OnBackPressedCallback? = null
-    private val backCallback = {
-        if (binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()) {
-            binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.collapse()
-        }
-        reEnableBackPressedCallBack()
-    }
 
     var isScrollingThroughPagesOrChapters = false
     private var hingeGapSize = 0
@@ -307,7 +302,34 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             ColorStateList.valueOf(contextCompatColor(R.color.surface_alpha)),
         )
 
-        backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
+        backPressedCallback = object : OnBackPressedCallback(enabled = true) {
+            override fun handleOnBackPressed() {
+                if (binding.chaptersSheet.root.sheetBehavior.isExpanded()) {
+                    binding.chaptersSheet.root.lastScale = binding.chaptersSheet.root.scaleX
+                    binding.chaptersSheet.root.sheetBehavior?.collapse()
+                }
+                reEnableBackPressedCallBack()
+            }
+
+            override fun handleOnBackStarted(backEvent: BackEventCompat) {
+                if (binding.chaptersSheet.root.sheetBehavior.isExpanded()) {
+                    binding.chaptersSheet.root.sheetBehavior?.startBackProgress(backEvent)
+                }
+            }
+
+            override fun handleOnBackProgressed(backEvent: BackEventCompat) {
+                if (binding.chaptersSheet.root.sheetBehavior.isExpanded()) {
+                    binding.chaptersSheet.root.sheetBehavior?.updateBackProgress(backEvent)
+                }
+            }
+
+            override fun handleOnBackCancelled() {
+                if (binding.chaptersSheet.root.sheetBehavior.isExpanded()) {
+                    binding.chaptersSheet.root.sheetBehavior?.cancelBackProgress()
+                }
+            }
+        }
+        onBackPressedDispatcher.addCallback(backPressedCallback!!)
         if (viewModel.needsInit()) {
             fromUrl = handleIntentAction(intent)
             if (!fromUrl) {
