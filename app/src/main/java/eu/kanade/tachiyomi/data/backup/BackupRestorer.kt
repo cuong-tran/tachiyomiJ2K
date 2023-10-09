@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.backup.models.IntPreferenceValue
 import eu.kanade.tachiyomi.data.backup.models.LongPreferenceValue
 import eu.kanade.tachiyomi.data.backup.models.StringPreferenceValue
 import eu.kanade.tachiyomi.data.backup.models.StringSetPreferenceValue
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -25,6 +26,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.AndroidPreferenceStore
 import eu.kanade.tachiyomi.data.preference.PreferenceStore
 import eu.kanade.tachiyomi.source.sourcePreferences
+import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
 import okio.buffer
@@ -32,14 +34,49 @@ import okio.gzip
 import okio.source
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
+import java.io.File
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
-class BackupRestorer(context: Context, notifier: BackupNotifier) : AbstractBackupRestore<BackupManager>(context, notifier) {
+class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
 
+    private lateinit var backupManager: BackupManager
+    private val db: DatabaseHelper by injectLazy()
+    private val customMangaManager: CustomMangaManager by injectLazy()
     private val preferenceStore: PreferenceStore = Injekt.get()
 
+    private var restoreAmount = 0
+    private var restoreProgress = 0
+
+    /**
+     * Mapping of source ID to source name from backup data
+     */
+    private var sourceMapping: Map<Long, String> = emptyMap()
+
+    private val errors = mutableListOf<Pair<Date, String>>()
+
+    suspend fun restoreBackup(uri: Uri): Boolean {
+        val startTime = System.currentTimeMillis()
+        restoreProgress = 0
+        errors.clear()
+
+        if (!performRestore(uri)) {
+            return false
+        }
+
+        val endTime = System.currentTimeMillis()
+        val time = endTime - startTime
+
+        val logFile = writeErrorLog()
+
+        notifier.showRestoreComplete(time, errors.size, logFile.parent, logFile.name)
+        return true
+    }
+
     @SuppressLint("Recycle")
-    override suspend fun performRestore(uri: Uri): Boolean {
+    suspend fun performRestore(uri: Uri): Boolean {
         backupManager = BackupManager(context)
 
         val stream = context.contentResolver.openInputStream(uri)
@@ -93,7 +130,7 @@ class BackupRestorer(context: Context, notifier: BackupNotifier) : AbstractBacku
         val customManga = backupManga.getCustomMangaInfo()
 
         try {
-            val dbManga = backupManager.getMangaFromDatabase(manga)
+            val dbManga = db.getManga(manga.url, manga.source).executeAsBlocking()
             if (dbManga == null) {
                 // Manga not in database
                 restoreExistingManga(manga, chapters, categories, history, tracks, backupCategories, customManga)
@@ -215,5 +252,39 @@ class BackupRestorer(context: Context, notifier: BackupNotifier) : AbstractBacku
                 }
             }
         }
+    }
+
+    /**
+     * Called to update dialog in [BackupConst]
+     *
+     * @param progress restore progress
+     * @param amount total restoreAmount of manga
+     * @param title title of restored manga
+     */
+    private fun showRestoreProgress(
+        progress: Int,
+        amount: Int,
+        title: String,
+    ) {
+        notifier.showRestoreProgress(title, progress, amount)
+    }
+
+    internal fun writeErrorLog(): File {
+        try {
+            if (errors.isNotEmpty()) {
+                val file = context.createFileInCacheDir("tachiyomi_restore.txt")
+                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+
+                file.bufferedWriter().use { out ->
+                    errors.forEach { (date, message) ->
+                        out.write("[${sdf.format(date)}] $message\n")
+                    }
+                }
+                return file
+            }
+        } catch (e: Exception) {
+            // Empty
+        }
+        return File("")
     }
 }

@@ -36,14 +36,19 @@ import eu.kanade.tachiyomi.data.backup.models.IntPreferenceValue
 import eu.kanade.tachiyomi.data.backup.models.LongPreferenceValue
 import eu.kanade.tachiyomi.data.backup.models.StringPreferenceValue
 import eu.kanade.tachiyomi.data.backup.models.StringSetPreferenceValue
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.data.preference.Preference
 import eu.kanade.tachiyomi.data.preference.PreferenceStore
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.ConfigurableSource
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.preferenceKey
 import eu.kanade.tachiyomi.source.sourcePreferences
@@ -57,10 +62,15 @@ import uy.kohesive.injekt.api.get
 import java.io.FileOutputStream
 import kotlin.math.max
 
-class BackupManager(context: Context) : AbstractBackupManager(context) {
+class BackupManager(val context: Context) {
 
     private val preferenceStore: PreferenceStore = Injekt.get()
     val parser = ProtoBuf
+    private val db: DatabaseHelper = Injekt.get()
+    private val sourceManager: SourceManager = Injekt.get()
+    private val trackManager: TrackManager = Injekt.get()
+    private val preferences: PreferencesHelper = Injekt.get()
+    private val customMangaManager: CustomMangaManager = Injekt.get()
 
     /**
      * Create backup Json file from database
@@ -68,16 +78,17 @@ class BackupManager(context: Context) : AbstractBackupManager(context) {
      * @param uri path of Uri
      * @param isAutoBackup backup called from scheduled backup job
      */
-    override fun createBackup(uri: Uri, flags: Int, isAutoBackup: Boolean): String {
+    fun createBackup(uri: Uri, flags: Int, isAutoBackup: Boolean): String {
         // Create root object
         var backup: Backup? = null
 
         db.inTransaction {
-            val databaseManga = getFavoriteManga() + if (flags and BACKUP_READ_MANGA_MASK == BACKUP_READ_MANGA) {
-                getReadManga()
-            } else {
-                emptyList()
-            }
+            val databaseManga = db.getFavoriteMangas().executeAsBlocking() +
+                if (flags and BACKUP_READ_MANGA_MASK == BACKUP_READ_MANGA) {
+                    db.getReadNotInLibraryMangas().executeAsBlocking()
+                } else {
+                    emptyList()
+                }
 
             backup = Backup(
                 backupMangas(databaseManga, flags),
@@ -98,7 +109,7 @@ class BackupManager(context: Context) : AbstractBackupManager(context) {
                     dir = dir.createDirectory("automatic")
 
                     // Delete older backups
-                    val numberOfBackups = numberOfBackups()
+                    val numberOfBackups = preferences.numberOfBackups().get()
                     dir.listFiles { _, filename -> Backup.filenameRegex.matches(filename) }
                         .orEmpty()
                         .sortedByDescending { it.name }
@@ -258,7 +269,7 @@ class BackupManager(context: Context) : AbstractBackupManager(context) {
     fun restoreExistingManga(manga: Manga, dbManga: Manga) {
         manga.id = dbManga.id
         manga.copyFrom(dbManga)
-        insertManga(manga)
+        db.insertManga(manga).executeAsBlocking()
     }
 
     /**
@@ -270,7 +281,7 @@ class BackupManager(context: Context) : AbstractBackupManager(context) {
     fun restoreNewManga(manga: Manga): Manga {
         return manga.also {
             it.initialized = it.description != null
-            it.id = insertManga(it)
+            it.id = db.insertManga(it).executeAsBlocking().insertedId()
         }
     }
 
@@ -432,7 +443,7 @@ class BackupManager(context: Context) : AbstractBackupManager(context) {
         }
 
         val newChapters = chapters.groupBy { it.id != null }
-        newChapters[true]?.let { updateKnownChapters(it) }
-        newChapters[false]?.let { insertChapters(it) }
+        newChapters[true]?.let { db.updateKnownChaptersBackup(it).executeAsBlocking() }
+        newChapters[false]?.let { db.insertChapters(it).executeAsBlocking() }
     }
 }
