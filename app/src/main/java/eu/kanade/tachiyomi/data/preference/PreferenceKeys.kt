@@ -111,8 +111,6 @@ object PreferenceKeys {
 
     const val downloadOnlyOverWifi = "pref_download_only_over_wifi_key"
 
-    const val folderPerManga = "create_folder_per_manga"
-
     const val showLibrarySearchSuggestions = "show_library_search_suggestions"
 
     const val librarySearchSuggestion = "library_search_suggestion"
