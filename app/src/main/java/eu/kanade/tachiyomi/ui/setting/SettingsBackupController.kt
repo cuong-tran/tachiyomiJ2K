@@ -218,6 +218,8 @@ class SettingsBackupController : SettingsController() {
                 R.string.chapters,
                 R.string.tracking,
                 R.string.history,
+                R.string.app_settings,
+                R.string.source_settings,
                 R.string.custom_manga_info,
                 R.string.all_read_manga,
             )
@@ -244,8 +246,10 @@ class SettingsBackupController : SettingsController() {
                                 2 -> flags = flags or BackupConst.BACKUP_CHAPTER
                                 3 -> flags = flags or BackupConst.BACKUP_TRACK
                                 4 -> flags = flags or BackupConst.BACKUP_HISTORY
-                                5 -> flags = flags or BackupConst.BACKUP_CUSTOM_INFO
-                                6 -> flags = flags or BackupConst.BACKUP_READ_MANGA
+                                5 -> flags = flags or BackupConst.BACKUP_APP_PREFS
+                                6 -> flags = flags or BackupConst.BACKUP_SOURCE_PREFS
+                                7 -> flags = flags or BackupConst.BACKUP_CUSTOM_INFO
+                                8 -> flags = flags or BackupConst.BACKUP_READ_MANGA
                             }
                         }
                     }

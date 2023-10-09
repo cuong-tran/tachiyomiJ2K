@@ -241,10 +241,4 @@ object PreferenceKeys {
     const val hideChapterTitles = "hide_chapter_titles"
 
     const val chaptersDescAsDefault = "chapters_desc_as_default"
-
-    fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
-
-    fun trackPassword(syncId: Int) = "pref_mangasync_password_$syncId"
-
-    fun trackToken(syncId: Int) = "track_token_$syncId"
 }

@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.track.EnhancedTrackService
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.TrackPreferences
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
 import eu.kanade.tachiyomi.data.track.bangumi.BangumiApi
@@ -30,6 +31,7 @@ class SettingsTrackingController :
     TrackLogoutDialog.Listener {
 
     private val trackManager: TrackManager by injectLazy()
+    val trackPreferences: TrackPreferences by injectLazy()
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.tracking
@@ -59,7 +61,7 @@ class SettingsTrackingController :
                 isIconSpaceReserved = true
                 title = context.getString(R.string.update_tracking_scoring_type, context.getString(R.string.anilist))
 
-                preferences.getStringPref(Keys.trackUsername(trackManager.aniList.id))
+                preferences.getStringPref(trackManager.aniList.getUsername())
                     .asImmediateFlowIn(viewScope) {
                         isVisible = it.isNotEmpty()
                     }
@@ -117,7 +119,7 @@ class SettingsTrackingController :
     ): TrackerPreference {
         return add(
             TrackerPreference(context).apply {
-                key = Keys.trackUsername(service.id)
+                key = trackPreferences.trackUsername(service).key()
                 title = context.getString(service.nameRes())
                 iconRes = service.getLogo()
                 iconColor = service.getLogoColor()
@@ -125,7 +127,7 @@ class SettingsTrackingController :
                     if (service.isLogged) {
                         if (service is EnhancedTrackService) {
                             service.logout()
-                            updatePreference(service.id)
+                            updatePreference(service)
                         } else {
                             val dialog = TrackLogoutDialog(service)
                             dialog.targetController = this@SettingsTrackingController
@@ -134,7 +136,7 @@ class SettingsTrackingController :
                     } else {
                         if (service is EnhancedTrackService) {
                             service.loginNoop()
-                            updatePreference(service.id)
+                            updatePreference(service)
                         } else {
                             login()
                         }
@@ -146,22 +148,22 @@ class SettingsTrackingController :
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        updatePreference(trackManager.myAnimeList.id)
-        updatePreference(trackManager.aniList.id)
-        updatePreference(trackManager.shikimori.id)
-        updatePreference(trackManager.bangumi.id)
+        updatePreference(trackManager.myAnimeList)
+        updatePreference(trackManager.aniList)
+        updatePreference(trackManager.shikimori)
+        updatePreference(trackManager.bangumi)
     }
 
-    private fun updatePreference(id: Int) {
-        val pref = findPreference(Keys.trackUsername(id)) as? TrackerPreference
+    private fun updatePreference(service: TrackService) {
+        val pref = findPreference(trackPreferences.trackUsername(service).key()) as? TrackerPreference
         pref?.notifyChanged()
     }
 
     override fun trackLoginDialogClosed(service: TrackService) {
-        updatePreference(service.id)
+        updatePreference(service)
     }
 
     override fun trackLogoutDialogClosed(service: TrackService) {
-        updatePreference(service.id)
+        updatePreference(service)
     }
 }

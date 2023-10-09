@@ -5,7 +5,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -14,7 +13,7 @@ import uy.kohesive.injekt.injectLazy
 
 abstract class TrackService(val id: Int) {
 
-    val preferences: PreferencesHelper by injectLazy()
+    val trackPreferences: TrackPreferences by injectLazy()
     val networkService: NetworkHelper by injectLazy()
     val db: DatabaseHelper by injectLazy()
     open fun canRemoveFromService() = false
@@ -93,19 +92,19 @@ abstract class TrackService(val id: Int) {
 
     @CallSuper
     open fun logout() {
-        preferences.setTrackCredentials(this, "", "")
+        trackPreferences.setCredentials(this, "", "")
     }
 
     open val isLogged: Boolean
         get() = getUsername().isNotEmpty() &&
             getPassword().isNotEmpty()
 
-    fun getUsername() = preferences.trackUsername(this)!!
+    fun getUsername() = trackPreferences.trackUsername(this).get()
 
-    fun getPassword() = preferences.trackPassword(this)!!
+    fun getPassword() = trackPreferences.trackPassword(this).get()
 
     fun saveCredentials(username: String, password: String) {
-        preferences.setTrackCredentials(this, username, password)
+        trackPreferences.setCredentials(this, username, password)
     }
 }
 

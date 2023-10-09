@@ -7,24 +7,38 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
+import eu.kanade.tachiyomi.data.backup.models.BackupPreference
 import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
 import eu.kanade.tachiyomi.data.backup.models.BackupSource
+import eu.kanade.tachiyomi.data.backup.models.BackupSourcePreferences
+import eu.kanade.tachiyomi.data.backup.models.BooleanPreferenceValue
+import eu.kanade.tachiyomi.data.backup.models.FloatPreferenceValue
+import eu.kanade.tachiyomi.data.backup.models.IntPreferenceValue
+import eu.kanade.tachiyomi.data.backup.models.LongPreferenceValue
+import eu.kanade.tachiyomi.data.backup.models.StringPreferenceValue
+import eu.kanade.tachiyomi.data.backup.models.StringSetPreferenceValue
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.preference.AndroidPreferenceStore
+import eu.kanade.tachiyomi.data.preference.PreferenceStore
+import eu.kanade.tachiyomi.source.sourcePreferences
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
 import okio.buffer
 import okio.gzip
 import okio.source
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.util.Date
 
 class BackupRestorer(context: Context, notifier: BackupNotifier) : AbstractBackupRestore<BackupManager>(context, notifier) {
 
+    private val preferenceStore: PreferenceStore = Injekt.get()
+
     @SuppressLint("Recycle")
-    @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun performRestore(uri: Uri): Boolean {
         backupManager = BackupManager(context)
 
@@ -44,6 +58,9 @@ class BackupRestorer(context: Context, notifier: BackupNotifier) : AbstractBacku
         sourceMapping = backupMaps.associate { it.sourceId to it.name }
 
         return coroutineScope {
+            restoreAppPreferences(backup.backupPreferences)
+            restoreSourcePreferences(backup.backupSourcePreferences)
+
             // Restore individual manga
             backup.backupManga.forEach {
                 if (!isActive) {
@@ -146,5 +163,57 @@ class BackupRestorer(context: Context, notifier: BackupNotifier) : AbstractBacku
         backupManager.restoreTrackForManga(manga, tracks)
         customManga?.id = manga.id!!
         customManga?.let { customMangaManager.saveMangaInfo(it) }
+    }
+
+    private fun restoreAppPreferences(preferences: List<BackupPreference>) {
+        restorePreferences(preferences, preferenceStore)
+    }
+
+    private fun restoreSourcePreferences(preferences: List<BackupSourcePreferences>) {
+        preferences.forEach {
+            val sourcePrefs = AndroidPreferenceStore(context, sourcePreferences(it.sourceKey))
+            restorePreferences(it.prefs, sourcePrefs)
+        }
+    }
+
+    private fun restorePreferences(
+        toRestore: List<BackupPreference>,
+        preferenceStore: PreferenceStore,
+    ) {
+        val prefs = preferenceStore.getAll()
+        toRestore.forEach { (key, value) ->
+            when (value) {
+                is IntPreferenceValue -> {
+                    if (prefs[key] is Int?) {
+                        preferenceStore.getInt(key).set(value.value)
+                    }
+                }
+                is LongPreferenceValue -> {
+                    if (prefs[key] is Long?) {
+                        preferenceStore.getLong(key).set(value.value)
+                    }
+                }
+                is FloatPreferenceValue -> {
+                    if (prefs[key] is Float?) {
+                        preferenceStore.getFloat(key).set(value.value)
+                    }
+                }
+                is StringPreferenceValue -> {
+                    if (prefs[key] is String?) {
+                        preferenceStore.getString(key).set(value.value)
+                    }
+                }
+                is BooleanPreferenceValue -> {
+                    if (prefs[key] is Boolean?) {
+                        preferenceStore.getBoolean(key).set(value.value)
+                    }
+                }
+                is StringSetPreferenceValue -> {
+                    if (prefs[key] is Set<*>?) {
+                        preferenceStore.getStringSet(key).set(value.value)
+                    }
+                }
+            }
+        }
     }
 }

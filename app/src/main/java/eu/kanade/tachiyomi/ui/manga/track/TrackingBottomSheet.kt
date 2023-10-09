@@ -200,9 +200,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
             return
         }
 
-        if (track.tracking_url.isBlank()) {
-            activity.toast(R.string.url_not_set_click_again)
-        } else {
+        if (track.tracking_url.isNotBlank()) {
             activity.openInBrowser(track.tracking_url.toUri())
             controller.refreshTracker = position
         }

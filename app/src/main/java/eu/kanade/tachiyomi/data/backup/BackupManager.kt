@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_APP_PREFS
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_APP_PREFS_MASK
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CATEGORY
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CATEGORY_MASK
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CHAPTER
@@ -14,6 +16,8 @@ import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_HISTORY
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_HISTORY_MASK
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_READ_MANGA
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_READ_MANGA_MASK
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_SOURCE_PREFS
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_SOURCE_PREFS_MASK
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_TRACK
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_TRACK_MASK
 import eu.kanade.tachiyomi.data.backup.models.Backup
@@ -21,25 +25,41 @@ import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupChapter
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
+import eu.kanade.tachiyomi.data.backup.models.BackupPreference
 import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
 import eu.kanade.tachiyomi.data.backup.models.BackupSource
+import eu.kanade.tachiyomi.data.backup.models.BackupSourcePreferences
 import eu.kanade.tachiyomi.data.backup.models.BackupTracking
+import eu.kanade.tachiyomi.data.backup.models.BooleanPreferenceValue
+import eu.kanade.tachiyomi.data.backup.models.FloatPreferenceValue
+import eu.kanade.tachiyomi.data.backup.models.IntPreferenceValue
+import eu.kanade.tachiyomi.data.backup.models.LongPreferenceValue
+import eu.kanade.tachiyomi.data.backup.models.StringPreferenceValue
+import eu.kanade.tachiyomi.data.backup.models.StringSetPreferenceValue
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.preference.Preference
+import eu.kanade.tachiyomi.data.preference.PreferenceStore
+import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.preferenceKey
+import eu.kanade.tachiyomi.source.sourcePreferences
 import kotlinx.serialization.protobuf.ProtoBuf
 import okio.buffer
 import okio.gzip
 import okio.sink
 import timber.log.Timber
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.io.FileOutputStream
 import kotlin.math.max
 
 class BackupManager(context: Context) : AbstractBackupManager(context) {
 
+    private val preferenceStore: PreferenceStore = Injekt.get()
     val parser = ProtoBuf
 
     /**
@@ -64,6 +84,8 @@ class BackupManager(context: Context) : AbstractBackupManager(context) {
                 backupCategories(),
                 emptyList(),
                 backupExtensionInfo(databaseManga),
+                backupAppPreferences(flags),
+                backupSourcePreferences(flags),
             )
         }
 
@@ -196,6 +218,41 @@ class BackupManager(context: Context) : AbstractBackupManager(context) {
         }
 
         return mangaObject
+    }
+
+    private fun backupAppPreferences(flags: Int): List<BackupPreference> {
+        if (flags and BACKUP_APP_PREFS_MASK != BACKUP_APP_PREFS) return emptyList()
+        return preferenceStore.getAll().toBackupPreferences()
+    }
+
+    private fun backupSourcePreferences(flags: Int): List<BackupSourcePreferences> {
+        if (flags and BACKUP_SOURCE_PREFS_MASK != BACKUP_SOURCE_PREFS) return emptyList()
+        return sourceManager.getOnlineSources()
+            .filterIsInstance<ConfigurableSource>()
+            .map {
+                BackupSourcePreferences(
+                    it.preferenceKey(),
+                    it.sourcePreferences().all.toBackupPreferences(),
+                )
+            }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun Map<String, *>.toBackupPreferences(): List<BackupPreference> {
+        return this.filterKeys { !Preference.isPrivate(it) }
+            .mapNotNull { (key, value) ->
+                when (value) {
+                    is Int -> BackupPreference(key, IntPreferenceValue(value))
+                    is Long -> BackupPreference(key, LongPreferenceValue(value))
+                    is Float -> BackupPreference(key, FloatPreferenceValue(value))
+                    is String -> BackupPreference(key, StringPreferenceValue(value))
+                    is Boolean -> BackupPreference(key, BooleanPreferenceValue(value))
+                    is Set<*> -> (value as? Set<String>)?.let {
+                        BackupPreference(key, StringSetPreferenceValue(it))
+                    }
+                    else -> null
+                }
+            }
     }
 
     fun restoreExistingManga(manga: Manga, dbManga: Manga) {

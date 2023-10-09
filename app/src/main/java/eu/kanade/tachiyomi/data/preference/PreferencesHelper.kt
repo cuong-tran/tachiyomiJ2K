@@ -11,7 +11,6 @@ import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.extension.model.InstalledExtensionsOrder
 import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
@@ -222,19 +221,6 @@ class PreferencesHelper(val context: Context) {
     )
 
     fun sourceSorting() = flowPrefs.getInt(Keys.sourcesSort, 0)
-
-    fun trackUsername(sync: TrackService) = prefs.getString(Keys.trackUsername(sync.id), "")
-
-    fun trackPassword(sync: TrackService) = prefs.getString(Keys.trackPassword(sync.id), "")
-
-    fun setTrackCredentials(sync: TrackService, username: String, password: String) {
-        prefs.edit()
-            .putString(Keys.trackUsername(sync.id), username)
-            .putString(Keys.trackPassword(sync.id), password)
-            .apply()
-    }
-
-    fun trackToken(sync: TrackService) = flowPrefs.getString(Keys.trackToken(sync.id), "")
 
     fun anilistScoreType() = flowPrefs.getString("anilist_score_type", "POINT_10")
 

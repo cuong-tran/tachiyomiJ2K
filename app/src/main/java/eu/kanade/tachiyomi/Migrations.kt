@@ -5,7 +5,9 @@ import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.preference.Preference
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
+import eu.kanade.tachiyomi.data.preference.PreferenceStore
 import eu.kanade.tachiyomi.data.preference.PreferenceValues
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.plusAssign
@@ -33,7 +35,11 @@ object Migrations {
      * @param preferences Preferences of the application.
      * @return true if a migration is performed, false otherwise.
      */
-    fun upgrade(preferences: PreferencesHelper, scope: CoroutineScope): Boolean {
+    fun upgrade(
+        preferences: PreferencesHelper,
+        preferenceStore: PreferenceStore,
+        scope: CoroutineScope,
+    ): Boolean {
         val context = preferences.context
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.edit {
@@ -219,6 +225,19 @@ object Migrations {
             if (oldVersion < 105) {
                 LibraryUpdateJob.cancelAllWorks(context)
                 LibraryUpdateJob.setupTask(context)
+            }
+            if (oldVersion < 108) {
+                preferenceStore.getAll()
+                    .filter { it.key.startsWith("pref_mangasync_") || it.key.startsWith("track_token_") }
+                    .forEach { (key, value) ->
+                        if (value is String) {
+                            preferenceStore
+                                .getString(Preference.privateKey(key))
+                                .set(value)
+
+                            preferenceStore.getString(key).delete()
+                        }
+                    }
             }
 
             return true
