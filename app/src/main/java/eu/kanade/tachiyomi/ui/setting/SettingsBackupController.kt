@@ -213,7 +213,7 @@ class SettingsBackupController : SettingsController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             val activity = activity!!
             val options = arrayOf(
-                R.string.manga,
+                R.string.library_entries,
                 R.string.categories,
                 R.string.chapters,
                 R.string.tracking,
