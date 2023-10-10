@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -16,7 +17,9 @@ import android.os.PowerManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.DecelerateInterpolator
+import androidx.activity.BackEventCompat
 import androidx.activity.ComponentDialog
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.addListener
@@ -37,6 +40,7 @@ import eu.kanade.tachiyomi.util.system.powerManager
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.animateBlur
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.min
 
 class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable, private val thumbView: View) :
     ComponentDialog(controller.activity!!, R.style.FullCoverDialogTheme) {
@@ -80,11 +84,38 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
             ContextCompat.registerReceiver(context, powerSaverChangeReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
         }
 
-        onBackPressedDispatcher.addCallback {
-            if (binding.mangaCoverFull.isClickable) {
-                animateBack()
+        val backPressedCallback = object : OnBackPressedCallback(enabled = true) {
+            var startX = 0f
+            var startY = 0f
+            override fun handleOnBackPressed() {
+                if (binding.mangaCoverFull.isClickable) {
+                    animateBack()
+                }
+            }
+
+            override fun handleOnBackStarted(backEvent: BackEventCompat) {
+                startX = backEvent.touchX
+                startY = backEvent.touchY
+            }
+
+            override fun handleOnBackProgressed(backEvent: BackEventCompat) {
+                val maxProgress = min(backEvent.progress, 0.4f)
+                binding.mangaCoverFull.scaleX = 1f - maxProgress * 0.6f
+                binding.mangaCoverFull.translationX =
+                    maxProgress * 100f * (if (backEvent.swipeEdge == BackEventCompat.EDGE_LEFT) 1 else -1)
+                binding.mangaCoverFull.translationY =
+                    -maxProgress * 150f
+                binding.mangaCoverFull.scaleY = 1f - maxProgress * 0.6f
+            }
+
+            override fun handleOnBackCancelled() {
+                binding.mangaCoverFull.scaleX = 1f
+                binding.mangaCoverFull.translationX = 0f
+                binding.mangaCoverFull.translationY = 0f
+                binding.mangaCoverFull.scaleY = 1f
             }
         }
+        onBackPressedDispatcher.addCallback(backPressedCallback)
 
         binding.touchOutside.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
@@ -273,7 +304,12 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
                 }
             }
 
-            playTogether(radiusAnimator, dimAnimator, saveAnimator)
+            val objectAnimator = ObjectAnimator.ofFloat(expandedImageView, View.SCALE_X, expandedImageView.scaleX, 1f)
+            val objectAnimator1 = ObjectAnimator.ofFloat(expandedImageView, View.SCALE_Y, expandedImageView.scaleY, 1f)
+            val objectAnimator2 = ObjectAnimator.ofFloat(expandedImageView, View.TRANSLATION_X, expandedImageView.translationX, 0f)
+            val objectAnimator3 = ObjectAnimator.ofFloat(expandedImageView, View.TRANSLATION_Y, expandedImageView.translationY, 0f)
+
+            playTogether(radiusAnimator, dimAnimator, saveAnimator, objectAnimator, objectAnimator1, objectAnimator2, objectAnimator3)
 
             addListener(
                 onEnd = {
