@@ -227,7 +227,7 @@ dependencies {
 
     // Database
     implementation("androidx.sqlite:sqlite-ktx:2.3.1")
-    implementation("com.github.requery:sqlite-android:3.43.0")
+    implementation("com.github.requery:sqlite-android:3.39.2")
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
 
@@ -301,6 +301,9 @@ tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.freeCompilerArgs += listOf(
             "-Xcontext-receivers",
+            "-opt-in=kotlin.Experimental",
+            "-opt-in=kotlin.RequiresOptIn",
+            "-opt-in=kotlin.ExperimentalStdlibApi",
             "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
             "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
