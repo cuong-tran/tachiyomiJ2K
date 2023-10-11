@@ -739,6 +739,6 @@ class BrowseController :
     data class SmartSearchConfig(val origTitle: String, val origMangaId: Long) : Parcelable
 
     companion object {
-        const val HELP_URL = "https://tachiyomi.org/help/guides/source-migration/"
+        const val HELP_URL = "https://tachiyomi.org/docs/guides/source-migration"
     }
 }

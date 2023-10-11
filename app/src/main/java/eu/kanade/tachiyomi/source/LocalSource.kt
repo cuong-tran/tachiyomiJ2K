@@ -29,7 +29,7 @@ import java.util.zip.ZipFile
 class LocalSource(private val context: Context) : CatalogueSource, UnmeteredSource {
     companion object {
         const val ID = 0L
-        const val HELP_URL = "https://tachiyomi.org/help/guides/local-manga/"
+        const val HELP_URL = "https://tachiyomi.org/docs/guides/local-source/"
 
         private const val COVER_NAME = "cover.jpg"
         private val LATEST_THRESHOLD = TimeUnit.MILLISECONDS.convert(7, TimeUnit.DAYS)

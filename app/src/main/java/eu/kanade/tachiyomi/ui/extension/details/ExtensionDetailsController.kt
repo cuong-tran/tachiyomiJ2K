@@ -201,7 +201,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         val extension = presenter.extension!!
 
         if (!extension.hasReadme) {
-            openInBrowser("https://tachiyomi.org/help/faq/#extensions")
+            openInBrowser("https://tachiyomi.org/docs/faq/browse/extensions")
             return
         }
 
