@@ -35,13 +35,13 @@
             tools:ignore="HardcodedText" />
 
         <ImageButton
-            android:id="@+id/btn_twitter"
+            android:id="@+id/btn_x"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Twitter"
+            android:contentDescription="X"
             android:padding="16dp"
-            android:src="@drawable/ic_twitter_24dp"
+            android:src="@drawable/ic_x_24dp"
             app:tint="?attr/colorAccent"
             tools:ignore="HardcodedText" />
 

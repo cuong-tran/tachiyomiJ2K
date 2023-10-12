@@ -40,7 +40,7 @@ class AboutLinksPreference @JvmOverloads constructor(context: Context, attrs: At
             compatToolTipText = (contentDescription.toString())
             setOnClickListener { context.openInBrowser("https://discord.gg/tachiyomi") }
         }
-        holder.findViewById(R.id.btn_twitter).apply {
+        holder.findViewById(R.id.btn_x).apply {
             compatToolTipText = (contentDescription.toString())
             setOnClickListener { context.openInBrowser("https://twitter.com/tachiyomiorg") }
         }
