@@ -8,4 +8,10 @@
         android:title="@string/search"
         app:actionViewClass="eu.kanade.tachiyomi.ui.base.MiniSearchView"
         app:showAsAction="collapseActionView|ifRoom" />
+
+    <item
+        android:id="@+id/action_help"
+        android:icon="@drawable/ic_help_24dp"
+        android:title="@string/help"
+        app:showAsAction="collapseActionView|ifRoom" />
 </menu>

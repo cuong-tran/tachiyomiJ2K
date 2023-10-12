@@ -8,9 +8,11 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
+import eu.kanade.tachiyomi.ui.more.AboutController
 import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.openInBrowser
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 
 class SettingsMainController : SettingsController(), FloatingSearchInterface {
@@ -84,12 +86,25 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             titleRes = R.string.advanced
             onClick { navigateTo(SettingsAdvancedController()) }
         }
+        preference {
+            iconRes = R.drawable.ic_info_outline_24dp
+            iconTint = tintColor
+            titleRes = R.string.about
+            onClick { navigateTo(AboutController()) }
+        }
         this
     }
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.settings_main, menu)
         // Change hint to show global search.
         activityBinding?.searchToolbar?.searchQueryHint = applicationContext?.getString(R.string.search_settings)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_help -> openInBrowser(URL_HELP)
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onActionViewExpand(item: MenuItem?) {
