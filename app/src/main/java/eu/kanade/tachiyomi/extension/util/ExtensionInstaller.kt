@@ -271,37 +271,13 @@ internal class ExtensionInstaller(private val context: Context) {
                 setInstalling(pkgName, uri.hashCode())
                 shizukuInstaller?.addToQueue(downloadId, pkgName, uri)
             }
-            PRIVATE -> {
+            PRIVATE -> installPrivately(downloadId, pkgName, uri)
+            else -> {
                 val extensionManager = Injekt.get<ExtensionManager>()
-                val tempFile = File(context.cacheDir, "temp_$downloadId")
-
-                pkgName ?: return
-                if (tempFile.exists() && !tempFile.delete()) {
-                    // Unlikely but just in case
-                    setInstallationResult(pkgName, false)
+                if (extensionManager.installedExtensionsFlow.value.find { it.pkgName == pkgName }?.isShared == false) {
+                    installPrivately(downloadId, pkgName, uri)
                     return
                 }
-
-                try {
-                    context.contentResolver.openInputStream(uri)?.use { input ->
-                        tempFile.outputStream().use { output ->
-                            input.copyTo(output)
-                        }
-                    }
-
-                    if (ExtensionLoader.installPrivateExtensionFile(context, tempFile)) {
-                        setInstallationResult(pkgName, true)
-                    } else {
-                        setInstallationResult(pkgName, false)
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to read downloaded extension file.")
-                    setInstallationResult(pkgName, false)
-                }
-
-                tempFile.delete()
-            }
-            else -> {
                 val intent =
                     if (useActivity) {
                         Intent(context, ExtensionInstallActivity::class.java)
@@ -318,6 +294,36 @@ internal class ExtensionInstaller(private val context: Context) {
                 }
             }
         }
+    }
+
+    private fun installPrivately(downloadId: Long, pkgName: String?, uri: Uri) {
+        val tempFile = File(context.cacheDir, "temp_$downloadId")
+
+        pkgName ?: return
+        if (tempFile.exists() && !tempFile.delete()) {
+            // Unlikely but just in case
+            setInstallationResult(pkgName, false)
+            return
+        }
+
+        try {
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            if (ExtensionLoader.installPrivateExtensionFile(context, tempFile)) {
+                setInstallationResult(pkgName, true)
+            } else {
+                setInstallationResult(pkgName, false)
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to read downloaded extension file.")
+            setInstallationResult(pkgName, false)
+        }
+
+        tempFile.delete()
     }
 
     /**
