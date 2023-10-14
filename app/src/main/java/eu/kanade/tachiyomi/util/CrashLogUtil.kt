@@ -7,11 +7,17 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.io.IOException
 
 class CrashLogUtil(private val context: Context) {
@@ -20,15 +26,18 @@ class CrashLogUtil(private val context: Context) {
         setSmallIcon(R.drawable.ic_tachij2k_notification)
     }
 
+    val scope = CoroutineScope(Dispatchers.IO)
     fun dumpLogs() {
-        try {
-            val file = context.createFileInCacheDir("tachiyomi_crash_logs.txt")
-            file.appendText(getDebugInfo() + "\n\n")
-            Runtime.getRuntime().exec("logcat *:E -d -f ${file.absolutePath}")
-
-            showNotification(file.getUriCompat(context))
-        } catch (e: IOException) {
-            context.toast("Failed to get logs")
+        scope.launch {
+            try {
+                val file = context.createFileInCacheDir("tachiyomi_crash_logs.txt")
+                file.appendText(getDebugInfo() + "\n\n")
+                file.appendText(getExtensionsInfo() + "\n\n")
+                Runtime.getRuntime().exec("logcat *:E -d -f ${file.absolutePath}")
+                showNotification(file.getUriCompat(context))
+            } catch (e: IOException) {
+                context.toast("Failed to get logs")
+            }
         }
     }
     fun getDebugInfo(): String {
@@ -43,9 +52,37 @@ class CrashLogUtil(private val context: Context) {
             Device product name: ${Build.PRODUCT}
         """.trimIndent()
     }
-    private fun showNotification(uri: Uri) {
-        context.notificationManager.cancel(Notifications.ID_CRASH_LOGS)
 
+    suspend fun getExtensionsInfo(): String {
+        val extensionManager: ExtensionManager = Injekt.get()
+        extensionManager.findAvailableExtensions()
+        val installedExtensions = extensionManager.installedExtensionsFlow.value
+        val availableExtensions = extensionManager.availableExtensionsFlow.value
+
+        val extensionInfoList = mutableListOf<String>()
+
+        for (installedExtension in installedExtensions) {
+            val availableExtension = availableExtensions.find { it.pkgName == installedExtension.pkgName }
+
+            val hasUpdate = availableExtension?.versionCode ?: 0 > installedExtension.versionCode
+            if (hasUpdate || installedExtension.isObsolete) {
+                val extensionInfo =
+                    "Extension Name: ${installedExtension.name}\n" +
+                        "Installed Version: ${installedExtension.versionName}\n" +
+                        "Available Version: ${availableExtension?.versionName ?: "N/A"}\n" +
+                        "Obsolete: ${installedExtension.isObsolete}\n"
+                extensionInfoList.add(extensionInfo)
+            }
+        }
+        if (extensionInfoList.isNotEmpty()) {
+            extensionInfoList.add(0, "Extensions that are outdated or obsolete")
+        }
+        return extensionInfoList.joinToString("\n")
+    }
+
+    private fun showNotification(uri: Uri) {
+        ExtensionManager(context)
+        context.notificationManager.cancel(Notifications.ID_CRASH_LOGS)
         with(notificationBuilder) {
             setContentTitle(context.getString(R.string.crash_log_saved))
 
