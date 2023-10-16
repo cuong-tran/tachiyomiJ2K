@@ -30,7 +30,7 @@ import uy.kohesive.injekt.api.get
 
 class SearchActivity : MainActivity() {
 
-    var backToMain = false
+    private var backToMain = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,7 +124,7 @@ class SearchActivity : MainActivity() {
 
                 // Get the search query provided in extras, and if not null, perform a global search with it.
                 val query = intent.getStringExtra(SearchManager.QUERY) ?: intent.getStringExtra(Intent.EXTRA_TEXT)
-                if (query != null && query.isNotEmpty()) {
+                if (!query.isNullOrEmpty()) {
                     extensionIntentForText(query)?.let {
                         startActivity(it)
                         finish()
@@ -138,7 +138,7 @@ class SearchActivity : MainActivity() {
             INTENT_SEARCH -> {
                 val query = intent.getStringExtra(INTENT_SEARCH_QUERY)
                 val filter = intent.getStringExtra(INTENT_SEARCH_FILTER)
-                if (query != null && query.isNotEmpty()) {
+                if (!query.isNullOrEmpty()) {
                     if (router.backstackSize > 1) {
                         router.popToRoot()
                     }
