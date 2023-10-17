@@ -1,11 +1,9 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.annotation.SuppressLint
-import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.webkit.WebStorage
@@ -41,7 +39,6 @@ import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
 import eu.kanade.tachiyomi.network.PREF_DOH_QUAD101
 import eu.kanade.tachiyomi.network.PREF_DOH_QUAD9
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.setting.database.ClearDatabaseController
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.disableItems
@@ -218,9 +215,27 @@ class SettingsAdvancedController : SettingsController() {
                 summaryRes = R.string.delete_unused_chapters
 
                 onClick {
-                    val ctrl = CleanupDownloadsDialogController()
-                    ctrl.targetController = this@SettingsAdvancedController
-                    ctrl.showDialog(router)
+                    activity!!.materialAlertDialog()
+                        .setTitle(R.string.clean_up_downloaded_chapters)
+                        .setMultiChoiceItems(
+                            R.array.clean_up_downloads,
+                            booleanArrayOf(true, true, true),
+                        ) { dialog, position, _ ->
+                            if (position == 0) {
+                                val listView = (dialog as AlertDialog).listView
+                                listView.setItemChecked(position, true)
+                            }
+                        }
+                        .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                            val listView = (dialog as AlertDialog).listView
+                            val deleteRead = listView.isItemChecked(1)
+                            val deleteNonFavorite = listView.isItemChecked(2)
+                            cleanupDownloads(deleteRead, deleteNonFavorite)
+                        }
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show().apply {
+                            disableItems(arrayOf(activity!!.getString(R.string.clean_orphaned_downloads)))
+                        }
                 }
             }
             preference {
@@ -360,35 +375,6 @@ class SettingsAdvancedController : SettingsController() {
 
                 onClick { LibraryUpdateJob.startNow(context, target = Target.TRACKING) }
             }
-        }
-    }
-
-    class CleanupDownloadsDialogController : DialogController() {
-        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            return activity!!.materialAlertDialog()
-                .setTitle(R.string.clean_up_downloaded_chapters)
-                .setMultiChoiceItems(
-                    R.array.clean_up_downloads,
-                    booleanArrayOf(true, true, true),
-                ) { dialog, position, _ ->
-                    if (position == 0) {
-                        val listView = (dialog as AlertDialog).listView
-                        listView.setItemChecked(position, true)
-                    }
-                }
-                .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                    val listView = (dialog as AlertDialog).listView
-                    val deleteRead = listView.isItemChecked(1)
-                    val deleteNonFavorite = listView.isItemChecked(2)
-                    (targetController as? SettingsAdvancedController)?.cleanupDownloads(
-                        deleteRead,
-                        deleteNonFavorite,
-                    )
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .create().apply {
-                    this.disableItems(arrayOf(activity!!.getString(R.string.clean_orphaned_downloads)))
-                }
         }
     }
 

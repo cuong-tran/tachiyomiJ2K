@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Activity
-import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -13,7 +12,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
-import androidx.core.os.bundleOf
 import androidx.preference.PreferenceScreen
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
@@ -22,7 +20,6 @@ import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupFileValidator
 import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.backup.models.Backup
-import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.DeviceUtil
 import eu.kanade.tachiyomi.util.system.disableItems
@@ -58,9 +55,7 @@ class SettingsBackupController : SettingsController() {
                 }
 
                 if (!BackupCreatorJob.isManualJobRunning(context)) {
-                    val ctrl = CreateBackupDialog()
-                    ctrl.targetController = this@SettingsBackupController
-                    ctrl.showDialog(router)
+                    showBackupCreateDialog()
                 } else {
                     context.toast(R.string.backup_in_progress)
                 }
@@ -177,6 +172,7 @@ class SettingsBackupController : SettingsController() {
                     activity.contentResolver.takePersistableUriPermission(uri, flags)
                     preferences.backupsDirectory().set(uri.toString())
                 }
+
                 CODE_BACKUP_CREATE -> {
                     val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
@@ -185,9 +181,10 @@ class SettingsBackupController : SettingsController() {
                     activity.toast(R.string.creating_backup)
                     BackupCreatorJob.startNow(activity, uri, backupFlags)
                 }
+
                 CODE_BACKUP_RESTORE -> {
                     (activity as? MainActivity)?.showNotificationPermissionPrompt(true)
-                    RestoreBackupDialog(uri).showDialog(router)
+                    showBackupRestoreDialog(uri)
                 }
             }
         }
@@ -208,101 +205,98 @@ class SettingsBackupController : SettingsController() {
         }
     }
 
-    class CreateBackupDialog(bundle: Bundle? = null) : DialogController(bundle) {
-        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            val activity = activity!!
-            val options = arrayOf(
-                R.string.library_entries,
-                R.string.categories,
-                R.string.chapters,
-                R.string.tracking,
-                R.string.history,
-                R.string.app_settings,
-                R.string.source_settings,
-                R.string.custom_manga_info,
-                R.string.all_read_manga,
-            )
-                .map { activity.getString(it) }
+    private fun showBackupCreateDialog() {
+        val activity = activity ?: return
+        val options = arrayOf(
+            R.string.library_entries,
+            R.string.categories,
+            R.string.chapters,
+            R.string.tracking,
+            R.string.history,
+            R.string.app_settings,
+            R.string.source_settings,
+            R.string.custom_manga_info,
+            R.string.all_read_manga,
+        )
+            .map { activity.getString(it) }
 
-            return activity.materialAlertDialog()
-                .setTitle(R.string.what_should_backup)
-                .setMultiChoiceItems(
-                    options.toTypedArray(),
-                    options.map { true }.toBooleanArray(),
-                ) { dialog, position, _ ->
-                    if (position == 0) {
-                        val listView = (dialog as AlertDialog).listView
-                        listView.setItemChecked(position, true)
-                    }
-                }
-                .setPositiveButton(R.string.create) { dialog, _ ->
+        activity.materialAlertDialog()
+            .setTitle(R.string.what_should_backup)
+            .setMultiChoiceItems(
+                options.toTypedArray(),
+                options.map { true }.toBooleanArray(),
+            ) { dialog, position, _ ->
+                if (position == 0) {
                     val listView = (dialog as AlertDialog).listView
-                    var flags = 0
-                    for (i in 1 until listView.count) {
-                        if (listView.isItemChecked(i)) {
-                            when (i) {
-                                1 -> flags = flags or BackupConst.BACKUP_CATEGORY
-                                2 -> flags = flags or BackupConst.BACKUP_CHAPTER
-                                3 -> flags = flags or BackupConst.BACKUP_TRACK
-                                4 -> flags = flags or BackupConst.BACKUP_HISTORY
-                                5 -> flags = flags or BackupConst.BACKUP_APP_PREFS
-                                6 -> flags = flags or BackupConst.BACKUP_SOURCE_PREFS
-                                7 -> flags = flags or BackupConst.BACKUP_CUSTOM_INFO
-                                8 -> flags = flags or BackupConst.BACKUP_READ_MANGA
-                            }
+                    listView.setItemChecked(position, true)
+                }
+            }
+            .setPositiveButton(R.string.create) { dialog, _ ->
+                val listView = (dialog as AlertDialog).listView
+                var flags = 0
+                for (i in 1 until listView.count) {
+                    if (listView.isItemChecked(i)) {
+                        when (i) {
+                            1 -> flags = flags or BackupConst.BACKUP_CATEGORY
+                            2 -> flags = flags or BackupConst.BACKUP_CHAPTER
+                            3 -> flags = flags or BackupConst.BACKUP_TRACK
+                            4 -> flags = flags or BackupConst.BACKUP_HISTORY
+                            5 -> flags = flags or BackupConst.BACKUP_APP_PREFS
+                            6 -> flags = flags or BackupConst.BACKUP_SOURCE_PREFS
+                            7 -> flags = flags or BackupConst.BACKUP_CUSTOM_INFO
+                            8 -> flags = flags or BackupConst.BACKUP_READ_MANGA
                         }
                     }
-                    (targetController as? SettingsBackupController)?.createBackup(flags)
                 }
-                .setNegativeButton(android.R.string.cancel, null)
-                .create().apply {
-                    disableItems(arrayOf(options.first()))
-                }
-        }
+                (targetController as? SettingsBackupController)?.createBackup(flags)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show().apply {
+                disableItems(arrayOf(options.first()))
+            }
     }
 
-    class RestoreBackupDialog(bundle: Bundle? = null) : DialogController(bundle) {
-        constructor(uri: Uri) : this(
-            bundleOf(KEY_URI to uri),
-        )
+    private fun showBackupRestoreDialog(uri: Uri) {
+        val activity = activity ?: return
 
-        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            val activity = activity!!
-            val uri: Uri = args.getParcelable(KEY_URI)!!
+        try {
+            val results = BackupFileValidator().validate(activity, uri)
 
-            return try {
-                val results = BackupFileValidator().validate(activity, uri)
-
-                var message = activity.getString(R.string.restore_content_full)
-                if (results.missingSources.isNotEmpty()) {
-                    message += "\n\n${activity.getString(R.string.restore_missing_sources)}\n${results.missingSources.joinToString("\n") { "- $it" }}"
-                }
-                if (results.missingTrackers.isNotEmpty()) {
-                    message += "\n\n${activity.getString(R.string.restore_missing_trackers)}\n${results.missingTrackers.joinToString("\n") { "- $it" }}"
-                }
-
-                return activity.materialAlertDialog()
-                    .setTitle(R.string.restore_backup)
-                    .setMessage(message)
-                    .setPositiveButton(R.string.restore) { _, _ ->
-                        val context = applicationContext
-                        if (context != null) {
-                            activity.toast(R.string.restoring_backup)
-                            BackupRestoreJob.start(context, uri)
-                        }
-                    }.create()
-            } catch (e: Exception) {
-                activity.materialAlertDialog()
-                    .setTitle(R.string.invalid_backup_file)
-                    .setMessage(e.message)
-                    .setPositiveButton(android.R.string.cancel, null)
-                    .create()
+            var message = activity.getString(R.string.restore_content_full)
+            if (results.missingSources.isNotEmpty()) {
+                message += "\n\n${activity.getString(R.string.restore_missing_sources)}\n${
+                results.missingSources.joinToString(
+                    "\n",
+                ) { "- $it" }
+                }"
             }
+            if (results.missingTrackers.isNotEmpty()) {
+                message += "\n\n${activity.getString(R.string.restore_missing_trackers)}\n${
+                results.missingTrackers.joinToString(
+                    "\n",
+                ) { "- $it" }
+                }"
+            }
+
+            activity.materialAlertDialog()
+                .setTitle(R.string.restore_backup)
+                .setMessage(message)
+                .setPositiveButton(R.string.restore) { _, _ ->
+                    val context = applicationContext
+                    if (context != null) {
+                        activity.toast(R.string.restoring_backup)
+                        BackupRestoreJob.start(context, uri)
+                    }
+                }.show()
+        } catch (e: Exception) {
+            activity.materialAlertDialog()
+                .setTitle(R.string.invalid_backup_file)
+                .setMessage(e.message)
+                .setPositiveButton(android.R.string.cancel, null)
+                .show()
         }
     }
 }
-
-private const val KEY_URI = "RestoreBackupDialog.uri"
 
 private const val CODE_BACKUP_DIR = 503
 private const val CODE_BACKUP_CREATE = 504

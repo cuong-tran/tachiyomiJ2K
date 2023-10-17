@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.ui.setting.database
 
 import android.annotation.SuppressLint
-import android.app.Dialog
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -24,7 +22,6 @@ import eu.davidea.flexibleadapter.Payload
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ClearDatabaseControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
-import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
@@ -118,9 +115,18 @@ class ClearDatabaseController :
         binding.fab.isInvisible = true
         binding.fab.setOnClickListener {
             if (adapter!!.selectedItemCount > 0) {
-                val ctrl = ClearDatabaseSourcesDialog()
-                ctrl.targetController = this
-                ctrl.showDialog(router)
+                val item = arrayOf(activity!!.getString(R.string.clear_db_exclude_read))
+                val selected = booleanArrayOf(true)
+                activity!!.materialAlertDialog()
+                    .setCustomTitleAndMessage(0, activity!!.getString(R.string.clear_database_confirmation))
+                    .setMultiChoiceItems(item, selected) { _, which, checked ->
+                        selected[which] = checked
+                    }
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        clearDatabaseForSelectedSources(selected.last())
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
             }
         }
     }
@@ -226,23 +232,6 @@ class ClearDatabaseController :
         }
         if (bottomPadding != binding.recycler.paddingBottom) {
             binding.recycler.updatePadding(bottom = bottomPadding)
-        }
-    }
-
-    class ClearDatabaseSourcesDialog : DialogController() {
-        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            val item = arrayOf(activity!!.getString(R.string.clear_db_exclude_read))
-            val selected = booleanArrayOf(true)
-            return activity!!.materialAlertDialog()
-                .setCustomTitleAndMessage(0, activity!!.getString(R.string.clear_database_confirmation))
-                .setMultiChoiceItems(item, selected) { _, which, checked ->
-                    selected[which] = checked
-                }
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    (targetController as? ClearDatabaseController)?.clearDatabaseForSelectedSources(selected.last())
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .create()
         }
     }
 

@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.ui.migration.MigrationMangaDialog
 import eu.kanade.tachiyomi.ui.migration.SearchController
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
@@ -475,21 +474,40 @@ class MigrationListController(bundle: Bundle? = null) :
         val totalManga = adapter?.itemCount ?: 0
         val mangaSkipped = adapter?.mangasSkipped() ?: 0
         when (item.itemId) {
-            R.id.action_copy_manga -> MigrationMangaDialog(
-                this,
-                true,
-                totalManga,
-                mangaSkipped,
-            ).showDialog(router)
-            R.id.action_migrate_manga -> MigrationMangaDialog(
-                this,
-                false,
-                totalManga,
-                mangaSkipped,
-            ).showDialog(router)
+            R.id.action_copy_manga, R.id.action_migrate_manga -> {
+                showCopyMigrateDialog(
+                    R.id.action_copy_manga == item.itemId,
+                    totalManga,
+                    mangaSkipped,
+                )
+            }
             else -> return super.onOptionsItemSelected(item)
         }
         return true
+    }
+
+    private fun showCopyMigrateDialog(copy: Boolean, totalManga: Int, mangaSkipped: Int) {
+        val activity = activity ?: return
+        val confirmRes = if (copy) R.plurals.copy_manga else R.plurals.migrate_manga
+        val skipping by lazy { activity.getString(R.string.skipping_, mangaSkipped) }
+        val additionalString = if (mangaSkipped > 0) " $skipping" else ""
+        val confirmString = activity.resources.getQuantityString(
+            confirmRes,
+            totalManga,
+            totalManga,
+            additionalString,
+        )
+        activity.materialAlertDialog()
+            .setMessage(confirmString)
+            .setPositiveButton(if (copy) R.string.copy_value else R.string.migrate) { _, _ ->
+                if (copy) {
+                    copyMangas()
+                } else {
+                    migrateMangas()
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     override fun canChangeTabs(block: () -> Unit): Boolean {

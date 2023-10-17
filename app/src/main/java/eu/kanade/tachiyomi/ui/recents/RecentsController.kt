@@ -54,13 +54,17 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recents.options.TabbedRecentsOptionsSheet
 import eu.kanade.tachiyomi.ui.source.browse.ProgressItem
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
+import eu.kanade.tachiyomi.util.system.addCheckBoxPrompt
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
 import eu.kanade.tachiyomi.util.system.isLTR
+import eu.kanade.tachiyomi.util.system.isPromptChecked
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
+import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.view.activityBinding
@@ -101,8 +105,7 @@ class RecentsController(bundle: Bundle? = null) :
     TabbedInterface,
     RootSearchInterface,
     FloatingSearchInterface,
-    BottomSheetController,
-    RemoveHistoryDialog.Listener {
+    BottomSheetController {
 
     init {
         setHasOptionsMenu(true)
@@ -781,25 +784,44 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun onItemLongClick(position: Int) {
         val item = adapter.getItem(position) as? RecentMangaItem ?: return
-        val manga = item.mch.manga
-        val history = item.mch.history
-        val chapter = item.mch.chapter
-        if (history.id != null) {
-            RemoveHistoryDialog(this, manga, history, chapter).showDialog(router)
-        }
+        showRemoveHistoryDialog(item.mch.manga, item.mch.history, item.mch.chapter)
     }
 
     override fun onItemLongClick(position: Int, chapter: ChapterHistory): Boolean {
         val history = chapter.history ?: return false
         val item = adapter.getItem(position) as? RecentMangaItem ?: return false
-        val manga = item.mch.manga
         if (history.id != null) {
-            RemoveHistoryDialog(this, manga, history, chapter).showDialog(router)
+            showRemoveHistoryDialog(item.mch.manga, history, chapter)
         }
         return history.id != null
     }
 
-    override fun removeHistory(manga: Manga, history: History, all: Boolean) {
+    private fun showRemoveHistoryDialog(manga: Manga, history: History, chapter: Chapter) {
+        val activity = activity ?: return
+        if (history.id != null) {
+            activity.materialAlertDialog()
+                .setCustomTitleAndMessage(
+                    R.string.reset_chapter_question,
+                    activity.getString(
+                        R.string.this_will_remove_the_read_date_for_x_question,
+                        chapter.name,
+                    ),
+                )
+                .addCheckBoxPrompt(
+                    activity.getString(
+                        R.string.reset_all_chapters_for_this_,
+                        manga.seriesType(activity),
+                    ),
+                )
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.reset) { dialog, _ ->
+                    removeHistory(manga, history, dialog.isPromptChecked)
+                }
+                .show()
+        }
+    }
+
+    private fun removeHistory(manga: Manga, history: History, all: Boolean) {
         if (all) {
             // Reset last read of chapter to 0L
             presenter.removeAllFromHistory(manga.id!!)
