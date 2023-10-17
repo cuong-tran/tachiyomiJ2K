@@ -30,9 +30,6 @@ import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
 import kotlinx.coroutines.MainScope
-import rx.Observable
-import rx.Subscription
-import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
@@ -43,18 +40,12 @@ abstract class SettingsController : PreferenceController() {
     val preferences: PreferencesHelper = Injekt.get()
     val viewScope = MainScope()
 
-    var untilDestroySubscriptions = CompositeSubscription()
-        private set
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         listView.layoutManager = LinearLayoutManagerAccurateOffset(view.context)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
-        if (untilDestroySubscriptions.isUnsubscribed) {
-            untilDestroySubscriptions = CompositeSubscription()
-        }
         val view = super.onCreateView(inflater, container, savedInstanceState)
         scrollViewWith(listView, padBottom = true)
         return view
@@ -77,11 +68,6 @@ abstract class SettingsController : PreferenceController() {
                 }
             }
         }
-    }
-
-    override fun onDestroyView(view: View) {
-        super.onDestroyView(view)
-        untilDestroySubscriptions.unsubscribe()
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -142,14 +128,6 @@ abstract class SettingsController : PreferenceController() {
         }
         setHasOptionsMenu(type.isEnter)
         super.onChangeStarted(handler, type)
-    }
-
-    fun <T> Observable<T>.subscribeUntilDestroy(): Subscription {
-        return subscribe().also { untilDestroySubscriptions.add(it) }
-    }
-
-    fun <T> Observable<T>.subscribeUntilDestroy(onNext: (T) -> Unit): Subscription {
-        return subscribe(onNext).also { untilDestroySubscriptions.add(it) }
     }
 
     inline fun <T> Preference.visibleIf(preference: com.fredporciuncula.flow.preferences.Preference<T>, crossinline block: (T) -> Boolean) {

@@ -20,9 +20,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.max
 import kotlin.math.min
@@ -70,11 +68,6 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
      * Configuration used by this viewer, like allow taps, or crop image borders.
      */
     val config = WebtoonConfig(scope)
-
-    /**
-     * Subscriptions to keep while this viewer is used.
-     */
-    val subscriptions = CompositeSubscription()
 
     init {
         recycler.setBackgroundColor(Color.BLACK)
@@ -183,7 +176,6 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
     override fun destroy() {
         super.destroy()
         scope.cancel()
-        subscriptions.unsubscribe()
     }
 
     /**
