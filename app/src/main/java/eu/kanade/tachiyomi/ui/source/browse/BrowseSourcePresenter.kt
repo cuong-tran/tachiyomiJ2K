@@ -172,6 +172,10 @@ open class BrowseSourcePresenter(
                     val mangas = second
                         .map { networkToLocalManga(it, sourceId) }
                         .filter { !prefs.hideInLibraryItems().get() || !it.favorite }
+                    if (mangas.isEmpty() && page == 1) {
+                        withUIContext { view?.onAddPageError(NoResultsException()) }
+                        return@onEach
+                    }
                     initializeMangas(mangas)
                     val items = mangas.map {
                         BrowseSourceItem(it, browseAsList, sourceListType, outlineCovers)
