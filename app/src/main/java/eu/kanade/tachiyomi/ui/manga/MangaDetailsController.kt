@@ -198,6 +198,7 @@ class MangaDetailsController :
     private var editMangaDialog: EditMangaDialog? = null
     var refreshTracker: Int? = null
     private var chapterPopupMenu: Pair<Int, PopupMenu>? = null
+    private var isPushing = true
 
     // Tablet Layout
     var isTablet = false
@@ -616,7 +617,7 @@ class MangaDetailsController :
     //region Lifecycle methods
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        if (adapter != null) {
+        if (adapter != null && !isPushing) {
             presenter.isLockedFromSearch =
                 shouldLockIfNeeded && SecureActivityDelegate.shouldBeLocked()
             presenter.headerItem.isLocked = presenter.isLockedFromSearch
@@ -658,6 +659,7 @@ class MangaDetailsController :
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
+        isPushing = true
         if (type.isEnter) {
             activityBinding?.appBar?.y = 0f
             activityBinding?.appBar?.updateAppBarAfterY(binding.recycler)
@@ -691,6 +693,7 @@ class MangaDetailsController :
         type: ControllerChangeType,
     ) {
         super.onChangeEnded(changeHandler, type)
+        isPushing = false
         if (type == ControllerChangeType.PUSH_ENTER) {
             binding.swipeRefresh.isRefreshing = presenter.isLoading
         }
