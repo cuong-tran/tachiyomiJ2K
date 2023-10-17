@@ -358,7 +358,7 @@ class BrowseController :
                     val controller = ExtensionFilterController()
                     router.pushController(
                         RouterTransaction.with(controller)
-                            .popChangeHandler(SettingsSourcesFadeChangeHandler())
+                            .popChangeHandler(FadeChangeHandler())
                             .pushChangeHandler(FadeChangeHandler()),
                     )
                 }
@@ -494,12 +494,16 @@ class BrowseController :
     override fun handleOnBackProgressed(backEvent: BackEventCompat) {
         if (showingExtensions && !binding.bottomSheet.root.canStillGoBack()) {
             binding.bottomSheet.root.sheetBehavior?.updateBackProgress(backEvent)
+        } else {
+            super.handleOnBackProgressed(backEvent)
         }
     }
 
     override fun handleOnBackCancelled() {
         if (showingExtensions && !binding.bottomSheet.root.canStillGoBack()) {
             binding.bottomSheet.root.sheetBehavior?.cancelBackProgress()
+        } else {
+            super.handleOnBackCancelled()
         }
     }
 
@@ -531,7 +535,7 @@ class BrowseController :
             binding.bottomSheet.root.updateExtTitle()
             binding.bottomSheet.root.presenter.refreshExtensions()
             presenter.updateSources()
-            if (type.isEnter) {
+            if (type.isEnter && isControllerVisible) {
                 activityBinding?.appBar?.doOnNextLayout {
                     activityBinding?.appBar?.y = 0f
                     activityBinding?.appBar?.updateAppBarAfterY(binding.sourceRecycler)
@@ -696,7 +700,7 @@ class BrowseController :
                 val controller = SettingsSourcesController()
                 router.pushController(
                     RouterTransaction.with(controller)
-                        .popChangeHandler(SettingsSourcesFadeChangeHandler())
+                        .popChangeHandler(FadeChangeHandler())
                         .pushChangeHandler(FadeChangeHandler()),
                 )
             }
@@ -732,8 +736,6 @@ class BrowseController :
             adapter?.addScrollableHeader(LangItem(SourcePresenter.LAST_USED_KEY))
         }
     }
-
-    class SettingsSourcesFadeChangeHandler : FadeChangeHandler()
 
     @Parcelize
     data class SmartSearchConfig(val origTitle: String, val origMangaId: Long) : Parcelable

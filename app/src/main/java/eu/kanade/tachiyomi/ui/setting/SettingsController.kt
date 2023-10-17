@@ -26,7 +26,10 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.view.BackHandlerControllerInterface
 import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.backgroundColor
+import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
 import kotlinx.coroutines.MainScope
@@ -34,7 +37,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
 
-abstract class SettingsController : PreferenceController() {
+abstract class SettingsController : PreferenceController(), BackHandlerControllerInterface {
 
     var preferenceKey: String? = null
     val preferences: PreferencesHelper = Injekt.get()
@@ -47,6 +50,7 @@ abstract class SettingsController : PreferenceController() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
         val view = super.onCreateView(inflater, container, savedInstanceState)
+        view.backgroundColor = view.context.getResourceColor(R.attr.background)
         scrollViewWith(listView, padBottom = true)
         return view
     }
@@ -123,10 +127,12 @@ abstract class SettingsController : PreferenceController() {
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
-        if (type.isEnter) {
+        if (type.isEnter && isControllerVisible) {
             setTitle()
+        } else if (type.isEnter) {
+            view?.alpha = 0f
         }
-        setHasOptionsMenu(type.isEnter)
+        setHasOptionsMenu(type.isEnter && isControllerVisible)
         super.onChangeStarted(handler, type)
     }
 

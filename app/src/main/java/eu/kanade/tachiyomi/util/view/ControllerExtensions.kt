@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.util.view
 import android.Manifest
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -18,10 +19,13 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.activity.BackEventCompat
+import androidx.annotation.CallSuper
 import androidx.annotation.MainThread
 import androidx.appcompat.widget.SearchView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.core.graphics.ColorUtils
 import androidx.core.math.MathUtils
 import androidx.core.net.toUri
@@ -45,6 +49,7 @@ import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
+import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -52,6 +57,7 @@ import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.ui.base.controller.CrossFadeChangeHandler
 import eu.kanade.tachiyomi.ui.base.controller.OneWayFadeChangeHandler
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -70,6 +76,7 @@ import eu.kanade.tachiyomi.widget.StatefulNestedScrollView
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
@@ -664,7 +671,9 @@ fun Controller.moveRecyclerViewUp(allTheWayUp: Boolean = false, scrollUpAnyway: 
     val recycler = mainRecyclerView ?: return
     val activityBinding = activityBinding ?: return
     val appBarOffset = activityBinding.appBar.toolbarDistanceToTop
-    if (allTheWayUp && recycler.computeVerticalScrollOffset() - recycler.paddingTop <= fullAppBarHeight ?: activityBinding.appBar.preLayoutHeight) {
+    if (allTheWayUp && recycler.computeVerticalScrollOffset() - recycler.paddingTop <=
+        (fullAppBarHeight ?: activityBinding.appBar.preLayoutHeight)
+    ) {
         (recycler.layoutManager as? LinearLayoutManager)?.scrollToPosition(0)
         (recycler.layoutManager as? StaggeredGridLayoutManager)?.scrollToPosition(0)
         recycler.post {
@@ -782,14 +791,27 @@ fun Controller.requestFilePermissionsSafe(
 }
 
 fun Controller.withFadeTransaction(): RouterTransaction {
+    val isLowRam by lazy { activity?.getSystemService<ActivityManager>()?.isLowRamDevice == true }
     return RouterTransaction.with(this)
-        .pushChangeHandler(OneWayFadeChangeHandler())
-        .popChangeHandler(OneWayFadeChangeHandler())
+        .pushChangeHandler(
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                FadeChangeHandler()
+            } else {
+                CrossFadeChangeHandler(duration = 250, removesFromViewOnPush = isLowRam)
+            },
+        )
+        .popChangeHandler(
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                FadeChangeHandler()
+            } else {
+                CrossFadeChangeHandler(duration = 150, removesFromViewOnPush = isLowRam)
+            },
+        )
 }
 
 fun Controller.withFadeInTransaction(): RouterTransaction {
     return RouterTransaction.with(this)
-        .pushChangeHandler(OneWayFadeChangeHandler().apply { fadeOut = false })
+        .pushChangeHandler(FadeChangeHandler())
         .popChangeHandler(OneWayFadeChangeHandler())
 }
 
@@ -829,4 +851,38 @@ fun Router.canStillGoBack(): Boolean {
         return controller.canStillGoBack()
     }
     return false
+}
+
+interface BackHandlerControllerInterface {
+    fun handleOnBackStarted(backEvent: BackEventCompat) {
+    }
+
+    @CallSuper
+    fun handleOnBackProgressed(backEvent: BackEventCompat) {
+        if (this !is Controller) return
+        if (router.backstackSize > 1) {
+            val progress = ((backEvent.progress.takeIf { it > 0.001f } ?: 0f) * 0.5f).pow(0.6f)
+            view?.let { view ->
+                view.alpha = 1f - progress
+                view.x = progress * view.width * 0.15f
+                router.backstack[router.backstackSize - 2].controller.view?.let { view2 ->
+                    view2.alpha = progress
+                    view2.x = view.x - view.width * 0.2f
+                }
+            }
+        }
+    }
+
+    @CallSuper
+    fun handleOnBackCancelled() {
+        if (this !is Controller) return
+        view?.alpha = 1f
+        view?.x = 0f
+        if (router.backstackSize > 1) {
+            router.backstack[router.backstackSize - 2].controller.view?.let { view ->
+                view.alpha = 0f
+                view.x = 0f
+            }
+        }
+    }
 }

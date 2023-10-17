@@ -495,12 +495,16 @@ class RecentsController(bundle: Bundle? = null) :
     override fun handleOnBackProgressed(backEvent: BackEventCompat) {
         if (showingDownloads) {
             binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.updateBackProgress(backEvent)
+        } else {
+            super.handleOnBackProgressed(backEvent)
         }
     }
 
     override fun handleOnBackCancelled() {
         if (showingDownloads) {
             binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.cancelBackProgress()
+        } else {
+            super.handleOnBackCancelled()
         }
     }
 
@@ -889,30 +893,33 @@ class RecentsController(bundle: Bundle? = null) :
         if (type.isEnter) {
             if (type == ControllerChangeType.POP_ENTER) presenter.onCreate()
             binding.downloadBottomSheet.dlBottomSheet.dismiss()
-            activityBinding?.mainTabs?.let { tabs ->
-                tabs.removeAllTabs()
-                tabs.clearOnTabSelectedListeners()
-                val selectedTab = presenter.viewType
-                RecentsViewType.entries.forEach { viewType ->
-                    tabs.addTab(
-                        tabs.newTab().setText(viewType.stringRes).also { tab ->
-                            tab.view.compatToolTipText = null
+            if (isControllerVisible) {
+                activityBinding?.mainTabs?.let { tabs ->
+                    tabs.removeAllTabs()
+                    tabs.clearOnTabSelectedListeners()
+                    val selectedTab = presenter.viewType
+                    RecentsViewType.entries.forEach { viewType ->
+                        tabs.addTab(
+                            tabs.newTab().setText(viewType.stringRes).also { tab ->
+                                tab.view.compatToolTipText = null
+                            },
+                            viewType == selectedTab,
+                        )
+                    }
+                    tabs.addOnTabSelectedListener(
+                        object : TabLayout.OnTabSelectedListener {
+                            override fun onTabSelected(tab: TabLayout.Tab?) {
+                                setViewType(RecentsViewType.valueOf(tab?.position))
+                            }
+
+                            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+                            override fun onTabReselected(tab: TabLayout.Tab?) {
+                                binding.recycler.smoothScrollToTop()
+                            }
                         },
-                        viewType == selectedTab,
                     )
+                    (activity as? MainActivity)?.showTabBar(true)
                 }
-                tabs.addOnTabSelectedListener(
-                    object : TabLayout.OnTabSelectedListener {
-                        override fun onTabSelected(tab: TabLayout.Tab?) {
-                            setViewType(RecentsViewType.valueOf(tab?.position))
-                        }
-                        override fun onTabUnselected(tab: TabLayout.Tab?) {}
-                        override fun onTabReselected(tab: TabLayout.Tab?) {
-                            binding.recycler.smoothScrollToTop()
-                        }
-                    },
-                )
-                (activity as? MainActivity)?.showTabBar(true)
             }
         } else {
             val lastController = router.backstack.lastOrNull()?.controller
@@ -929,7 +936,7 @@ class RecentsController(bundle: Bundle? = null) :
         if (type == ControllerChangeType.POP_ENTER) {
             setBottomPadding()
         }
-        if (type.isEnter) {
+        if (type.isEnter && isControllerVisible) {
             updateTitleAndMenu()
         }
     }

@@ -661,10 +661,12 @@ class MangaDetailsController :
         super.onChangeStarted(handler, type)
         isPushing = true
         if (type.isEnter) {
-            activityBinding?.appBar?.y = 0f
-            activityBinding?.appBar?.updateAppBarAfterY(binding.recycler)
-            updateToolbarTitleAlpha(0f)
-            setStatusBarAndToolbar()
+            if (isControllerVisible) {
+                activityBinding?.appBar?.y = 0f
+                activityBinding?.appBar?.updateAppBarAfterY(binding.recycler)
+                updateToolbarTitleAlpha(0f)
+                setStatusBarAndToolbar()
+            }
         } else {
             if (router.backstack.lastOrNull()?.controller is DialogController) {
                 return

@@ -269,9 +269,9 @@ dependencies {
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
 
     // Conductor
-    val conductorVersion = "3.0.0"
+    val conductorVersion = "4.0.0-preview-3"
     implementation("com.bluelinelabs:conductor:$conductorVersion")
-    implementation("com.github.tachiyomiorg:conductor-support-preference:$conductorVersion")
+    implementation("com.github.tachiyomiorg:conductor-support-preference:3.0.0")
 
     // Shizuku
     val shizukuVersion = "12.1.0"

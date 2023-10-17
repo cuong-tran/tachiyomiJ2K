@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
@@ -169,7 +170,7 @@ open class GlobalSearchController(
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
-        if (type.isEnter) {
+        if (type.isEnter && isControllerVisible) {
             val searchView = activityBinding?.searchToolbar?.searchView ?: return
             val searchItem = activityBinding?.searchToolbar?.searchItem ?: return
             searchItem.expandActionView()

@@ -27,7 +27,6 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.activity.BackEventCompat
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.IdRes
 import androidx.appcompat.view.ActionMode
@@ -115,6 +114,7 @@ import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.prepareSideNavContext
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.BackHandlerControllerInterface
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.blurBehindWindow
 import eu.kanade.tachiyomi.util.view.canStillGoBack
@@ -212,7 +212,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         get() = max(binding.toolbar.height, binding.cardFrame.height, binding.appBar.attrToolbarHeight)
 
     private var actionMode: ActionMode? = null
-    var backPressedCallback: OnBackPressedCallback? = null
+    private var backPressedCallback: OnBackPressedCallback? = null
     private val backCallback = {
         pressingBack()
         reEnableBackPressedCallBack()
@@ -253,23 +253,41 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
 
         super.onCreate(savedInstanceState)
         backPressedCallback = object : OnBackPressedCallback(enabled = true) {
+            var controllerHandlesBackPress = false
             override fun handleOnBackPressed() {
                 backCallback()
             }
 
             override fun handleOnBackStarted(backEvent: BackEventCompat) {
-                val controller = router.backstack.lastOrNull()?.controller as? BaseController<*>
-                controller?.handleOnBackStarted(backEvent)
+                controllerHandlesBackPress = false
+                if (!(
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                        ViewCompat.getRootWindowInsets(window.decorView)
+                        ?.isVisible(WindowInsetsCompat.Type.ime()) == true
+                    ) &&
+                    actionMode == null &&
+                    !(binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible)
+                ) {
+                    controllerHandlesBackPress = true
+                }
+                if (controllerHandlesBackPress) {
+                    val controller = router.backstack.lastOrNull()?.controller as? BackHandlerControllerInterface
+                    controller?.handleOnBackStarted(backEvent)
+                }
             }
 
             override fun handleOnBackProgressed(backEvent: BackEventCompat) {
-                val controller = router.backstack.lastOrNull()?.controller as? BaseController<*>
-                controller?.handleOnBackProgressed(backEvent)
+                if (controllerHandlesBackPress) {
+                    val controller = router.backstack.lastOrNull()?.controller as? BackHandlerControllerInterface
+                    controller?.handleOnBackProgressed(backEvent)
+                }
             }
 
             override fun handleOnBackCancelled() {
-                val controller = router.backstack.lastOrNull()?.controller as? BaseController<*>
-                controller?.handleOnBackCancelled()
+                if (controllerHandlesBackPress) {
+                    val controller = router.backstack.lastOrNull()?.controller as? BackHandlerControllerInterface
+                    controller?.handleOnBackCancelled()
+                }
             }
         }
         onBackPressedDispatcher.addCallback(backPressedCallback!!)
@@ -501,6 +519,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     container: ViewGroup,
                     handler: ControllerChangeHandler,
                 ) {
+                    to?.view?.alpha = 1f
                     syncActivityViewWithController(to, from, isPush)
                     binding.appBar.isVisible = true
                     binding.appBar.alpha = 1f
@@ -519,6 +538,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 ) {
                     nav.translationY = 0f
                     showDLQueueTutorial()
+                    if (!(from is DialogController || to is DialogController) && from != null) {
+                        from.view?.alpha = 0f
+                    }
                     if (router.backstackSize == 1) {
                         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !isPush) {
                             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
@@ -705,8 +727,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         if (insets == null) return
         window.navigationBarColor = when {
             Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1 -> {
-                // basically if in landscape on a phone
-                // For lollipop, draw opaque nav bar
+                // basically if in landscape on a phone, solid black bar
+                // otherwise translucent dark theme or black if light theme
                 when {
                     insets.hasSideNavBar() -> Color.BLACK
                     isInNightMode() -> ColorUtils.setAlphaComponent(
