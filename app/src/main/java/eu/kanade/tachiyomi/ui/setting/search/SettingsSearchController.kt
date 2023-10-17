@@ -10,9 +10,8 @@ import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.SettingsSearchControllerBinding
-import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
-import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
+import eu.kanade.tachiyomi.ui.main.SearchControllerInterface
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
@@ -25,8 +24,7 @@ import uy.kohesive.injekt.api.get
  */
 class SettingsSearchController :
     BaseController<SettingsSearchControllerBinding>(),
-    FloatingSearchInterface,
-    SmallToolbarInterface,
+    SearchControllerInterface,
     SettingsSearchAdapter.OnTitleClickListener {
 
     /**

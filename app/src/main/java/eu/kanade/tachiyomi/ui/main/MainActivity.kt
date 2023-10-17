@@ -260,19 +260,22 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
 
             override fun handleOnBackStarted(backEvent: BackEventCompat) {
                 controllerHandlesBackPress = false
+                val controller by lazy { router.backstack.lastOrNull()?.controller }
                 if (!(
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                         ViewCompat.getRootWindowInsets(window.decorView)
                         ?.isVisible(WindowInsetsCompat.Type.ime()) == true
                     ) &&
                     actionMode == null &&
-                    !(binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible)
+                    !(
+                        binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible &&
+                            controller !is SearchControllerInterface
+                        )
                 ) {
                     controllerHandlesBackPress = true
                 }
                 if (controllerHandlesBackPress) {
-                    val controller = router.backstack.lastOrNull()?.controller as? BackHandlerControllerInterface
-                    controller?.handleOnBackStarted(backEvent)
+                    (controller as? BackHandlerControllerInterface)?.handleOnBackStarted(backEvent)
                 }
             }
 
@@ -1513,6 +1516,8 @@ interface TabbedInterface
 interface HingeSupportedController {
     fun updateForHinge()
 }
+
+interface SearchControllerInterface : FloatingSearchInterface, SmallToolbarInterface
 
 interface FloatingSearchInterface {
     fun searchTitle(title: String?): String? {
