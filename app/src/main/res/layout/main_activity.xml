@@ -18,6 +18,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0">
 
+        <ImageView
+            android:id="@+id/back_shadow"
+            android:layout_width="6dp"
+            android:alpha="0.25"
+            android:visibility="gone"
+            android:layout_height="match_parent"
+            android:src="@drawable/shape_gradient_start_shadow"
+            android:importantForAccessibility="no" />
     </com.bluelinelabs.conductor.ChangeHandlerFrameLayout>
 
     <eu.kanade.tachiyomi.ui.base.ExpandedAppBarLayout

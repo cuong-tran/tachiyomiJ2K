@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.main
 
 import android.Manifest
 import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Dialog
@@ -526,6 +527,21 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     syncActivityViewWithController(to, from, isPush)
                     binding.appBar.isVisible = true
                     binding.appBar.alpha = 1f
+                    if (binding.backShadow.isVisible && !isPush) {
+                        val alpha = binding.backShadow.alpha
+                        val bA = ObjectAnimator.ofFloat(binding.backShadow, View.ALPHA, alpha, 0f)
+                        from?.view?.let { view ->
+                            bA.addUpdateListener {
+                                binding.backShadow.x = view.x - binding.backShadow.width
+                            }
+                        }
+                        bA.doOnEnd {
+                            binding.backShadow.alpha = 0.25f
+                            binding.backShadow.isVisible = false
+                        }
+                        bA.duration = 150
+                        bA.start()
+                    }
                     if (!isPush || router.backstackSize == 1) {
                         nav.translationY = 0f
                     }

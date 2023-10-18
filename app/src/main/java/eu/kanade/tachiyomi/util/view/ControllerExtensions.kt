@@ -887,6 +887,21 @@ interface BackHandlerControllerInterface {
             view?.let { view ->
                 view.alpha = 1f - progress
                 view.x = progress * view.width * 0.15f
+
+                activityBinding?.let { activityBinding ->
+                    val container = activityBinding.controllerContainer
+                    val backShadow = activityBinding.backShadow
+                    if (container.indexOfChild(backShadow) != container.indexOfChild(view) - 1) {
+                        container.removeView(backShadow)
+                        container.addView(backShadow, container.indexOfChild(view))
+                    }
+                    if (!backShadow.isVisible) {
+                        backShadow.isVisible = true
+                    }
+                    backShadow.x = view.x - backShadow.width
+                    backShadow.alpha = 0.33f * view.alpha
+                }
+
                 router.backstack[router.backstackSize - 2].controller.view?.let { view2 ->
                     view2.alpha = progress
                     view2.x = view.x - view.width * 0.2f
@@ -906,5 +921,7 @@ interface BackHandlerControllerInterface {
                 view.x = 0f
             }
         }
+        activityBinding?.backShadow?.isVisible = false
+        activityBinding?.backShadow?.alpha = 0.25f
     }
 }
