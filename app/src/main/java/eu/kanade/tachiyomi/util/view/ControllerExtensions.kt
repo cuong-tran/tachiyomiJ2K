@@ -882,7 +882,7 @@ interface BackHandlerControllerInterface {
     @CallSuper
     fun handleOnBackProgressed(backEvent: BackEventCompat) {
         if (this !is Controller) return
-        if (router.backstackSize > 1) {
+        if (router.backstackSize > 1 && isControllerVisible) {
             val progress = ((backEvent.progress.takeIf { it > 0.001f } ?: 0f) * 0.5f).pow(0.6f)
             view?.let { view ->
                 view.alpha = 1f - progress

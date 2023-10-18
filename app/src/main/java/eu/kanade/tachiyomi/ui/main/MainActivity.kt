@@ -555,6 +555,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     container: ViewGroup,
                     handler: ControllerChangeHandler,
                 ) {
+                    to?.view?.x = 0f
                     nav.translationY = 0f
                     showDLQueueTutorial()
                     if (!(from is DialogController || to is DialogController) && from != null) {
