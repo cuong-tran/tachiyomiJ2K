@@ -4,7 +4,6 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -109,6 +108,7 @@ import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.copyToClipboard
 import eu.kanade.tachiyomi.util.view.findChild
 import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.isControllerVisible
@@ -1639,10 +1639,10 @@ class MangaDetailsController :
      * @param content the actual text to copy to the board
      * @param label Label to show to the user describing the content
      */
-    override fun copyToClipboard(content: String, label: Int, useToast: Boolean) {
+    override fun copyContentToClipboard(content: String, label: Int, useToast: Boolean) {
         val view = view ?: return
         val contentType = if (label != 0) view.context.getString(label) else null
-        copyToClipboard(content, contentType, useToast)
+        copyContentToClipboard(content, contentType, useToast)
     }
 
     /**
@@ -1651,22 +1651,8 @@ class MangaDetailsController :
      * @param content the actual text to copy to the board
      * @param label Label to show to the user describing the content
      */
-    override fun copyToClipboard(content: String, label: String?, useToast: Boolean) {
-        if (content.isBlank()) return
-
-        val activity = activity ?: return
-        val view = view ?: return
-
-        val clipboard = activity.getSystemService(ClipboardManager::class.java)
-        clipboard.setPrimaryClip(ClipData.newPlainText(label, content))
-
-        label ?: return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return
-        if (useToast) {
-            activity.toast(view.context.getString(R.string._copied_to_clipboard, label))
-        } else {
-            snack = view.snack(view.context.getString(R.string._copied_to_clipboard, label))
-        }
+    override fun copyContentToClipboard(content: String, label: String?, useToast: Boolean) {
+        snack = copyToClipboard(content, label, useToast)
     }
 
     override fun showTrackingSheet() {
@@ -1897,7 +1883,7 @@ class MangaDetailsController :
             item: MenuItem?,
         ): Boolean {
             when (item?.itemId) {
-                R.id.action_copy -> copyToClipboard(text, null)
+                R.id.action_copy -> copyContentToClipboard(text, null)
                 R.id.action_source_search -> sourceSearch(text)
                 R.id.action_global_search, R.id.action_local_search -> {
                     if (authorText != null) {

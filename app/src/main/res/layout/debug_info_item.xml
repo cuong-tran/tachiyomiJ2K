@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/debug_title"
+            style="?textAppearanceTitleMedium"
+            android:padding="8dp"
+            android:layout_gravity="center_vertical"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/card_view_group"
+            android:layout_width="match_parent"
+            tools:visibility="invisible"
+            android:layout_height="wrap_content"
+            tools:text="Enqueued" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/debug_summary"
+            android:typeface="monospace"
+            android:padding="8dp"
+            android:layout_gravity="center_vertical"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/card_view_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Enqueued" />
+</FrameLayout>

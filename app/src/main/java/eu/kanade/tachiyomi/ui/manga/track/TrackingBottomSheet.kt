@@ -241,7 +241,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     override fun onTitleLongClick(position: Int) {
         val title = adapter?.getItem(position)?.track?.title ?: return
-        controller.copyToClipboard(title, R.string.title, true)
+        controller.copyContentToClipboard(title, R.string.title, true)
     }
 
     private fun startTransition(duration: Long = 100) {

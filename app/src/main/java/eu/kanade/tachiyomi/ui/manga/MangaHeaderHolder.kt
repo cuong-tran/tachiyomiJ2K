@@ -139,7 +139,7 @@ class MangaHeaderHolder(
             }
             title.setOnLongClickListener {
                 title.text?.toString()?.toNormalized()?.let {
-                    adapter.delegate.copyToClipboard(it, R.string.title)
+                    adapter.delegate.copyContentToClipboard(it, R.string.title)
                 }
                 true
             }
@@ -150,7 +150,7 @@ class MangaHeaderHolder(
             }
             mangaAuthor.setOnLongClickListener {
                 mangaAuthor.text?.toString()?.let {
-                    adapter.delegate.copyToClipboard(it, R.string.author)
+                    adapter.delegate.copyContentToClipboard(it, R.string.author)
                 }
                 true
             }
@@ -523,7 +523,7 @@ class MangaHeaderHolder(
                         adapter.delegate.showFloatingActionMode(chip, isTag = true)
                     }
                     chip.setOnLongClickListener {
-                        adapter.delegate.copyToClipboard(genreText, genreText)
+                        adapter.delegate.copyContentToClipboard(genreText, genreText)
                         true
                     }
                     this.addView(chip)

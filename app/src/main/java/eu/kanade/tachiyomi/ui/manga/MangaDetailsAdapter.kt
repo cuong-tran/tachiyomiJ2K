@@ -140,9 +140,9 @@ class MangaDetailsAdapter(
         fun showFloatingActionMode(view: TextView, content: String? = null, isTag: Boolean = false)
         fun showChapterFilter()
         fun favoriteManga(longPress: Boolean)
-        fun copyToClipboard(content: String, label: Int, useToast: Boolean = false)
+        fun copyContentToClipboard(content: String, label: Int, useToast: Boolean = false)
         fun customActionMode(view: TextView): ActionMode.Callback
-        fun copyToClipboard(content: String, label: String?, useToast: Boolean = false)
+        fun copyContentToClipboard(content: String, label: String?, useToast: Boolean = false)
         fun zoomImageFromThumb(thumbView: View)
         fun showTrackingSheet()
         fun updateScroll()

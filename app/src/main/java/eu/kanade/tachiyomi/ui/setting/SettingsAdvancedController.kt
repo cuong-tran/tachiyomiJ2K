@@ -40,6 +40,7 @@ import eu.kanade.tachiyomi.network.PREF_DOH_QUAD101
 import eu.kanade.tachiyomi.network.PREF_DOH_QUAD9
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.setting.database.ClearDatabaseController
+import eu.kanade.tachiyomi.ui.setting.debug.DebugController
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.disableItems
 import eu.kanade.tachiyomi.util.system.isPackageInstalled
@@ -107,35 +108,47 @@ class SettingsAdvancedController : SettingsController() {
             }
         }
 
-        val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
-        if (pm != null) {
-            preference {
-                key = "disable_batt_opt"
-                titleRes = R.string.disable_battery_optimization
-                summaryRes = R.string.disable_if_issues_with_updating
+        preference {
+            key = "debug_info"
+            titleRes = R.string.pref_debug_info
 
-                onClick {
-                    val packageName: String = context.packageName
-                    if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                        val intent = Intent().apply {
-                            action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                            data = "package:$packageName".toUri()
-                        }
-                        startActivity(intent)
-                    } else {
-                        context.toast(R.string.battery_optimization_disabled)
-                    }
-                }
+            onClick {
+                router.pushController(DebugController().withFadeTransaction())
             }
         }
 
-        preference {
-            key = "pref_dont_kill_my_app"
-            title = "Don't kill my app!"
-            summaryRes = R.string.about_dont_kill_my_app
+        preferenceCategory {
+            titleRes = R.string.label_background_activity
+            val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
+            if (pm != null) {
+                preference {
+                    key = "disable_batt_opt"
+                    titleRes = R.string.disable_battery_optimization
+                    summaryRes = R.string.disable_if_issues_with_updating
 
-            onClick {
-                openInBrowser("https://dontkillmyapp.com/")
+                    onClick {
+                        val packageName: String = context.packageName
+                        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                            val intent = Intent().apply {
+                                action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                                data = "package:$packageName".toUri()
+                            }
+                            startActivity(intent)
+                        } else {
+                            context.toast(R.string.battery_optimization_disabled)
+                        }
+                    }
+                }
+            }
+
+            preference {
+                key = "pref_dont_kill_my_app"
+                title = "Don't kill my app!"
+                summaryRes = R.string.about_dont_kill_my_app
+
+                onClick {
+                    openInBrowser("https://dontkillmyapp.com/")
+                }
             }
         }
 

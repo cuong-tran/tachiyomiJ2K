@@ -114,7 +114,7 @@ class AboutController : SettingsController() {
         preference {
             key = "pref_build_time"
             titleRes = R.string.build_time
-            summary = getFormattedBuildTime()
+            summary = getFormattedBuildTime(dateFormat)
         }
 
         preferenceCategory {
@@ -234,15 +234,18 @@ class AboutController : SettingsController() {
         }
     }
 
-    private fun getFormattedBuildTime(): String {
-        try {
-            val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
-            inputDf.timeZone = TimeZone.getTimeZone("UTC")
-            val buildTime = inputDf.parse(BuildConfig.BUILD_TIME) ?: return BuildConfig.BUILD_TIME
+    companion object {
+        fun getFormattedBuildTime(dateFormat: DateFormat): String {
+            try {
+                val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
+                inputDf.timeZone = TimeZone.getTimeZone("UTC")
+                val buildTime =
+                    inputDf.parse(BuildConfig.BUILD_TIME) ?: return BuildConfig.BUILD_TIME
 
-            return buildTime.toTimestampString(dateFormat)
-        } catch (e: ParseException) {
-            return BuildConfig.BUILD_TIME
+                return buildTime.toTimestampString(dateFormat)
+            } catch (e: ParseException) {
+                return BuildConfig.BUILD_TIME
+            }
         }
     }
 }

@@ -4,6 +4,8 @@ import android.Manifest
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.app.ActivityManager
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -50,6 +52,7 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
+import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -821,6 +824,25 @@ fun Controller.openInBrowser(url: String) {
         startActivity(intent)
     } catch (e: Throwable) {
         activity?.toast(e.message)
+    }
+}
+
+fun Controller.copyToClipboard(content: String, label: String?, useToast: Boolean): Snackbar? {
+    if (content.isBlank()) return null
+
+    val activity = activity ?: return null
+    val view = view ?: return null
+
+    val clipboard = activity.getSystemService(ClipboardManager::class.java)
+    clipboard.setPrimaryClip(ClipData.newPlainText(label, content))
+
+    label ?: return null
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return null
+    return if (useToast) {
+        activity.toast(view.context.getString(R.string._copied_to_clipboard, label))
+        null
+    } else {
+        view.snack(view.context.getString(R.string._copied_to_clipboard, label))
     }
 }
 
