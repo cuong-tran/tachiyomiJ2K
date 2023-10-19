@@ -423,7 +423,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
                 .setPositiveButton(R.string.remove) { _, _ ->
                     presenter.uninstallExtension(pkgName)
                 }
-                .setNegativeButton(android.R.string.cancel) { _, _ -> }
+                .setNegativeButton(android.R.string.cancel, null)
                 .show()
         }
     }

@@ -58,7 +58,7 @@ class ExtensionDetailsHeaderAdapter(private val presenter: ExtensionDetailsPrese
                         .setPositiveButton(R.string.remove) { _, _ ->
                             presenter.uninstallExtension()
                         }
-                        .setNegativeButton(android.R.string.cancel) { _, _ -> }
+                        .setNegativeButton(android.R.string.cancel, null)
                         .show()
                 }
             }

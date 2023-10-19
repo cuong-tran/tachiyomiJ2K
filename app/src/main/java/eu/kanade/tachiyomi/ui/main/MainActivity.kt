@@ -187,7 +187,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 materialAlertDialog()
                     .setTitle(R.string.warning)
                     .setMessage(R.string.allow_notifications_recommended)
-                    .setPositiveButton(android.R.string.ok) { _, _ -> }
+                    .setPositiveButton(android.R.string.ok, null)
                     .show()
             }
         }
