@@ -3,11 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/browse_layout"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:id="@+id/browse_layout">
 
     <FrameLayout
-        android:id="@+id/frame_layout"
+        android:id="@+id/browse_frame_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?attr/background">

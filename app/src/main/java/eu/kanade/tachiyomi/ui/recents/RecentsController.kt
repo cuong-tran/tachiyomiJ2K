@@ -260,7 +260,7 @@ class RecentsController(bundle: Bundle? = null) :
         if (presenter.recentItems.isNotEmpty()) {
             adapter.updateDataSet(presenter.recentItems)
         } else {
-            binding.frameLayout.alpha = 0f
+            binding.recentsFrameLayout.alpha = 0f
         }
 
         binding.downloadBottomSheet.dlBottomSheet.onCreate(this)
@@ -573,7 +573,7 @@ class RecentsController(bundle: Bundle? = null) :
             (activity as? MainActivity)?.showNotificationPermissionPrompt()
         }
         binding.progress.isVisible = false
-        binding.frameLayout.alpha = 1f
+        binding.recentsFrameLayout.alpha = 1f
         binding.swipeRefresh.isRefreshing = LibraryUpdateJob.isRunning(view!!.context)
         adapter.removeAllScrollableHeaders()
         adapter.updateDataSet(recents)
