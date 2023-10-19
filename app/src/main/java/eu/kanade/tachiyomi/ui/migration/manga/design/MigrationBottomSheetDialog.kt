@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.CompoundButton
@@ -12,6 +13,7 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -70,6 +72,11 @@ class MigrationBottomSheetDialog(
             },
             activity,
         )
+        val contentView = binding.root
+        (contentView.parent as View).background = ContextCompat.getDrawable(context, R.drawable.bg_sheet_gradient)
+        contentView.post {
+            (contentView.parent as View).background = ContextCompat.getDrawable(context, R.drawable.bg_sheet_gradient)
+        }
     }
 
     /**
