@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.migration.manga.process
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.os.Bundle
@@ -9,7 +11,10 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.BackEventCompat
+import androidx.core.animation.doOnEnd
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
@@ -430,6 +435,25 @@ class MigrationListController(bundle: Bundle? = null) :
     }
 
     override fun handleBack(): Boolean {
+        view?.let { view ->
+            if (view.x != 0f || view.alpha != 1f) {
+                val animatorSet = AnimatorSet()
+                animatorSet.play(ObjectAnimator.ofFloat(view, View.ALPHA, view.alpha, 1f))
+                val tA = ObjectAnimator.ofFloat(view, View.TRANSLATION_X, view.translationX, 0f)
+                tA.addUpdateListener {
+                    activityBinding?.backShadow?.let { backShadow ->
+                        backShadow.x = view.x - backShadow.width
+                    }
+                }
+                animatorSet.duration = 150
+                animatorSet.doOnEnd {
+                    activityBinding?.backShadow?.alpha = 0.25f
+                    activityBinding?.backShadow?.isVisible = false
+                }
+                animatorSet.play(tA)
+                animatorSet.start()
+            }
+        }
         activity?.materialAlertDialog()
             ?.setTitle(R.string.stop_migrating)
             ?.setPositiveButton(R.string.stop) { _, _ ->
@@ -522,6 +546,16 @@ class MigrationListController(bundle: Bundle? = null) :
             return false
         }
         return true
+    }
+
+    override fun handleOnBackProgressed(backEvent: BackEventCompat) {
+        super.handleOnBackProgressed(backEvent)
+        if (router.backstackSize > 1 && isControllerVisible) {
+            router.backstack[router.backstackSize - 2].controller.view?.let { view2 ->
+                view2.alpha = 0f
+                view2.x = 0f
+            }
+        }
     }
 
     companion object {

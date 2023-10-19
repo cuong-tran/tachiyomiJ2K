@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.base.controller
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -41,10 +42,16 @@ class CrossFadeChangeHandler : AnimatorChangeHandler {
             }
         } else {
             if (from != null) {
-                animatorSet.play(ObjectAnimator.ofFloat(from, View.TRANSLATION_X, from.width.toFloat() * 0.2f))
+                val start = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && from.translationX != 0f) {
+                    from.translationX
+                } else {
+                    from.width.toFloat() * 0.2f
+                }
+                animatorSet.play(ObjectAnimator.ofFloat(from, View.TRANSLATION_X, start))
             }
             if (to != null) {
-                // Allow this to have a nice transition when coming off an aborted push animation
+                // Allow this to have a nice transition when coming off an aborted push animation or
+                // from back gesture
                 val fromLeft = from?.translationX ?: 0F
                 animatorSet.play(ObjectAnimator.ofFloat(to, View.TRANSLATION_X, fromLeft - to.width * 0.2f, 0f))
             }

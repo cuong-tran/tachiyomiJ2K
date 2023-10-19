@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clipToPadding="false"
+    android:background="?background"
     android:fitsSystemWindows="true"
     tools:context="eu.kanade.tachiyomi.ui.more.stats.StatsController">
 
