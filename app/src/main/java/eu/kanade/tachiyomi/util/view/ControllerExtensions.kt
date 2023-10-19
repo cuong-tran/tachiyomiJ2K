@@ -753,14 +753,16 @@ fun Controller.requestFilePermissionsSafe(
     showA11PermissionAnyway: Boolean = false,
 ) {
     val activity = activity ?: return
-    val permissions = mutableListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    permissions.forEach { permission ->
-        if (ContextCompat.checkSelfPermission(
-                activity,
-                permission,
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissions(arrayOf(permission), requestCode)
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+        val permissions = mutableListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        permissions.forEach { permission ->
+            if (ContextCompat.checkSelfPermission(
+                    activity,
+                    permission,
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissions(arrayOf(permission), requestCode)
+            }
         }
     }
     if (
