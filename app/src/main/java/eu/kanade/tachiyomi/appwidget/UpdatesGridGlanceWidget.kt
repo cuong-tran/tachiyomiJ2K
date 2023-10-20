@@ -39,6 +39,7 @@ import kotlinx.coroutines.MainScope
 import uy.kohesive.injekt.injectLazy
 import java.util.Calendar
 import java.util.Date
+import kotlin.math.min
 
 class UpdatesGridGlanceWidget : GlanceAppWidget() {
     private val app: Application by injectLazy()
@@ -76,7 +77,7 @@ class UpdatesGridGlanceWidget : GlanceAppWidget() {
                 .flatMap { manager.getAppWidgetSizes(it) }
                 .maxBy { it.height.value * it.width.value }
                 .calculateRowAndColumnCount()
-            val processList = list ?: RecentsPresenter.getRecentManga(customAmount = rowCount * columnCount)
+            val processList = list ?: RecentsPresenter.getRecentManga(customAmount = min(50, rowCount * columnCount))
 
             data = prepareList(processList, rowCount * columnCount)
             ids.forEach { update(app, it) }
