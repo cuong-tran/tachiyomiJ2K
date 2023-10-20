@@ -533,13 +533,19 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                         from?.view?.let { view ->
                             bA.addUpdateListener {
                                 binding.backShadow.x = view.x - binding.backShadow.width
+                                if (router.backstackSize == 1) {
+                                    to?.view?.let { toView ->
+                                        nav.x = toView.x
+                                    }
+                                }
                             }
                         }
                         bA.doOnEnd {
                             binding.backShadow.alpha = 0.25f
                             binding.backShadow.isVisible = false
+                            nav.x = 0f
                         }
-                        bA.duration = 150
+                        bA.duration = 175
                         bA.start()
                     }
                     if (!isPush || router.backstackSize == 1) {
@@ -1339,8 +1345,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                             ?: View.GONE
                     }
             }
-            alphaAnimation.duration = 200
-            alphaAnimation.startDelay = 50
+            alphaAnimation.duration = 150
             animationSet?.playTogether(alphaAnimation)
             animationSet?.start()
         }

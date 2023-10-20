@@ -21,8 +21,6 @@ import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.RecyclerView
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
-import com.bluelinelabs.conductor.RouterTransaction
-import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -355,12 +353,7 @@ class BrowseController :
             when (item.itemId) {
                 // Initialize option to open catalogue settings.
                 R.id.action_filter -> {
-                    val controller = ExtensionFilterController()
-                    router.pushController(
-                        RouterTransaction.with(controller)
-                            .popChangeHandler(FadeChangeHandler())
-                            .pushChangeHandler(FadeChangeHandler()),
-                    )
+                    router.pushController(ExtensionFilterController().withFadeTransaction())
                 }
                 R.id.action_migration_guide -> {
                     activity?.openInBrowser(HELP_URL)
@@ -697,12 +690,7 @@ class BrowseController :
         when (item.itemId) {
             // Initialize option to open catalogue settings.
             R.id.action_filter -> {
-                val controller = SettingsSourcesController()
-                router.pushController(
-                    RouterTransaction.with(controller)
-                        .popChangeHandler(FadeChangeHandler())
-                        .pushChangeHandler(FadeChangeHandler()),
-                )
+                router.pushController(SettingsSourcesController().withFadeTransaction())
             }
             R.id.action_migration_guide -> {
                 activity?.openInBrowser(HELP_URL)

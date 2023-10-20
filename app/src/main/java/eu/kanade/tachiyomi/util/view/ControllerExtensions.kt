@@ -373,6 +373,26 @@ fun Controller.scrollViewWith(
     }
     addLifecycleListener(
         object : Controller.LifecycleListener() {
+            override fun onChangeEnd(
+                controller: Controller,
+                changeHandler: ControllerChangeHandler,
+                changeType: ControllerChangeType,
+            ) {
+                super.onChangeEnd(controller, changeHandler, changeType)
+                if (changeType.isEnter) {
+                    if (fakeToolbarView?.parent != null) {
+                        val parent = fakeToolbarView?.parent as? ViewGroup ?: return
+                        parent.removeView(fakeToolbarView)
+                        fakeToolbarView = null
+                    }
+                    if (fakeBottomNavView?.parent != null) {
+                        val parent = fakeBottomNavView?.parent as? ViewGroup ?: return
+                        parent.removeView(fakeBottomNavView)
+                        fakeBottomNavView = null
+                    }
+                }
+            }
+
             override fun onChangeStart(
                 controller: Controller,
                 changeHandler: ControllerChangeHandler,
@@ -388,16 +408,6 @@ fun Controller.scrollViewWith(
                     activityBinding?.appBar?.setToolbarModeBy(this@scrollViewWith)
                     activityBinding?.appBar?.useTabsInPreLayout = includeTabView
                     colorToolbar(isToolbarColor)
-                    if (fakeToolbarView?.parent != null) {
-                        val parent = fakeToolbarView?.parent as? ViewGroup ?: return
-                        parent.removeView(fakeToolbarView)
-                        fakeToolbarView = null
-                    }
-                    if (fakeBottomNavView?.parent != null) {
-                        val parent = fakeBottomNavView?.parent as? ViewGroup ?: return
-                        parent.removeView(fakeBottomNavView)
-                        fakeBottomNavView = null
-                    }
                     lastY = 0f
                     activityBinding?.appBar?.updateAppBarAfterY(recycler)
                     activityBinding?.toolbar?.tag = randomTag
@@ -802,7 +812,7 @@ fun Controller.withFadeTransaction(): RouterTransaction {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                 FadeChangeHandler()
             } else {
-                CrossFadeChangeHandler(duration = 250, removesFromViewOnPush = isLowRam)
+                CrossFadeChangeHandler(duration = 200, removesFromViewOnPush = isLowRam)
             },
         )
         .popChangeHandler(
