@@ -545,35 +545,6 @@ object ImageUtil {
             return true
         }
 
-        val options = extractImageOptions(imageFile.openInputStream(), resetAfterExtraction = false).apply { inJustDecodeBounds = false }
-        // Values are stored as they get modified during split loop
-        val imageHeight = options.outHeight
-        val imageWidth = options.outWidth
-
-        val splitHeight = (displayMaxHeightInPx * 1.5).toInt()
-        // -1 so it doesn't try to split when imageHeight = getDisplayHeightInPx
-        val partCount = (imageHeight - 1) / splitHeight + 1
-
-        val optimalSplitHeight = imageHeight / partCount
-
-        val splitDataList = (0 until partCount).fold(mutableListOf<SplitData>()) { list, index ->
-            list.apply {
-                // Only continue if the list is empty or there is image remaining
-                if (isEmpty() || imageHeight > last().bottomOffset) {
-                    val topOffset = index * optimalSplitHeight
-                    var outputImageHeight = min(optimalSplitHeight, imageHeight - topOffset)
-
-                    val remainingHeight = imageHeight - (topOffset + outputImageHeight)
-                    // If remaining height is smaller or equal to 1/3th of
-                    // optimal split height then include it in current page
-                    if (remainingHeight <= (optimalSplitHeight / 3)) {
-                        outputImageHeight += remainingHeight
-                    }
-                    add(SplitData(index, topOffset, outputImageHeight))
-                }
-            }
-        }
-
         val bitmapRegionDecoder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             BitmapRegionDecoder.newInstance(imageFile.openInputStream())
         } else {
@@ -586,15 +557,16 @@ object ImageUtil {
             return false
         }
 
-        Timber.d(
-            "Splitting image with height of $imageHeight into $partCount part with estimated ${optimalSplitHeight}px height per split",
-        )
+        val options = extractImageOptions(imageFile.openInputStream(), resetAfterExtraction = false).apply {
+            inJustDecodeBounds = false
+        }
+        val splitDataList = options.splitData
 
         return try {
             splitDataList.forEach { splitData ->
                 val splitPath = splitImagePath(imageFilePath, splitData.index)
 
-                val region = Rect(0, splitData.topOffset, imageWidth, splitData.bottomOffset)
+                val region = Rect(0, splitData.topOffset, splitData.splitWidth, splitData.bottomOffset)
 
                 FileOutputStream(splitPath).use { outputStream ->
                     val splitBitmap = bitmapRegionDecoder.decodeRegion(region, options)
@@ -602,7 +574,7 @@ object ImageUtil {
                     splitBitmap.recycle()
                 }
                 Timber.d(
-                    "Success: Split #${splitData.index + 1} with topOffset=${splitData.topOffset} height=${splitData.outputImageHeight} bottomOffset=${splitData.bottomOffset}",
+                    "Success: Split #${splitData.index + 1} with topOffset=${splitData.topOffset} height=${splitData.splitHeight} bottomOffset=${splitData.bottomOffset}",
                 )
             }
             imageFile.delete()
@@ -622,12 +594,47 @@ object ImageUtil {
     private fun splitImagePath(imageFilePath: String, index: Int) =
         imageFilePath.substringBeforeLast(".") + "__${"%03d".format(index + 1)}.jpg"
 
+    private val BitmapFactory.Options.splitData
+        get(): List<SplitData> {
+            val imageHeight = outHeight
+            val imageWidth = outWidth
+
+            val optimalImageHeight = displayMaxHeightInPx * 2
+
+            // -1 so it doesn't try to split when imageHeight = optimalImageHeight
+            val partCount = (imageHeight - 1) / optimalImageHeight + 1
+            val optimalSplitHeight = imageHeight / partCount
+
+            Timber.d(
+                "Splitting image with height of $imageHeight into $partCount part with estimated ${optimalSplitHeight}px height per split",
+            )
+
+            return mutableListOf<SplitData>().apply {
+                val range = 0 until partCount
+                for (index in range) {
+                    // Only continue if the list is empty or there is image remaining
+                    if (isNotEmpty() && imageHeight <= last().bottomOffset) break
+
+                    val topOffset = index * optimalSplitHeight
+                    var splitHeight = min(optimalSplitHeight, imageHeight - topOffset)
+
+                    if (index == range.last) {
+                        val remainingHeight = imageHeight - (topOffset + splitHeight)
+                        splitHeight += remainingHeight
+                    }
+
+                    add(SplitData(index, topOffset, splitHeight, imageWidth))
+                }
+            }
+        }
+
     data class SplitData(
         val index: Int,
         val topOffset: Int,
-        val outputImageHeight: Int,
+        val splitHeight: Int,
+        val splitWidth: Int,
     ) {
-        val bottomOffset = topOffset + outputImageHeight
+        val bottomOffset = topOffset + splitHeight
     }
 
     private val Bitmap.rect: Rect
@@ -641,11 +648,11 @@ object ImageUtil {
 
     /**
      * Returns if this bitmap matches what would be (if rightSide param is true)
-     * the single left side page, or the second page to read in a RTL book, first in an LTR book.
+     * the single left side page, or the second page to read in an RTL book, first in an LTR book.
      *
      * @return An int based on confidence, 0 meaning not padded, 1 meaning barely padded,
      * 2 meaning likely padded, 3 meaining definitely padded
-     * @param rightSide: When true, check if its a single left side page, else right side
+     * @param rightSide: When true, check if it's a single left side page, else right side
      */
     fun Bitmap.isPagePadded(rightSide: Boolean): Int {
         val booleans = listOf(true, false)
