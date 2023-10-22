@@ -540,7 +540,7 @@ fun View.updateGradiantBGRadius(
     }
 }
 
-@RequiresApi(31)
+@RequiresApi(Build.VERSION_CODES.S)
 fun View.animateBlur(
     @FloatRange(from = 0.1) from: Float,
     @FloatRange(from = 0.1) to: Float,

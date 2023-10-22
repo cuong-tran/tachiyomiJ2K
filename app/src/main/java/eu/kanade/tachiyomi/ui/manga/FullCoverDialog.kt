@@ -14,19 +14,22 @@ import android.graphics.Shader
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.PowerManager
+import android.os.SystemClock
 import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.VelocityTracker
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import androidx.activity.BackEventCompat
 import androidx.activity.ComponentDialog
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.addCallback
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updateLayoutParams
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import androidx.transition.ChangeBounds
 import androidx.transition.ChangeImageTransform
 import androidx.transition.TransitionManager
@@ -40,6 +43,7 @@ import eu.kanade.tachiyomi.util.system.powerManager
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.animateBlur
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.max
 import kotlin.math.min
 
 class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable, private val thumbView: View) :
@@ -49,6 +53,7 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
     val binding = FullCoverDialogBinding.inflate(LayoutInflater.from(context), null, false)
     val preferences: PreferencesHelper by injectLazy()
 
+    val velocityTracker: VelocityTracker by lazy { VelocityTracker.obtain() }
     private val ratio = 5f.dpToPx
     private val fullRatio = 0f
     private val shortAnimationDuration = (
@@ -85,26 +90,38 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
         }
 
         val backPressedCallback = object : OnBackPressedCallback(enabled = true) {
-            var startX = 0f
-            var startY = 0f
+            var startTime: Long = 0
+            var lastX: Float = 0f
+            var lastY: Float = 0f
             override fun handleOnBackPressed() {
                 if (binding.mangaCoverFull.isClickable) {
+                    val motionEvent = MotionEvent.obtain(startTime, SystemClock.uptimeMillis(), MotionEvent.ACTION_UP, lastX, lastY, 0)
+                    velocityTracker.addMovement(motionEvent)
+                    motionEvent.recycle()
                     animateBack()
                 }
             }
 
             override fun handleOnBackStarted(backEvent: BackEventCompat) {
-                startX = backEvent.touchX
-                startY = backEvent.touchY
+                super.handleOnBackStarted(backEvent)
+                startTime = SystemClock.uptimeMillis()
+                velocityTracker.clear()
+                val motionEvent = MotionEvent.obtain(startTime, startTime, MotionEvent.ACTION_DOWN, backEvent.touchX, backEvent.touchY, 0)
+                velocityTracker.addMovement(motionEvent)
+                motionEvent.recycle()
             }
 
             override fun handleOnBackProgressed(backEvent: BackEventCompat) {
                 val maxProgress = min(backEvent.progress, 0.4f)
+                val motionEvent = MotionEvent.obtain(startTime, SystemClock.uptimeMillis(), MotionEvent.ACTION_MOVE, backEvent.touchX, backEvent.touchY, 0)
+                lastX = backEvent.touchX
+                lastY = backEvent.touchY
+                velocityTracker.addMovement(motionEvent)
+                motionEvent.recycle()
                 binding.mangaCoverFull.scaleX = 1f - maxProgress * 0.6f
                 binding.mangaCoverFull.translationX =
                     maxProgress * 100f * (if (backEvent.swipeEdge == BackEventCompat.EDGE_LEFT) 1 else -1)
-                binding.mangaCoverFull.translationY =
-                    -maxProgress * 150f
+                binding.mangaCoverFull.translationY = -maxProgress * 150f
                 binding.mangaCoverFull.scaleY = 1f - maxProgress * 0.6f
             }
 
@@ -264,21 +281,24 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
         }
 
         // Zoom out back to tc thumbnail
-        val transitionSet2 = TransitionSet()
-        val bound2 = ChangeBounds()
-        transitionSet2.addTransition(bound2)
-        val changeImageTransform2 = ChangeImageTransform()
-        transitionSet2.addTransition(changeImageTransform2)
-        transitionSet2.duration = shortAnimationDuration
-        TransitionManager.beginDelayedTransition(binding.root, transitionSet2)
+        val transitionSet = TransitionSet()
+        transitionSet.addTransition(ChangeBounds())
+        transitionSet.addTransition(ChangeImageTransform())
+        transitionSet.duration = shortAnimationDuration
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            velocityTracker.computeCurrentVelocity(2, 40f)
+            transitionSet.interpolator = DecelerateInterpolator(max(1f, velocityTracker.getAxisVelocity(MotionEvent.AXIS_X)))
+        }
+        TransitionManager.beginDelayedTransition(binding.root, transitionSet)
 
-        if (Build.VERSION.SDK_INT >= 31) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             activity?.window?.decorView?.animateBlur(20f, 0.1f, 50, true)?.apply {
                 startDelay = shortAnimationDuration - 100
             }?.start()
         }
         val attrs = window?.attributes
         val ogDim = attrs?.dimAmount ?: 0.25f
+        velocityTracker.recycle()
 
         // AnimationSet for backdrop because idk how to use TransitionSet
         AnimatorSet().apply {
@@ -303,13 +323,12 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
                     binding.btnSave.alpha = it.animatedValue as Float
                 }
             }
+            playTogether(radiusAnimator, dimAnimator, saveAnimator)
 
-            val objectAnimator = ObjectAnimator.ofFloat(expandedImageView, View.SCALE_X, expandedImageView.scaleX, 1f)
-            val objectAnimator1 = ObjectAnimator.ofFloat(expandedImageView, View.SCALE_Y, expandedImageView.scaleY, 1f)
-            val objectAnimator2 = ObjectAnimator.ofFloat(expandedImageView, View.TRANSLATION_X, expandedImageView.translationX, 0f)
-            val objectAnimator3 = ObjectAnimator.ofFloat(expandedImageView, View.TRANSLATION_Y, expandedImageView.translationY, 0f)
-
-            playTogether(radiusAnimator, dimAnimator, saveAnimator, objectAnimator, objectAnimator1, objectAnimator2, objectAnimator3)
+            play(ObjectAnimator.ofFloat(expandedImageView, View.SCALE_X, 1f))
+            play(ObjectAnimator.ofFloat(expandedImageView, View.SCALE_Y, 1f))
+            play(ObjectAnimator.ofFloat(expandedImageView, View.TRANSLATION_X, 0f))
+            play(ObjectAnimator.ofFloat(expandedImageView, View.TRANSLATION_Y, 0f))
 
             addListener(
                 onEnd = {
