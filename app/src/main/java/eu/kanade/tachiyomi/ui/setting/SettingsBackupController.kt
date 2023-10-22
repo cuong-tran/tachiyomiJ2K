@@ -248,7 +248,7 @@ class SettingsBackupController : SettingsController() {
                         }
                     }
                 }
-                (targetController as? SettingsBackupController)?.createBackup(flags)
+                createBackup(flags)
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show().apply {
