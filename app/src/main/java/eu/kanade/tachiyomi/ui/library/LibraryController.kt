@@ -945,7 +945,7 @@ open class LibraryController(
         LibraryUpdateJob.startNow(view.context, category)
         snack = view.snack(R.string.updating_library) {
             anchorView = anchorView()
-            view.elevation = 15f.dpToPx
+            this.view.elevation = 15f.dpToPx
             setAction(R.string.cancel) {
                 LibraryUpdateJob.stop(context)
                 viewScope.launchUI {
