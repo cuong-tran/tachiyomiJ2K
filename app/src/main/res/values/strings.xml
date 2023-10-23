@@ -569,6 +569,7 @@
     <string name="remember_this_choice">Remember this choice</string>
     <string name="source_not_installed">Source not installed</string>
     <string name="cover_saved">Cover saved</string>
+    <string name="share_cover">Share cover</string>
     <string name="error_saving_cover">Error saving cover</string>
     <string name="error_sharing_cover">Error sharing cover</string>
     <string name="app_settings">App settings</string>

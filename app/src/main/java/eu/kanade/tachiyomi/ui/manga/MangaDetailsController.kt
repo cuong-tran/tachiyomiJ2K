@@ -3,13 +3,16 @@ package eu.kanade.tachiyomi.ui.manga
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.PendingIntent
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
+import android.service.chooser.ChooserAction
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -1213,7 +1216,30 @@ class MangaDetailsController :
                     clipData = ClipData.newRawUri(null, stream)
                 }
             }
-            startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
+            startActivity(
+                Intent.createChooser(intent, context.getString(R.string.share)).apply {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && stream != null) {
+                        val shareCoverIntent = Intent(Intent.ACTION_SEND).apply {
+                            putExtra(Intent.EXTRA_STREAM, stream)
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            clipData = ClipData.newRawUri(null, stream)
+                            type = "image/*"
+                        }
+                        val pendingIntent = PendingIntent.getActivity(
+                            context,
+                            manga?.id?.hashCode() ?: 0,
+                            Intent.createChooser(shareCoverIntent, context.getString(R.string.share)),
+                            PendingIntent.FLAG_IMMUTABLE,
+                        )
+                        val action = ChooserAction.Builder(
+                            Icon.createWithResource(context, R.drawable.ic_photo_24dp),
+                            context.getString(R.string.share_cover),
+                            pendingIntent,
+                        ).build()
+                        putExtra(Intent.EXTRA_CHOOSER_CUSTOM_ACTIONS, arrayOf(action))
+                    }
+                },
+            )
         } catch (e: Exception) {
             context.toast(e.message)
         }
