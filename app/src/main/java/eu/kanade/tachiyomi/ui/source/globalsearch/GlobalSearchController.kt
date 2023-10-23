@@ -63,6 +63,7 @@ open class GlobalSearchController(
      * Snackbar containing an error message when a request fails.
      */
     private var snack: Snackbar? = null
+    private var lastPosition: Int = -1
 
     /**
      * Called when controller is initialized.
@@ -79,9 +80,11 @@ open class GlobalSearchController(
 
     override val presenter = GlobalSearchPresenter(initialQuery, extensionFilter)
 
-    override fun onTitleClick(source: CatalogueSource) {
+    override fun onTitleClick(position: Int) {
+        val source = adapter?.getItem(position)?.source ?: return
         preferences.lastUsedCatalogueSource().set(source.id)
         router.pushController(BrowseSourceController(source, presenter.query).withFadeTransaction())
+        lastPosition = position
     }
 
     /**
@@ -91,6 +94,7 @@ open class GlobalSearchController(
      */
     override fun onMangaClick(manga: Manga) {
         // Open MangaController.
+        lastPosition = adapter?.currentItems?.indexOfFirst { it.source.id == manga.source } ?: -1
         router.pushController(
             MangaDetailsController(manga, true, shouldLockIfNeeded = activity is SearchActivity)
                 .withFadeTransaction(),
@@ -174,6 +178,11 @@ open class GlobalSearchController(
             searchItem.expandActionView()
             searchView.setQuery(presenter.query, false)
             searchView.clearFocus()
+        }
+        if (type == ControllerChangeType.POP_ENTER && lastPosition > -1) {
+            val holder = binding.recycler.findViewHolderForAdapterPosition(lastPosition) as? GlobalSearchHolder
+            holder?.updateAll()
+            lastPosition = -1
         }
     }
 

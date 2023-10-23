@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.util.SparseArray
 import eu.davidea.flexibleadapter.FlexibleAdapter
-import eu.kanade.tachiyomi.source.CatalogueSource
 
 /**
  * Adapter that holds the search cards.
@@ -71,7 +70,7 @@ class GlobalSearchAdapter(val controller: GlobalSearchController) :
     }
 
     interface OnTitleClickListener {
-        fun onTitleClick(source: CatalogueSource)
+        fun onTitleClick(position: Int)
     }
 
     private companion object {

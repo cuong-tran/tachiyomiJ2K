@@ -16,6 +16,8 @@ import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bluelinelabs.conductor.ControllerChangeHandler
+import com.bluelinelabs.conductor.ControllerChangeType
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -25,7 +27,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.BrowseSourceControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.LocalSource
-import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -121,7 +122,8 @@ open class BrowseSourceController(bundle: Bundle) :
     private var progressItem: ProgressItem? = null
 
     /** Current filter sheet */
-    var filterSheet: SourceFilterSheet? = null
+    private var filterSheet: SourceFilterSheet? = null
+    private var lastPosition: Int = -1
 
     private val isBehindGlobalSearch: Boolean
         get() = router.backstackSize >= 2 && router.backstack[router.backstackSize - 2].controller is GlobalSearchController
@@ -504,6 +506,14 @@ open class BrowseSourceController(bundle: Bundle) :
         activity?.openInBrowser(LocalSource.HELP_URL)
     }
 
+    override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
+        super.onChangeStarted(handler, type)
+        if (type == ControllerChangeType.POP_ENTER && lastPosition > -1) {
+            adapter?.notifyItemChanged(lastPosition, false)
+            lastPosition = -1
+        }
+    }
+
     /**
      * Restarts the request with a new query.
      *
@@ -739,7 +749,7 @@ open class BrowseSourceController(bundle: Bundle) :
     override fun onItemClick(view: View?, position: Int): Boolean {
         val item = adapter?.getItem(position) as? BrowseSourceItem ?: return false
         router.pushController(MangaDetailsController(item.manga, true).withFadeTransaction())
-
+        lastPosition = position
         return false
     }
 

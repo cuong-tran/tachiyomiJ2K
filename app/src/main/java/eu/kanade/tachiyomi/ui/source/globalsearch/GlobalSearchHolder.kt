@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.globalsearch
 
+import android.annotation.SuppressLint
 import android.view.View
 import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -36,9 +37,7 @@ class GlobalSearchHolder(view: View, val adapter: GlobalSearchAdapter) :
         binding.titleMoreIcon.isVisible = adapter.controller !is SearchController && adapter.controller.extensionFilter == null
         if (binding.titleMoreIcon.isVisible) {
             binding.titleWrapper.setOnClickListener {
-                adapter.getItem(bindingAdapterPosition)?.let {
-                    adapter.titleClickListener.onTitleClick(it.source)
-                }
+                adapter.titleClickListener.onTitleClick(bindingAdapterPosition)
             }
         }
     }
@@ -82,6 +81,9 @@ class GlobalSearchHolder(view: View, val adapter: GlobalSearchAdapter) :
     }
 
     fun updateManga(position: Int) = mangaAdapter.notifyItemChanged(position)
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateAll() = mangaAdapter.notifyDataSetChanged()
 
     /**
      * Called from the presenter when a manga is initialized.
