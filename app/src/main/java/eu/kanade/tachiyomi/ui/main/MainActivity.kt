@@ -28,6 +28,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import android.view.animation.DecelerateInterpolator
 import androidx.activity.BackEventCompat
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -278,7 +279,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     velocityTracker.addMovement(motionEvent)
                     motionEvent.recycle()
                     velocityTracker.computeCurrentVelocity(2, 5f)
-                    backVelocity = max(1f, velocityTracker.getAxisVelocity(MotionEvent.AXIS_X))
+                    backVelocity = max(1f, abs(velocityTracker.getAxisVelocity(MotionEvent.AXIS_X)))
                 }
                 lastX = 0f
                 lastY = 0f
@@ -564,8 +565,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     binding.appBar.isVisible = true
                     binding.appBar.alpha = 1f
                     if (binding.backShadow.isVisible && !isPush) {
-                        val alpha = binding.backShadow.alpha
-                        val bA = ObjectAnimator.ofFloat(binding.backShadow, View.ALPHA, alpha, 0f)
+                        val bA = ObjectAnimator.ofFloat(binding.backShadow, View.ALPHA, 0f)
                         from?.view?.let { view ->
                             bA.addUpdateListener {
                                 binding.backShadow.x = view.x - binding.backShadow.width
@@ -581,7 +581,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                             binding.backShadow.isVisible = false
                             nav.x = 0f
                         }
-                        bA.duration = 175
+                        bA.duration = 150
+                        bA.interpolator = DecelerateInterpolator(backVelocity.takeIf { it != 0f } ?: 1f)
                         bA.start()
                     }
                     if (!isPush || router.backstackSize == 1) {
@@ -599,6 +600,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 ) {
                     to?.view?.x = 0f
                     nav.translationY = 0f
+                    backVelocity = 0f
                     showDLQueueTutorial()
                     if (!(from is DialogController || to is DialogController) && from != null) {
                         from.view?.alpha = 0f

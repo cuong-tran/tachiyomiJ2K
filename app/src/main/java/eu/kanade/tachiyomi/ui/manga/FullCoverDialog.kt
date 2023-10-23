@@ -29,7 +29,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updateLayoutParams
-import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import androidx.transition.ChangeBounds
 import androidx.transition.ChangeImageTransform
 import androidx.transition.TransitionManager

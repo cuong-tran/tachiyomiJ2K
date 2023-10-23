@@ -13,7 +13,6 @@ import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.changehandler.AnimatorChangeHandler
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import kotlin.math.max
 import kotlin.math.roundToLong
 
 class CrossFadeChangeHandler : AnimatorChangeHandler {
@@ -98,11 +97,10 @@ class CrossFadeChangeHandler : AnimatorChangeHandler {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
         ) {
             animatorSet.interpolator = if (MainActivity.backVelocity != 0f) {
-                DecelerateInterpolator(max(1f, MainActivity.backVelocity))
+                DecelerateInterpolator(MainActivity.backVelocity)
             } else {
                 LinearOutSlowInInterpolator()
             }
-            MainActivity.backVelocity = 0f
         }
         return animatorSet
     }
