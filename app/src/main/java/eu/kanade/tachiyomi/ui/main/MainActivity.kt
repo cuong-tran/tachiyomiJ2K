@@ -278,8 +278,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     )
                     velocityTracker.addMovement(motionEvent)
                     motionEvent.recycle()
-                    velocityTracker.computeCurrentVelocity(2, 5f)
-                    backVelocity = max(1f, abs(velocityTracker.getAxisVelocity(MotionEvent.AXIS_X)))
+                    velocityTracker.computeCurrentVelocity(1, 5f)
+                    backVelocity =
+                        max(0.5f, abs(velocityTracker.getAxisVelocity(MotionEvent.AXIS_X)) * 0.5f)
                 }
                 lastX = 0f
                 lastY = 0f

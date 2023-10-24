@@ -42,6 +42,7 @@ import eu.kanade.tachiyomi.util.system.powerManager
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.animateBlur
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -285,8 +286,10 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
         transitionSet.addTransition(ChangeImageTransform())
         transitionSet.duration = shortAnimationDuration
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            velocityTracker.computeCurrentVelocity(2, 40f)
-            transitionSet.interpolator = DecelerateInterpolator(max(1f, velocityTracker.getAxisVelocity(MotionEvent.AXIS_X)))
+            velocityTracker.computeCurrentVelocity(1, 5f)
+            val velo =
+                max(0.5f, abs(velocityTracker.getAxisVelocity(MotionEvent.AXIS_X)) * 0.5f)
+            transitionSet.interpolator = DecelerateInterpolator(velo)
         }
         TransitionManager.beginDelayedTransition(binding.root, transitionSet)
 

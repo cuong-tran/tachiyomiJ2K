@@ -812,14 +812,14 @@ fun Controller.withFadeTransaction(): RouterTransaction {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                 FadeChangeHandler()
             } else {
-                CrossFadeChangeHandler(removesFromViewOnPush = isLowRam)
+                CrossFadeChangeHandler(isLowRam)
             },
         )
         .popChangeHandler(
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                 FadeChangeHandler()
             } else {
-                CrossFadeChangeHandler(removesFromViewOnPush = isLowRam)
+                CrossFadeChangeHandler(isLowRam)
             },
         )
 }
