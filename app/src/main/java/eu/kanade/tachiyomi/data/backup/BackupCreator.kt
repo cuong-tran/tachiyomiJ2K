@@ -55,7 +55,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.FileOutputStream
 
-class BackupManager(val context: Context) {
+class BackupCreator(val context: Context) {
 
     private val preferenceStore: PreferenceStore = Injekt.get()
     val parser = ProtoBuf

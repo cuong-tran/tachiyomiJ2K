@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.util
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
-import eu.kanade.tachiyomi.data.backup.BackupManager
+import eu.kanade.tachiyomi.data.backup.BackupCreator
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
 import okio.buffer
@@ -16,7 +16,7 @@ object BackupUtil {
      */
     @SuppressLint("Recycle")
     fun decodeBackup(context: Context, uri: Uri): Backup {
-        val backupCreator = BackupManager(context)
+        val backupCreator = BackupCreator(context)
 
         val backupStringSource = context.contentResolver.openInputStream(uri)!!.source().buffer()
 
