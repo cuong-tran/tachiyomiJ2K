@@ -262,7 +262,7 @@ internal class ExtensionInstaller(private val context: Context) {
     fun installApk(downloadId: Long, uri: Uri) {
         val pkgName = activeDownloads.entries.find { it.value == downloadId }?.key
         val useActivity =
-            pkgName?.let { !ExtensionLoader.isExtensionInstalledByApp(context, pkgName) } ?: true ||
+            (pkgName?.let { !ExtensionLoader.isExtensionInstalledByApp(context, pkgName) } ?: true) ||
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.S
         val prefs: PreferencesHelper = Injekt.get()
         when (prefs.extensionInstaller().get()) {
