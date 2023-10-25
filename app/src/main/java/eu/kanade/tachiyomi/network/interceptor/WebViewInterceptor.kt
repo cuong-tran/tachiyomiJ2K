@@ -85,7 +85,6 @@ abstract class WebViewInterceptor(
         return WebView(context).apply {
             setDefaultSettings()
             // Avoid sending empty User-Agent, Chromium WebView will reset to default if empty
-            Timber.d("User agent: ${defaultUserAgentProvider()}")
             settings.userAgentString = request.header("User-Agent") ?: defaultUserAgentProvider()
         }
     }
