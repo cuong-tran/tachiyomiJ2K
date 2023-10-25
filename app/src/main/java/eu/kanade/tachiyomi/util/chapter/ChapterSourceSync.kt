@@ -41,6 +41,7 @@ fun syncChaptersWithSource(
         .mapIndexed { i, sChapter ->
             Chapter.create().apply {
                 copyFrom(sChapter)
+                name = with(ChapterSanitizer) { sChapter.name.sanitize(manga.title) }
                 manga_id = manga.id
                 source_order = i
             }
@@ -178,7 +179,8 @@ fun syncChaptersWithSource(
 
 // checks if the chapter in db needs updated
 private fun shouldUpdateDbChapter(dbChapter: Chapter, sourceChapter: Chapter): Boolean {
-    return dbChapter.scanlator != sourceChapter.scanlator || dbChapter.name != sourceChapter.name ||
+    return dbChapter.scanlator != sourceChapter.scanlator ||
+        dbChapter.name != sourceChapter.name ||
         dbChapter.date_upload != sourceChapter.date_upload ||
         dbChapter.chapter_number != sourceChapter.chapter_number ||
         dbChapter.source_order != sourceChapter.source_order

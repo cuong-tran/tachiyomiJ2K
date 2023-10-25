@@ -371,16 +371,26 @@ class DownloadManager(val context: Context) {
      * @param newChapter the target chapter with the new name.
      */
     fun renameChapter(source: Source, manga: Manga, oldChapter: Chapter, newChapter: Chapter) {
-        val oldName = provider.getChapterDirName(oldChapter)
-        val newName = provider.getChapterDirName(newChapter)
+        val oldNames = provider.getValidChapterDirNames(oldChapter).map { listOf(it, "$it.cbz") }.flatten()
+        var newName = provider.getChapterDirName(newChapter)
         val mangaDir = provider.getMangaDir(manga, source)
 
-        val oldFolder = mangaDir.findFile(oldName)
-        if (oldFolder?.renameTo(newName) == true) {
+        // Assume there's only 1 version of the chapter name formats present
+        val oldDownload = oldNames.asSequence()
+            .mapNotNull { mangaDir.findFile(it) }
+            .firstOrNull() ?: return
+
+        if (oldDownload.isFile && oldDownload.name?.endsWith(".cbz") == true) {
+            newName += ".cbz"
+        }
+
+        if (oldDownload.name == newName) return
+
+        if (oldDownload.renameTo(newName)) {
             cache.removeChapters(listOf(oldChapter), manga)
             cache.addChapter(newName, manga)
         } else {
-            Timber.e("Could not rename downloaded chapter: %s.", oldName)
+            Timber.e("Could not rename downloaded chapter: ${oldNames.joinToString()}")
         }
     }
 
