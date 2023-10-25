@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.database.queries
 import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
 import com.pushtorefresh.storio.sqlite.queries.RawQuery
 import eu.kanade.tachiyomi.data.database.DbProvider
+import eu.kanade.tachiyomi.data.database.inTransactionReturn
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.resolvers.HistoryUpsertResolver
@@ -164,10 +165,12 @@ interface HistoryQueries : DbProvider {
      * Inserts history object if not yet in database
      * @param historyList history object list
      */
-    fun upsertHistoryLastRead(historyList: List<History>) = db.put()
-        .objects(historyList)
-        .withPutResolver(HistoryUpsertResolver())
-        .prepare()
+    fun upsertHistoryLastRead(historyList: List<History>) = db.inTransactionReturn {
+        db.put()
+            .objects(historyList)
+            .withPutResolver(HistoryUpsertResolver())
+            .prepare()
+    }
 
     fun deleteHistory() = db.delete()
         .byQuery(
