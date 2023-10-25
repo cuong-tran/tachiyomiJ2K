@@ -806,22 +806,17 @@ fun Controller.requestFilePermissionsSafe(
 }
 
 fun Controller.withFadeTransaction(): RouterTransaction {
-    val isLowRam by lazy { activity?.getSystemService<ActivityManager>()?.isLowRamDevice == true }
+    val isLowRam = activity?.getSystemService<ActivityManager>()?.isLowRamDevice == true
+    val handler = {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE || isLowRam) {
+            FadeChangeHandler(isLowRam)
+        } else {
+            CrossFadeChangeHandler(false)
+        }
+    }
     return RouterTransaction.with(this)
-        .pushChangeHandler(
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                FadeChangeHandler()
-            } else {
-                CrossFadeChangeHandler(isLowRam)
-            },
-        )
-        .popChangeHandler(
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                FadeChangeHandler()
-            } else {
-                CrossFadeChangeHandler(isLowRam)
-            },
-        )
+        .pushChangeHandler(handler())
+        .popChangeHandler(handler())
 }
 
 fun Controller.withFadeInTransaction(): RouterTransaction {
