@@ -272,7 +272,7 @@ class SettingsAdvancedController : SettingsController() {
                 titleRes = R.string.clear_cookies
 
                 onClick {
-                    network.cookieManager.removeAll()
+                    network.cookieJar.removeAll()
                     activity?.toast(R.string.cookies_cleared)
                 }
             }
@@ -321,7 +321,6 @@ class SettingsAdvancedController : SettingsController() {
                         context.toast(R.string.error_user_agent_string_invalid)
                         return@onChange false
                     }
-                    activity?.toast(R.string.requires_app_restart)
                     true
                 }
             }

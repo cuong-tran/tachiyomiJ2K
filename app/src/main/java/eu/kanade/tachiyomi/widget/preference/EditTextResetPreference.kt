@@ -24,6 +24,11 @@ class EditTextResetPreference @JvmOverloads constructor(
         defValue = defaultValue as? String ?: defValue
     }
 
+    override fun setDefaultValue(defaultValue: Any?) {
+        super.setDefaultValue(defaultValue)
+        defValue = defaultValue as? String ?: defValue
+    }
+
     override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {
         sharedPreferences?.getString(key, defValue)
     }
