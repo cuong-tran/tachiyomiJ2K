@@ -46,6 +46,7 @@ import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.preferenceKey
 import eu.kanade.tachiyomi.source.sourcePreferences
+import eu.kanade.tachiyomi.ui.library.LibrarySort
 import kotlinx.serialization.protobuf.ProtoBuf
 import okio.buffer
 import okio.gzip
@@ -244,6 +245,12 @@ class BackupCreator(val context: Context) {
     private fun Map<String, *>.toBackupPreferences(): List<BackupPreference> {
         return this.filterKeys { !Preference.isPrivate(it) }
             .mapNotNull { (key, value) ->
+                // j2k fork differences
+                if (key == "library_sorting_mode" && value is Int) {
+                    val stringValue = (LibrarySort.valueOf(value) ?: LibrarySort.Title).serialize()
+                    return@mapNotNull BackupPreference(key, StringPreferenceValue(stringValue))
+                }
+                // end j2k fork differences
                 when (value) {
                     is Int -> BackupPreference(key, IntPreferenceValue(value))
                     is Long -> BackupPreference(key, LongPreferenceValue(value))

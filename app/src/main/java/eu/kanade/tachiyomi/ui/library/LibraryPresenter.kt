@@ -204,9 +204,7 @@ class LibraryPresenter(
         preferences.lastUsedCategory().set(order)
         val category = categories.find { it.order == order }?.id ?: return
         currentCategory = category
-        view?.onNextLibraryUpdate(
-            sectionedLibraryItems[currentCategory] ?: blankItem(),
-        )
+        view?.onNextLibraryUpdate(sectionedLibraryItems[currentCategory] ?: blankItem())
     }
 
     fun blankItem(id: Int = currentCategory): List<LibraryItem> {

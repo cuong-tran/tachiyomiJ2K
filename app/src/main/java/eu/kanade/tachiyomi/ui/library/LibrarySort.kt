@@ -38,6 +38,19 @@ enum class LibrarySort(
     val categoryValueDescending: Char
         get() = if (this == DragAndDrop) 'D' else 'b' + catValue * 2
 
+    fun serialize(): String {
+        val type = when (this) {
+            LastRead -> "LAST_READ"
+            Unread -> "UNREAD_COUNT"
+            TotalChapters -> "TOTAL_CHAPTERS"
+            LatestChapter -> "LATEST_CHAPTER"
+            DateFetched -> "CHAPTER_FETCH_DATE"
+            DateAdded -> "DATE_ADDED"
+            else -> "ALPHABETICAL"
+        }
+        return "$type,ASCENDING"
+    }
+
     @StringRes
     fun stringRes(isDynamic: Boolean) = if (isDynamic) dynamicStringRes else stringRes
 
@@ -56,6 +69,26 @@ enum class LibrarySort(
     }
 
     companion object {
+        fun deserialize(serialized: String): LibrarySort {
+            if (serialized.isEmpty()) return Title
+            return try {
+                val values = serialized.split(",")
+                when (values[0]) {
+                    "ALPHABETICAL" -> Title
+                    "LAST_READ" -> LastRead
+                    "LAST_MANGA_UPDATE" -> LatestChapter
+                    "UNREAD_COUNT" -> Unread
+                    "TOTAL_CHAPTERS" -> TotalChapters
+                    "LATEST_CHAPTER" -> LatestChapter
+                    "CHAPTER_FETCH_DATE" -> DateFetched
+                    "DATE_ADDED" -> DateAdded
+                    else -> Title
+                }
+            } catch (e: Exception) {
+                Title
+            }
+        }
+
         fun valueOf(value: Int) = entries.find { it.mainValue == value }
         fun valueOf(char: Char?) = entries.find { it.categoryValue == char || it.categoryValueDescending == char }
     }

@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.updater.AppUpdateJob
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
+import eu.kanade.tachiyomi.ui.library.LibrarySort
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -238,6 +239,21 @@ object Migrations {
                             preferenceStore.getString(key).delete()
                         }
                     }
+            }
+            if (oldVersion < 110) {
+                try {
+                    val librarySortString = prefs.getString("library_sorting_mode", "")
+                    if (!librarySortString.isNullOrEmpty()) {
+                        prefs.edit {
+                            remove("library_sorting_mode")
+                            putInt(
+                                "library_sorting_mode",
+                                LibrarySort.deserialize(librarySortString).mainValue,
+                            )
+                        }
+                    }
+                } catch (_: Exception) {
+                }
             }
 
             return true

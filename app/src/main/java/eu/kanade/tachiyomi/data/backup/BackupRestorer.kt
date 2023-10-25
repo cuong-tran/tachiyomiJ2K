@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.data.preference.PreferenceStore
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.sourcePreferences
+import eu.kanade.tachiyomi.ui.library.LibrarySort
 import eu.kanade.tachiyomi.util.BackupUtil
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import kotlinx.coroutines.coroutineScope
@@ -385,6 +386,15 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
     ) {
         val prefs = preferenceStore.getAll()
         toRestore.forEach { (key, value) ->
+            // j2k fork differences
+            if (key == "library_sorting_mode" && value is StringPreferenceValue &&
+                prefs[key] is Int?
+            ) {
+                val intValue = LibrarySort.deserialize(value.value)
+                preferenceStore.getInt(key).set(intValue.mainValue)
+                return@forEach
+            }
+            // end j2k fork differences
             when (value) {
                 is IntPreferenceValue -> {
                     if (prefs[key] is Int?) {
