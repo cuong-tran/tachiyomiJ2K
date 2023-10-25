@@ -76,7 +76,13 @@ open class WebViewActivity : BaseWebViewActivity() {
 
             binding.webview.webViewClient = object : WebViewClientCompat() {
                 override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
-                    view.loadUrl(url)
+                    // Don't attempt to open blobs as webpages
+                    if (url.startsWith("blob:http")) {
+                        return false
+                    }
+
+                    // Continue with request, but with custom headers
+                    view.loadUrl(url, headers)
                     return true
                 }
 
