@@ -1,17 +1,21 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.app.ActivityManager
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.core.content.getSystemService
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
+import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.more.AboutController
 import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.fadeTransactionHandler
 import eu.kanade.tachiyomi.util.view.openInBrowser
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 
@@ -108,7 +112,12 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
     }
 
     override fun onActionViewExpand(item: MenuItem?) {
-        router.pushController(RouterTransaction.with(SettingsSearchController()))
+        val isLowRam = activity?.getSystemService<ActivityManager>()?.isLowRamDevice == true
+        router.pushController(
+            RouterTransaction.with(SettingsSearchController())
+                .pushChangeHandler(SimpleSwapChangeHandler(removesFromViewOnPush = isLowRam))
+                .popChangeHandler(fadeTransactionHandler()),
+        )
     }
 
     private fun navigateTo(controller: Controller) {
