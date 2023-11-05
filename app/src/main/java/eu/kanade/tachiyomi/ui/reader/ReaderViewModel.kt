@@ -817,8 +817,11 @@ class ReaderViewModel(
         val baseDir = Environment.getExternalStorageDirectory().absolutePath +
             File.separator + Environment.DIRECTORY_PICTURES +
             File.separator + context.getString(R.string.app_name)
-        val destDir =
+        val destDir = if (preferences.folderPerManga().get()) {
             File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
+        } else {
+            File(baseDir)
+        }
 
         // Copy file in background.
         viewModelScope.launchNonCancellable {
@@ -848,8 +851,11 @@ class ReaderViewModel(
             val baseDir = Environment.getExternalStorageDirectory().absolutePath +
                 File.separator + Environment.DIRECTORY_PICTURES +
                 File.separator + context.getString(R.string.app_name)
-            val destDir =
+            val destDir = if (preferences.folderPerManga().get()) {
                 File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
+            } else {
+                File(baseDir)
+            }
 
             try {
                 val file = saveImages(firstPage, secondPage, isLTR, bg, destDir, manga)

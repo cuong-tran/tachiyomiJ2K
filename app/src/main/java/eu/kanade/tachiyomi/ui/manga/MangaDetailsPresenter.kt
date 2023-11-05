@@ -853,12 +853,19 @@ class MangaDetailsPresenter(
 
     fun saveCover(): Boolean {
         return try {
-            val baseDir = Environment.getExternalStorageDirectory().absolutePath +
-                File.separator + Environment.DIRECTORY_PICTURES +
-                File.separator + preferences.context.getString(R.string.app_name)
-            val directory =
-                File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
+            val directory = if (preferences.folderPerManga().get()) {
+                val baseDir = Environment.getExternalStorageDirectory().absolutePath +
+                    File.separator + Environment.DIRECTORY_PICTURES +
+                    File.separator + preferences.context.getString(R.string.app_name)
 
+                File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
+            } else {
+                File(
+                    Environment.getExternalStorageDirectory().absolutePath +
+                        File.separator + Environment.DIRECTORY_PICTURES +
+                        File.separator + preferences.context.getString(R.string.app_name),
+                )
+            }
             val file = saveCover(directory)
             DiskUtil.scanMedia(preferences.context, file)
             true

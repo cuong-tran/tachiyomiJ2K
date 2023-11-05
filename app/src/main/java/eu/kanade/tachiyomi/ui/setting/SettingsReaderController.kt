@@ -395,6 +395,11 @@ class SettingsReaderController : SettingsController() {
                 titleRes = R.string.show_on_long_press
                 defaultValue = true
             }
+            switchPreference {
+                bindTo(preferences.folderPerManga())
+                titleRes = R.string.save_pages_separately
+                summaryRes = R.string.create_folders_by_manga_title
+            }
         }
     }
 }
