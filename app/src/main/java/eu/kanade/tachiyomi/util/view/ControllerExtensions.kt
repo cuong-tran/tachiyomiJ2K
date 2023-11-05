@@ -254,6 +254,27 @@ fun <T> Controller.liftAppbarWith(
             }
         },
     )
+    addLifecycleListener(
+        object : Controller.LifecycleListener() {
+            override fun onChangeStart(
+                controller: Controller,
+                changeHandler: ControllerChangeHandler,
+                changeType: ControllerChangeType,
+            ) {
+                super.onChangeStart(controller, changeHandler, changeType)
+                if (changeType.isEnter) {
+                    activityBinding?.appBar?.hideBigView(
+                        true,
+                        setTitleAlpha = this@liftAppbarWith !is MangaDetailsController,
+                    )
+                    activityBinding?.appBar?.setToolbarModeBy(this@liftAppbarWith)
+                    activityBinding?.appBar?.useTabsInPreLayout = false
+                    colorToolbar(isToolbarColored)
+                    activityBinding?.appBar?.updateAppBarAfterY(recycler)
+                }
+            }
+        },
+    )
 }
 
 fun Controller.scrollViewWith(
