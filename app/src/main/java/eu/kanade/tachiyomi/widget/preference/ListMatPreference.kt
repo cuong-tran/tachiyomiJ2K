@@ -29,10 +29,16 @@ open class ListMatPreference @JvmOverloads constructor(
         defValue = defaultValue as? String ?: defValue
     }
 
+    override fun setDefaultValue(defaultValue: Any?) {
+        super.setDefaultValue(defaultValue)
+        defValue = defaultValue as? String ?: defValue
+    }
+
     private val indexOfPref: Int
         get() = tempValue ?: entryValues.indexOf(
-            if (isPersistent) {
-                sharedPreferences?.getString(key, defValue)
+            if (isPersistent || preferenceDataStore != null) {
+                preferenceDataStore?.getString(key, defValue)
+                    ?: sharedPreferences?.getString(key, defValue)
             } else {
                 tempEntry
             } ?: defValue,
@@ -58,15 +64,21 @@ open class ListMatPreference @JvmOverloads constructor(
         val default = indexOfPref
         setSingleChoiceItems(entries.toTypedArray(), default) { dialog, pos ->
             val value = entryValues[pos]
-            if (isPersistent) {
-                sharedPreferences?.edit { putString(key, value) }
-            } else {
-                tempValue = pos
-                tempEntry = entries.getOrNull(pos)
-                notifyChanged()
+            if (callChangeListener(value)) {
+                if (isPersistent) {
+                    if (preferenceDataStore != null) {
+                        preferenceDataStore?.putString(key, value)
+                        notifyChanged()
+                    } else {
+                        sharedPreferences?.edit { putString(key, value) }
+                    }
+                } else {
+                    tempValue = pos
+                    tempEntry = entries.getOrNull(pos)
+                    notifyChanged()
+                }
             }
             this@ListMatPreference.summary = this@ListMatPreference.summary
-            callChangeListener(value)
             dialog.dismiss()
         }
     }

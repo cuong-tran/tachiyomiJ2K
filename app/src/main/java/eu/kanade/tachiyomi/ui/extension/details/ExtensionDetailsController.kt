@@ -12,11 +12,8 @@ import android.view.MenuItem
 import android.view.View
 import androidx.preference.DialogPreference
 import androidx.preference.EditTextPreference
-import androidx.preference.EditTextPreferenceDialogController
 import androidx.preference.ListPreference
-import androidx.preference.ListPreferenceDialogController
 import androidx.preference.MultiSelectListPreference
-import androidx.preference.MultiSelectListPreferenceDialogController
 import androidx.preference.Preference
 import androidx.preference.PreferenceGroupAdapter
 import androidx.preference.PreferenceManager
@@ -39,6 +36,7 @@ import eu.kanade.tachiyomi.source.preferenceKey
 import eu.kanade.tachiyomi.source.sourcePreferences
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.setting.DSL
+import eu.kanade.tachiyomi.ui.setting.defaultValue
 import eu.kanade.tachiyomi.ui.setting.onChange
 import eu.kanade.tachiyomi.ui.setting.switchPreference
 import eu.kanade.tachiyomi.util.system.LocaleHelper
@@ -48,6 +46,9 @@ import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
 import eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText.Companion.setIncognito
+import eu.kanade.tachiyomi.widget.preference.EditTextResetPreference
+import eu.kanade.tachiyomi.widget.preference.ListMatPreference
+import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -326,23 +327,53 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
             screen.getPreference(it) === preference
         }
 
-        val f = when (preference) {
-            is EditTextPreference ->
-                EditTextPreferenceDialogController
-                    .newInstance(preference.getKey())
-            is ListPreference ->
-                ListPreferenceDialogController
-                    .newInstance(preference.getKey())
-            is MultiSelectListPreference ->
-                MultiSelectListPreferenceDialogController
-                    .newInstance(preference.getKey())
+        val context = preferences.context
+        val matPref = when (preference) {
+            is EditTextPreference -> EditTextResetPreference(activity, context).apply {
+                dialogSummary = preference.dialogMessage
+                onPreferenceChangeListener = preference.onPreferenceChangeListener
+            }
+
+            is ListPreference -> ListMatPreference(activity, context).apply {
+                isPersistent = false
+                defaultValue = preference.value
+                entries = preference.entries.map { it.toString() }
+                entryValues = preference.entryValues.map { it.toString() }
+                onChange {
+                    if (preference.callChangeListener(it)) {
+                        preference.value = it as? String
+                        true
+                    } else {
+                        false
+                    }
+                }
+            }
+
+            is MultiSelectListPreference -> MultiListMatPreference(activity, context).apply {
+                isPersistent = false
+                defaultValue = preference.values
+                entries = preference.entries.map { it.toString() }
+                entryValues = preference.entryValues.map { it.toString() }
+                onChange { newValue ->
+                    if (newValue is Set<*> && preference.callChangeListener(newValue)) {
+                        preference.values = newValue.map { it.toString() }.toSet()
+                        true
+                    } else {
+                        false
+                    }
+                }
+            }
+
             else -> throw IllegalArgumentException(
                 "Tried to display dialog for unknown " +
                     "preference type. Did you forget to override onDisplayPreferenceDialog()?",
             )
         }
-        f.targetController = this
-        f.showDialog(router)
+        matPref.apply {
+            key = preference.key
+            preferenceDataStore = preference.preferenceDataStore
+            title = (preference as? DialogPreference)?.dialogTitle ?: preference.title
+        }.performClick()
     }
 
     private fun Source.isEnabled(): Boolean {

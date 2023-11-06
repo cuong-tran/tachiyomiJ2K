@@ -64,7 +64,8 @@ class MultiListMatPreference @JvmOverloads constructor(
 
     @SuppressLint("CheckResult")
     override fun MaterialAlertDialogBuilder.setListItems() {
-        val set = sharedPreferences?.getStringSet(key, defValue) ?: defValue
+        val set = preferenceDataStore?.getStringSet(key, defValue)
+            ?: sharedPreferences?.getStringSet(key, defValue) ?: defValue
         val items = if (allSelectionRes != null) {
             if (showAllLast) {
                 entries + listOf(context.getString(allSelectionRes!!))
@@ -88,9 +89,16 @@ class MultiListMatPreference @JvmOverloads constructor(
             var value = pos.mapNotNull {
                 entryValues.getOrNull(it - if (allSelectionRes != null && !showAllLast) 1 else 0)
             }.toSet()
-            if (allSelectionRes != null && !allIsAlwaysSelected && selected[allPos]) value = emptySet()
-            sharedPreferences?.edit { putStringSet(key, value) }
-            callChangeListener(value)
+            if (allSelectionRes != null && !allIsAlwaysSelected && selected[allPos]) {
+                value = emptySet()
+            }
+            if (callChangeListener(value) && isPersistent) {
+                if (preferenceDataStore != null) {
+                    preferenceDataStore?.putStringSet(key, value)
+                } else if (preferenceDataStore == null) {
+                    sharedPreferences?.edit { putStringSet(key, value) }
+                }
+            }
             notifyChanged()
         }
         setMultiChoiceItems(items.toTypedArray(), selected) { dialog, pos, checked ->

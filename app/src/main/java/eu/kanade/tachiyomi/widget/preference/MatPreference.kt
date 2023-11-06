@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.widget.preference
 
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.util.AttributeSet
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
@@ -36,15 +37,17 @@ open class MatPreference @JvmOverloads constructor(
             val dialog = dialog().apply {
                 setOnDismissListener { this@MatPreference.isShowing = false }
             }.create()
-//            dialog.setOnShowListener {
             onShow(dialog)
-//            }
+            dialog.setOnShowListener {
+                didShow(it)
+            }
             dialog.show()
         }
         isShowing = true
     }
 
     protected open fun onShow(dialog: AlertDialog) { }
+    protected open fun didShow(dialog: DialogInterface) { }
 
     protected open var customSummaryProvider: SummaryProvider<MatPreference>? = null
         set(value) {
