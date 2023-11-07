@@ -70,6 +70,8 @@ class BrowseSourceGridHolder(
                 .setParameter(MangaCoverFetcher.useCustomCover, false)
                 .build()
             Coil.imageLoader(view.context).enqueue(request)
+
+            binding.coverThumbnail.alpha = if (manga.favorite) 0.34f else 1.0f
         }
     }
 }
