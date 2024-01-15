@@ -333,14 +333,13 @@
     <string name="ext_installer_private" translatable="false">Private</string>
     <string name="ext_installer_summary">Allows extensions to be installed without user prompts and enables automatic updates for devices under Android 12</string>
     <string name="untrusted_extension">Untrusted extension</string>
-    <string name="untrusted_extension_message">This extension was signed with an untrusted certificate and wasn\'t activated.\n\nA malicious extension could read any login credentials stored in Tachiyomi or execute arbitrary code.\n\nBy trusting this certificate you accept these risks.</string>
+    <string name="untrusted_extension_message">Malicious extensions can read any stored login credentials or execute arbitrary code.\n\nBy trusting this extension, you accept these risks.</string>
     <string name="obsolete_extension_message">This extension is no longer available.</string>
-    <string name="unofficial_extension_message">This extension is not from the official Tachiyomi extensions list.</string>
+    <string name="extension_api_error">Failed to fetch available extensions</string>
     <string name="version_">Version: %1$s</string>
     <string name="language_">Language: %1$s</string>
     <string name="nsfw_short">18+</string>
     <string name="installed_">Installed %1$s</string>
-    <string name="unofficial">Unofficial</string>
     <string name="extensions_miui_warning">MIUI Optimization must be disabled to install extensions.</string>
     <string name="may_contain_nsfw">May contain NSFW (18+) content</string>
     <string name="app_info">App info</string>
@@ -362,6 +361,23 @@
         <item quantity="one">Extension update available</item>
         <item quantity="other">%d extension updates available</item>
     </plurals>
+    <string name="ext_revoke_trust">Revoke trusted unknown extensions</string>
+
+    <!-- Extension Repos -->
+    <string name="action_add_repo">Add repo</string>
+    <string name="action_add_repo_message">Add additional repos to Tachiyomi. This should be a URL that ends with \"index.min.json\"</string>
+    <string name="extension_repos">Extension repos</string>
+    <plurals name="num_repos">
+        <item quantity="one">%d repo</item>
+        <item quantity="other">%d repos</item>
+    </plurals>
+    <string name="error_repo_exists">This repo already exists!</string>
+    <string name="repo_cannot_be_blank">Repo name cannot be blank</string>
+    <string name="snack_repo_deleted">Repo deleted</string>
+    <string name="invalid_repo_name">Invalid repo name</string>
+    <string name="confirm_repo_deletion">Delete repo</string>
+    <string name="delete_repo_confirmation">Do you wish to delete the repo \"%s\"?</string>
+    <string name="url_not_set_click_again">Repo URL not set, please edit the URL</string>
 
     <!-- Reader -->
     <string name="set_as_cover">Set as cover</string>

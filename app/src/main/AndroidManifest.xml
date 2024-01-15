@@ -60,6 +60,16 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Deep link to add repos -->
+            <intent-filter android:label="@string/action_add_repo">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="tachiyomi" />
+                <data android:host="add-repo" />
+            </intent-filter>
             <meta-data android:name="android.app.searchable" android:resource="@xml/searchable"/>
         </activity>
         <activity

@@ -24,7 +24,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
-import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
+import eu.kanade.tachiyomi.extension.api.ExtensionApi
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
@@ -44,7 +44,7 @@ class ExtensionUpdateJob(private val context: Context, workerParams: WorkerParam
 
     override suspend fun doWork(): Result = coroutineScope {
         val pendingUpdates = try {
-            ExtensionGithubApi().checkForUpdates(context)
+            ExtensionApi().checkForUpdates(context)
         } catch (e: Exception) {
             return@coroutineScope Result.failure()
         }

@@ -4,17 +4,21 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Parcelable
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
+import eu.kanade.tachiyomi.extension.api.ExtensionApi
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.extension.util.ExtensionInstallReceiver
 import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
+import eu.kanade.tachiyomi.extension.util.TrustExtension
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.extension.ExtensionIntallInfo
 import eu.kanade.tachiyomi.util.system.launchNow
+import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -39,12 +43,13 @@ import java.util.Locale
 class ExtensionManager(
     private val context: Context,
     private val preferences: PreferencesHelper = Injekt.get(),
+    private val trustExtension: TrustExtension = Injekt.get(),
 ) {
 
     /**
      * API where all the available extensions can be found.
      */
-    private val api = ExtensionGithubApi()
+    private val api = ExtensionApi()
 
     /**
      * The installer which installs, updates and uninstalls the extensions.
@@ -130,10 +135,10 @@ class ExtensionManager(
         val extensions: List<Extension.Available> = try {
             api.findExtensions()
         } catch (e: Exception) {
-            Timber.e(e)
+            Timber.e(e, context.getString(R.string.extension_api_error))
+            withUIContext { context.toast(R.string.extension_api_error) }
             emptyList()
         }
-
         enableAdditionalSubLanguages(extensions)
 
         _availableExtensionsFlow.value = extensions
@@ -198,14 +203,17 @@ class ExtensionManager(
             val pkgName = installedExt.pkgName
             val availableExt = availableExtensions.find { it.pkgName == pkgName }
 
-            if (!installedExt.isUnofficial && availableExt == null != installedExt.isObsolete) {
+            if (availableExt == null != installedExt.isObsolete) {
                 mutInstalledExtensions[index] = installedExt.copy(isObsolete = true)
                 changed = true
             }
             if (availableExt != null) {
                 val hasUpdate = installedExt.updateExists(availableExt)
                 if (installedExt.hasUpdate != hasUpdate) {
-                    mutInstalledExtensions[index] = installedExt.copy(hasUpdate = hasUpdate)
+                    mutInstalledExtensions[index] = installedExt.copy(
+                        hasUpdate = hasUpdate,
+                        repoUrl = availableExt.repoUrl,
+                    )
                     hasUpdateCount++
                     changed = true
                 }
@@ -303,34 +311,30 @@ class ExtensionManager(
     }
 
     /**
-     * Adds the given signature to the list of trusted signatures. It also loads in background the
-     * extensions that match this signature.
+     * Adds the given extension to the list of trusted extensions. It also loads in background the
+     * now trusted extensions.
      *
-     * @param signature The signature to whitelist.
+     * @param pkgName the package name of the extension to trust
+     * @param versionCode the version code of the extension to trust
+     * @param signatureHash the signature hash of the extension to trust
      */
-    fun trustSignature(signature: String) {
-        val untrustedSignatures = untrustedExtensionsFlow.value.map { it.signatureHash }.toSet()
-        if (signature !in untrustedSignatures) return
+    fun trust(pkgName: String, versionCode: Long, signatureHash: String) {
+        val untrustedPkgNames = untrustedExtensionsFlow.value.map { it.pkgName }.toSet()
+        if (pkgName !in untrustedPkgNames) return
 
-        ExtensionLoader.trustedSignatures += signature
-        val preference = preferences.trustedSignatures()
-        preference.set(preference.get() + signature)
+        trustExtension.trust(pkgName, versionCode, signatureHash)
 
-        val nowTrustedExtensions = untrustedExtensionsFlow.value.filter { it.signatureHash == signature }
+        val nowTrustedExtensions = untrustedExtensionsFlow.value
+            .filter { it.pkgName == pkgName && it.versionCode == versionCode }
         _untrustedExtensionsFlow.value -= nowTrustedExtensions
 
-        val ctx = context
         launchNow {
             nowTrustedExtensions
                 .map { extension ->
-                    async { ExtensionLoader.loadExtensionFromPkgName(ctx, extension.pkgName) }
+                    async { ExtensionLoader.loadExtensionFromPkgName(context, extension.pkgName) }.await()
                 }
-                .map { it.await() }
-                .forEach { result ->
-                    if (result is LoadResult.Success) {
-                        registerNewExtension(result.extension)
-                    }
-                }
+                .filterIsInstance<LoadResult.Success>()
+                .forEach { registerNewExtension(it.extension) }
         }
     }
 
@@ -422,7 +426,7 @@ class ExtensionManager(
 
     private fun Extension.Installed.updateExists(availableExtension: Extension.Available? = null): Boolean {
         val availableExt = availableExtension ?: availableExtensionsFlow.value.find { it.pkgName == pkgName }
-        if (isUnofficial || availableExt == null) return false
+            ?: return false
 
         return (availableExt.versionCode > versionCode || availableExt.libVersion > libVersion)
     }
@@ -435,6 +439,7 @@ class ExtensionManager(
         val name: String,
         val versionCode: Long,
         val libVersion: Double,
+        val repoUrl: String,
     ) : Parcelable {
         constructor(extension: Extension.Available) : this(
             apkName = extension.apkName,
@@ -442,6 +447,7 @@ class ExtensionManager(
             name = extension.name,
             versionCode = extension.versionCode,
             libVersion = extension.libVersion,
+            repoUrl = extension.repoUrl,
         )
     }
 

@@ -323,7 +323,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     }
 
     private fun openTrustDialog(extension: Extension.Untrusted) {
-        ExtensionTrustDialog(this, extension.signatureHash, extension.pkgName)
+        ExtensionTrustDialog(this, extension.signatureHash, extension.pkgName, extension.versionCode)
             .showDialog(controller.router)
     }
 
@@ -407,8 +407,8 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         extAdapter?.updateItem(updateHeader)
     }
 
-    override fun trustSignature(signatureHash: String) {
-        presenter.trustSignature(signatureHash)
+    override fun trustExtension(pkgName: String, versionCode: Long, signatureHash: String) {
+        presenter.trustExtension(pkgName, versionCode, signatureHash)
     }
     override fun uninstallExtension(pkgName: String) {
         presenter.uninstallExtension(pkgName)

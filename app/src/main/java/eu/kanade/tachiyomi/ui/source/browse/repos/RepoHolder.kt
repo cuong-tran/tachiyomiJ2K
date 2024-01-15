@@ -1,67 +1,72 @@
-package eu.kanade.tachiyomi.ui.category
+package eu.kanade.tachiyomi.ui.source.browse.repos
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.text.InputType
 import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.ItemTouchHelper
+import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.databinding.CategoriesItemBinding
-import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.ui.category.CategoryPresenter.Companion.CREATE_CATEGORY_ORDER
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import java.util.Locale
 
 /**
- * Holder used to display category items.
+ * Holder used to display repo items.
  *
- * @param view The view used by category items.
+ * @param view The view used by repo items.
  * @param adapter The adapter containing this holder.
  */
-class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleViewHolder(view, adapter) {
+class RepoHolder(view: View, val adapter: RepoAdapter) : FlexibleViewHolder(view, adapter) {
 
     private val binding = CategoriesItemBinding.bind(view)
+
     init {
         binding.editButton.setOnClickListener {
             submitChanges()
         }
     }
 
-    var createCategory = false
+    private var createRepo = false
     private var regularDrawable: Drawable? = null
 
     /**
-     * Binds this holder with the given category.
+     * Binds this holder with the given repo.
      *
-     * @param category The category to bind.
+     * @param repo The repo to bind.
      */
-    fun bind(category: Category) {
+    fun bind(repo: String) {
         // Set capitalized title.
-        binding.title.text = category.name.replaceFirstChar { it.titlecase(Locale.getDefault()) }
+        binding.image.isVisible = false
         binding.editText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 submitChanges()
             }
             true
         }
-        createCategory = category.order == CREATE_CATEGORY_ORDER
-        if (createCategory) {
-            binding.title.setTextColor(ContextCompat.getColor(itemView.context, R.color.material_on_background_disabled))
+        createRepo = repo == RepoPresenter.CREATE_REPO_ITEM
+        if (createRepo) {
+            binding.title.text = itemView.context.getString(R.string.action_add_repo)
+            binding.title.setTextColor(
+                ContextCompat.getColor(itemView.context, R.color.material_on_background_disabled),
+            )
             regularDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.ic_add_24dp)
-            binding.image.isVisible = false
             binding.editButton.setImageDrawable(null)
             binding.editText.setText("")
-            binding.editText.hint = binding.title.text
+            binding.editText.hint = ""
         } else {
+            binding.title.text = repo
+            binding.title.maxLines = 2
             binding.title.setTextColor(itemView.context.getResourceColor(R.attr.colorOnBackground))
-            regularDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.ic_drag_handle_24dp)
-            binding.image.isVisible = true
+            regularDrawable = ContextCompat.getDrawable(itemView.context, R.drawable.ic_github_24dp)
+            binding.reorder.setOnClickListener {
+                adapter.repoItemListener.onLogoClick(flexibleAdapterPosition)
+            }
             binding.editText.setText(binding.title.text)
         }
     }
@@ -69,27 +74,31 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
     @SuppressLint("ClickableViewAccessibility")
     fun isEditing(editing: Boolean) {
         itemView.isActivated = editing
-        binding.title.visibility = if (editing) View.INVISIBLE else View.VISIBLE
-        binding.editText.visibility = if (!editing) View.INVISIBLE else View.VISIBLE
+        binding.title.isInvisible = editing
+        binding.editText.isInvisible = !editing
         if (editing) {
+            binding.editText.inputType = InputType.TYPE_TEXT_VARIATION_URI
             binding.editText.requestFocus()
             binding.editText.selectAll()
             binding.editButton.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_check_24dp))
             binding.editButton.drawable.mutate().setTint(itemView.context.getResourceColor(R.attr.colorSecondary))
             showKeyboard()
-            if (!createCategory) {
+            if (!createRepo) {
+                binding.editText.setText("${binding.editText.text}/index.min.json")
                 binding.reorder.setImageDrawable(
                     ContextCompat.getDrawable(itemView.context, R.drawable.ic_delete_24dp),
                 )
                 binding.reorder.setOnClickListener {
-                    adapter.categoryItemListener.onItemDelete(flexibleAdapterPosition)
+                    adapter.repoItemListener.onItemDelete(flexibleAdapterPosition)
                     hideKeyboard()
                 }
             }
         } else {
-            if (!createCategory) {
+            if (!createRepo) {
                 setDragHandleView(binding.reorder)
-                binding.editButton.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_edit_24dp))
+                binding.editButton.setImageDrawable(
+                    ContextCompat.getDrawable(itemView.context, R.drawable.ic_edit_24dp),
+                )
             } else {
                 binding.editButton.setImageDrawable(null)
                 binding.reorder.setOnTouchListener { _, _ -> true }
@@ -104,13 +113,9 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
 
     private fun submitChanges() {
         if (binding.editText.isVisible) {
-            if (adapter.categoryItemListener.onCategoryRename(
-                    flexibleAdapterPosition,
-                    binding.editText.text.toString(),
-                )
-            ) {
+            if (adapter.repoItemListener.onRepoRename(flexibleAdapterPosition, binding.editText.text.toString())) {
                 isEditing(false)
-                if (!createCategory) {
+                if (!createRepo) {
                     binding.title.text = binding.editText.text.toString()
                 }
             }
@@ -128,18 +133,5 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
     private fun hideKeyboard() {
         val inputMethodManager = itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(binding.editText.windowToken, 0)
-    }
-
-    override fun onActionStateChanged(position: Int, actionState: Int) {
-        super.onActionStateChanged(position, actionState)
-        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-            binding.root.isDragged = true
-        }
-    }
-
-    override fun onItemReleased(position: Int) {
-        super.onItemReleased(position)
-        adapter.categoryItemListener.onItemReleased(position)
-        binding.root.isDragged = false
     }
 }

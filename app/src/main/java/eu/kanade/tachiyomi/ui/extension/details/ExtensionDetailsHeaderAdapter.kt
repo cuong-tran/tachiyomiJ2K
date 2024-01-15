@@ -75,10 +75,7 @@ class ExtensionDetailsHeaderAdapter(private val presenter: ExtensionDetailsPrese
                 binding.extensionUninstallButton.text = context.getString(R.string.remove)
             }
 
-            if (extension.isUnofficial) {
-                binding.extensionWarningBanner.isVisible = true
-                binding.extensionWarningBanner.setText(R.string.unofficial_extension_message)
-            } else if (extension.isObsolete) {
+            if (extension.isObsolete) {
                 binding.extensionWarningBanner.isVisible = true
                 binding.extensionWarningBanner.setText(R.string.obsolete_extension_message)
             }

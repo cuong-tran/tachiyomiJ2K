@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.migration.MigrationController
+import eu.kanade.tachiyomi.ui.source.browse.repos.RepoController
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.injectLazy
@@ -49,6 +50,15 @@ class SettingsBrowseController : SettingsController() {
                     ExtensionUpdateJob.setupTask(context, it)
                     true
                 }
+            }
+            preference {
+                key = "pref_edit_extension_repos"
+
+                val repoCount = preferences.extensionRepos().get().count()
+                titleRes = R.string.extension_repos
+                if (repoCount > 0) summary = context.resources.getQuantityString(R.plurals.num_repos, repoCount, repoCount)
+
+                onClick { router.pushController(RepoController().withFadeTransaction()) }
             }
             if (ExtensionManager.canAutoInstallUpdates()) {
                 val intPref = intListPreference(activity) {

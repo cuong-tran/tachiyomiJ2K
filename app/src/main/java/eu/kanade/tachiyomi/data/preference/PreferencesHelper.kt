@@ -295,7 +295,10 @@ class PreferencesHelper(val context: Context) {
 
     fun automaticExtUpdates() = flowPrefs.getBoolean(Keys.automaticExtUpdates, true)
 
-    fun installedExtensionsOrder() = flowPrefs.getInt(Keys.installedExtensionsOrder, InstalledExtensionsOrder.Name.value)
+    fun extensionRepos() = flowPrefs.getStringSet("extension_repos", emptySet())
+
+    fun installedExtensionsOrder() =
+        flowPrefs.getInt(Keys.installedExtensionsOrder, InstalledExtensionsOrder.Name.value)
 
     fun migrationSourceOrder() = flowPrefs.getInt("migration_source_order", Values.MigrationSourceOrder.Alphabetically.value)
 
@@ -342,7 +345,7 @@ class PreferencesHelper(val context: Context) {
 
     fun migrateFlags() = flowPrefs.getInt("migrate_flags", Int.MAX_VALUE)
 
-    fun trustedSignatures() = flowPrefs.getStringSet("trusted_signatures", emptySet())
+    fun trustedExtensions() = flowPrefs.getStringSet("trusted_extensions", emptySet())
 
     // using string instead of set so it is ordered
     fun migrationSources() = flowPrefs.getString("migrate_sources", "")

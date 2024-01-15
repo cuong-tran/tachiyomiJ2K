@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackPreferences
 import eu.kanade.tachiyomi.extension.ExtensionManager
+import eu.kanade.tachiyomi.extension.util.TrustExtension
 import eu.kanade.tachiyomi.network.JavaScriptEngine
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
@@ -67,6 +68,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { ChapterFilter() }
 
         addSingletonFactory { MangaShortcutManager() }
+
+        addSingletonFactory { TrustExtension(get()) }
 
         // Asynchronously init expensive components for a faster cold start
 
