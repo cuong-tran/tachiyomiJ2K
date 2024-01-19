@@ -26,10 +26,12 @@ internal class ExtensionApi {
 
     suspend fun findExtensions(): List<Extension.Available> {
         return withIOContext {
-            val extensions = preferences.extensionRepos().get().flatMap { getExtensions(it) }
+            val repos = preferences.extensionRepos().get()
+            if (repos.isEmpty()) {
+                return@withIOContext emptyList()
+            }
+            val extensions = repos.flatMap { getExtensions(it) }
 
-            // Sanity check - a small number of extensions probably means something broke
-            // with the repo generator
             if (extensions.isEmpty()) {
                 throw Exception()
             }

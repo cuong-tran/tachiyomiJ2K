@@ -154,7 +154,12 @@ class RepoController(bundle: Bundle? = null) :
     override fun onItemDelete(position: Int) {
         activity!!.materialAlertDialog()
             .setTitle(R.string.confirm_repo_deletion)
-            .setMessage(R.string.delete_repo_confirmation)
+            .setMessage(
+                activity!!.getString(
+                    R.string.delete_repo_confirmation,
+                    (adapter!!.getItem(position) as RepoItem).repo,
+                ),
+            )
             .setPositiveButton(R.string.delete) { _, _ ->
                 deleteRepo(position)
             }

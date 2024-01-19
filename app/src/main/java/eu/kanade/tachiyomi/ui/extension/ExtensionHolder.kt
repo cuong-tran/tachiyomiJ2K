@@ -116,9 +116,10 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
         val repoText = when {
             extension is Extension.Untrusted -> itemView.context.getString(R.string.untrusted)
             extension is Extension.Installed && extension.isObsolete -> itemView.context.getString(R.string.obsolete)
+            extension is Extension.Installed -> extension.repoUrl.orEmpty()
             else -> ""
         }
-        return if (isEmpty()) {
+        return if (isEmpty() || repoText.isEmpty()) {
             this
         } else {
             "$this • "

@@ -42,6 +42,7 @@ import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.setting.SettingsBrowseController
 import eu.kanade.tachiyomi.ui.setting.SettingsSourcesController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
+import eu.kanade.tachiyomi.ui.source.browse.repos.RepoController
 import eu.kanade.tachiyomi.ui.source.globalsearch.GlobalSearchController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
@@ -360,6 +361,9 @@ class BrowseController :
                 }
                 R.id.action_sources_settings -> {
                     router.pushController(SettingsBrowseController().withFadeTransaction())
+                }
+                R.id.action_ext_repos -> {
+                    router.pushController(RepoController().withFadeTransaction())
                 }
             }
             return@setOnMenuItemClickListener true

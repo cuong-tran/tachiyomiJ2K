@@ -50,7 +50,6 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     ExtensionAdapter.OnButtonClickListener,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
-    ExtensionTrustDialog.Listener,
     SourceAdapter.OnAllClickListener,
     BaseMigrationInterface {
 
@@ -323,8 +322,16 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     }
 
     private fun openTrustDialog(extension: Extension.Untrusted) {
-        ExtensionTrustDialog(this, extension.signatureHash, extension.pkgName, extension.versionCode)
-            .showDialog(controller.router)
+        val activity = controller.activity ?: return
+        activity.materialAlertDialog()
+            .setTitle(R.string.untrusted_extension)
+            .setMessage(R.string.untrusted_extension_message)
+            .setPositiveButton(R.string.trust) { _, _ ->
+                trustExtension(extension.pkgName, extension.versionCode, extension.signatureHash)
+            }
+            .setNegativeButton(R.string.uninstall) { _, _ ->
+                uninstallExtension(extension.pkgName)
+            }.show()
     }
 
     fun setExtensions(extensions: List<ExtensionItem>, updateController: Boolean = true) {
@@ -407,10 +414,10 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         extAdapter?.updateItem(updateHeader)
     }
 
-    override fun trustExtension(pkgName: String, versionCode: Long, signatureHash: String) {
+    private fun trustExtension(pkgName: String, versionCode: Long, signatureHash: String) {
         presenter.trustExtension(pkgName, versionCode, signatureHash)
     }
-    override fun uninstallExtension(pkgName: String) {
+    private fun uninstallExtension(pkgName: String) {
         presenter.uninstallExtension(pkgName)
     }
 

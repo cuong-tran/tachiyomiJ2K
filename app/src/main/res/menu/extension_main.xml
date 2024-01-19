@@ -12,5 +12,12 @@
         android:id="@+id/action_filter"
         android:title="@string/filter_languages"
         android:icon="@drawable/ic_language_24dp"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_ext_repos"
+        android:title="@string/extension_repos"
+        android:icon="@drawable/ic_extension_update_24dp"
+        app:iconTint="?actionBarTintColor"
+        app:showAsAction="ifRoom"/>
 </menu>
