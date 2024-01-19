@@ -2,6 +2,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_open_repo"
+        android:icon="@drawable/ic_open_in_new_24dp"
+        app:iconTint="?actionBarTintColor"
+        android:title="@string/open_source_repo"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_clear_cookies"
         android:icon="@drawable/ic_delete_24dp"
         android:title="@string/clear_cookies"

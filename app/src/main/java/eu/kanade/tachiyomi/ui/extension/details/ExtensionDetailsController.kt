@@ -40,6 +40,7 @@ import eu.kanade.tachiyomi.ui.setting.defaultValue
 import eu.kanade.tachiyomi.ui.setting.onChange
 import eu.kanade.tachiyomi.ui.setting.switchPreference
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import eu.kanade.tachiyomi.util.view.openInBrowser
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
@@ -151,10 +152,12 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.extension_details, menu)
+        menu.findItem(R.id.action_open_repo)?.isVisible = presenter.extension?.repoUrl != null
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.action_open_repo -> openRepo()
             R.id.action_clear_cookies -> clearCookies()
         }
         return super.onOptionsItemSelected(item)
@@ -173,6 +176,28 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         Timber.d("Cleared $cleared cookies for: ${urls.joinToString()}")
         val context = view?.context ?: return
         binding.coordinator.snack(context.getString(R.string.cookies_cleared))
+    }
+
+    private fun openRepo() {
+        val regex = """https://raw.githubusercontent.com/(.+?)/(.+?)/.+""".toRegex()
+        val url = regex.find(presenter.extension?.repoUrl.orEmpty())
+            ?.let {
+                val (user, repo) = it.destructured
+                "https://github.com/$user/$repo"
+            }
+            ?: presenter.extension?.repoUrl ?: return
+        openInBrowser(url)
+    }
+
+    private fun createUrl(url: String, pkgName: String, pkgFactory: String?, path: String = ""): String {
+        return if (!pkgFactory.isNullOrEmpty()) {
+            when (path.isEmpty()) {
+                true -> "$url/multisrc/src/main/java/eu/kanade/tachiyomi/multisrc/$pkgFactory"
+                else -> "$url/multisrc/overrides/$pkgFactory/" + (pkgName.split(".").lastOrNull() ?: "") + path
+            }
+        } else {
+            url + "/src/" + pkgName.replace(".", "/") + path
+        }
     }
 
     private fun addPreferencesForSource(screen: PreferenceScreen, source: Source, isMultiSource: Boolean, isMultiLangSingleSource: Boolean) {

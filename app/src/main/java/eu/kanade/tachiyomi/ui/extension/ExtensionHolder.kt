@@ -95,7 +95,7 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
         binding.warning.text = when {
             extension.isNsfw -> itemView.context.getString(R.string.nsfw_short)
             else -> ""
-        }.plusRepo(extension).uppercase(Locale.ROOT)
+        }.uppercase(Locale.ROOT)
         binding.installProgress.progress = item.sessionProgress ?: 0
         binding.installProgress.isVisible = item.sessionProgress != null
         binding.cancelButton.isVisible = item.sessionProgress != null
@@ -110,20 +110,6 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
             binding.sourceImage.load(extension.icon)
         }
         bindButton(item)
-    }
-
-    private fun String.plusRepo(extension: Extension): String {
-        val repoText = when {
-            extension is Extension.Untrusted -> itemView.context.getString(R.string.untrusted)
-            extension is Extension.Installed && extension.isObsolete -> itemView.context.getString(R.string.obsolete)
-            extension is Extension.Installed -> extension.repoUrl.orEmpty()
-            else -> ""
-        }
-        return if (isEmpty() || repoText.isEmpty()) {
-            this
-        } else {
-            "$this • "
-        } + repoText
     }
 
     @Suppress("ResourceType")
