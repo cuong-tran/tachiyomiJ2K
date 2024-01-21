@@ -179,7 +179,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     }
 
     private fun openRepo() {
-        val regex = """https://raw.githubusercontent.com/(.+?)/(.+?)/.+""".toRegex()
+        val regex = """https://(?:raw.githubusercontent.com|github.com)/(.+?)/(.+?)/.+""".toRegex()
         val url = regex.find(presenter.extension?.repoUrl.orEmpty())
             ?.let {
                 val (user, repo) = it.destructured

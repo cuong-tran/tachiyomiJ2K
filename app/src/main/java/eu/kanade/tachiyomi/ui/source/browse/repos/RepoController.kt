@@ -122,12 +122,13 @@ class RepoController(bundle: Bundle? = null) :
 
     override fun onLogoClick(position: Int) {
         val repo = (adapter?.getItem(position) as? RepoItem)?.repo ?: return
+        val repoUrl = presenter.getRepoUrl(repo)
         if (isNotOnline()) return
 
-        if (repo.isBlank()) {
+        if (repoUrl.isBlank()) {
             activity?.toast(R.string.url_not_set_click_again)
         } else {
-            activity?.openInBrowser(repo.toUri())
+            activity?.openInBrowser(repoUrl.toUri())
         }
     }
 
@@ -193,6 +194,13 @@ class RepoController(bundle: Bundle? = null) :
         presenter.deleteRepo(adapter.deletedItems.map { (it as RepoItem).repo }.firstOrNull())
         adapter.confirmDeletion()
         snack = null
+    }
+
+    /**
+     * Called from the presenter when a repo already exists.
+     */
+    fun onRepoExistsError() {
+        activity?.toast(R.string.error_repo_exists)
     }
 
     /**
