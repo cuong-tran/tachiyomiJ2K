@@ -100,7 +100,7 @@ body:
           required: true
         - label: I have tried the [troubleshooting guide](https://tachiyomi.org/help/guides/troubleshooting/).
           required: true
-        - label: I have updated the app to version **[1.7.3](https://github.com/Jays2Kings/tachiyomiJ2K/releases/latest)**.
+        - label: I have updated the app to version **[1.7.4](https://github.com/Jays2Kings/tachiyomiJ2K/releases/latest)**.
           required: true
         - label: I have updated all installed extensions.
           required: true
