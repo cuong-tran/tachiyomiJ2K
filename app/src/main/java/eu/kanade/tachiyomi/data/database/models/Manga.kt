@@ -2,10 +2,13 @@ package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.ui.library.LibraryGridHolder
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
@@ -272,12 +275,41 @@ interface Manga : SManga {
         get() = viewer_flags and OrientationType.MASK
         set(rotationType) = setViewerFlags(rotationType, OrientationType.MASK)
 
+    /**
+     * [vibrantCoverColor] used to set the color theme in manga detail page.
+     *
+     * It reads/saves to a hashmap in [Companion]'s [Manga.vibrantCoverColorMap] for multiple mangas.
+     *
+     * Set in [MangaCoverMetadata.setRatioAndColors] & [MangaDetailsController.setPaletteColor]:
+     * - First [MangaCoverMetadata.setRatioAndColors] sets when browsing, use that to show color
+     * initially in detail page.
+     * - Then [MangaDetailsController.setPaletteColor] update color with updated image.
+     *
+     * Get in [MangaDetailsController.setAccentColorValue], [MangaDetailsController.setCoverColorValue]
+     * & [MangaDetailsController.setHeaderColorValue].
+     */
     var vibrantCoverColor: Int?
         get() = vibrantCoverColorMap[id]
         set(value) {
             id?.let { vibrantCoverColorMap[it] = value }
         }
 
+    /**
+     * [dominantCoverColors] seems being used to set cover/text's color in Library grid view.
+     *
+     * It reads/saves to [MangaCoverMetadata.coverColorMap].
+     *
+     * Format: <first: cover color, second: text color>.
+     *
+     * Set in [MangaCoverMetadata.setRatioAndColors] whenever browsing meets a favorite manga
+     *  by loading from [CoverCache].
+     *
+     * Get in [LibraryGridHolder].
+     *
+     * If manga has a new cover and had [vibrantCoverColor] updated with [MangaDetailsController.setPaletteColor],
+     * the next time it appears in browsing (or when come backs from detail page), [MangaCoverMetadata.setRatioAndColors]
+     * will update this without loading Bitmap from [CoverCache].
+     */
     var dominantCoverColors: Pair<Int, Int>?
         get() = MangaCoverMetadata.getColors(this)
         set(value) {
@@ -327,6 +359,10 @@ interface Manga : SManga {
         const val TYPE_COMIC = 4
         const val TYPE_WEBTOON = 5
 
+        /**
+         * [vibrantCoverColorMap] store color generated while browsing library.
+         * It always empty at beginning each time app starts, then add more color.
+         */
         private val vibrantCoverColorMap: HashMap<Long, Int?> = hashMapOf()
 
         fun create(source: Long): Manga = MangaImpl().apply {

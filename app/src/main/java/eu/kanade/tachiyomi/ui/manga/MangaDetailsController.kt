@@ -92,6 +92,7 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.isLocal
+import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.addCheckBoxPrompt
@@ -562,7 +563,12 @@ class MangaDetailsController :
         }
     }
 
-    /** Get the color of the manga cover*/
+    /**
+     * [setPaletteColor] Get the color of the manga cover by loading cover from network.
+     *
+     * It's always called when open manga detail page. Although color is already loaded while
+     * browsing via [MangaCoverMetadata.setRatioAndColors] but will be refreshed with new loaded cover with this.
+     */
     fun setPaletteColor() {
         val view = view ?: return
 

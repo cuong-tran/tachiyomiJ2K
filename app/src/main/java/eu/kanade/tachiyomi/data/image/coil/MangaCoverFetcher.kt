@@ -261,6 +261,10 @@ class MangaCoverFetcher(
         return ImageSource(file = data, diskCacheKey = diskCacheKey, closeable = this)
     }
 
+    /**
+     * [setRatioAndColorsInScope] is called whenever a cover is loaded with [MangaCoverFetcher.fetch]
+     * @param ogFile if Null then it will load from [CoverCache]. It can't accept File from [writeResponseToCoverCache]
+     */
     private fun setRatioAndColorsInScope(manga: Manga, ogFile: File? = null, force: Boolean = false) {
         fileScope.launch {
             MangaCoverMetadata.setRatioAndColors(manga, ogFile, force)

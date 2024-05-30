@@ -5,8 +5,10 @@ import androidx.annotation.ColorInt
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.image.coil.getBestColor
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -14,6 +16,13 @@ import java.util.concurrent.ConcurrentHashMap
 /** Object that holds info about a covers size ratio + dominant colors */
 object MangaCoverMetadata {
     private var coverRatioMap = ConcurrentHashMap<Long, Float>()
+
+    /**
+     * [coverColorMap] stores favorite manga's cover & text's color as a joined string in Prefs.
+     * They will be loaded each time [MangaCoverMetadata] is initialized with [MangaCoverMetadata.load]
+     *
+     * They will be saved back when [MangaCoverFetcher.setRatioAndColorsInScope] is called.
+     */
     private var coverColorMap = ConcurrentHashMap<Long, Pair<Int, Int>>()
     private val preferences by injectLazy<PreferencesHelper>()
     private val coverCache by injectLazy<CoverCache>()
@@ -48,17 +57,44 @@ object MangaCoverMetadata {
         )
     }
 
+    /**
+     * [setRatioAndColors] won't run if manga is not in library but already has [Manga.vibrantCoverColor].
+     *
+     * It removes saved colors from saved Prefs of [MangaCoverMetadata.coverColorMap] if manga is not favorite.
+     *
+     * If manga already has color (wrote by previous run or when opened detail page
+     * with [MangaDetailsController.setPaletteColor] and not in library, it won't do anything.
+     * It only run with favorite manga or non-favorite manga without color.
+     *
+     * If manga already restored color (except that favorite manga doesn't load color yet), then it
+     * will skip actually reading [CoverCache].
+     * For example when a manga updates its cover and next time it goes back to browsing page, this
+     * function will skip loading bitmap but trying set dominant color with new cover. By doing so,
+     * new cover's color will be saved into Prefs.
+     *
+     * Set [Manga.dominantCoverColors] for favorite manga only.
+     * Set [Manga.vibrantCoverColor] for all mangas.
+     *
+     * This function is called when updating old library, to initially store color for all favorite mangas.
+     *
+     * It should also be called everytime while browsing to get manga's color from [CoverCache].
+     *
+     */
     fun setRatioAndColors(manga: Manga, ogFile: File? = null, force: Boolean = false) {
         if (!manga.favorite) {
             remove(manga)
         }
+        // Won't do anything if manga is browsing & color loaded
         if (manga.vibrantCoverColor != null && !manga.favorite) return
         val file = ogFile ?: coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(manga)
         // if the file exists and the there was still an error then the file is corrupted
         if (file.exists()) {
             val options = BitmapFactory.Options()
             val hasVibrantColor = if (manga.favorite) manga.vibrantCoverColor != null else true
+            // If dominantCoverColors is not null, it means that color is restored from Prefs
+            // and also has vibrantCoverColor (e.g. new color caused by updated cover)
             if (manga.dominantCoverColors != null && hasVibrantColor && !force) {
+                // Trying update color without needs for actually reading file
                 options.inJustDecodeBounds = true
             } else {
                 options.inSampleSize = 4
