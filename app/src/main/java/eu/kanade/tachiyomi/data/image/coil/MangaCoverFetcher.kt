@@ -81,8 +81,10 @@ class MangaCoverFetcher(
             }
         }
         val coverFile = coverCache.getCoverFile(manga)
+        // Load cover from cache (cover cache or online cover cache)
         if (!shouldFetchRemotely && coverFile.exists() && options.diskCachePolicy.readEnabled) {
             if (!manga.favorite) {
+                // TODO: Why need to update this? To keep the cover cache?
                 coverFile.setLastModified(Date().time)
             }
             setRatioAndColorsInScope(manga, coverFile)
